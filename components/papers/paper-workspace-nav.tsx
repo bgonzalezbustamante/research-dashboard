@@ -4,6 +4,7 @@ type PaperWorkspaceNavProps = {
   presentationCount: number
   noteCount: number
   citationCount: number
+  totalMinutes: number
 }
 
 const items = [
@@ -39,6 +40,35 @@ const items = [
   },
 ] as const
 
+function formatDuration(
+  minutes: number
+) {
+  if (minutes === 0) {
+    return '0h'
+  }
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    )
+
+  const remainder =
+    minutes % 60
+
+  if (
+    hours > 0 &&
+    remainder > 0
+  ) {
+    return `${hours}h ${remainder}m`
+  }
+
+  if (hours > 0) {
+    return `${hours}h`
+  }
+
+  return `${remainder}m`
+}
+
 export default function PaperWorkspaceNav(
   props: PaperWorkspaceNavProps
 ) {
@@ -47,18 +77,20 @@ export default function PaperWorkspaceNav(
       aria-label="Paper workspace"
       className="mb-6 overflow-x-auto rounded-lg border border-oxford-stone bg-white"
     >
-      <div className="flex min-w-max">
+      <div className="flex min-w-max items-stretch">
         {items.map((item) => {
           const count =
             item.countKey === null
               ? null
-              : props[item.countKey]
+              : props[
+                  item.countKey
+                ]
 
           return (
             <a
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 border-r border-oxford-stone px-4 py-3 text-sm font-medium text-oxford-charcoal transition last:border-r-0 hover:bg-oxford-shell hover:text-oxford-blue"
+              className="flex items-center gap-2 border-r border-oxford-stone px-4 py-3 text-sm font-medium text-oxford-charcoal transition hover:bg-oxford-shell hover:text-oxford-blue"
             >
               {item.label}
 
@@ -70,6 +102,18 @@ export default function PaperWorkspaceNav(
             </a>
           )
         })}
+
+        <div className="flex items-center gap-2 px-4 py-3 text-sm">
+          <span className="font-medium text-oxford-ash">
+            Hours
+          </span>
+
+          <span className="rounded-full bg-oxford-blue px-2.5 py-0.5 text-xs font-medium text-white">
+            {formatDuration(
+              props.totalMinutes
+            )}
+          </span>
+        </div>
       </div>
     </nav>
   )

@@ -67,6 +67,12 @@ type AuthorJoinRow = {
     | null
 }
 
+type WorkSessionRow = {
+  paper_id: string
+  start_time: string
+  end_time: string
+}
+
 type CitationDisplay = {
   value: string
   detail: string
@@ -178,6 +184,95 @@ function formatDate(
       )
     )
   )
+}
+
+function timeToMinutes(
+  value: string
+) {
+  const [
+    hours,
+    minutes,
+  ] = value
+    .slice(0, 5)
+    .split(':')
+    .map(Number)
+
+  return (
+    hours * 60 +
+    minutes
+  )
+}
+
+function getSessionDuration(
+  startTime: string,
+  endTime: string
+) {
+  return (
+    timeToMinutes(
+      endTime
+    ) -
+    timeToMinutes(
+      startTime
+    )
+  )
+}
+
+function formatDuration(
+  minutes: number
+) {
+  if (minutes === 0) {
+    return '0h'
+  }
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    )
+
+  const remainder =
+    minutes % 60
+
+  if (
+    hours > 0 &&
+    remainder > 0
+  ) {
+    return `${hours}h ${remainder}m`
+  }
+
+  if (hours > 0) {
+    return `${hours}h`
+  }
+
+  return `${remainder}m`
+}
+
+function getHoursByPaper(
+  sessions: WorkSessionRow[]
+) {
+  const totals =
+    new Map<
+      string,
+      number
+    >()
+
+  for (const session of sessions) {
+    const duration =
+      getSessionDuration(
+        session.start_time,
+        session.end_time
+      )
+
+    totals.set(
+      session.paper_id,
+      (
+        totals.get(
+          session.paper_id
+        ) ?? 0
+      ) + duration
+    )
+  }
+
+  return totals
 }
 
 function getHistoryLabel(
@@ -591,7 +686,8 @@ export default async function PapersPage({
 
   const paperIds =
     papers.map(
-      (paper) => paper.id
+      (paper) =>
+        paper.id
     )
 
   let milestones:
@@ -606,6 +702,9 @@ export default async function PapersPage({
   let authorRows:
     AuthorJoinRow[] = []
 
+  let workSessions:
+    WorkSessionRow[] = []
+
   if (
     paperIds.length > 0
   ) {
@@ -614,6 +713,7 @@ export default async function PapersPage({
       citationResult,
       historyResult,
       authorResult,
+      workSessionResult,
     ] = await Promise.all([
       supabase
         .from(
@@ -689,6 +789,20 @@ export default async function PapersPage({
             ascending: true,
           }
         ),
+
+      supabase
+        .from(
+          'work_sessions'
+        )
+        .select(`
+          paper_id,
+          start_time,
+          end_time
+        `)
+        .in(
+          'paper_id',
+          paperIds
+        ),
     ])
 
     if (
@@ -723,6 +837,14 @@ export default async function PapersPage({
       )
     }
 
+    if (
+      workSessionResult.error
+    ) {
+      throw new Error(
+        `Could not load paper working hours: ${workSessionResult.error.message}`
+      )
+    }
+
     milestones =
       (milestoneResult.data ??
         []) as MilestoneRow[]
@@ -738,6 +860,10 @@ export default async function PapersPage({
     authorRows =
       (authorResult.data ??
         []) as AuthorJoinRow[]
+
+    workSessions =
+      (workSessionResult.data ??
+        []) as WorkSessionRow[]
   }
 
   const nextMilestoneByPaper =
@@ -758,6 +884,11 @@ export default async function PapersPage({
   const citationDisplayByPaper =
     getCitationDisplays(
       citations
+    )
+
+  const hoursByPaper =
+    getHoursByPaper(
+      workSessions
     )
 
   const normalizedQuery =
@@ -1264,7 +1395,7 @@ export default async function PapersPage({
                 </th>
 
                 <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Updated
+                  Hours
                 </th>
               </tr>
             </thead>
@@ -1291,6 +1422,11 @@ export default async function PapersPage({
                     citationDisplayByPaper.get(
                       paper.id
                     )
+
+                  const paperMinutes =
+                    hoursByPaper.get(
+                      paper.id
+                    ) ?? 0
 
                   return (
                     <tr
@@ -1424,10 +1560,12 @@ export default async function PapersPage({
                         )}
                       </td>
 
-                      <td className="whitespace-nowrap px-4 py-4 text-oxford-ash">
-                        {formatDate(
-                          paper.updated_at
-                        )}
+                      <td className="whitespace-nowrap px-4 py-4">
+                        <span className="font-medium text-oxford-charcoal">
+                          {formatDuration(
+                            paperMinutes
+                          )}
+                        </span>
                       </td>
                     </tr>
                   )

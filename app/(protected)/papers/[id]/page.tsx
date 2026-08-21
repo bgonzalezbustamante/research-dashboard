@@ -102,6 +102,28 @@ function getHistoryLabel(
   }
 }
 
+function timeToMinutes(
+  value: string
+) {
+  const [hours, minutes] =
+    value
+      .slice(0, 5)
+      .split(':')
+      .map(Number)
+
+  return hours * 60 + minutes
+}
+
+function getSessionDuration(
+  startTime: string,
+  endTime: string
+) {
+  return (
+    timeToMinutes(endTime) -
+    timeToMinutes(startTime)
+  )
+}
+
 export default async function PaperPage({
   params,
   searchParams,
@@ -158,6 +180,7 @@ export default async function PaperPage({
     presentationsResult,
     notesResult,
     citationsResult,
+    workSessionsResult,
   ] = await Promise.all([
     supabase
       .from('paper_authors')
@@ -271,6 +294,15 @@ export default async function PaperPage({
       .order('created_at', {
         ascending: true,
       }),
+
+    supabase
+      .from('work_sessions')
+      .select(`
+        id,
+        start_time,
+        end_time
+      `)
+      .eq('paper_id', id),
   ])
 
   if (authorResult.error) {
@@ -315,6 +347,12 @@ export default async function PaperPage({
     )
   }
 
+  if (workSessionsResult.error) {
+    throw new Error(
+      `Could not load paper working hours: ${workSessionsResult.error.message}`
+    )
+  }
+
   const authorRows =
     authorResult.data ?? []
 
@@ -335,6 +373,20 @@ export default async function PaperPage({
 
   const citationSnapshots =
     citationsResult.data ?? []
+
+  const workSessions =
+    workSessionsResult.data ?? []
+
+  const totalPaperMinutes =
+    workSessions.reduce(
+      (total, session) =>
+        total +
+        getSessionDuration(
+          session.start_time,
+          session.end_time
+        ),
+      0
+    )
 
   const normalizedNotes =
     notes.map((note) => {
@@ -398,7 +450,8 @@ export default async function PaperPage({
       })
 
   const nextMilestone =
-    plannedMilestones[0] ?? null
+    plannedMilestones[0] ??
+    null
 
   const latestHistory =
     historyEvents.length > 0
@@ -580,6 +633,9 @@ export default async function PaperPage({
         }
         citationCount={
           citationSnapshots.length
+        }
+        totalMinutes={
+          totalPaperMinutes
         }
       />
 
