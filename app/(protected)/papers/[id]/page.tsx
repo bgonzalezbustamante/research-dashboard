@@ -6,6 +6,7 @@ import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import StatusBadge from '@/components/ui/status-badge'
+import MilestonesSection from '@/components/papers/milestones-section'
 import { createClient } from '@/lib/supabase/server'
 import {
   archivePaper,
@@ -24,13 +25,21 @@ type PaperPageProps = {
   params: Promise<{
     id: string
   }>
+  searchParams: Promise<{
+    milestoneError?: string
+  }>
 }
 
 export default async function PaperPage({
   params,
+  searchParams,
 }: PaperPageProps) {
   const { id } =
     await params
+
+  const {
+    milestoneError,
+  } = await searchParams
 
   const supabase =
     await createClient()
@@ -114,6 +123,27 @@ export default async function PaperPage({
   if (linksError) {
     throw new Error(
       `Could not load links: ${linksError.message}`
+    )
+  }
+
+  const {
+    data: milestones,
+    error: milestonesError,
+  } = await supabase
+    .from('paper_milestones')
+    .select(`
+      id,
+      title,
+      target_date,
+      completed_on,
+      status,
+      notes
+    `)
+    .eq('paper_id', id)
+
+  if (milestonesError) {
+    throw new Error(
+      `Could not load milestones: ${milestonesError.message}`
     )
   }
 
@@ -336,6 +366,16 @@ export default async function PaperPage({
             )}
         </Card>
       </div>
+
+      <MilestonesSection
+        paperId={paper.id}
+        milestones={
+          milestones ?? []
+        }
+        error={
+          milestoneError
+        }
+      />
     </div>
   )
 }
