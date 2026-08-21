@@ -683,9 +683,6 @@ export default async function HoursPage({
         selectedDate={
           selectedDate
         }
-        selectedPeriod={
-          selectedPeriod
-        }
         logs={
           analyticsLogs
         }
