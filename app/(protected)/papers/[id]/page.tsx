@@ -1,13 +1,14 @@
-import {
-  notFound,
-} from 'next/navigation'
+import { notFound } from 'next/navigation'
+
+import HistorySection from '@/components/papers/history-section'
+import MilestonesSection from '@/components/papers/milestones-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import StatusBadge from '@/components/ui/status-badge'
-import MilestonesSection from '@/components/papers/milestones-section'
 import { createClient } from '@/lib/supabase/server'
+
 import {
   archivePaper,
   restorePaper,
@@ -27,6 +28,7 @@ type PaperPageProps = {
   }>
   searchParams: Promise<{
     milestoneError?: string
+    historyError?: string
   }>
 }
 
@@ -34,15 +36,14 @@ export default async function PaperPage({
   params,
   searchParams,
 }: PaperPageProps) {
-  const { id } =
-    await params
+  const { id } = await params
 
   const {
     milestoneError,
+    historyError,
   } = await searchParams
 
-  const supabase =
-    await createClient()
+  const supabase = await createClient()
 
   const {
     data: paper,
@@ -87,12 +88,9 @@ export default async function PaperPage({
       )
     `)
     .eq('paper_id', id)
-    .order(
-      'author_order',
-      {
-        ascending: true,
-      }
-    )
+    .order('author_order', {
+      ascending: true,
+    })
 
   if (authorError) {
     throw new Error(
@@ -113,12 +111,9 @@ export default async function PaperPage({
       sort_order
     `)
     .eq('paper_id', id)
-    .order(
-      'sort_order',
-      {
-        ascending: true,
-      }
-    )
+    .order('sort_order', {
+      ascending: true,
+    })
 
   if (linksError) {
     throw new Error(
@@ -147,16 +142,41 @@ export default async function PaperPage({
     )
   }
 
+  const {
+    data: historyEvents,
+    error: historyErrorQuery,
+  } = await supabase
+    .from('paper_history')
+    .select(`
+      id,
+      event_date,
+      event_type,
+      venue,
+      round_number,
+      decision,
+      notes,
+      created_at
+    `)
+    .eq('paper_id', id)
+    .order('event_date', {
+      ascending: true,
+    })
+    .order('created_at', {
+      ascending: true,
+    })
+
+  if (historyErrorQuery) {
+    throw new Error(
+      `Could not load paper history: ${historyErrorQuery.message}`
+    )
+  }
+
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
-          title={
-            paper.short_title
-          }
-          description={
-            paper.title
-          }
+          title={paper.short_title}
+          description={paper.title}
         />
 
         <div className="flex flex-wrap gap-3">
@@ -175,11 +195,7 @@ export default async function PaperPage({
           </ButtonLink>
 
           {paper.archived_at ? (
-            <form
-              action={
-                restorePaper
-              }
-            >
+            <form action={restorePaper}>
               <input
                 type="hidden"
                 name="paper_id"
@@ -194,11 +210,7 @@ export default async function PaperPage({
               </Button>
             </form>
           ) : (
-            <form
-              action={
-                archivePaper
-              }
-            >
+            <form action={archivePaper}>
               <input
                 type="hidden"
                 name="paper_id"
@@ -218,8 +230,7 @@ export default async function PaperPage({
 
       {paper.archived_at && (
         <div className="mb-6 rounded-md border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-gray-700">
-          This paper is archived and
-          does not appear in the
+          This paper is archived and does not appear in the
           default active-papers list.
         </div>
       )}
@@ -228,19 +239,13 @@ export default async function PaperPage({
         <Card className="lg:col-span-2">
           <div className="flex flex-wrap items-center gap-3">
             <StatusBadge
-              status={
-                paper.status as PaperStatus
-              }
+              status={paper.status as PaperStatus}
             />
 
-            {paper.status ===
-              'revise-round' &&
+            {paper.status === 'revise-round' &&
               paper.revision_round && (
                 <span className="text-sm text-oxford-ash">
-                  Round{' '}
-                  {
-                    paper.revision_round
-                  }
+                  Round {paper.revision_round}
                 </span>
               )}
           </div>
@@ -258,13 +263,10 @@ export default async function PaperPage({
                       Array.isArray(
                         row.authors
                       )
-                        ? row
-                            .authors[0]
+                        ? row.authors[0]
                         : row.authors
 
-                    return (
-                      author?.full_name
-                    )
+                    return author?.full_name
                   })
                   .filter(Boolean)
                   .join(', ')
@@ -296,8 +298,7 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.target_venue ??
-                  '—'}
+                {paper.target_venue ?? '—'}
               </dd>
             </div>
 
@@ -307,8 +308,7 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.current_venue ??
-                  '—'}
+                {paper.current_venue ?? '—'}
               </dd>
             </div>
 
@@ -318,8 +318,7 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.started_on ??
-                  '—'}
+                {paper.started_on ?? '—'}
               </dd>
             </div>
 
@@ -329,8 +328,7 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.published_on ??
-                  '—'}
+                {paper.published_on ?? '—'}
               </dd>
             </div>
           </dl>
@@ -343,24 +341,18 @@ export default async function PaperPage({
                 </h2>
 
                 <div className="mt-3 flex flex-col gap-2">
-                  {links.map(
-                    (link) => (
-                      <a
-                        key={
-                          link.id
-                        }
-                        href={
-                          link.url
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-oxford-blue hover:underline"
-                      >
-                        {link.label ??
-                          link.link_type}
-                      </a>
-                    )
-                  )}
+                  {links.map((link) => (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-oxford-blue hover:underline"
+                    >
+                      {link.label ??
+                        link.link_type}
+                    </a>
+                  ))}
                 </div>
               </>
             )}
@@ -369,12 +361,14 @@ export default async function PaperPage({
 
       <MilestonesSection
         paperId={paper.id}
-        milestones={
-          milestones ?? []
-        }
-        error={
-          milestoneError
-        }
+        milestones={milestones ?? []}
+        error={milestoneError}
+      />
+
+      <HistorySection
+        paperId={paper.id}
+        events={historyEvents ?? []}
+        error={historyError}
       />
     </div>
   )
