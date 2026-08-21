@@ -3,6 +3,7 @@ import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 
 type PaperStatus =
   | 'writing'
@@ -569,9 +570,12 @@ export default async function PapersPage({
                     className="border-b border-oxford-stone align-top last:border-b-0 hover:bg-oxford-off-white"
                   >
                     <td className="px-4 py-4">
-                      <div className="font-medium text-oxford-blue">
+                      <Link
+                        href={`/papers/${paper.id}`}
+                        className="font-medium text-oxford-blue hover:underline"
+                      >
                         {paper.short_title}
-                      </div>
+                      </Link>
 
                       <div className="mt-1 max-w-md leading-5 text-oxford-charcoal">
                         {paper.title}
