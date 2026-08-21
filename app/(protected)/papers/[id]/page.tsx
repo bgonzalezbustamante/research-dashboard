@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 
+import CitationsSection from '@/components/papers/citations-section'
 import HistorySection from '@/components/papers/history-section'
 import MilestonesSection from '@/components/papers/milestones-section'
 import NotesSection from '@/components/papers/notes-section'
@@ -33,6 +34,7 @@ type PaperPageProps = {
     historyError?: string
     presentationError?: string
     noteError?: string
+    citationError?: string
   }>
 }
 
@@ -47,6 +49,7 @@ export default async function PaperPage({
     historyError,
     presentationError,
     noteError,
+    citationError,
   } = await searchParams
 
   const supabase =
@@ -262,6 +265,32 @@ export default async function PaperPage({
         }
       }
     )
+
+  const {
+    data: citationSnapshots,
+    error: citationsError,
+  } = await supabase
+    .from('citation_snapshots')
+    .select(`
+      id,
+      source,
+      citation_count,
+      captured_on,
+      created_at
+    `)
+    .eq('paper_id', id)
+    .order('captured_on', {
+      ascending: true,
+    })
+    .order('created_at', {
+      ascending: true,
+    })
+
+  if (citationsError) {
+    throw new Error(
+      `Could not load citation history: ${citationsError.message}`
+    )
+  }
 
   return (
     <div>
@@ -542,6 +571,19 @@ export default async function PaperPage({
         }
         error={
           noteError
+        }
+      />
+
+      <CitationsSection
+        paperId={
+          paper.id
+        }
+        snapshots={
+          citationSnapshots ??
+          []
+        }
+        error={
+          citationError
         }
       />
     </div>
