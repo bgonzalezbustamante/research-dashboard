@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 
 import HistorySection from '@/components/papers/history-section'
 import MilestonesSection from '@/components/papers/milestones-section'
+import PresentationsSection from '@/components/papers/presentations-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
@@ -29,6 +30,7 @@ type PaperPageProps = {
   searchParams: Promise<{
     milestoneError?: string
     historyError?: string
+    presentationError?: string
   }>
 }
 
@@ -41,9 +43,11 @@ export default async function PaperPage({
   const {
     milestoneError,
     historyError,
+    presentationError,
   } = await searchParams
 
-  const supabase = await createClient()
+  const supabase =
+    await createClient()
 
   const {
     data: paper,
@@ -171,6 +175,29 @@ export default async function PaperPage({
     )
   }
 
+  const {
+    data: presentations,
+    error: presentationsError,
+  } = await supabase
+    .from('paper_presentations')
+    .select(`
+      id,
+      event_name,
+      location,
+      presentation_date,
+      presentation_title,
+      presentation_type,
+      url,
+      notes
+    `)
+    .eq('paper_id', id)
+
+  if (presentationsError) {
+    throw new Error(
+      `Could not load presentations: ${presentationsError.message}`
+    )
+  }
+
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -195,11 +222,17 @@ export default async function PaperPage({
           </ButtonLink>
 
           {paper.archived_at ? (
-            <form action={restorePaper}>
+            <form
+              action={
+                restorePaper
+              }
+            >
               <input
                 type="hidden"
                 name="paper_id"
-                value={paper.id}
+                value={
+                  paper.id
+                }
               />
 
               <Button
@@ -210,11 +243,17 @@ export default async function PaperPage({
               </Button>
             </form>
           ) : (
-            <form action={archivePaper}>
+            <form
+              action={
+                archivePaper
+              }
+            >
               <input
                 type="hidden"
                 name="paper_id"
-                value={paper.id}
+                value={
+                  paper.id
+                }
               />
 
               <Button
@@ -239,13 +278,19 @@ export default async function PaperPage({
         <Card className="lg:col-span-2">
           <div className="flex flex-wrap items-center gap-3">
             <StatusBadge
-              status={paper.status as PaperStatus}
+              status={
+                paper.status as PaperStatus
+              }
             />
 
-            {paper.status === 'revise-round' &&
+            {paper.status ===
+              'revise-round' &&
               paper.revision_round && (
                 <span className="text-sm text-oxford-ash">
-                  Round {paper.revision_round}
+                  Round{' '}
+                  {
+                    paper.revision_round
+                  }
                 </span>
               )}
           </div>
@@ -263,10 +308,13 @@ export default async function PaperPage({
                       Array.isArray(
                         row.authors
                       )
-                        ? row.authors[0]
+                        ? row
+                            .authors[0]
                         : row.authors
 
-                    return author?.full_name
+                    return (
+                      author?.full_name
+                    )
                   })
                   .filter(Boolean)
                   .join(', ')
@@ -280,7 +328,9 @@ export default async function PaperPage({
               </h2>
 
               <p className="mt-2 whitespace-pre-line leading-7 text-oxford-charcoal">
-                {paper.abstract}
+                {
+                  paper.abstract
+                }
               </p>
             </>
           )}
@@ -298,7 +348,10 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.target_venue ?? '—'}
+                {
+                  paper.target_venue ??
+                  '—'
+                }
               </dd>
             </div>
 
@@ -308,7 +361,10 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.current_venue ?? '—'}
+                {
+                  paper.current_venue ??
+                  '—'
+                }
               </dd>
             </div>
 
@@ -318,7 +374,10 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.started_on ?? '—'}
+                {
+                  paper.started_on ??
+                  '—'
+                }
               </dd>
             </div>
 
@@ -328,7 +387,10 @@ export default async function PaperPage({
               </dt>
 
               <dd className="mt-1 text-oxford-ash">
-                {paper.published_on ?? '—'}
+                {
+                  paper.published_on ??
+                  '—'
+                }
               </dd>
             </div>
           </dl>
@@ -341,18 +403,24 @@ export default async function PaperPage({
                 </h2>
 
                 <div className="mt-3 flex flex-col gap-2">
-                  {links.map((link) => (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-oxford-blue hover:underline"
-                    >
-                      {link.label ??
-                        link.link_type}
-                    </a>
-                  ))}
+                  {links.map(
+                    (link) => (
+                      <a
+                        key={
+                          link.id
+                        }
+                        href={
+                          link.url
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-oxford-blue hover:underline"
+                      >
+                        {link.label ??
+                          link.link_type}
+                      </a>
+                    )
+                  )}
                 </div>
               </>
             )}
@@ -360,15 +428,41 @@ export default async function PaperPage({
       </div>
 
       <MilestonesSection
-        paperId={paper.id}
-        milestones={milestones ?? []}
-        error={milestoneError}
+        paperId={
+          paper.id
+        }
+        milestones={
+          milestones ?? []
+        }
+        error={
+          milestoneError
+        }
       />
 
       <HistorySection
-        paperId={paper.id}
-        events={historyEvents ?? []}
-        error={historyError}
+        paperId={
+          paper.id
+        }
+        events={
+          historyEvents ??
+          []
+        }
+        error={
+          historyError
+        }
+      />
+
+      <PresentationsSection
+        paperId={
+          paper.id
+        }
+        presentations={
+          presentations ??
+          []
+        }
+        error={
+          presentationError
+        }
       />
     </div>
   )
