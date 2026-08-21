@@ -1,5 +1,8 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
+
 import { createClient } from '@/lib/supabase/server'
+
 import OxfordLogo from '@/components/oxford-logo'
 import AppNavigation from '@/components/app-navigation'
 import SiteFooter from '@/components/site-footer'
@@ -29,13 +32,22 @@ export default async function ProtectedLayout({
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-              <OxfordLogo className="w-[190px]" />
+              <Link
+                href="/dashboard"
+                aria-label="Go to dashboard"
+                className="inline-flex"
+              >
+                <OxfordLogo className="w-[190px]" />
+              </Link>
 
               <div className="hidden h-10 w-px bg-oxford-stone sm:block" />
 
-              <p className="font-serif text-lg font-semibold text-oxford-blue">
+              <Link
+                href="/dashboard"
+                className="font-serif text-lg font-semibold text-oxford-blue transition hover:opacity-80"
+              >
                 Research Dashboard
-              </p>
+              </Link>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

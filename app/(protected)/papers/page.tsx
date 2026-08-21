@@ -1240,7 +1240,7 @@ export default async function PapersPage({
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-oxford-stone bg-white">
-          <table className="w-full min-w-[1350px] text-left text-sm">
+          <table className="w-full min-w-[1150px] text-left text-sm">
             <thead className="border-b border-oxford-stone bg-oxford-shell">
               <tr>
                 <th className="px-4 py-3 font-medium text-oxford-charcoal">
@@ -1249,10 +1249,6 @@ export default async function PapersPage({
 
                 <th className="px-4 py-3 font-medium text-oxford-charcoal">
                   Status
-                </th>
-
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Venue
                 </th>
 
                 <th className="px-4 py-3 font-medium text-oxford-charcoal">
@@ -1295,17 +1291,6 @@ export default async function PapersPage({
                     citationDisplayByPaper.get(
                       paper.id
                     )
-
-                  const venue =
-                    paper.current_venue ??
-                    paper.target_venue
-
-                  const venueType =
-                    paper.current_venue
-                      ? 'Current'
-                      : paper.target_venue
-                        ? 'Target'
-                        : null
 
                   return (
                     <tr
@@ -1363,28 +1348,6 @@ export default async function PapersPage({
                               }
                             </div>
                           )}
-                      </td>
-
-                      <td className="px-4 py-4">
-                        {venue ? (
-                          <>
-                            <div className="max-w-48 text-oxford-charcoal">
-                              {
-                                venue
-                              }
-                            </div>
-
-                            <div className="mt-1 text-xs text-oxford-ash">
-                              {
-                                venueType
-                              }
-                            </div>
-                          </>
-                        ) : (
-                          <span className="text-oxford-ash">
-                            —
-                          </span>
-                        )}
                       </td>
 
                       <td className="px-4 py-4">
