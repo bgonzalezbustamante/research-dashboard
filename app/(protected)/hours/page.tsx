@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import ActivityLabelsSection from '@/components/hours/activity-labels-section'
 import DailyLogSection from '@/components/hours/daily-log-section'
+import WorkSessionsSection from '@/components/hours/work-sessions-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
@@ -12,6 +13,7 @@ type HoursPageProps = {
     date?: string
     dailyError?: string
     labelError?: string
+    sessionError?: string
   }>
 }
 
@@ -164,6 +166,7 @@ export default async function HoursPage({
   const [
     dailyLogResult,
     labelsResult,
+    papersResult,
   ] = await Promise.all([
     supabase
       .from('daily_logs')
@@ -207,6 +210,20 @@ export default async function HoursPage({
           ascending: true,
         }
       ),
+
+    supabase
+      .from('papers')
+      .select(`
+        id,
+        short_title,
+        archived_at
+      `)
+      .order(
+        'short_title',
+        {
+          ascending: true,
+        }
+      ),
   ])
 
   if (
@@ -225,11 +242,128 @@ export default async function HoursPage({
     )
   }
 
+  if (
+    papersResult.error
+  ) {
+    throw new Error(
+      `Could not load papers: ${papersResult.error.message}`
+    )
+  }
+
   const dailyLog =
     dailyLogResult.data
 
   const labels =
     labelsResult.data ?? []
+
+  const papers =
+    papersResult.data ?? []
+
+  let sessions: {
+    id: string
+    start_time: string
+    end_time: string
+    place: string
+    activity_label_id: string
+    paper_id: string | null
+    label_name: string
+    label_is_break: boolean
+    label_is_active: boolean
+    paper_short_title: string | null
+    paper_archived: boolean
+  }[] = []
+
+  if (dailyLog) {
+    const {
+      data: sessionRows,
+      error: sessionsError,
+    } = await supabase
+      .from('work_sessions')
+      .select(`
+        id,
+        start_time,
+        end_time,
+        place,
+        activity_label_id,
+        paper_id,
+        activity_labels (
+          name,
+          is_break,
+          is_active
+        ),
+        papers (
+          short_title,
+          archived_at
+        )
+      `)
+      .eq(
+        'daily_log_id',
+        dailyLog.id
+      )
+      .order(
+        'start_time',
+        {
+          ascending: true,
+        }
+      )
+
+    if (sessionsError) {
+      throw new Error(
+        `Could not load work sessions: ${sessionsError.message}`
+      )
+    }
+
+    sessions =
+      (sessionRows ?? []).map(
+        (session) => {
+          const activityLabel =
+            Array.isArray(
+              session.activity_labels
+            )
+              ? session.activity_labels[0]
+              : session.activity_labels
+
+          const paper =
+            Array.isArray(
+              session.papers
+            )
+              ? session.papers[0]
+              : session.papers
+
+          return {
+            id:
+              session.id,
+            start_time:
+              session.start_time,
+            end_time:
+              session.end_time,
+            place:
+              session.place,
+            activity_label_id:
+              session.activity_label_id,
+            paper_id:
+              session.paper_id,
+            label_name:
+              activityLabel?.name ??
+              'Unknown activity',
+            label_is_break:
+              activityLabel?.is_break ??
+              false,
+            label_is_active:
+              activityLabel?.is_active ??
+              false,
+            paper_short_title:
+              paper?.short_title ??
+              null,
+            paper_archived:
+              paper?.archived_at !==
+                null &&
+              paper?.archived_at !==
+                undefined,
+          }
+        }
+      )
+  }
 
   return (
     <div>
@@ -320,6 +454,27 @@ export default async function HoursPage({
         }
         error={
           params.dailyError
+        }
+      />
+
+      <WorkSessionsSection
+        date={
+          selectedDate
+        }
+        dailyLogExists={
+          dailyLog !== null
+        }
+        sessions={
+          sessions
+        }
+        labels={
+          labels
+        }
+        papers={
+          papers
+        }
+        error={
+          params.sessionError
         }
       />
 

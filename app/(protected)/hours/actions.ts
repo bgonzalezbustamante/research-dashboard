@@ -7,6 +7,27 @@ import { createClient } from '@/lib/supabase/server'
 
 const MAX_COFFEE_COUNT = 32767
 
+type ServerSupabaseClient =
+  Awaited<ReturnType<typeof createClient>>
+
+type SessionPayload = {
+  startTime: string
+  endTime: string
+  activityLabelId: string
+  place: string
+  paperId: string | null
+}
+
+type SessionPayloadResult =
+  | {
+      payload: SessionPayload
+      error?: never
+    }
+  | {
+      payload?: never
+      error: string
+    }
+
 function getRequiredText(
   formData: FormData,
   name: string
@@ -66,6 +87,41 @@ function isValidDateString(
     date.getUTCDate() ===
       day
   )
+}
+
+function isValidTimeString(
+  value: string
+) {
+  if (
+    !/^\d{2}:\d{2}$/.test(
+      value
+    )
+  ) {
+    return false
+  }
+
+  const [hours, minutes] =
+    value
+      .split(':')
+      .map(Number)
+
+  return (
+    hours >= 0 &&
+    hours <= 23 &&
+    minutes >= 0 &&
+    minutes <= 59
+  )
+}
+
+function timeToMinutes(
+  value: string
+) {
+  const [hours, minutes] =
+    value
+      .split(':')
+      .map(Number)
+
+  return hours * 60 + minutes
 }
 
 function getAmsterdamDate() {
@@ -211,6 +267,360 @@ function redirectToLabels(
       date
     )}#activity-labels`
   )
+}
+
+function redirectSessionError(
+  date: string,
+  message: string
+): never {
+  redirect(
+    `/hours?date=${encodeURIComponent(
+      date
+    )}&sessionError=${encodeURIComponent(
+      message
+    )}#work-sessions`
+  )
+}
+
+function redirectToSessions(
+  date: string
+): never {
+  redirect(
+    `/hours?date=${encodeURIComponent(
+      date
+    )}#work-sessions`
+  )
+}
+
+function getSessionPayload(
+  formData: FormData
+): SessionPayloadResult {
+  const startTime =
+    getRequiredText(
+      formData,
+      'start_time'
+    )
+
+  const endTime =
+    getRequiredText(
+      formData,
+      'end_time'
+    )
+
+  const activityLabelId =
+    getRequiredText(
+      formData,
+      'activity_label_id'
+    )
+
+  const place =
+    getRequiredText(
+      formData,
+      'place'
+    )
+
+  const paperId =
+    getOptionalText(
+      formData,
+      'paper_id'
+    )
+
+  if (
+    !isValidTimeString(
+      startTime
+    ) ||
+    !isValidTimeString(
+      endTime
+    )
+  ) {
+    return {
+      error:
+        'Start and end times must be valid clock times.',
+    }
+  }
+
+  if (
+    timeToMinutes(
+      endTime
+    ) <=
+    timeToMinutes(
+      startTime
+    )
+  ) {
+    return {
+      error:
+        'End time must be later than start time.',
+    }
+  }
+
+  if (!activityLabelId) {
+    return {
+      error:
+        'Activity label is required.',
+    }
+  }
+
+  if (!place) {
+    return {
+      error:
+        'Work location is required.',
+    }
+  }
+
+  return {
+    payload: {
+      startTime,
+      endTime,
+      activityLabelId,
+      place,
+      paperId,
+    },
+  }
+}
+
+async function validateSessionReferences(
+  supabase: ServerSupabaseClient,
+  userId: string,
+  activityLabelId: string,
+  paperId: string | null,
+  allowedInactiveLabelId?: string
+) {
+  const {
+    data: label,
+    error: labelError,
+  } = await supabase
+    .from('activity_labels')
+    .select(`
+      id,
+      is_break,
+      is_active
+    `)
+    .eq(
+      'id',
+      activityLabelId
+    )
+    .eq(
+      'owner_id',
+      userId
+    )
+    .maybeSingle()
+
+  if (
+    labelError ||
+    !label
+  ) {
+    return {
+      error:
+        'The selected activity label is not available.',
+    }
+  }
+
+  if (
+    !label.is_active &&
+    label.id !==
+      allowedInactiveLabelId
+  ) {
+    return {
+      error:
+        'The selected activity label is inactive.',
+    }
+  }
+
+  if (
+    label.is_break &&
+    paperId
+  ) {
+    return {
+      error:
+        'Break sessions cannot be linked to a paper.',
+    }
+  }
+
+  if (paperId) {
+    const {
+      data: paper,
+      error: paperError,
+    } = await supabase
+      .from('papers')
+      .select('id')
+      .eq(
+        'id',
+        paperId
+      )
+      .eq(
+        'owner_id',
+        userId
+      )
+      .maybeSingle()
+
+    if (
+      paperError ||
+      !paper
+    ) {
+      return {
+        error:
+          'The selected paper is not available.',
+      }
+    }
+  }
+
+  return {
+    label,
+  }
+}
+
+async function getOrCreateDailyLog(
+  supabase: ServerSupabaseClient,
+  userId: string,
+  logDate: string
+) {
+  const {
+    data: existingLog,
+    error: existingError,
+  } = await supabase
+    .from('daily_logs')
+    .select('id')
+    .eq(
+      'owner_id',
+      userId
+    )
+    .eq(
+      'log_date',
+      logDate
+    )
+    .maybeSingle()
+
+  if (existingError) {
+    return {
+      error:
+        'The daily log could not be loaded.',
+    }
+  }
+
+  if (existingLog) {
+    return {
+      id: existingLog.id,
+    }
+  }
+
+  const {
+    data: createdLog,
+    error: createError,
+  } = await supabase
+    .from('daily_logs')
+    .insert({
+      owner_id: userId,
+      log_date: logDate,
+      coffee_count: 0,
+    })
+    .select('id')
+    .single()
+
+  if (
+    !createError &&
+    createdLog
+  ) {
+    return {
+      id: createdLog.id,
+    }
+  }
+
+  if (
+    createError?.code ===
+    '23505'
+  ) {
+    const {
+      data: concurrentLog,
+      error: concurrentError,
+    } = await supabase
+      .from('daily_logs')
+      .select('id')
+      .eq(
+        'owner_id',
+        userId
+      )
+      .eq(
+        'log_date',
+        logDate
+      )
+      .maybeSingle()
+
+    if (
+      !concurrentError &&
+      concurrentLog
+    ) {
+      return {
+        id:
+          concurrentLog.id,
+      }
+    }
+  }
+
+  console.error(
+    'Automatic daily log creation failed:',
+    createError
+  )
+
+  return {
+    error:
+      'The daily log could not be created.',
+  }
+}
+
+function getSessionDatabaseError(
+  error: {
+    code?: string
+    message?: string
+    details?: string
+  } | null
+) {
+  const text =
+    `${error?.message ?? ''} ${error?.details ?? ''}`.toLowerCase()
+
+  if (
+    text.includes(
+      'work sessions cannot overlap'
+    )
+  ) {
+    return 'This interval overlaps an existing work session.'
+  }
+
+  if (
+    text.includes(
+      'break sessions cannot be linked to papers'
+    )
+  ) {
+    return 'Break sessions cannot be linked to a paper.'
+  }
+
+  if (
+    text.includes(
+      'end_time'
+    ) ||
+    text.includes(
+      'positive_interval'
+    )
+  ) {
+    return 'End time must be later than start time.'
+  }
+
+  if (
+    text.includes(
+      'activity label'
+    )
+  ) {
+    return 'The selected activity label is not valid for this session.'
+  }
+
+  if (
+    text.includes(
+      'paper'
+    )
+  ) {
+    return 'The selected paper is not valid for this session.'
+  }
+
+  return 'The work session could not be saved.'
 }
 
 export async function saveDailyLog(
@@ -686,5 +1096,376 @@ export async function deleteActivityLabel(
 
   redirectToLabels(
     returnDate
+  )
+}
+
+export async function createWorkSession(
+  formData: FormData
+) {
+  const {
+    supabase,
+    userId,
+  } = await requireAuth()
+
+  const logDate =
+    getRequiredText(
+      formData,
+      'log_date'
+    )
+
+  if (
+    !isValidDateString(
+      logDate
+    )
+  ) {
+    redirect('/hours')
+  }
+
+  const result =
+    getSessionPayload(
+      formData
+    )
+
+  if (!result.payload) {
+    redirectSessionError(
+      logDate,
+      result.error
+    )
+  }
+
+  const payload =
+    result.payload
+
+  const referenceResult =
+    await validateSessionReferences(
+      supabase,
+      userId,
+      payload.activityLabelId,
+      payload.paperId
+    )
+
+  if (
+    referenceResult.error
+  ) {
+    redirectSessionError(
+      logDate,
+      referenceResult.error
+    )
+  }
+
+  const dailyLogResult =
+    await getOrCreateDailyLog(
+      supabase,
+      userId,
+      logDate
+    )
+
+  if (
+    !dailyLogResult.id
+  ) {
+    redirectSessionError(
+      logDate,
+      dailyLogResult.error ??
+        'The daily log could not be created.'
+    )
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('work_sessions')
+    .insert({
+      daily_log_id:
+        dailyLogResult.id,
+      activity_label_id:
+        payload.activityLabelId,
+      paper_id:
+        payload.paperId,
+      start_time:
+        payload.startTime,
+      end_time:
+        payload.endTime,
+      place:
+        payload.place,
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    console.error(
+      'Work session creation failed:',
+      error
+    )
+
+    redirectSessionError(
+      logDate,
+      getSessionDatabaseError(
+        error
+      )
+    )
+  }
+
+  revalidatePath('/hours')
+
+  redirectToSessions(
+    logDate
+  )
+}
+
+export async function updateWorkSession(
+  formData: FormData
+) {
+  const {
+    supabase,
+    userId,
+  } = await requireAuth()
+
+  const logDate =
+    getRequiredText(
+      formData,
+      'log_date'
+    )
+
+  const sessionId =
+    getRequiredText(
+      formData,
+      'session_id'
+    )
+
+  if (
+    !isValidDateString(
+      logDate
+    ) ||
+    !sessionId
+  ) {
+    redirect('/hours')
+  }
+
+  const result =
+    getSessionPayload(
+      formData
+    )
+
+  if (!result.payload) {
+    redirectSessionError(
+      logDate,
+      result.error
+    )
+  }
+
+  const payload =
+    result.payload
+
+  const {
+    data: dailyLog,
+    error: dailyLogError,
+  } = await supabase
+    .from('daily_logs')
+    .select('id')
+    .eq(
+      'owner_id',
+      userId
+    )
+    .eq(
+      'log_date',
+      logDate
+    )
+    .maybeSingle()
+
+  if (
+    dailyLogError ||
+    !dailyLog
+  ) {
+    redirectSessionError(
+      logDate,
+      'The daily log could not be loaded.'
+    )
+  }
+
+  const {
+    data: existingSession,
+    error: existingError,
+  } = await supabase
+    .from('work_sessions')
+    .select(`
+      id,
+      activity_label_id
+    `)
+    .eq(
+      'id',
+      sessionId
+    )
+    .eq(
+      'daily_log_id',
+      dailyLog.id
+    )
+    .maybeSingle()
+
+  if (
+    existingError ||
+    !existingSession
+  ) {
+    redirectSessionError(
+      logDate,
+      'The work session could not be found.'
+    )
+  }
+
+  const referenceResult =
+    await validateSessionReferences(
+      supabase,
+      userId,
+      payload.activityLabelId,
+      payload.paperId,
+      existingSession.activity_label_id
+    )
+
+  if (
+    referenceResult.error
+  ) {
+    redirectSessionError(
+      logDate,
+      referenceResult.error
+    )
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('work_sessions')
+    .update({
+      activity_label_id:
+        payload.activityLabelId,
+      paper_id:
+        payload.paperId,
+      start_time:
+        payload.startTime,
+      end_time:
+        payload.endTime,
+      place:
+        payload.place,
+    })
+    .eq(
+      'id',
+      sessionId
+    )
+    .eq(
+      'daily_log_id',
+      dailyLog.id
+    )
+    .select('id')
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error(
+      'Work session update failed:',
+      error
+    )
+
+    redirectSessionError(
+      logDate,
+      getSessionDatabaseError(
+        error
+      )
+    )
+  }
+
+  revalidatePath('/hours')
+
+  redirectToSessions(
+    logDate
+  )
+}
+
+export async function deleteWorkSession(
+  formData: FormData
+) {
+  const {
+    supabase,
+    userId,
+  } = await requireAuth()
+
+  const logDate =
+    getRequiredText(
+      formData,
+      'log_date'
+    )
+
+  const sessionId =
+    getRequiredText(
+      formData,
+      'session_id'
+    )
+
+  if (
+    !isValidDateString(
+      logDate
+    ) ||
+    !sessionId
+  ) {
+    redirect('/hours')
+  }
+
+  const {
+    data: dailyLog,
+    error: dailyLogError,
+  } = await supabase
+    .from('daily_logs')
+    .select('id')
+    .eq(
+      'owner_id',
+      userId
+    )
+    .eq(
+      'log_date',
+      logDate
+    )
+    .maybeSingle()
+
+  if (
+    dailyLogError ||
+    !dailyLog
+  ) {
+    redirectSessionError(
+      logDate,
+      'The daily log could not be loaded.'
+    )
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('work_sessions')
+    .delete()
+    .eq(
+      'id',
+      sessionId
+    )
+    .eq(
+      'daily_log_id',
+      dailyLog.id
+    )
+    .select('id')
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error(
+      'Work session deletion failed:',
+      error
+    )
+
+    redirectSessionError(
+      logDate,
+      'The work session could not be deleted.'
+    )
+  }
+
+  revalidatePath('/hours')
+
+  redirectToSessions(
+    logDate
   )
 }

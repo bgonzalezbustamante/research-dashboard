@@ -63,26 +63,22 @@ export default function ActivityLabelsSection({
 
           <p className="mt-1 text-sm text-oxford-ash">
             Define the categories
-            that will be assigned to
-            work sessions.
+            assigned to your work
+            sessions.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-4 text-sm text-oxford-ash">
           <span>
             <strong className="font-medium text-oxford-charcoal">
-              {
-                activeCustomCount
-              }
+              {activeCustomCount}
             </strong>{' '}
             active
           </span>
 
           <span>
             <strong className="font-medium text-oxford-charcoal">
-              {
-                inactiveCustomCount
-              }
+              {inactiveCustomCount}
             </strong>{' '}
             inactive
           </span>
@@ -95,23 +91,22 @@ export default function ActivityLabelsSection({
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.65fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(250px,0.7fr)_minmax(0,2fr)]">
         <Card>
-          <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+          <h3 className="font-serif text-lg font-semibold text-oxford-blue">
             Add activity label
           </h3>
 
-          <p className="mt-2 text-sm leading-6 text-oxford-ash">
-            Labels describe what
-            you were doing during a
-            recorded interval.
+          <p className="mt-1 text-sm leading-5 text-oxford-ash">
+            Create a category for
+            work-session activity.
           </p>
 
           <form
             action={
               createActivityLabel
             }
-            className="mt-5 space-y-4"
+            className="mt-4 space-y-4"
           >
             <input
               type="hidden"
@@ -156,7 +151,7 @@ export default function ActivityLabelsSection({
               <textarea
                 id="new-label-description"
                 name="description"
-                rows={4}
+                rows={3}
                 placeholder="Optional description"
                 className={
                   inputClass
@@ -173,68 +168,71 @@ export default function ActivityLabelsSection({
           </form>
         </Card>
 
-        <div className="space-y-4">
+        <div className="grid content-start gap-4 sm:grid-cols-2">
           {labels.map(
             (label) => (
               <Card
                 key={
                   label.id
                 }
+                className="h-fit"
               >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-medium text-oxford-charcoal">
-                        {
-                          label.name
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-oxford-charcoal">
+                      {
+                        label.name
+                      }
+                    </h3>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {label.is_break && (
+                      <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                        Break
+                      </span>
+                    )}
+
+                    {label.is_system && (
+                      <span className="rounded-full border border-oxford-stone bg-oxford-shell px-2 py-0.5 text-xs font-medium text-oxford-ash">
+                        System
+                      </span>
+                    )}
+
+                    {!label.is_system && (
+                      <span
+                        className={
+                          label.is_active
+                            ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800'
+                            : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700'
                         }
-                      </h3>
-
-                      {label.is_break && (
-                        <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-                          Break
-                        </span>
-                      )}
-
-                      {label.is_system && (
-                        <span className="rounded-full border border-oxford-stone bg-oxford-shell px-2 py-0.5 text-xs font-medium text-oxford-ash">
-                          System
-                        </span>
-                      )}
-
-                      {!label.is_system && (
-                        <span
-                          className={
-                            label.is_active
-                              ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800'
-                              : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700'
-                          }
-                        >
-                          {label.is_active
-                            ? 'Active'
-                            : 'Inactive'}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="mt-2 text-sm leading-6 text-oxford-ash">
-                      {label.description ??
-                        'No description.'}
-                    </p>
+                      >
+                        {label.is_active
+                          ? 'Active'
+                          : 'Inactive'}
+                      </span>
+                    )}
                   </div>
                 </div>
 
+                {label.description && (
+                  <p className="mt-2 text-sm leading-5 text-oxford-ash">
+                    {
+                      label.description
+                    }
+                  </p>
+                )}
+
                 {label.is_system ? (
-                  <div className="mt-4 rounded-md border border-oxford-stone bg-oxford-shell px-4 py-3 text-sm text-oxford-ash">
-                    This is a protected
-                    system label. It
-                    cannot be renamed,
-                    deactivated, or
-                    deleted.
-                  </div>
+                  <p className="mt-3 border-t border-oxford-stone pt-3 text-xs leading-5 text-oxford-ash">
+                    Protected system
+                    label. It cannot
+                    be modified or
+                    deactivated.
+                  </p>
                 ) : (
-                  <div className="mt-5 border-t border-oxford-stone pt-4">
-                    <div className="flex flex-wrap gap-3">
+                  <div className="mt-3 border-t border-oxford-stone pt-3">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                       <form
                         action={
                           setActivityLabelActive
@@ -266,123 +264,26 @@ export default function ActivityLabelsSection({
                           }
                         />
 
-                        <Button
+                        <button
                           type="submit"
-                          variant="secondary"
+                          className="text-sm font-medium text-oxford-blue hover:underline"
                         >
                           {label.is_active
                             ? 'Deactivate'
                             : 'Reactivate'}
-                        </Button>
+                        </button>
                       </form>
-                    </div>
 
-                    <details className="mt-4">
-                      <summary className="cursor-pointer text-sm font-medium text-oxford-blue hover:underline">
-                        Edit label
-                      </summary>
-
-                      <form
-                        action={
-                          updateActivityLabel
-                        }
-                        className="mt-4 grid gap-4"
-                      >
-                        <input
-                          type="hidden"
-                          name="return_date"
-                          value={
-                            returnDate
-                          }
-                        />
-
-                        <input
-                          type="hidden"
-                          name="label_id"
-                          value={
-                            label.id
-                          }
-                        />
-
-                        <div>
-                          <label
-                            htmlFor={`label-name-${label.id}`}
-                            className={
-                              labelClass
-                            }
-                          >
-                            Name
-                          </label>
-
-                          <input
-                            id={`label-name-${label.id}`}
-                            name="name"
-                            type="text"
-                            required
-                            defaultValue={
-                              label.name
-                            }
-                            className={
-                              inputClass
-                            }
-                          />
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor={`label-description-${label.id}`}
-                            className={
-                              labelClass
-                            }
-                          >
-                            Description
-                          </label>
-
-                          <textarea
-                            id={`label-description-${label.id}`}
-                            name="description"
-                            rows={4}
-                            defaultValue={
-                              label.description ??
-                              ''
-                            }
-                            className={
-                              inputClass
-                            }
-                          />
-                        </div>
-
-                        <Button
-                          type="submit"
-                          variant="primary"
-                        >
-                          Save label
-                        </Button>
-                      </form>
-                    </details>
-
-                    <details className="mt-4">
-                      <summary className="cursor-pointer text-sm font-medium text-red-700 hover:underline">
-                        Delete label
-                      </summary>
-
-                      <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-4">
-                        <p className="text-sm leading-6 text-red-800">
-                          Delete only an
-                          erroneous,
-                          unused label.
-                          Once a label
-                          has work-session
-                          history,
-                          deactivate it
-                          instead.
-                        </p>
+                      <details>
+                        <summary className="cursor-pointer text-sm font-medium text-oxford-blue hover:underline">
+                          Edit
+                        </summary>
 
                         <form
                           action={
-                            deleteActivityLabel
+                            updateActivityLabel
                           }
-                          className="mt-3"
+                          className="mt-3 space-y-3"
                         >
                           <input
                             type="hidden"
@@ -400,15 +301,112 @@ export default function ActivityLabelsSection({
                             }
                           />
 
+                          <div>
+                            <label
+                              htmlFor={`label-name-${label.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              Name
+                            </label>
+
+                            <input
+                              id={`label-name-${label.id}`}
+                              name="name"
+                              type="text"
+                              required
+                              defaultValue={
+                                label.name
+                              }
+                              className={
+                                inputClass
+                              }
+                            />
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor={`label-description-${label.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              Description
+                            </label>
+
+                            <textarea
+                              id={`label-description-${label.id}`}
+                              name="description"
+                              rows={3}
+                              defaultValue={
+                                label.description ??
+                                ''
+                              }
+                              className={
+                                inputClass
+                              }
+                            />
+                          </div>
+
                           <Button
                             type="submit"
-                            variant="danger"
+                            variant="primary"
                           >
-                            Confirm delete
+                            Save
                           </Button>
                         </form>
-                      </div>
-                    </details>
+                      </details>
+
+                      <details>
+                        <summary className="cursor-pointer text-sm font-medium text-red-700 hover:underline">
+                          Delete
+                        </summary>
+
+                        <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+                          <p className="text-xs leading-5 text-red-800">
+                            Delete only
+                            an erroneous,
+                            unused label.
+                            Deactivate
+                            labels with
+                            historical
+                            sessions.
+                          </p>
+
+                          <form
+                            action={
+                              deleteActivityLabel
+                            }
+                            className="mt-3"
+                          >
+                            <input
+                              type="hidden"
+                              name="return_date"
+                              value={
+                                returnDate
+                              }
+                            />
+
+                            <input
+                              type="hidden"
+                              name="label_id"
+                              value={
+                                label.id
+                              }
+                            />
+
+                            <Button
+                              type="submit"
+                              variant="danger"
+                            >
+                              Confirm
+                              delete
+                            </Button>
+                          </form>
+                        </div>
+                      </details>
+                    </div>
                   </div>
                 )}
               </Card>
