@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Oxford core */
+  --oxford-blue: #002147;
+  --oxford-blue-dark: #00152f;
+
+  /* Oxford neutrals */
+  --oxford-charcoal: #211d1c;
+  --oxford-ash: #61615f;
+  --oxford-stone: #d9d8d6;
+  --oxford-shell: #f1eee9;
+  --oxford-off-white: #f2f0f0;
+
+  /* Selected Oxford secondary colours */
+  --oxford-cool-grey: #e4f0ef;
+  --oxford-sky-blue: #b9d6f2;
+  --oxford-green: #426a5a;
+  --oxford-yellow-ochre: #e2c044;
+  --oxford-peach: #e08d79;
+
+  --background: var(--oxford-off-white);
+  --foreground: var(--oxford-charcoal);
 }
 
 @theme inline {
+  --color-oxford-blue: var(--oxford-blue);
+  --color-oxford-blue-dark: var(--oxford-blue-dark);
+
+  --color-oxford-charcoal: var(--oxford-charcoal);
+  --color-oxford-ash: var(--oxford-ash);
+  --color-oxford-stone: var(--oxford-stone);
+  --color-oxford-shell: var(--oxford-shell);
+  --color-oxford-off-white: var(--oxford-off-white);
+
+  --color-oxford-cool-grey: var(--oxford-cool-grey);
+  --color-oxford-sky-blue: var(--oxford-sky-blue);
+  --color-oxford-green: var(--oxford-green);
+  --color-oxford-yellow-ochre: var(--oxford-yellow-ochre);
+  --color-oxford-peach: var(--oxford-peach);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-sans: var(--font-roboto);
+  --font-serif: var(--font-noto-serif);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-roboto), Arial, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: var(--oxford-sky-blue);
+  color: var(--oxford-blue);
 }
