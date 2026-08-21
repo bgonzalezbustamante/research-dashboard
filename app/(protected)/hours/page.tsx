@@ -2,20 +2,36 @@ import Link from 'next/link'
 
 import ActivityLabelsSection from '@/components/hours/activity-labels-section'
 import DailyLogSection from '@/components/hours/daily-log-section'
+import HoursAnalyticsSection from '@/components/hours/hours-analytics-section'
 import WorkSessionsSection from '@/components/hours/work-sessions-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import { createClient } from '@/lib/supabase/server'
 
+type AnalyticsPeriod =
+  | 'day'
+  | 'week'
+  | 'month'
+  | 'year'
+
 type HoursPageProps = {
   searchParams: Promise<{
     date?: string
+    period?: string
     dailyError?: string
     labelError?: string
     sessionError?: string
   }>
 }
+
+const analyticsPeriods:
+  AnalyticsPeriod[] = [
+    'day',
+    'week',
+    'month',
+    'year',
+  ]
 
 function isValidDateString(
   value: string
@@ -63,14 +79,18 @@ function getAmsterdamDate() {
         month: '2-digit',
         day: '2-digit',
       }
-    ).formatToParts(new Date())
+    ).formatToParts(
+      new Date()
+    )
 
   const values =
     Object.fromEntries(
-      parts.map((part) => [
-        part.type,
-        part.value,
-      ])
+      parts.map(
+        (part) => [
+          part.type,
+          part.value,
+        ]
+      )
     )
 
   return `${values.year}-${values.month}-${values.day}`
@@ -148,6 +168,14 @@ export default async function HoursPage({
       ? params.date
       : today
 
+  const selectedPeriod:
+    AnalyticsPeriod =
+    analyticsPeriods.includes(
+      params.period as AnalyticsPeriod
+    )
+      ? (params.period as AnalyticsPeriod)
+      : 'month'
+
   const previousDate =
     shiftDate(
       selectedDate,
@@ -160,11 +188,29 @@ export default async function HoursPage({
       1
     )
 
+  const selectedYear =
+    selectedDate.slice(
+      0,
+      4
+    )
+
+  const analyticsStart =
+    shiftDate(
+      `${selectedYear}-01-01`,
+      -6
+    )
+
+  const analyticsEnd =
+    shiftDate(
+      `${selectedYear}-12-31`,
+      6
+    )
+
   const supabase =
     await createClient()
 
   const [
-    dailyLogResult,
+    dailyLogsResult,
     labelsResult,
     papersResult,
   ] = await Promise.all([
@@ -172,13 +218,23 @@ export default async function HoursPage({
       .from('daily_logs')
       .select(`
         id,
+        log_date,
         coffee_count
       `)
-      .eq(
+      .gte(
         'log_date',
-        selectedDate
+        analyticsStart
       )
-      .maybeSingle(),
+      .lte(
+        'log_date',
+        analyticsEnd
+      )
+      .order(
+        'log_date',
+        {
+          ascending: true,
+        }
+      ),
 
     supabase
       .from(
@@ -227,10 +283,10 @@ export default async function HoursPage({
   ])
 
   if (
-    dailyLogResult.error
+    dailyLogsResult.error
   ) {
     throw new Error(
-      `Could not load daily log: ${dailyLogResult.error.message}`
+      `Could not load daily logs: ${dailyLogsResult.error.message}`
     )
   }
 
@@ -250,8 +306,8 @@ export default async function HoursPage({
     )
   }
 
-  const dailyLog =
-    dailyLogResult.data
+  const dailyLogs =
+    dailyLogsResult.data ?? []
 
   const labels =
     labelsResult.data ?? []
@@ -259,28 +315,59 @@ export default async function HoursPage({
   const papers =
     papersResult.data ?? []
 
-  let sessions: {
-    id: string
-    start_time: string
-    end_time: string
-    place: string
-    activity_label_id: string
-    paper_id: string | null
-    label_name: string
-    label_is_break: boolean
-    label_is_active: boolean
-    paper_short_title: string | null
-    paper_archived: boolean
-  }[] = []
+  const dailyLogIds =
+    dailyLogs.map(
+      (log) =>
+        log.id
+    )
 
-  if (dailyLog) {
+  let allSessionRows:
+    {
+      id: string
+      daily_log_id: string
+      start_time: string
+      end_time: string
+      place: string
+      activity_label_id: string
+      paper_id: string | null
+      activity_labels:
+        | {
+            name: string
+            is_break: boolean
+            is_active: boolean
+          }
+        | {
+            name: string
+            is_break: boolean
+            is_active: boolean
+          }[]
+        | null
+      papers:
+        | {
+            short_title: string
+            archived_at: string | null
+          }
+        | {
+            short_title: string
+            archived_at: string | null
+          }[]
+        | null
+    }[] = []
+
+  if (
+    dailyLogIds.length >
+    0
+  ) {
     const {
-      data: sessionRows,
-      error: sessionsError,
+      data,
+      error,
     } = await supabase
-      .from('work_sessions')
+      .from(
+        'work_sessions'
+      )
       .select(`
         id,
+        daily_log_id,
         start_time,
         end_time,
         place,
@@ -296,9 +383,9 @@ export default async function HoursPage({
           archived_at
         )
       `)
-      .eq(
+      .in(
         'daily_log_id',
-        dailyLog.id
+        dailyLogIds
       )
       .order(
         'start_time',
@@ -307,69 +394,153 @@ export default async function HoursPage({
         }
       )
 
-    if (sessionsError) {
+    if (error) {
       throw new Error(
-        `Could not load work sessions: ${sessionsError.message}`
+        `Could not load work sessions: ${error.message}`
       )
     }
 
-    sessions =
-      (sessionRows ?? []).map(
-        (session) => {
-          const activityLabel =
-            Array.isArray(
-              session.activity_labels
-            )
-              ? session.activity_labels[0]
-              : session.activity_labels
-
-          const paper =
-            Array.isArray(
-              session.papers
-            )
-              ? session.papers[0]
-              : session.papers
-
-          return {
-            id:
-              session.id,
-            start_time:
-              session.start_time,
-            end_time:
-              session.end_time,
-            place:
-              session.place,
-            activity_label_id:
-              session.activity_label_id,
-            paper_id:
-              session.paper_id,
-            label_name:
-              activityLabel?.name ??
-              'Unknown activity',
-            label_is_break:
-              activityLabel?.is_break ??
-              false,
-            label_is_active:
-              activityLabel?.is_active ??
-              false,
-            paper_short_title:
-              paper?.short_title ??
-              null,
-            paper_archived:
-              paper?.archived_at !==
-                null &&
-              paper?.archived_at !==
-                undefined,
-          }
-        }
-      )
+    allSessionRows =
+      data ?? []
   }
+
+  const sessionsByLog =
+    new Map<
+      string,
+      {
+        id: string
+        start_time: string
+        end_time: string
+        place: string
+        activity_label_id: string
+        paper_id: string | null
+        label_name: string
+        label_is_break: boolean
+        label_is_active: boolean
+        paper_short_title: string | null
+        paper_archived: boolean
+      }[]
+    >()
+
+  for (const session of
+    allSessionRows) {
+    const activityLabel =
+      Array.isArray(
+        session.activity_labels
+      )
+        ? session.activity_labels[0]
+        : session.activity_labels
+
+    const paper =
+      Array.isArray(
+        session.papers
+      )
+        ? session.papers[0]
+        : session.papers
+
+    const normalisedSession = {
+      id:
+        session.id,
+      start_time:
+        session.start_time,
+      end_time:
+        session.end_time,
+      place:
+        session.place,
+      activity_label_id:
+        session.activity_label_id,
+      paper_id:
+        session.paper_id,
+      label_name:
+        activityLabel?.name ??
+        'Unknown activity',
+      label_is_break:
+        activityLabel?.is_break ??
+        false,
+      label_is_active:
+        activityLabel?.is_active ??
+        false,
+      paper_short_title:
+        paper?.short_title ??
+        null,
+      paper_archived:
+        paper?.archived_at !==
+          null &&
+        paper?.archived_at !==
+          undefined,
+    }
+
+    const existing =
+      sessionsByLog.get(
+        session.daily_log_id
+      ) ?? []
+
+    existing.push(
+      normalisedSession
+    )
+
+    sessionsByLog.set(
+      session.daily_log_id,
+      existing
+    )
+  }
+
+  const selectedDailyLog =
+    dailyLogs.find(
+      (log) =>
+        log.log_date ===
+        selectedDate
+    ) ?? null
+
+  const selectedSessions =
+    selectedDailyLog
+      ? sessionsByLog.get(
+          selectedDailyLog.id
+        ) ?? []
+      : []
+
+  const analyticsLogs =
+    dailyLogs.map(
+      (log) => ({
+        id:
+          log.id,
+        log_date:
+          log.log_date,
+        coffee_count:
+          log.coffee_count,
+        sessions:
+          (
+            sessionsByLog.get(
+              log.id
+            ) ?? []
+          ).map(
+            (session) => ({
+              id:
+                session.id,
+              start_time:
+                session.start_time,
+              end_time:
+                session.end_time,
+              place:
+                session.place,
+              paper_id:
+                session.paper_id,
+              label_name:
+                session.label_name,
+              label_is_break:
+                session.label_is_break,
+              paper_short_title:
+                session.paper_short_title,
+            })
+          ),
+      })
+    )
 
   return (
     <div>
       <PageHeader
         title="Working Hours"
-        description="Record daily work, breaks, activities, locations, papers, and coffee."
+        description="Record and analyse daily work, breaks, activities, locations, papers, and coffee."
       />
 
       <section
@@ -391,21 +562,21 @@ export default async function HoursPage({
 
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href={`/hours?date=${previousDate}`}
+              href={`/hours?date=${previousDate}&period=${selectedPeriod}`}
               className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal transition hover:bg-oxford-shell hover:text-oxford-blue"
             >
               ← Previous
             </Link>
 
             <ButtonLink
-              href={`/hours?date=${today}`}
+              href={`/hours?date=${today}&period=${selectedPeriod}`}
               variant="secondary"
             >
               Today
             </ButtonLink>
 
             <Link
-              href={`/hours?date=${nextDate}`}
+              href={`/hours?date=${nextDate}&period=${selectedPeriod}`}
               className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal transition hover:bg-oxford-shell hover:text-oxford-blue"
             >
               Next →
@@ -417,6 +588,14 @@ export default async function HoursPage({
           method="get"
           className="mt-4 flex flex-col gap-3 border-t border-oxford-stone pt-4 sm:flex-row sm:items-end"
         >
+          <input
+            type="hidden"
+            name="period"
+            value={
+              selectedPeriod
+            }
+          />
+
           <div>
             <label
               htmlFor="hours-date"
@@ -450,7 +629,14 @@ export default async function HoursPage({
           selectedDate
         }
         log={
-          dailyLog
+          selectedDailyLog
+            ? {
+                id:
+                  selectedDailyLog.id,
+                coffee_count:
+                  selectedDailyLog.coffee_count,
+              }
+            : null
         }
         error={
           params.dailyError
@@ -462,10 +648,11 @@ export default async function HoursPage({
           selectedDate
         }
         dailyLogExists={
-          dailyLog !== null
+          selectedDailyLog !==
+          null
         }
         sessions={
-          sessions
+          selectedSessions
         }
         labels={
           labels
@@ -475,6 +662,18 @@ export default async function HoursPage({
         }
         error={
           params.sessionError
+        }
+      />
+
+      <HoursAnalyticsSection
+        selectedDate={
+          selectedDate
+        }
+        selectedPeriod={
+          selectedPeriod
+        }
+        logs={
+          analyticsLogs
         }
       />
 
