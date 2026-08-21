@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 
 import HistorySection from '@/components/papers/history-section'
 import MilestonesSection from '@/components/papers/milestones-section'
+import NotesSection from '@/components/papers/notes-section'
 import PresentationsSection from '@/components/papers/presentations-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
@@ -31,6 +32,7 @@ type PaperPageProps = {
     milestoneError?: string
     historyError?: string
     presentationError?: string
+    noteError?: string
   }>
 }
 
@@ -44,6 +46,7 @@ export default async function PaperPage({
     milestoneError,
     historyError,
     presentationError,
+    noteError,
   } = await searchParams
 
   const supabase =
@@ -198,12 +201,78 @@ export default async function PaperPage({
     )
   }
 
+  const {
+    data: notes,
+    error: notesError,
+  } = await supabase
+    .from('paper_notes')
+    .select(`
+      id,
+      note_date,
+      note_type,
+      body,
+      created_by,
+      created_at,
+      updated_at,
+      profiles (
+        full_name,
+        email
+      )
+    `)
+    .eq('paper_id', id)
+    .order('note_date', {
+      ascending: false,
+    })
+    .order('created_at', {
+      ascending: false,
+    })
+
+  if (notesError) {
+    throw new Error(
+      `Could not load paper notes: ${notesError.message}`
+    )
+  }
+
+  const normalizedNotes =
+    (notes ?? []).map(
+      (note) => {
+        const profile =
+          Array.isArray(
+            note.profiles
+          )
+            ? note.profiles[0]
+            : note.profiles
+
+        return {
+          id: note.id,
+          note_date:
+            note.note_date,
+          note_type:
+            note.note_type,
+          body:
+            note.body,
+          created_at:
+            note.created_at,
+          updated_at:
+            note.updated_at,
+          creator_name:
+            profile?.full_name ??
+            profile?.email ??
+            'You',
+        }
+      }
+    )
+
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
-          title={paper.short_title}
-          description={paper.title}
+          title={
+            paper.short_title
+          }
+          description={
+            paper.title
+          }
         />
 
         <div className="flex flex-wrap gap-3">
@@ -269,7 +338,8 @@ export default async function PaperPage({
 
       {paper.archived_at && (
         <div className="mb-6 rounded-md border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-gray-700">
-          This paper is archived and does not appear in the
+          This paper is archived and
+          does not appear in the
           default active-papers list.
         </div>
       )}
@@ -444,8 +514,7 @@ export default async function PaperPage({
           paper.id
         }
         events={
-          historyEvents ??
-          []
+          historyEvents ?? []
         }
         error={
           historyError
@@ -457,11 +526,22 @@ export default async function PaperPage({
           paper.id
         }
         presentations={
-          presentations ??
-          []
+          presentations ?? []
         }
         error={
           presentationError
+        }
+      />
+
+      <NotesSection
+        paperId={
+          paper.id
+        }
+        notes={
+          normalizedNotes
+        }
+        error={
+          noteError
         }
       />
     </div>
