@@ -58,6 +58,7 @@
 - Added `.env.example` while keeping local environment values outside version control.
 - Added production deployment through Netlify and the custom domain:
   - [dashboard.bgonzalezbustamante.com](https://dashboard.bgonzalezbustamante.com)
+- Fixed the production logout redirect so signed-out users return to the canonical custom domain rather than the Netlify branch-deploy URL.
 
 ### Notes
 
@@ -68,5 +69,10 @@
 - Citation yield uses Google Scholar only and is a descriptive cumulative indicator, not a causal measure of research productivity.
 - The web application remains authenticated even if the source-code repository is public.
 - Institutional branding assets remain subject to their respective rights and are not covered by any repository licence.
+
+### Roadmap
+
+- Add reproducible Supabase schema migrations and local project configuration.
+- Add Phase F collaboration, coauthor access, and paper-level permissions.
 
 ---

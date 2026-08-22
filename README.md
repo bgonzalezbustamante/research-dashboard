@@ -1,6 +1,6 @@
 # Research Dashboard
 
-A private research-management dashboard for tracking papers, working hours, biweekly capacity planning, and cross-module research analytics.
+An authenticated personal research-management dashboard for tracking papers, working hours, biweekly capacity planning, and cross-module research analytics.
 
 **Production:** [dashboard.bgonzalezbustamante.com](https://dashboard.bgonzalezbustamante.com)
 
