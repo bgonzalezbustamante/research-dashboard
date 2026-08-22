@@ -131,6 +131,7 @@ export default function DailyLogSection({
             </label>
 
             <input
+              key={`${date}-${log?.id ?? 'new'}`}
               id="coffee-count"
               name="coffee_count"
               type="number"
