@@ -1,3 +1,4 @@
+import { setDefaultLocationLabel } from '@/app/(protected)/hours/location-default-action'
 import {
   createLocationLabel,
   deleteLocationLabel,
@@ -18,6 +19,7 @@ type LocationLabel = {
   name: string
   description: string | null
   is_active: boolean
+  is_default: boolean
 }
 
 const inputClass =
@@ -39,10 +41,15 @@ export default async function LocationLabelsSection({
         id,
         name,
         description,
-        is_active
+        is_active,
+        is_default
       `)
       .order(
         'is_active',
+        { ascending: false }
+      )
+      .order(
+        'is_default',
         { ascending: false }
       )
       .order(
@@ -92,6 +99,11 @@ export default async function LocationLabelsSection({
   const inactiveCount =
     labels.length - activeCount
 
+  const defaultLocation =
+    labels.find(
+      (label) => label.is_default
+    ) ?? null
+
   return (
     <section
       id="location-labels"
@@ -105,10 +117,11 @@ export default async function LocationLabelsSection({
 
           <p className="mt-1 text-sm text-oxford-ash">
             Define reusable locations
-            for new work sessions.
-            Existing session locations
-            remain recorded as historical
-            text.
+            for new work sessions and
+            choose one active location
+            as the default. Existing
+            session locations remain
+            recorded as historical text.
           </p>
         </div>
 
@@ -126,6 +139,14 @@ export default async function LocationLabelsSection({
             </strong>{' '}
             inactive
           </span>
+
+          <span>
+            Default:{' '}
+            <strong className="font-medium text-oxford-charcoal">
+              {defaultLocation?.name ??
+                'None'}
+            </strong>
+          </span>
         </div>
       </div>
 
@@ -137,7 +158,8 @@ export default async function LocationLabelsSection({
 
           <p className="mt-1 text-sm leading-5 text-oxford-ash">
             Create a reusable work
-            location.
+            location. You can mark it
+            as default afterwards.
           </p>
 
           <form
@@ -222,17 +244,25 @@ export default async function LocationLabelsSection({
                     {label.name}
                   </h3>
 
-                  <span
-                    className={
-                      label.is_active
-                        ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800'
-                        : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700'
-                    }
-                  >
-                    {label.is_active
-                      ? 'Active'
-                      : 'Inactive'}
-                  </span>
+                  <div className="flex flex-wrap justify-end gap-1.5">
+                    {label.is_default && (
+                      <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
+                        Default
+                      </span>
+                    )}
+
+                    <span
+                      className={
+                        label.is_active
+                          ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800'
+                          : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700'
+                      }
+                    >
+                      {label.is_active
+                        ? 'Active'
+                        : 'Inactive'}
+                    </span>
+                  </div>
                 </div>
 
                 {label.description && (
@@ -243,6 +273,31 @@ export default async function LocationLabelsSection({
 
                 <div className="mt-3 border-t border-oxford-stone pt-3">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    {!label.is_default && (
+                      <form
+                        action={setDefaultLocationLabel}
+                      >
+                        <input
+                          type="hidden"
+                          name="return_date"
+                          value={returnDate}
+                        />
+
+                        <input
+                          type="hidden"
+                          name="label_id"
+                          value={label.id}
+                        />
+
+                        <button
+                          type="submit"
+                          className="text-sm font-medium text-oxford-blue hover:underline"
+                        >
+                          Set default
+                        </button>
+                      </form>
+                    )}
+
                     <form
                       action={setLocationLabelActive}
                     >

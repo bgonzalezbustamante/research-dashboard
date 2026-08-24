@@ -21,6 +21,7 @@ type LocationLabel = {
   id: string
   name: string
   is_active: boolean
+  is_default: boolean
 }
 
 type PaperOption = {
@@ -132,10 +133,15 @@ export default async function WorkSessionsSection({
       .select(`
         id,
         name,
-        is_active
+        is_active,
+        is_default
       `)
       .order(
         'is_active',
+        { ascending: false }
+      )
+      .order(
+        'is_default',
         { ascending: false }
       )
       .order(
@@ -168,6 +174,12 @@ export default async function WorkSessionsSection({
       (location) =>
         location.is_active
     )
+
+  const defaultLocation =
+    selectableLocations.find(
+      (location) =>
+        location.is_default
+    ) ?? null
 
   const sortedSessions =
     [...sessions].sort(
@@ -434,7 +446,10 @@ export default async function WorkSessionsSection({
                       id="session-place"
                       name="place"
                       required
-                      defaultValue=""
+                      defaultValue={
+                        defaultLocation?.name ??
+                        ''
+                      }
                       className={inputClass}
                     >
                       <option
@@ -451,6 +466,9 @@ export default async function WorkSessionsSection({
                             value={location.name}
                           >
                             {location.name}
+                            {location.is_default
+                              ? ' — default'
+                              : ''}
                           </option>
                         )
                       )}
@@ -767,6 +785,9 @@ export default async function WorkSessionsSection({
                                           {location.name}
                                           {!location.is_active
                                             ? ' (inactive)'
+                                            : ''}
+                                          {location.is_default
+                                            ? ' — default'
                                             : ''}
                                         </option>
                                       )
