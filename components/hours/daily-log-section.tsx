@@ -60,42 +60,32 @@ export default function DailyLogSection({
   return (
     <section
       id="daily-log"
-      className="scroll-mt-6"
+      className="h-full scroll-mt-6"
     >
-      <div className="mb-4">
-        <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
-          Daily log
-        </h2>
-
-        <p className="mt-1 text-sm text-oxford-ash">
-          Record the daily context
-          for {formatDate(date)}.
-          Locations will be recorded
-          separately for each work
-          session.
-        </p>
-      </div>
-
       {error && (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
         </div>
       )}
 
-      <Card>
+      <Card className="h-full">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+            <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+              Daily log
+            </div>
+
+            <h2 className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
               Daily context
-            </h3>
+            </h2>
 
             <p className="mt-1 text-sm leading-6 text-oxford-ash">
-              Coffee count applies
-              to the whole working
-              day. Work location is
-              recorded at session
-              level so one day can
-              include several places.
+              Record coffee for{' '}
+              {formatDate(
+                date
+              )}. Work location is
+              recorded separately
+              for each session.
             </p>
           </div>
 
@@ -114,7 +104,7 @@ export default function DailyLogSection({
 
         <form
           action={saveDailyLog}
-          className="mt-6"
+          className="mt-5"
         >
           <input
             type="hidden"
@@ -146,8 +136,8 @@ export default function DailyLogSection({
             />
 
             <p className="mt-1 text-xs text-oxford-ash">
-              Total number of coffees
-              consumed during the day.
+              Total coffees consumed
+              during the day.
             </p>
           </div>
 

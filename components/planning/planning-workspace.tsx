@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 import {
   useState,
 } from 'react'
@@ -739,9 +741,19 @@ export default function PlanningWorkspace({
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-medium text-oxford-blue">
-                            {title}
-                          </h2>
+                          {!isBlocked &&
+                          allocation.paper_id ? (
+                            <Link
+                              href={`/papers/${allocation.paper_id}`}
+                              className="font-medium text-oxford-blue transition hover:underline"
+                            >
+                              {title}
+                            </Link>
+                          ) : (
+                            <h2 className="font-medium text-oxford-blue">
+                              {title}
+                            </h2>
+                          )}
 
                           <span
                             className={

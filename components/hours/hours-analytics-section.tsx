@@ -2,586 +2,23 @@ import Link from 'next/link'
 
 import Card from '@/components/ui/card'
 
-type AnalyticsPeriod =
-  | 'day'
-  | 'week'
-  | 'month'
-  | 'year'
-
-type AnalyticsSession = {
-  id: string
-  start_time: string
-  end_time: string
-  place: string
-  paper_id: string | null
-  label_name: string
-  label_is_break: boolean
-  paper_short_title: string | null
-}
-
-type AnalyticsDailyLog = {
-  id: string
-  log_date: string
-  coffee_count: number
-  sessions: AnalyticsSession[]
-}
+import {
+  type AnalyticsPeriod,
+  type HoursAnalyticsDailyLog,
+  formatDuration,
+  formatPeriodLabel,
+  getActivityTotals,
+  getLocationTotals,
+  getPaperTotals,
+  getPeriodBounds,
+  summarisePeriod,
+} from '@/lib/hours/analytics'
 
 type HoursAnalyticsSectionProps = {
   selectedDate: string
   selectedPeriod: AnalyticsPeriod
-  logs: AnalyticsDailyLog[]
-}
-
-type PeriodSummary = {
-  grossMinutes: number
-  breakMinutes: number
-  netMinutes: number
-  coffeeCount: number
-  workingDays: number
-}
-
-type LocationSummary = {
-  grossMinutes: number
-  breakMinutes: number
-  netMinutes: number
-}
-
-function normaliseTime(
-  value: string
-) {
-  return value.slice(0, 5)
-}
-
-function timeToMinutes(
-  value: string
-) {
-  const [hours, minutes] =
-    normaliseTime(value)
-      .split(':')
-      .map(Number)
-
-  return hours * 60 + minutes
-}
-
-function getDurationMinutes(
-  startTime: string,
-  endTime: string
-) {
-  return (
-    timeToMinutes(endTime) -
-    timeToMinutes(startTime)
-  )
-}
-
-function parseDate(
-  value: string
-) {
-  const [year, month, day] =
-    value
-      .split('-')
-      .map(Number)
-
-  return new Date(
-    Date.UTC(
-      year,
-      month - 1,
-      day
-    )
-  )
-}
-
-function formatDateValue(
-  date: Date
-) {
-  return date
-    .toISOString()
-    .slice(0, 10)
-}
-
-function shiftDate(
-  value: string,
-  days: number
-) {
-  const date =
-    parseDate(value)
-
-  date.setUTCDate(
-    date.getUTCDate() +
-      days
-  )
-
-  return formatDateValue(
-    date
-  )
-}
-
-function getWeekStart(
-  value: string
-) {
-  const date =
-    parseDate(value)
-
-  const weekday =
-    date.getUTCDay()
-
-  const difference =
-    weekday === 0
-      ? -6
-      : 1 - weekday
-
-  return shiftDate(
-    value,
-    difference
-  )
-}
-
-function getWeekEnd(
-  value: string
-) {
-  return shiftDate(
-    getWeekStart(value),
-    6
-  )
-}
-
-function getMonthStart(
-  value: string
-) {
-  return `${value.slice(0, 7)}-01`
-}
-
-function getMonthEnd(
-  value: string
-) {
-  const [year, month] =
-    value
-      .split('-')
-      .map(Number)
-
-  const date =
-    new Date(
-      Date.UTC(
-        year,
-        month,
-        0
-      )
-    )
-
-  return formatDateValue(
-    date
-  )
-}
-
-function getYearStart(
-  value: string
-) {
-  return `${value.slice(0, 4)}-01-01`
-}
-
-function getYearEnd(
-  value: string
-) {
-  return `${value.slice(0, 4)}-12-31`
-}
-
-function getPeriodBounds(
-  date: string,
-  period: AnalyticsPeriod
-) {
-  switch (period) {
-    case 'day':
-      return {
-        start: date,
-        end: date,
-      }
-
-    case 'week':
-      return {
-        start:
-          getWeekStart(date),
-        end:
-          getWeekEnd(date),
-      }
-
-    case 'year':
-      return {
-        start:
-          getYearStart(date),
-        end:
-          getYearEnd(date),
-      }
-
-    case 'month':
-    default:
-      return {
-        start:
-          getMonthStart(date),
-        end:
-          getMonthEnd(date),
-      }
-  }
-}
-
-function formatDuration(
-  minutes: number
-) {
-  const hours =
-    Math.floor(
-      minutes / 60
-    )
-
-  const remainder =
-    minutes % 60
-
-  if (
-    hours > 0 &&
-    remainder > 0
-  ) {
-    return `${hours}h ${remainder}m`
-  }
-
-  if (hours > 0) {
-    return `${hours}h`
-  }
-
-  return `${remainder}m`
-}
-
-function formatPeriodLabel(
-  date: string,
-  period: AnalyticsPeriod
-) {
-  const parsed =
-    parseDate(date)
-
-  if (
-    period === 'day'
-  ) {
-    return new Intl.DateTimeFormat(
-      'en-GB',
-      {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }
-    ).format(parsed)
-  }
-
-  if (
-    period === 'week'
-  ) {
-    const start =
-      parseDate(
-        getWeekStart(date)
-      )
-
-    const end =
-      parseDate(
-        getWeekEnd(date)
-      )
-
-    const startLabel =
-      new Intl.DateTimeFormat(
-        'en-GB',
-        {
-          day: 'numeric',
-          month: 'short',
-        }
-      ).format(start)
-
-    const endLabel =
-      new Intl.DateTimeFormat(
-        'en-GB',
-        {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        }
-      ).format(end)
-
-    return `${startLabel} – ${endLabel}`
-  }
-
-  if (
-    period === 'year'
-  ) {
-    return date.slice(
-      0,
-      4
-    )
-  }
-
-  return new Intl.DateTimeFormat(
-    'en-GB',
-    {
-      month: 'long',
-      year: 'numeric',
-    }
-  ).format(parsed)
-}
-
-function isWithinPeriod(
-  date: string,
-  start: string,
-  end: string
-) {
-  return (
-    date >= start &&
-    date <= end
-  )
-}
-
-function summarisePeriod(
-  logs: AnalyticsDailyLog[],
-  start: string,
-  end: string
-): PeriodSummary {
-  let grossMinutes = 0
-  let breakMinutes = 0
-  let coffeeCount = 0
-  let workingDays = 0
-
-  for (const log of logs) {
-    if (
-      !isWithinPeriod(
-        log.log_date,
-        start,
-        end
-      )
-    ) {
-      continue
-    }
-
-    coffeeCount +=
-      log.coffee_count
-
-    if (
-      log.sessions.length > 0
-    ) {
-      workingDays += 1
-    }
-
-    for (const session of
-      log.sessions) {
-      const duration =
-        getDurationMinutes(
-          session.start_time,
-          session.end_time
-        )
-
-      grossMinutes +=
-        duration
-
-      if (
-        session.label_is_break
-      ) {
-        breakMinutes +=
-          duration
-      }
-    }
-  }
-
-  return {
-    grossMinutes,
-    breakMinutes,
-    netMinutes:
-      grossMinutes -
-      breakMinutes,
-    coffeeCount,
-    workingDays,
-  }
-}
-
-function getActivityTotals(
-  logs: AnalyticsDailyLog[],
-  start: string,
-  end: string
-) {
-  const totals =
-    new Map<
-      string,
-      number
-    >()
-
-  for (const log of logs) {
-    if (
-      !isWithinPeriod(
-        log.log_date,
-        start,
-        end
-      )
-    ) {
-      continue
-    }
-
-    for (const session of
-      log.sessions) {
-      const duration =
-        getDurationMinutes(
-          session.start_time,
-          session.end_time
-        )
-
-      totals.set(
-        session.label_name,
-        (totals.get(
-          session.label_name
-        ) ?? 0) +
-          duration
-      )
-    }
-  }
-
-  return [...totals.entries()]
-    .map(
-      ([name, minutes]) => ({
-        name,
-        minutes,
-      })
-    )
-    .sort(
-      (a, b) =>
-        b.minutes -
-        a.minutes
-    )
-}
-
-function getPaperTotals(
-  logs: AnalyticsDailyLog[],
-  start: string,
-  end: string
-) {
-  const totals =
-    new Map<
-      string,
-      number
-    >()
-
-  for (const log of logs) {
-    if (
-      !isWithinPeriod(
-        log.log_date,
-        start,
-        end
-      )
-    ) {
-      continue
-    }
-
-    for (const session of
-      log.sessions) {
-      if (
-        session.label_is_break
-      ) {
-        continue
-      }
-
-      const duration =
-        getDurationMinutes(
-          session.start_time,
-          session.end_time
-        )
-
-      const name =
-        session.paper_short_title ??
-        'Unassigned'
-
-      totals.set(
-        name,
-        (totals.get(
-          name
-        ) ?? 0) +
-          duration
-      )
-    }
-  }
-
-  return [...totals.entries()]
-    .map(
-      ([name, minutes]) => ({
-        name,
-        minutes,
-      })
-    )
-    .sort(
-      (a, b) =>
-        b.minutes -
-        a.minutes
-    )
-}
-
-function getLocationTotals(
-  logs: AnalyticsDailyLog[],
-  start: string,
-  end: string
-) {
-  const totals =
-    new Map<
-      string,
-      LocationSummary
-    >()
-
-  for (const log of logs) {
-    if (
-      !isWithinPeriod(
-        log.log_date,
-        start,
-        end
-      )
-    ) {
-      continue
-    }
-
-    for (const session of
-      log.sessions) {
-      const duration =
-        getDurationMinutes(
-          session.start_time,
-          session.end_time
-        )
-
-      const existing =
-        totals.get(
-          session.place
-        ) ?? {
-          grossMinutes: 0,
-          breakMinutes: 0,
-          netMinutes: 0,
-        }
-
-      existing.grossMinutes +=
-        duration
-
-      if (
-        session.label_is_break
-      ) {
-        existing.breakMinutes +=
-          duration
-      }
-
-      existing.netMinutes =
-        existing.grossMinutes -
-        existing.breakMinutes
-
-      totals.set(
-        session.place,
-        existing
-      )
-    }
-  }
-
-  return [...totals.entries()]
-    .map(
-      ([name, summary]) => ({
-        name,
-        ...summary,
-      })
-    )
-    .sort(
-      (a, b) =>
-        b.netMinutes -
-        a.netMinutes
-    )
+  logs:
+    HoursAnalyticsDailyLog[]
 }
 
 function BreakdownBar({
@@ -595,8 +32,10 @@ function BreakdownBar({
     maximum > 0
       ? Math.max(
           2,
-          (value /
-            maximum) *
+          (
+            value /
+            maximum
+          ) *
             100
         )
       : 0
@@ -648,16 +87,19 @@ export default function HoursAnalyticsSection({
       dayBounds.start,
       dayBounds.end
     ),
+
     week: summarisePeriod(
       logs,
       weekBounds.start,
       weekBounds.end
     ),
+
     month: summarisePeriod(
       logs,
       monthBounds.start,
       monthBounds.end
     ),
+
     year: summarisePeriod(
       logs,
       yearBounds.start,
@@ -766,7 +208,10 @@ export default function HoursAnalyticsSection({
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {periodCards.map(
-          ({ key, label }) => {
+          ({
+            key,
+            label,
+          }) => {
             const summary =
               summaries[key]
 

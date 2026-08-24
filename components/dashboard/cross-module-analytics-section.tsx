@@ -4,9 +4,18 @@ import Card from '@/components/ui/card'
 import ButtonLink from '@/components/ui/button-link'
 import { createClient } from '@/lib/supabase/server'
 
+import {
+  type MonthlySummary,
+  type TimeAnalyticsDailyLog,
+  formatDuration,
+  getDurationMinutes,
+  summariseMonths,
+} from '@/lib/hours/analytics'
+
 type DailyLogRow = {
   id: string
   log_date: string
+  coffee_count: number
 }
 
 type WorkSessionRow = {
@@ -63,16 +72,11 @@ type CrossModuleAnalyticsSectionProps = {
   year: number
 }
 
-type MonthlyStats = {
-  month: number
-  grossMinutes: number
-  breakMinutes: number
-  paperMinutes: number
-  unassignedMinutes: number
-  workingDates: Set<string>
-  researchDays: number
-  blockedDays: number
-}
+type MonthlyStats =
+  MonthlySummary & {
+    researchDays: number
+    blockedDays: number
+  }
 
 const MINUTES_PER_PLANNED_DAY =
   8 * 60
@@ -105,38 +109,6 @@ function getAmsterdamDate() {
   return `${values.year}-${values.month}-${values.day}`
 }
 
-function timeToMinutes(
-  value: string
-) {
-  const [
-    hours,
-    minutes,
-  ] = value
-    .slice(0, 5)
-    .split(':')
-    .map(Number)
-
-  return (
-    hours * 60 +
-    minutes
-  )
-}
-
-function getDurationMinutes(
-  startTime: string,
-  endTime: string
-) {
-  return Math.max(
-    0,
-    timeToMinutes(
-      endTime
-    ) -
-      timeToMinutes(
-        startTime
-      )
-  )
-}
-
 function getIsBreak(
   activityLabels:
     | {
@@ -158,35 +130,6 @@ function getIsBreak(
     label?.is_break ??
     false
   )
-}
-
-function formatDuration(
-  minutes: number
-) {
-  if (minutes === 0) {
-    return '0h'
-  }
-
-  const hours =
-    Math.floor(
-      minutes / 60
-    )
-
-  const remainder =
-    minutes % 60
-
-  if (
-    hours > 0 &&
-    remainder > 0
-  ) {
-    return `${hours}h ${remainder}m`
-  }
-
-  if (hours > 0) {
-    return `${hours}h`
-  }
-
-  return `${remainder}m`
 }
 
 function formatMonth(
@@ -244,7 +187,8 @@ export default async function CrossModuleAnalyticsSection({
       )
       .select(`
         id,
-        log_date
+        log_date,
+        coffee_count
       `)
       .gte(
         'log_date',
@@ -465,16 +409,6 @@ export default async function CrossModuleAnalyticsSection({
         []) as PlanningAllocationRow[]
   }
 
-  const logDateById =
-    new Map(
-      dailyLogs.map(
-        (log) => [
-          log.id,
-          log.log_date,
-        ]
-      )
-    )
-
   const periodStartById =
     new Map(
       planningPeriods.map(
@@ -485,99 +419,67 @@ export default async function CrossModuleAnalyticsSection({
       )
     )
 
-  const monthlyStats:
-    MonthlyStats[] =
-    Array.from(
-      {
-        length: 12,
-      },
-      (
-        _,
-        index
-      ) => ({
-        month:
-          index + 1,
-
-        grossMinutes:
-          0,
-
-        breakMinutes:
-          0,
-
-        paperMinutes:
-          0,
-
-        unassignedMinutes:
-          0,
-
-        workingDates:
-          new Set<string>(),
-
-        researchDays:
-          0,
-
-        blockedDays:
-          0,
-      })
-    )
+  const sessionsByLog =
+    new Map<
+      string,
+      TimeAnalyticsDailyLog['sessions']
+    >()
 
   for (const session of
     workSessions) {
-    const date =
-      logDateById.get(
+    const existing =
+      sessionsByLog.get(
         session.daily_log_id
-      )
+      ) ?? []
 
-    if (!date) {
-      continue
-    }
-
-    const month =
-      Number(
-        date.slice(
-          5,
-          7
-        )
-      )
-
-    const stats =
-      monthlyStats[
-        month - 1
-      ]
-
-    const duration =
-      getDurationMinutes(
+    existing.push({
+      start_time:
         session.start_time,
-        session.end_time
-      )
+      end_time:
+        session.end_time,
+      paper_id:
+        session.paper_id,
+      label_is_break:
+        getIsBreak(
+          session.activity_labels
+        ),
+    })
 
-    const isBreak =
-      getIsBreak(
-        session.activity_labels
-      )
+    sessionsByLog.set(
+      session.daily_log_id,
+      existing
+    )
+  }
 
-    stats.grossMinutes +=
-      duration
-
-    stats.workingDates.add(
-      date
+  const analyticsLogs:
+    TimeAnalyticsDailyLog[] =
+    dailyLogs.map(
+      (log) => ({
+        id:
+          log.id,
+        log_date:
+          log.log_date,
+        coffee_count:
+          log.coffee_count,
+        sessions:
+          sessionsByLog.get(
+            log.id
+          ) ?? [],
+      })
     )
 
-    if (isBreak) {
-      stats.breakMinutes +=
-        duration
-
-      continue
-    }
-
-    if (session.paper_id) {
-      stats.paperMinutes +=
-        duration
-    } else {
-      stats.unassignedMinutes +=
-        duration
-    }
-  }
+  const monthlyStats:
+    MonthlyStats[] =
+    summariseMonths(
+      analyticsLogs,
+      year
+    ).map(
+      (month) => ({
+        ...month,
+        researchDays: 0,
+        blockedDays: 0,
+      })
+    )
 
   for (const allocation of
     planningAllocations) {
@@ -603,6 +505,10 @@ export default async function CrossModuleAnalyticsSection({
         month - 1
       ]
 
+    if (!stats) {
+      continue
+    }
+
     if (
       allocation.allocation_type ===
       'paper'
@@ -615,31 +521,16 @@ export default async function CrossModuleAnalyticsSection({
     }
   }
 
-  const annualGrossMinutes =
-    monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
-        total +
-        month.grossMinutes,
-      0
-    )
-
-  const annualBreakMinutes =
-    monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
-        total +
-        month.breakMinutes,
-      0
-    )
-
   const annualNetMinutes =
-    annualGrossMinutes -
-    annualBreakMinutes
+    monthlyStats.reduce(
+      (
+        total,
+        month
+      ) =>
+        total +
+        month.netMinutes,
+      0
+    )
 
   const annualPaperMinutes =
     monthlyStats.reduce(
@@ -692,7 +583,7 @@ export default async function CrossModuleAnalyticsSection({
         month
       ) =>
         total +
-        month.workingDates.size,
+        month.workingDays,
       0
     )
 
@@ -709,8 +600,7 @@ export default async function CrossModuleAnalyticsSection({
       1,
       ...monthlyStats.map(
         (month) =>
-          month.grossMinutes -
-          month.breakMinutes
+          month.netMinutes
       )
     )
 
@@ -1004,13 +894,9 @@ export default async function CrossModuleAnalyticsSection({
           <div className="mt-5 space-y-3">
             {monthlyStats.map(
               (month) => {
-                const netMinutes =
-                  month.grossMinutes -
-                  month.breakMinutes
-
                 const width =
                   (
-                    netMinutes /
+                    month.netMinutes /
                     maxMonthlyNetMinutes
                   ) *
                   100
@@ -1031,7 +917,7 @@ export default async function CrossModuleAnalyticsSection({
 
                     <div className="text-right text-sm font-medium text-oxford-blue">
                       {formatDuration(
-                        netMinutes
+                        month.netMinutes
                       )}
                     </div>
 
@@ -1046,9 +932,7 @@ export default async function CrossModuleAnalyticsSection({
 
                     <div className="text-right text-xs text-oxford-ash">
                       {
-                        month
-                          .workingDates
-                          .size
+                        month.workingDays
                       }{' '}
                       days
                     </div>

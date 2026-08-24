@@ -6,6 +6,17 @@ import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
 import { createClient } from '@/lib/supabase/server'
 
+import {
+  type TimeAnalyticsDailyLog,
+  formatDuration,
+  getMonthEnd,
+  getMonthStart,
+  getWeekEnd,
+  getWeekStart,
+  parseDate,
+  summarisePeriod,
+} from '@/lib/hours/analytics'
+
 type PaperStatus =
   | 'writing'
   | 'under-review'
@@ -103,110 +114,6 @@ function getAmsterdamDate() {
   return `${values.year}-${values.month}-${values.day}`
 }
 
-function parseDate(
-  value: string
-) {
-  const [
-    year,
-    month,
-    day,
-  ] = value
-    .split('-')
-    .map(Number)
-
-  return new Date(
-    Date.UTC(
-      year,
-      month - 1,
-      day
-    )
-  )
-}
-
-function formatDateValue(
-  date: Date
-) {
-  return date
-    .toISOString()
-    .slice(0, 10)
-}
-
-function shiftDate(
-  value: string,
-  days: number
-) {
-  const date =
-    parseDate(value)
-
-  date.setUTCDate(
-    date.getUTCDate() +
-      days
-  )
-
-  return formatDateValue(
-    date
-  )
-}
-
-function getWeekStart(
-  value: string
-) {
-  const date =
-    parseDate(value)
-
-  const weekday =
-    date.getUTCDay()
-
-  const difference =
-    weekday === 0
-      ? -6
-      : 1 - weekday
-
-  return shiftDate(
-    value,
-    difference
-  )
-}
-
-function getWeekEnd(
-  value: string
-) {
-  return shiftDate(
-    getWeekStart(value),
-    6
-  )
-}
-
-function getMonthStart(
-  value: string
-) {
-  return `${value.slice(
-    0,
-    7
-  )}-01`
-}
-
-function getMonthEnd(
-  value: string
-) {
-  const [
-    year,
-    month,
-  ] = value
-    .split('-')
-    .map(Number)
-
-  return formatDateValue(
-    new Date(
-      Date.UTC(
-        year,
-        month,
-        0
-      )
-    )
-  )
-}
-
 function getPlanningPeriodStart(
   value: string
 ) {
@@ -227,13 +134,13 @@ function getPlanningPeriodStart(
 function getPlanningPeriodEnd(
   periodStart: string
 ) {
-  const [
-    year,
-    month,
-    day,
-  ] = periodStart
-    .split('-')
-    .map(Number)
+  const day =
+    Number(
+      periodStart.slice(
+        8,
+        10
+      )
+    )
 
   if (day === 1) {
     return `${periodStart.slice(
@@ -242,76 +149,32 @@ function getPlanningPeriodEnd(
     )}15`
   }
 
-  return formatDateValue(
-    new Date(
-      Date.UTC(
-        year,
-        month,
-        0
-      )
-    )
+  return getMonthEnd(
+    periodStart
   )
 }
 
-function timeToMinutes(
-  value: string
+function getIsBreak(
+  activityLabels:
+    | {
+        is_break: boolean
+      }
+    | {
+        is_break: boolean
+      }[]
+    | null
 ) {
-  const [
-    hours,
-    minutes,
-  ] = value
-    .slice(0, 5)
-    .split(':')
-    .map(Number)
+  const label =
+    Array.isArray(
+      activityLabels
+    )
+      ? activityLabels[0]
+      : activityLabels
 
   return (
-    hours * 60 +
-    minutes
+    label?.is_break ??
+    false
   )
-}
-
-function getDurationMinutes(
-  startTime: string,
-  endTime: string
-) {
-  return Math.max(
-    0,
-    timeToMinutes(
-      endTime
-    ) -
-      timeToMinutes(
-        startTime
-      )
-  )
-}
-
-function formatDuration(
-  minutes: number
-) {
-  if (minutes === 0) {
-    return '0h'
-  }
-
-  const hours =
-    Math.floor(
-      minutes / 60
-    )
-
-  const remainder =
-    minutes % 60
-
-  if (
-    hours > 0 &&
-    remainder > 0
-  ) {
-    return `${hours}h ${remainder}m`
-  }
-
-  if (hours > 0) {
-    return `${hours}h`
-  }
-
-  return `${remainder}m`
 }
 
 function formatSignedDuration(
@@ -504,6 +367,121 @@ function getPlanningTone(
       'Overcommitted',
     className:
       'border-orange-300 bg-orange-100 text-orange-900',
+  }
+}
+
+function getWorkloadPresentation(
+  grossMinutes: number
+) {
+  const hours =
+    grossMinutes /
+    60
+
+  if (hours < 30) {
+    return {
+      label:
+        'Below range',
+      className:
+        'border-orange-200 bg-orange-50',
+      headingClass:
+        'text-orange-800',
+      valueClass:
+        'text-orange-900',
+      detailClass:
+        'text-orange-800',
+    }
+  }
+
+  if (hours < 40) {
+    return {
+      label:
+        'Approaching range',
+      className:
+        'border-yellow-200 bg-yellow-50',
+      headingClass:
+        'text-yellow-800',
+      valueClass:
+        'text-yellow-900',
+      detailClass:
+        'text-yellow-800',
+    }
+  }
+
+  if (hours < 60) {
+    return {
+      label:
+        'Within range',
+      className:
+        'border-green-200 bg-green-50',
+      headingClass:
+        'text-green-800',
+      valueClass:
+        'text-green-900',
+      detailClass:
+        'text-green-800',
+    }
+  }
+
+  if (hours < 90) {
+    return {
+      label:
+        'Above range',
+      className:
+        'border-yellow-200 bg-yellow-50',
+      headingClass:
+        'text-yellow-800',
+      valueClass:
+        'text-yellow-900',
+      detailClass:
+        'text-yellow-800',
+    }
+  }
+
+  return {
+    label:
+      'Very high',
+    className:
+      'border-orange-200 bg-orange-50',
+    headingClass:
+      'text-orange-800',
+    valueClass:
+      'text-orange-900',
+    detailClass:
+      'text-orange-800',
+  }
+}
+
+function getCoffeePresentation(
+  highCoffeeDays: number
+) {
+  if (
+    highCoffeeDays >= 3
+  ) {
+    return {
+      label:
+        'High frequency',
+      className:
+        'border-orange-200 bg-orange-50',
+      headingClass:
+        'text-orange-800',
+      valueClass:
+        'text-orange-900',
+      detailClass:
+        'text-orange-800',
+    }
+  }
+
+  return {
+    label:
+      'Within range',
+    className:
+      'border-green-200 bg-green-50',
+    headingClass:
+      'text-green-800',
+    valueClass:
+      'text-green-900',
+    detailClass:
+      'text-green-800',
   }
 }
 
@@ -816,122 +794,115 @@ export default async function DashboardPage({
         []) as PlanningAllocationRow[]
   }
 
-  const logDateById =
-    new Map(
-      dailyLogs.map(
-        (log) => [
-          log.id,
-          log.log_date,
-        ]
-      )
-    )
-
-  let weekGrossMinutes = 0
-  let weekBreakMinutes = 0
-  let monthGrossMinutes = 0
-  let monthBreakMinutes = 0
-  let periodPaperMinutes = 0
-
-  const weekWorkingDates =
-    new Set<string>()
+  const sessionsByLog =
+    new Map<
+      string,
+      TimeAnalyticsDailyLog['sessions']
+    >()
 
   for (const session of
     workSessions) {
-    const date =
-      logDateById.get(
+    const existing =
+      sessionsByLog.get(
         session.daily_log_id
-      )
+      ) ?? []
 
-    if (!date) {
-      continue
-    }
-
-    const duration =
-      getDurationMinutes(
+    existing.push({
+      start_time:
         session.start_time,
-        session.end_time
-      )
+      end_time:
+        session.end_time,
+      paper_id:
+        session.paper_id,
+      label_is_break:
+        getIsBreak(
+          session.activity_labels
+        ),
+    })
 
-    const label =
-      Array.isArray(
-        session.activity_labels
-      )
-        ? session
-            .activity_labels[0]
-        : session.activity_labels
-
-    const isBreak =
-      label?.is_break ??
-      false
-
-    if (
-      date >= weekStart &&
-      date <= weekEnd
-    ) {
-      weekGrossMinutes +=
-        duration
-
-      if (isBreak) {
-        weekBreakMinutes +=
-          duration
-      }
-
-      weekWorkingDates.add(
-        date
-      )
-    }
-
-    if (
-      date >= monthStart &&
-      date <= monthEnd
-    ) {
-      monthGrossMinutes +=
-        duration
-
-      if (isBreak) {
-        monthBreakMinutes +=
-          duration
-      }
-    }
-
-    if (
-      date >=
-        planningPeriodStart &&
-      date <=
-        planningPeriodEnd &&
-      session.paper_id
-    ) {
-      periodPaperMinutes +=
-        duration
-    }
+    sessionsByLog.set(
+      session.daily_log_id,
+      existing
+    )
   }
 
+  const analyticsLogs:
+    TimeAnalyticsDailyLog[] =
+    dailyLogs.map(
+      (log) => ({
+        id:
+          log.id,
+        log_date:
+          log.log_date,
+        coffee_count:
+          log.coffee_count,
+        sessions:
+          sessionsByLog.get(
+            log.id
+          ) ?? [],
+      })
+    )
+
+  const weekSummary =
+    summarisePeriod(
+      analyticsLogs,
+      weekStart,
+      weekEnd
+    )
+
+  const monthSummary =
+    summarisePeriod(
+      analyticsLogs,
+      monthStart,
+      monthEnd
+    )
+
+  const planningSummary =
+    summarisePeriod(
+      analyticsLogs,
+      planningPeriodStart,
+      planningPeriodEnd
+    )
+
+  const weekGrossMinutes =
+    weekSummary.grossMinutes
+
+  const weekBreakMinutes =
+    weekSummary.breakMinutes
+
   const weekNetMinutes =
-    weekGrossMinutes -
-    weekBreakMinutes
+    weekSummary.netMinutes
 
   const monthNetMinutes =
-    monthGrossMinutes -
-    monthBreakMinutes
+    monthSummary.netMinutes
+
+  const monthBreakMinutes =
+    monthSummary.breakMinutes
+
+  const periodPaperMinutes =
+    planningSummary.paperMinutes
+
+  const weekDailyLogs =
+    dailyLogs.filter(
+      (log) =>
+        log.log_date >=
+          weekStart &&
+        log.log_date <=
+          weekEnd
+    )
+
+  const weekLoggedDays =
+    weekDailyLogs.length
 
   const weekCoffees =
-    dailyLogs
-      .filter(
-        (log) =>
-          log.log_date >=
-            weekStart &&
-          log.log_date <=
-            weekEnd
-      )
-      .reduce(
-        (
-          total,
-          log
-        ) =>
-          total +
-          log.coffee_count,
-        0
-      )
+    weekSummary.coffeeCount
+
+  const highCoffeeDays =
+    weekDailyLogs.filter(
+      (log) =>
+        log.coffee_count >
+        6
+    ).length
 
   const researchDays =
     planningAllocations
@@ -971,29 +942,47 @@ export default async function DashboardPage({
     researchDays +
     blockedDays
 
+  const researchPlannedMinutes =
+    researchDays *
+    MINUTES_PER_PLANNED_DAY
+
+  const blockedPlannedMinutes =
+    blockedDays *
+    MINUTES_PER_PLANNED_DAY
+
+  const totalPlannedMinutes =
+    totalPlannedDays *
+    MINUTES_PER_PLANNED_DAY
+
   const flowsavvyCount =
     planningAllocations.filter(
       (allocation) =>
         allocation.flowsavvy_added
     ).length
 
-  const plannedResearchMinutes =
-    researchDays *
-    MINUTES_PER_PLANNED_DAY
-
   const researchGapMinutes =
     periodPaperMinutes -
-    plannedResearchMinutes
+    researchPlannedMinutes
 
   const gapPresentation =
     getGapPresentation(
-      plannedResearchMinutes,
+      researchPlannedMinutes,
       periodPaperMinutes
     )
 
   const planningTone =
     getPlanningTone(
       totalPlannedDays
+    )
+
+  const workloadPresentation =
+    getWorkloadPresentation(
+      weekGrossMinutes
+    )
+
+  const coffeePresentation =
+    getCoffeePresentation(
+      highCoffeeDays
     )
 
   const reviewRevisionCount =
@@ -1159,7 +1148,7 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      <div className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Active papers
@@ -1192,10 +1181,10 @@ export default async function DashboardPage({
 
           <div className="mt-1 text-xs text-oxford-ash">
             {
-              weekWorkingDates.size
+              weekSummary.workingDays
             }{' '}
             working{' '}
-            {weekWorkingDates.size ===
+            {weekSummary.workingDays ===
             1
               ? 'day'
               : 'days'}{' '}
@@ -1229,20 +1218,132 @@ export default async function DashboardPage({
           </div>
 
           <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {
-              totalPlannedDays
-            }
-            d
+            {formatDuration(
+              totalPlannedMinutes
+            )}
           </div>
 
           <div className="mt-1 text-xs text-oxford-ash">
             Research{' '}
-            {researchDays}d ·
-            Blocked{' '}
-            {blockedDays}d
+            {formatDuration(
+              researchPlannedMinutes
+            )}{' '}
+            · Blocked{' '}
+            {formatDuration(
+              blockedPlannedMinutes
+            )}
           </div>
         </div>
       </div>
+
+      <section className="mb-8">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="font-serif text-lg font-semibold text-oxford-blue">
+              Weekly signals
+            </h2>
+
+            <p className="mt-1 text-xs text-oxford-ash">
+              Monday–Sunday ·{' '}
+              {formatDate(
+                weekStart
+              )}{' '}
+              –{' '}
+              {formatDate(
+                weekEnd
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div
+            className={`rounded-lg border px-4 py-4 ${workloadPresentation.className}`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div
+                  className={`text-xs font-medium uppercase tracking-wide ${workloadPresentation.headingClass}`}
+                >
+                  Gross workload
+                </div>
+
+                <div
+                  className={`mt-1 font-serif text-2xl font-semibold ${workloadPresentation.valueClass}`}
+                >
+                  {formatDuration(
+                    weekGrossMinutes
+                  )}
+                </div>
+              </div>
+
+              <span
+                className={`rounded-full border border-current/20 px-2.5 py-1 text-xs font-medium ${workloadPresentation.headingClass}`}
+              >
+                {
+                  workloadPresentation.label
+                }
+              </span>
+            </div>
+
+            <div
+              className={`mt-2 text-xs ${workloadPresentation.detailClass}`}
+            >
+              Reference: 40–59h
+              green · 30–39h or
+              60–89h yellow ·
+              below 30h or 90h+
+              orange
+            </div>
+          </div>
+
+          <div
+            className={`rounded-lg border px-4 py-4 ${coffeePresentation.className}`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div
+                  className={`text-xs font-medium uppercase tracking-wide ${coffeePresentation.headingClass}`}
+                >
+                  Coffee
+                </div>
+
+                <div
+                  className={`mt-1 font-serif text-2xl font-semibold ${coffeePresentation.valueClass}`}
+                >
+                  {weekCoffees}{' '}
+                  coffees
+                </div>
+              </div>
+
+              <span
+                className={`rounded-full border border-current/20 px-2.5 py-1 text-xs font-medium ${coffeePresentation.headingClass}`}
+              >
+                {
+                  coffeePresentation.label
+                }
+              </span>
+            </div>
+
+            <div
+              className={`mt-2 text-xs ${coffeePresentation.detailClass}`}
+            >
+              {weekCoffees}{' '}
+              coffees ·{' '}
+              {weekLoggedDays}{' '}
+              logged{' '}
+              {weekLoggedDays === 1
+                ? 'day'
+                : 'days'}{' '}
+              · {highCoffeeDays}{' '}
+              {highCoffeeDays === 1
+                ? 'day'
+                : 'days'}{' '}
+              above 6
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-lg border border-oxford-stone bg-white p-5">
@@ -1276,10 +1377,9 @@ export default async function DashboardPage({
               </div>
 
               <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                {
-                  researchDays
-                }
-                d
+                {formatDuration(
+                  researchPlannedMinutes
+                )}
               </div>
             </div>
 
@@ -1289,10 +1389,9 @@ export default async function DashboardPage({
               </div>
 
               <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                {
-                  blockedDays
-                }
-                d
+                {formatDuration(
+                  blockedPlannedMinutes
+                )}
               </div>
             </div>
 
@@ -1369,7 +1468,7 @@ export default async function DashboardPage({
 
               <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
                 {formatDuration(
-                  plannedResearchMinutes
+                  researchPlannedMinutes
                 )}
               </div>
             </div>
@@ -1483,10 +1582,10 @@ export default async function DashboardPage({
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-oxford-ash">
             <span>
               {
-                weekWorkingDates.size
+                weekSummary.workingDays
               }{' '}
               working{' '}
-              {weekWorkingDates.size ===
+              {weekSummary.workingDays ===
               1
                 ? 'day'
                 : 'days'}

@@ -20,11 +20,34 @@ export default async function ProtectedLayout({
   if (error || !data?.claims) {
     redirect('/login')
   }
+  
+  const userId =
+  typeof data.claims.sub === 'string'
+    ? data.claims.sub
+    : ''
 
-  const email =
-    typeof data.claims.email === 'string'
-      ? data.claims.email
-      : ''
+  let fullName = ''
+
+  if (userId) {
+    const {
+      data: profile,
+      error: profileError,
+    } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profileError) {
+      throw new Error(
+        `Could not load profile: ${profileError.message}`
+      )
+    }
+
+    fullName =
+      profile?.full_name?.trim() ??
+      ''
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">
@@ -56,9 +79,9 @@ export default async function ProtectedLayout({
               <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
 
               <div className="flex items-center gap-3">
-                {email && (
+                {fullName && (
                   <span className="hidden text-sm text-oxford-ash xl:inline">
-                    {email}
+                    {fullName}
                   </span>
                 )}
 

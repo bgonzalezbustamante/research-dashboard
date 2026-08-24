@@ -1,5 +1,71 @@
 # CHANGELOG
 
+## v0.1.0-beta.2 "Ember Orchard"
+
+### Summary
+
+- Unified working-time aggregation across the Hours module and Dashboard analytics.
+- Added weekly workload and coffee signals to the Dashboard.
+- Changed Dashboard planning indicators to display hours using 1 planned day = 8 hours.
+- Added direct links from Planning allocations to their corresponding paper workspaces.
+- Changed the authenticated navigation identity from email to the profile full name.
+- Refined the Working Hours layout so Selected day and Daily log appear side by side above Work sessions.
+- Added local Supabase CLI configuration through `supabase/config.toml`.
+
+### Code changes
+
+`working hours`
+
+- Centralised day, week, month, and year aggregation logic in shared analytics utilities.
+- Kept Gross, Break, Net, paper-linked, unassigned, coffee, and working-day definitions consistent across modules.
+- Reorganised the top of the Hours page so Selected day and Daily log share one responsive row.
+- Simplified the Daily log presentation by keeping daily-context information within its card.
+
+`dashboard and analytics`
+
+- Reused the shared Hours aggregation logic for monthly workload and period summaries.
+- Added Monday–Sunday gross-workload traffic-light indicators:
+  - below 30 hours: orange
+  - 30–39 hours: yellow
+  - 40–59 hours: green
+  - 60–89 hours: yellow
+  - 90 hours or more: orange
+- Added a weekly coffee signal based on the number of logged days exceeding six coffees:
+  - zero to two days: green
+  - three or more days: orange
+- Changed current planning indicators from committed days to hours using an 8-hour planned working day.
+- Retained monthly workload as net recorded working hours.
+
+`planning`
+
+- Added direct navigation from paper allocations to the associated paper workspace.
+- Kept blocked-time allocations as non-linked planning entries.
+
+`authentication and navigation`
+
+- Changed the signed-in user identifier in the navigation from email address to `profiles.full_name`.
+
+`development and database`
+
+- Added `supabase/config.toml` for local Supabase CLI configuration.
+- Kept secrets outside version control through environment-variable references.
+- Retained reproducible schema migrations and full local-database reconstruction as future work.
+
+### Notes
+
+- This release remains a single-owner beta.
+- Phase F collaboration, coauthor access, and paper-level permissions remain deferred.
+- Application data remain stored in Supabase and are not committed to the repository.
+- The web application remains authenticated even if the source-code repository is public.
+- Institutional branding assets remain subject to their respective rights and are not covered by any repository licence.
+
+### Roadmap
+
+- Add reproducible Supabase schema migrations and local development workflow.
+- Add Phase F collaboration, coauthor access, and paper-level permissions.
+
+---
+
 ## v0.1.0-beta.1 "Ember Willow"
 
 ### Summary

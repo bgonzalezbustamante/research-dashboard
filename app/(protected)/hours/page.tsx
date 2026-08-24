@@ -544,11 +544,11 @@ export default async function HoursPage({
         description="Record and analyse daily work, breaks, activities, locations, papers, and coffee."
       />
 
-      <section
-        aria-label="Date selection"
-        className="mb-8 rounded-lg border border-oxford-stone bg-white p-4"
-      >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <section
+          aria-label="Date selection"
+          className="h-full rounded-lg border border-oxford-stone bg-white p-4"
+        >
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
               Selected day
@@ -561,7 +561,7 @@ export default async function HoursPage({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <Link
               href={`/hours?date=${previousDate}&period=${selectedPeriod}`}
               className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal transition hover:bg-oxford-shell hover:text-oxford-blue"
@@ -583,67 +583,67 @@ export default async function HoursPage({
               Next →
             </Link>
           </div>
-        </div>
 
-        <form
-          method="get"
-          className="mt-4 flex flex-col gap-3 border-t border-oxford-stone pt-4 sm:flex-row sm:items-end"
-        >
-          <input
-            type="hidden"
-            name="period"
-            value={
-              selectedPeriod
-            }
-          />
-
-          <div>
-            <label
-              htmlFor="hours-date"
-              className="mb-1 block text-sm font-medium text-oxford-charcoal"
-            >
-              Go to date
-            </label>
-
-            <input
-              id="hours-date"
-              name="date"
-              type="date"
-              defaultValue={
-                selectedDate
-              }
-              className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            variant="secondary"
+          <form
+            method="get"
+            className="mt-4 flex flex-col gap-3 border-t border-oxford-stone pt-4 sm:flex-row sm:items-end"
           >
-            Go
-          </Button>
-        </form>
-      </section>
-
-      <DailyLogSection
-        key={selectedDate}
-        date={
-          selectedDate
-        }
-        log={
-          selectedDailyLog
-            ? {
-                id:
-                  selectedDailyLog.id,
-                coffee_count:
-                  selectedDailyLog.coffee_count,
+            <input
+              type="hidden"
+              name="period"
+              value={
+                selectedPeriod
               }
-            : null
-        }
-        error={
-          params.dailyError
-        }
-      />
+            />
+
+            <div>
+              <label
+                htmlFor="hours-date"
+                className="mb-1 block text-sm font-medium text-oxford-charcoal"
+              >
+                Go to date
+              </label>
+
+              <input
+                id="hours-date"
+                name="date"
+                type="date"
+                defaultValue={
+                  selectedDate
+                }
+                className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              variant="secondary"
+            >
+              Go
+            </Button>
+          </form>
+        </section>
+
+        <DailyLogSection
+          key={selectedDate}
+          date={
+            selectedDate
+          }
+          log={
+            selectedDailyLog
+              ? {
+                  id:
+                    selectedDailyLog.id,
+                  coffee_count:
+                    selectedDailyLog.coffee_count,
+                }
+              : null
+          }
+          error={
+            params.dailyError
+          }
+        />
+      </div>
 
       <WorkSessionsSection
         date={
