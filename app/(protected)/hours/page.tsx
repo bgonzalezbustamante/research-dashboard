@@ -538,7 +538,7 @@ export default async function HoursPage({
     )
 
   return (
-    <div>
+    <div className="flex flex-col [&>#location-labels]:order-last">
       <PageHeader
         title="Working Hours"
         description="Record and analyse daily work, breaks, activities, locations, papers, and coffee."

@@ -6,8 +6,8 @@ import { useState } from 'react'
 import {
   createPlanningAllocation,
   deletePlanningAllocation,
-  updatePlanningAllocation,
 } from '@/app/(protected)/planning/actions'
+import { updatePlanningAllocationWithPeriod } from '@/app/(protected)/planning/update-allocation-action'
 
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
@@ -121,6 +121,117 @@ function getAllocationPresentation(
   return 'border-orange-200 bg-orange-50 text-orange-800'
 }
 
+function getPeriodEnd(
+  periodStart: string
+) {
+  const [year, month, day] =
+    periodStart
+      .split('-')
+      .map(Number)
+
+  if (day === 1) {
+    return `${periodStart.slice(
+      0,
+      8
+    )}15`
+  }
+
+  return new Date(
+    Date.UTC(
+      year,
+      month,
+      0
+    )
+  )
+    .toISOString()
+    .slice(0, 10)
+}
+
+function formatPeriodOption(
+  periodStart: string
+) {
+  const periodEnd =
+    getPeriodEnd(periodStart)
+
+  const startDay = Number(
+    periodStart.slice(8, 10)
+  )
+
+  const endDay = Number(
+    periodEnd.slice(8, 10)
+  )
+
+  const [year, month] =
+    periodStart
+      .split('-')
+      .map(Number)
+
+  const monthLabel =
+    new Intl.DateTimeFormat(
+      'en-GB',
+      {
+        month: 'long',
+        year: 'numeric',
+      }
+    ).format(
+      new Date(
+        Date.UTC(
+          year,
+          month - 1,
+          1
+        )
+      )
+    )
+
+  return `${startDay}–${endDay} ${monthLabel}`
+}
+
+function getPeriodOptions(
+  periodStart: string
+) {
+  const selectedYear = Number(
+    periodStart.slice(0, 4)
+  )
+
+  const options: {
+    value: string
+    label: string
+  }[] = []
+
+  for (
+    let year = selectedYear - 1;
+    year <= selectedYear + 1;
+    year += 1
+  ) {
+    for (
+      let month = 1;
+      month <= 12;
+      month += 1
+    ) {
+      const monthString = String(
+        month
+      ).padStart(2, '0')
+
+      for (const day of [1, 16]) {
+        const dayString = String(
+          day
+        ).padStart(2, '0')
+
+        const value =
+          `${year}-${monthString}-${dayString}`
+
+        options.push({
+          value,
+          label:
+            formatPeriodOption(value),
+        })
+      }
+    }
+  }
+
+  return options
+}
+
 export default function PlanningWorkspace({
   periodStart,
   periodEnd,
@@ -183,6 +294,9 @@ export default function PlanningWorkspace({
   const canAdd =
     availablePapers.length > 0 ||
     availableBlockedOptions.length > 0
+
+  const periodOptions =
+    getPeriodOptions(periodStart)
 
   return (
     <section
@@ -545,7 +659,7 @@ export default function PlanningWorkspace({
 
                           <form
                             action={
-                              updatePlanningAllocation
+                              updatePlanningAllocationWithPeriod
                             }
                             className="mt-3 space-y-3"
                           >
@@ -560,6 +674,33 @@ export default function PlanningWorkspace({
                               name="allocation_id"
                               value={allocation.id}
                             />
+
+                            <div>
+                              <label
+                                htmlFor={`planning-period-${allocation.id}`}
+                                className={labelClass}
+                              >
+                                Period
+                              </label>
+
+                              <select
+                                id={`planning-period-${allocation.id}`}
+                                name="target_period_start"
+                                defaultValue={periodStart}
+                                className={inputClass}
+                              >
+                                {periodOptions.map(
+                                  (option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  )
+                                )}
+                              </select>
+                            </div>
 
                             <div>
                               <label
