@@ -23,6 +23,24 @@ function isMutationForm(
   return method !== 'get'
 }
 
+function isCoauthorEditableForm(
+  form: HTMLFormElement
+) {
+  return (
+    form.dataset.coauthorEditable ===
+    'true'
+  )
+}
+
+function shouldHideForm(
+  form: HTMLFormElement
+) {
+  return (
+    isMutationForm(form) &&
+    !isCoauthorEditableForm(form)
+  )
+}
+
 function applyReadOnlyMode() {
   const main =
     document.querySelector('main')
@@ -36,7 +54,7 @@ function applyReadOnlyMode() {
       'form'
     )
     .forEach((form) => {
-      if (!isMutationForm(form)) {
+      if (!shouldHideForm(form)) {
         return
       }
 
@@ -66,14 +84,14 @@ function applyReadOnlyMode() {
       'details'
     )
     .forEach((details) => {
-      const hasMutationForm =
+      const hasHiddenMutationForm =
         Array.from(
           details.querySelectorAll<HTMLFormElement>(
             'form'
           )
-        ).some(isMutationForm)
+        ).some(shouldHideForm)
 
-      if (hasMutationForm) {
+      if (hasHiddenMutationForm) {
         details.open = false
         details.hidden = true
         details.setAttribute(

@@ -5,6 +5,19 @@ import {
   type NextRequest,
 } from 'next/server'
 
+function isDashboardOnlyPath(
+  pathname: string
+) {
+  return (
+    pathname === '/dashboard' ||
+    pathname.startsWith('/dashboard/') ||
+    pathname === '/hours' ||
+    pathname.startsWith('/hours/') ||
+    pathname === '/planning' ||
+    pathname.startsWith('/planning/')
+  )
+}
+
 export async function updateSession(
   request: NextRequest
 ) {
@@ -101,6 +114,42 @@ export async function updateSession(
         siteUrl
       )
     )
+  }
+
+  const userId =
+    user?.sub
+
+  if (
+    typeof userId === 'string' &&
+    isDashboardOnlyPath(
+      request.nextUrl.pathname
+    )
+  ) {
+    const {
+      data: dashboardMembership,
+      error: membershipError,
+    } = await supabase
+      .from('dashboard_members')
+      .select('role')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (
+      !membershipError &&
+      !dashboardMembership
+    ) {
+      const siteUrl =
+        process.env
+          .NEXT_PUBLIC_SITE_URL ??
+        request.nextUrl.origin
+
+      return NextResponse.redirect(
+        new URL(
+          '/papers',
+          siteUrl
+        )
+      )
+    }
   }
 
   return supabaseResponse

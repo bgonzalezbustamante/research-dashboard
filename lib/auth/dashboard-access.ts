@@ -6,6 +6,16 @@ export type DashboardRole =
   | 'owner'
   | 'viewer'
 
+export type AppAccess = {
+  userId: string
+  dashboardOwnerId: string | null
+  dashboardRole: DashboardRole | null
+  hasDashboardAccess: boolean
+  canEditDashboard: boolean
+  hasPaperAccess: boolean
+  hasCoauthorAccess: boolean
+}
+
 export type DashboardAccess = {
   userId: string
   ownerId: string
@@ -13,7 +23,7 @@ export type DashboardAccess = {
   canEdit: boolean
 }
 
-export async function requireDashboardAccess(): Promise<DashboardAccess> {
+async function requireAuthenticatedUser() {
   const supabase =
     await createClient()
 
@@ -30,41 +40,119 @@ export async function requireDashboardAccess(): Promise<DashboardAccess> {
     redirect('/login')
   }
 
-  const {
-    data: membership,
-    error: membershipError,
-  } = await supabase
-    .from('dashboard_members')
-    .select('owner_id, role')
-    .eq('user_id', userId)
-    .maybeSingle()
+  return {
+    supabase,
+    userId,
+  }
+}
 
-  if (membershipError) {
+export async function requireAppAccess(): Promise<AppAccess> {
+  const {
+    supabase,
+    userId,
+  } = await requireAuthenticatedUser()
+
+  const [
+    dashboardResult,
+    paperResult,
+    coauthorResult,
+  ] = await Promise.all([
+    supabase
+      .from('dashboard_members')
+      .select('owner_id, role')
+      .eq('user_id', userId)
+      .maybeSingle(),
+
+    supabase
+      .from('paper_members')
+      .select('paper_id')
+      .eq('user_id', userId)
+      .limit(1),
+
+    supabase
+      .from('paper_members')
+      .select('paper_id')
+      .eq('user_id', userId)
+      .eq('role', 'coauthor')
+      .limit(1),
+  ])
+
+  if (dashboardResult.error) {
     throw new Error(
-      `Could not load dashboard access: ${membershipError.message}`
+      `Could not load dashboard access: ${dashboardResult.error.message}`
     )
   }
 
+  if (paperResult.error) {
+    throw new Error(
+      `Could not load paper access: ${paperResult.error.message}`
+    )
+  }
+
+  if (coauthorResult.error) {
+    throw new Error(
+      `Could not load coauthor access: ${coauthorResult.error.message}`
+    )
+  }
+
+  const dashboardMembership =
+    dashboardResult.data
+
+  const dashboardRole =
+    dashboardMembership &&
+    ['owner', 'viewer'].includes(
+      dashboardMembership.role
+    )
+      ? (dashboardMembership.role as DashboardRole)
+      : null
+
+  const hasPaperAccess =
+    (paperResult.data ?? []).length > 0
+
+  const hasCoauthorAccess =
+    (coauthorResult.data ?? []).length > 0
+
   if (
-    !membership ||
-    ![
-      'owner',
-      'viewer',
-    ].includes(membership.role)
+    !dashboardRole &&
+    !hasPaperAccess
   ) {
     redirect('/access-denied')
   }
 
-  const role =
-    membership.role as DashboardRole
-
   return {
     userId,
+    dashboardOwnerId:
+      dashboardMembership?.owner_id ??
+      null,
+    dashboardRole,
+    hasDashboardAccess:
+      dashboardRole !== null,
+    canEditDashboard:
+      dashboardRole === 'owner',
+    hasPaperAccess,
+    hasCoauthorAccess,
+  }
+}
+
+export async function requireDashboardAccess(): Promise<DashboardAccess> {
+  const access =
+    await requireAppAccess()
+
+  if (
+    !access.dashboardRole ||
+    !access.dashboardOwnerId
+  ) {
+    redirect('/papers')
+  }
+
+  return {
+    userId: access.userId,
     ownerId:
-      membership.owner_id,
-    role,
+      access.dashboardOwnerId,
+    role:
+      access.dashboardRole,
     canEdit:
-      role === 'owner',
+      access.canEditDashboard,
   }
 }
 

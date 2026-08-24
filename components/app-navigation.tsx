@@ -3,7 +3,11 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const links = [
+type AppNavigationProps = {
+  showDashboardModules?: boolean
+}
+
+const dashboardLinks = [
   {
     href: '/dashboard',
     label: 'Dashboard',
@@ -16,14 +20,25 @@ const links = [
     href: '/planning',
     label: 'Planning',
   },
-  {
-    href: '/papers',
-    label: 'Papers',
-  },
 ]
 
-export default function AppNavigation() {
+const papersLink = {
+  href: '/papers',
+  label: 'Papers',
+}
+
+export default function AppNavigation({
+  showDashboardModules = true,
+}: AppNavigationProps) {
   const pathname = usePathname()
+
+  const links =
+    showDashboardModules
+      ? [
+          ...dashboardLinks,
+          papersLink,
+        ]
+      : [papersLink]
 
   return (
     <nav

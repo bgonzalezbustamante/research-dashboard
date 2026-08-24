@@ -103,7 +103,10 @@ export default function PaperWorkspaceNav(
           )
         })}
 
-        <div className="flex items-center gap-2 px-4 py-3 text-sm">
+        <div
+          data-dashboard-only="true"
+          className="flex items-center gap-2 px-4 py-3 text-sm"
+        >
           <span className="font-medium text-oxford-ash">
             Hours
           </span>

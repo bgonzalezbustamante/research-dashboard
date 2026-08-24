@@ -69,15 +69,25 @@ select {
 }
 
 /*
- * Viewer accounts are read-only. GET forms remain available for
- * navigation and filtering; mutation forms and owner-only paper routes
- * are hidden before hydration so there is no clickable write-control
- * window while the client-side guard starts.
+ * Non-owner accounts are read-only by default. GET forms remain
+ * available for navigation and filtering. A paper-scoped coauthor form
+ * must opt in explicitly with data-coauthor-editable="true".
  */
-[data-dashboard-role="viewer"] main form:not([method="get" i]),
-[data-dashboard-role="viewer"] main details:has(form:not([method="get" i])),
-[data-dashboard-role="viewer"] main a[href="/papers/new"],
-[data-dashboard-role="viewer"] main a[href^="/papers/"][href$="/edit"] {
+[data-app-read-only="true"] main form:not([method="get" i]):not([data-coauthor-editable="true"]),
+[data-app-read-only="true"] main details:has(form:not([method="get" i]):not([data-coauthor-editable="true"])),
+[data-app-read-only="true"] main a[href="/papers/new"],
+[data-app-read-only="true"] main a[href^="/papers/"][href$="/edit"] {
+  display: none !important;
+}
+
+/*
+ * Coauthor-only accounts do not have access to personal Hours data.
+ * Hide dashboard-derived paper-hours displays rather than presenting
+ * unavailable work-session rows as zero hours.
+ */
+[data-has-dashboard-access="false"] [data-dashboard-only="true"],
+[data-has-dashboard-access="false"] table[class*="min-w-[1150px]"] th:nth-child(6),
+[data-has-dashboard-access="false"] table[class*="min-w-[1150px]"] td:nth-child(6) {
   display: none !important;
 }
 
