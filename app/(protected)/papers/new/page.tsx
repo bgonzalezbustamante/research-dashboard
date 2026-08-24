@@ -25,6 +25,10 @@ export default async function NewPaperPage({
         submitLabel="Create paper"
         cancelHref="/papers"
         error={error}
+        initialValues={{
+          authors:
+            'Bastián González-Bustamante',
+        }}
       />
     </div>
   )

@@ -1,10 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-
-import {
-  useState,
-} from 'react'
+import { useState } from 'react'
 
 import {
   createPlanningAllocation,
@@ -34,30 +31,23 @@ type PaperOption = {
 
 type PlanningAllocation = {
   id: string
-  allocation_type:
-    AllocationType
-  blocked_type:
-    BlockedType | null
+  allocation_type: AllocationType
+  blocked_type: BlockedType | null
   committed_days: number
   flowsavvy_added: boolean
-  flowsavvy_added_at:
-    string | null
+  flowsavvy_added_at: string | null
   notes: string | null
   paper_id: string | null
-  paper_short_title:
-    string | null
-  paper_title:
-    string | null
+  paper_short_title: string | null
+  paper_title: string | null
   paper_archived: boolean
 }
 
 type PlanningWorkspaceProps = {
   periodStart: string
   periodEnd: string
-  allocations:
-    PlanningAllocation[]
-  availablePapers:
-    PaperOption[]
+  allocations: PlanningAllocation[]
+  availablePapers: PaperOption[]
   error?: string
 }
 
@@ -103,9 +93,7 @@ function formatTimestamp(
       hour: '2-digit',
       minute: '2-digit',
     }
-  ).format(
-    new Date(value)
-  )
+  ).format(new Date(value))
 }
 
 function getBlockedLabel(
@@ -114,87 +102,9 @@ function getBlockedLabel(
   return (
     blockedOptions.find(
       (option) =>
-        option.value ===
-        value
-    )?.label ??
-    'Blocked time'
+        option.value === value
+    )?.label ?? 'Blocked time'
   )
-}
-
-function getLoadPresentation(
-  totalDays: number
-) {
-  if (totalDays === 0) {
-    return {
-      label: 'Open',
-      container:
-        'border-green-200 bg-green-50',
-      text:
-        'text-green-900',
-      secondary:
-        'text-green-800',
-      bar:
-        'bg-green-500',
-    }
-  }
-
-  if (totalDays <= 5) {
-    return {
-      label:
-        'Light commitment',
-      container:
-        'border-green-200 bg-green-50',
-      text:
-        'text-green-900',
-      secondary:
-        'text-green-800',
-      bar:
-        'bg-green-500',
-    }
-  }
-
-  if (totalDays <= 10) {
-    return {
-      label:
-        'Moderate commitment',
-      container:
-        'border-yellow-200 bg-yellow-50',
-      text:
-        'text-yellow-900',
-      secondary:
-        'text-yellow-800',
-      bar:
-        'bg-yellow-500',
-    }
-  }
-
-  if (totalDays <= 15) {
-    return {
-      label:
-        'Full commitment',
-      container:
-        'border-orange-200 bg-orange-50',
-      text:
-        'text-orange-900',
-      secondary:
-        'text-orange-800',
-      bar:
-        'bg-orange-500',
-    }
-  }
-
-  return {
-    label:
-      'Overcommitted',
-    container:
-      'border-orange-300 bg-orange-100',
-    text:
-      'text-orange-950',
-    secondary:
-      'text-orange-900',
-    bar:
-      'bg-orange-700',
-  }
 }
 
 function getAllocationPresentation(
@@ -246,27 +156,22 @@ export default function PlanningWorkspace({
         )
     )
 
-  const defaultType:
-    AllocationType =
-    availablePapers.length >
-    0
+  const defaultType: AllocationType =
+    availablePapers.length > 0
       ? 'paper'
       : 'blocked'
 
   const [
     allocationType,
     setAllocationType,
-  ] =
-    useState<AllocationType>(
-      defaultType
-    )
+  ] = useState<AllocationType>(
+    defaultType
+  )
 
   const effectiveType:
     AllocationType =
-    allocationType ===
-      'paper' &&
-    availablePapers.length ===
-      0
+    allocationType === 'paper' &&
+    availablePapers.length === 0
       ? 'blocked'
       : allocationType ===
             'blocked' &&
@@ -275,57 +180,9 @@ export default function PlanningWorkspace({
         ? 'paper'
         : allocationType
 
-  const totalDays =
-    allocations.reduce(
-      (
-        total,
-        allocation
-      ) =>
-        total +
-        allocation.committed_days,
-      0
-    )
-
-  const load =
-    getLoadPresentation(
-      totalDays
-    )
-
-  const loadPercentage =
-    Math.min(
-      100,
-      (
-        totalDays /
-        15
-      ) *
-        100
-    )
-
-  const flowsavvyCount =
-    allocations.filter(
-      (allocation) =>
-        allocation.flowsavvy_added
-    ).length
-
-  const paperCount =
-    allocations.filter(
-      (allocation) =>
-        allocation.allocation_type ===
-        'paper'
-    ).length
-
-  const blockedCount =
-    allocations.filter(
-      (allocation) =>
-        allocation.allocation_type ===
-        'blocked'
-    ).length
-
   const canAdd =
-    availablePapers.length >
-      0 ||
-    availableBlockedOptions.length >
-      0
+    availablePapers.length > 0 ||
+    availableBlockedOptions.length > 0
 
   return (
     <section
@@ -337,103 +194,6 @@ export default function PlanningWorkspace({
           {error}
         </div>
       )}
-
-      <div
-        className={`mb-6 rounded-lg border p-4 ${load.container}`}
-      >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div
-              className={`text-xs font-medium uppercase tracking-wide ${load.secondary}`}
-            >
-              Period load
-            </div>
-
-            <div
-              className={`mt-1 font-serif text-2xl font-semibold ${load.text}`}
-            >
-              {totalDays}{' '}
-              committed{' '}
-              {totalDays === 1
-                ? 'day'
-                : 'days'}
-            </div>
-
-            <p
-              className={`mt-1 text-sm ${load.secondary}`}
-            >
-              {paperCount}{' '}
-              {paperCount === 1
-                ? 'paper'
-                : 'papers'}{' '}
-              · {blockedCount}{' '}
-              blocked{' '}
-              {blockedCount === 1
-                ? 'allocation'
-                : 'allocations'}{' '}
-              · {load.label}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div>
-              <div
-                className={`text-xs uppercase tracking-wide ${load.secondary}`}
-              >
-                FlowSavvy
-              </div>
-
-              <div
-                className={`mt-1 font-medium ${load.text}`}
-              >
-                {flowsavvyCount}/
-                {
-                  allocations.length
-                }{' '}
-                added
-              </div>
-            </div>
-
-            {totalDays >
-              15 && (
-              <div>
-                <div
-                  className={`text-xs uppercase tracking-wide ${load.secondary}`}
-                >
-                  Above reference
-                </div>
-
-                <div
-                  className={`mt-1 font-medium ${load.text}`}
-                >
-                  +
-                  {totalDays -
-                    15}{' '}
-                  days
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/70">
-          <div
-            className={`h-full rounded-full ${load.bar}`}
-            style={{
-              width: `${loadPercentage}%`,
-            }}
-          />
-        </div>
-
-        <p
-          className={`mt-2 text-xs ${load.secondary}`}
-        >
-          Paper allocations and
-          blocked time both count
-          towards the 15-day
-          planning reference.
-        </p>
-      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(280px,0.7fr)_minmax(0,2fr)]">
         <Card>
@@ -465,17 +225,13 @@ export default function PlanningWorkspace({
               <input
                 type="hidden"
                 name="period_start"
-                value={
-                  periodStart
-                }
+                value={periodStart}
               />
 
               <div>
                 <label
                   htmlFor="allocation-type"
-                  className={
-                    labelClass
-                  }
+                  className={labelClass}
                 >
                   Allocation type
                 </label>
@@ -483,20 +239,14 @@ export default function PlanningWorkspace({
                 <select
                   id="allocation-type"
                   name="allocation_type"
-                  value={
-                    effectiveType
-                  }
-                  onChange={(
-                    event
-                  ) =>
+                  value={effectiveType}
+                  onChange={(event) =>
                     setAllocationType(
                       event.target
                         .value as AllocationType
                     )
                   }
-                  className={
-                    inputClass
-                  }
+                  className={inputClass}
                 >
                   {availablePapers.length >
                     0 && (
@@ -519,9 +269,7 @@ export default function PlanningWorkspace({
                 <div>
                   <label
                     htmlFor="planning-paper"
-                    className={
-                      labelClass
-                    }
+                    className={labelClass}
                   >
                     Paper
                   </label>
@@ -531,9 +279,7 @@ export default function PlanningWorkspace({
                     name="paper_id"
                     required
                     defaultValue=""
-                    className={
-                      inputClass
-                    }
+                    className={inputClass}
                   >
                     <option
                       value=""
@@ -545,16 +291,10 @@ export default function PlanningWorkspace({
                     {availablePapers.map(
                       (paper) => (
                         <option
-                          key={
-                            paper.id
-                          }
-                          value={
-                            paper.id
-                          }
+                          key={paper.id}
+                          value={paper.id}
                         >
-                          {
-                            paper.short_title
-                          }
+                          {paper.short_title}
                         </option>
                       )
                     )}
@@ -564,9 +304,7 @@ export default function PlanningWorkspace({
                 <div>
                   <label
                     htmlFor="blocked-type"
-                    className={
-                      labelClass
-                    }
+                    className={labelClass}
                   >
                     Blocked time
                   </label>
@@ -576,9 +314,7 @@ export default function PlanningWorkspace({
                     name="blocked_type"
                     required
                     defaultValue=""
-                    className={
-                      inputClass
-                    }
+                    className={inputClass}
                   >
                     <option
                       value=""
@@ -588,20 +324,12 @@ export default function PlanningWorkspace({
                     </option>
 
                     {availableBlockedOptions.map(
-                      (
-                        option
-                      ) => (
+                      (option) => (
                         <option
-                          key={
-                            option.value
-                          }
-                          value={
-                            option.value
-                          }
+                          key={option.value}
+                          value={option.value}
                         >
-                          {
-                            option.label
-                          }
+                          {option.label}
                         </option>
                       )
                     )}
@@ -612,9 +340,7 @@ export default function PlanningWorkspace({
               <div>
                 <label
                   htmlFor="planning-days"
-                  className={
-                    labelClass
-                  }
+                  className={labelClass}
                 >
                   Committed days
                 </label>
@@ -623,9 +349,7 @@ export default function PlanningWorkspace({
                   id="planning-days"
                   name="committed_days"
                   defaultValue="5"
-                  className={
-                    inputClass
-                  }
+                  className={inputClass}
                 >
                   <option value="5">
                     5 days
@@ -644,9 +368,7 @@ export default function PlanningWorkspace({
               <div>
                 <label
                   htmlFor="planning-notes"
-                  className={
-                    labelClass
-                  }
+                  className={labelClass}
                 >
                   Notes
                 </label>
@@ -661,9 +383,7 @@ export default function PlanningWorkspace({
                       ? 'Optional planning note'
                       : 'e.g. APSA Annual Meeting'
                   }
-                  className={
-                    inputClass
-                  }
+                  className={inputClass}
                 />
               </div>
 
@@ -676,7 +396,7 @@ export default function PlanningWorkspace({
 
                 <span>
                   Already added to
-                  FlowSavvy
+                  FlowSavvy/Calendar
                 </span>
               </label>
 
@@ -691,14 +411,12 @@ export default function PlanningWorkspace({
         </Card>
 
         <div className="grid content-start gap-4 sm:grid-cols-2">
-          {allocations.length ===
-          0 ? (
+          {allocations.length === 0 ? (
             <div className="sm:col-span-2">
               <Card>
                 <div className="py-7 text-center">
                   <h2 className="font-serif text-lg font-semibold text-oxford-blue">
-                    No allocations
-                    yet
+                    No allocations yet
                   </h2>
 
                   <p className="mt-1 text-sm text-oxford-ash">
@@ -733,9 +451,7 @@ export default function PlanningWorkspace({
 
                 return (
                   <Card
-                    key={
-                      allocation.id
-                    }
+                    key={allocation.id}
                     className="h-fit"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
@@ -778,9 +494,7 @@ export default function PlanningWorkspace({
                           allocation.committed_days
                         )}`}
                       >
-                        {
-                          allocation.committed_days
-                        }{' '}
+                        {allocation.committed_days}{' '}
                         days
                       </span>
                     </div>
@@ -797,7 +511,7 @@ export default function PlanningWorkspace({
                         <div className="text-sm text-green-800">
                           <div className="font-medium">
                             ☑ Added to
-                            FlowSavvy
+                            FlowSavvy/Calendar
                           </div>
 
                           {allocation.flowsavvy_added_at && (
@@ -810,17 +524,15 @@ export default function PlanningWorkspace({
                         </div>
                       ) : (
                         <div className="text-sm text-oxford-ash">
-                          ☐ Not added
-                          to FlowSavvy
+                          ☐ Not added to
+                          FlowSavvy/Calendar
                         </div>
                       )}
                     </div>
 
                     {allocation.notes && (
                       <p className="mt-3 whitespace-pre-line text-sm leading-5 text-oxford-charcoal">
-                        {
-                          allocation.notes
-                        }
+                        {allocation.notes}
                       </p>
                     )}
 
@@ -840,28 +552,21 @@ export default function PlanningWorkspace({
                             <input
                               type="hidden"
                               name="period_start"
-                              value={
-                                periodStart
-                              }
+                              value={periodStart}
                             />
 
                             <input
                               type="hidden"
                               name="allocation_id"
-                              value={
-                                allocation.id
-                              }
+                              value={allocation.id}
                             />
 
                             <div>
                               <label
                                 htmlFor={`planning-days-${allocation.id}`}
-                                className={
-                                  labelClass
-                                }
+                                className={labelClass}
                               >
-                                Committed
-                                days
+                                Committed days
                               </label>
 
                               <select
@@ -870,9 +575,7 @@ export default function PlanningWorkspace({
                                 defaultValue={String(
                                   allocation.committed_days
                                 )}
-                                className={
-                                  inputClass
-                                }
+                                className={inputClass}
                               >
                                 <option value="5">
                                   5 days
@@ -891,9 +594,7 @@ export default function PlanningWorkspace({
                             <div>
                               <label
                                 htmlFor={`planning-notes-${allocation.id}`}
-                                className={
-                                  labelClass
-                                }
+                                className={labelClass}
                               >
                                 Notes
                               </label>
@@ -903,12 +604,9 @@ export default function PlanningWorkspace({
                                 name="notes"
                                 rows={3}
                                 defaultValue={
-                                  allocation.notes ??
-                                  ''
+                                  allocation.notes ?? ''
                                 }
-                                className={
-                                  inputClass
-                                }
+                                className={inputClass}
                               />
                             </div>
 
@@ -924,7 +622,7 @@ export default function PlanningWorkspace({
 
                               <span>
                                 Added to
-                                FlowSavvy
+                                FlowSavvy/Calendar
                               </span>
                             </label>
 
@@ -932,8 +630,7 @@ export default function PlanningWorkspace({
                               type="submit"
                               variant="primary"
                             >
-                              Save
-                              allocation
+                              Save allocation
                             </Button>
                           </form>
                         </details>
@@ -946,10 +643,8 @@ export default function PlanningWorkspace({
                           <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
                             <p className="text-xs leading-5 text-red-800">
                               Remove this
-                              allocation
-                              from the
-                              selected
-                              planning
+                              allocation from the
+                              selected planning
                               period.
                             </p>
 
@@ -962,25 +657,20 @@ export default function PlanningWorkspace({
                               <input
                                 type="hidden"
                                 name="period_start"
-                                value={
-                                  periodStart
-                                }
+                                value={periodStart}
                               />
 
                               <input
                                 type="hidden"
                                 name="allocation_id"
-                                value={
-                                  allocation.id
-                                }
+                                value={allocation.id}
                               />
 
                               <Button
                                 type="submit"
                                 variant="danger"
                               >
-                                Confirm
-                                delete
+                                Confirm delete
                               </Button>
                             </form>
                           </div>
@@ -996,13 +686,12 @@ export default function PlanningWorkspace({
       </div>
 
       <p className="mt-4 text-xs text-oxford-ash">
-        Planning period:{' '}
-        {periodStart} to{' '}
-        {periodEnd}. Paper work and
+        Planning period: {periodStart}{' '}
+        to {periodEnd}. Paper work and
         blocked commitments both
         consume planning capacity.
-        Detailed scheduling remains
-        in FlowSavvy.
+        Detailed scheduling remains in
+        FlowSavvy/Calendar.
       </p>
     </section>
   )
