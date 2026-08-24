@@ -1,5 +1,6 @@
 import PageHeader from '@/components/page-header'
 import PaperForm from '@/components/papers/paper-form'
+import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createPaper } from '../actions'
 
 type NewPaperPageProps = {
@@ -11,7 +12,10 @@ type NewPaperPageProps = {
 export default async function NewPaperPage({
   searchParams,
 }: NewPaperPageProps) {
-  const { error } = await searchParams
+  await requireDashboardOwner()
+
+  const { error } =
+    await searchParams
 
   return (
     <div>

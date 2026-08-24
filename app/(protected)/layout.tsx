@@ -1,56 +1,55 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 
-import { createClient } from '@/lib/supabase/server'
-
-import OxfordLogo from '@/components/oxford-logo'
 import AppNavigation from '@/components/app-navigation'
+import OxfordLogo from '@/components/oxford-logo'
+import ReadOnlyMode from '@/components/read-only-mode'
 import SiteFooter from '@/components/site-footer'
 import Button from '@/components/ui/button'
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function ProtectedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const supabase = await createClient()
+  const access =
+    await requireDashboardAccess()
 
-  const { data, error } = await supabase.auth.getClaims()
+  const supabase =
+    await createClient()
 
-  if (error || !data?.claims) {
-    redirect('/login')
+  const {
+    data: profile,
+    error: profileError,
+  } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', access.userId)
+    .maybeSingle()
+
+  if (profileError) {
+    throw new Error(
+      `Could not load profile: ${profileError.message}`
+    )
   }
-  
-  const userId =
-  typeof data.claims.sub === 'string'
-    ? data.claims.sub
-    : ''
 
-  let fullName = ''
+  const fullName =
+    profile?.full_name?.trim() ??
+    ''
 
-  if (userId) {
-    const {
-      data: profile,
-      error: profileError,
-    } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', userId)
-      .maybeSingle()
-
-    if (profileError) {
-      throw new Error(
-        `Could not load profile: ${profileError.message}`
-      )
-    }
-
-    fullName =
-      profile?.full_name?.trim() ??
-      ''
-  }
+  const isViewer =
+    access.role === 'viewer'
 
   return (
-    <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">
+    <div
+      data-dashboard-role={access.role}
+      className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal"
+    >
+      <ReadOnlyMode
+        enabled={isViewer}
+      />
+
       <header className="border-b border-oxford-stone bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -79,14 +78,26 @@ export default async function ProtectedLayout({
               <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
 
               <div className="flex items-center gap-3">
+                {isViewer && (
+                  <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
+                    Viewer
+                  </span>
+                )}
+
                 {fullName && (
                   <span className="hidden text-sm text-oxford-ash xl:inline">
                     {fullName}
                   </span>
                 )}
 
-                <form action="/auth/signout" method="post">
-                  <Button type="submit" variant="secondary">
+                <form
+                  action="/auth/signout"
+                  method="post"
+                >
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                  >
                     Sign out
                   </Button>
                 </form>
@@ -95,6 +106,19 @@ export default async function ProtectedLayout({
           </div>
         </div>
       </header>
+
+      {isViewer && (
+        <div className="border-b border-sky-200 bg-sky-50">
+          <div className="mx-auto max-w-7xl px-6 py-3 text-sm text-sky-900">
+            <strong className="font-medium">
+              Read-only access.
+            </strong>{' '}
+            You can browse Dashboard,
+            Hours, Planning, and Papers,
+            but changes are disabled.
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-6 py-8">

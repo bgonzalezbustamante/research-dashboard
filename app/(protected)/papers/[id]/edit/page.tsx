@@ -1,8 +1,10 @@
 import {
   notFound,
 } from 'next/navigation'
+
 import PageHeader from '@/components/page-header'
 import PaperForm from '@/components/papers/paper-form'
+import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 import { updatePaper } from '../../actions'
 
@@ -19,6 +21,8 @@ export default async function EditPaperPage({
   params,
   searchParams,
 }: EditPaperPageProps) {
+  await requireDashboardOwner()
+
   const { id } =
     await params
 
