@@ -102,6 +102,18 @@ export default function DailyLogSection({
           </span>
         </div>
 
+        <div className="mt-5 max-w-xs rounded-lg border border-oxford-stone bg-oxford-shell px-4 py-3">
+          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+            Coffees recorded
+          </div>
+
+          <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
+            {log
+              ? log.coffee_count
+              : '—'}
+          </div>
+        </div>
+
         <form
           action={saveDailyLog}
           className="mt-5"
