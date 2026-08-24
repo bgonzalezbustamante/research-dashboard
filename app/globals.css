@@ -68,6 +68,19 @@ select {
   font: inherit;
 }
 
+/*
+ * Viewer accounts are read-only. GET forms remain available for
+ * navigation and filtering; mutation forms and owner-only paper routes
+ * are hidden before hydration so there is no clickable write-control
+ * window while the client-side guard starts.
+ */
+[data-dashboard-role="viewer"] main form:not([method="get" i]),
+[data-dashboard-role="viewer"] main details:has(form:not([method="get" i])),
+[data-dashboard-role="viewer"] main a[href="/papers/new"],
+[data-dashboard-role="viewer"] main a[href^="/papers/"][href$="/edit"] {
+  display: none !important;
+}
+
 ::selection {
   background: var(--oxford-sky-blue);
   color: var(--oxford-blue);

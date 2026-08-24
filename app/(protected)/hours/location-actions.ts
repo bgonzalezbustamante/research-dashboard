@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 function getRequiredText(
@@ -76,29 +77,6 @@ function getReturnDate(
     : getAmsterdamDate()
 }
 
-async function requireAuth() {
-  const supabase =
-    await createClient()
-
-  const { data, error } =
-    await supabase.auth.getClaims()
-
-  const userId =
-    data?.claims?.sub
-
-  if (
-    error ||
-    typeof userId !== 'string'
-  ) {
-    redirect('/login')
-  }
-
-  return {
-    supabase,
-    userId,
-  }
-}
-
 function redirectLocationError(
   date: string,
   message: string
@@ -106,7 +84,7 @@ function redirectLocationError(
   redirect(
     `/hours?date=${encodeURIComponent(
       date
-    )}&sessionError=${encodeURIComponent(
+    )}&locationError=${encodeURIComponent(
       message
     )}#location-labels`
   )
@@ -122,16 +100,40 @@ function redirectToLocations(
   )
 }
 
+async function requireLocationWriteAccess(
+  returnDate: string
+) {
+  const access =
+    await requireDashboardAccess()
+
+  if (!access.canEdit) {
+    redirectLocationError(
+      returnDate,
+      'Viewer access is read-only. Location labels cannot be changed.'
+    )
+  }
+
+  const supabase =
+    await createClient()
+
+  return {
+    supabase,
+    userId: access.userId,
+  }
+}
+
 export async function createLocationLabel(
   formData: FormData
 ) {
+  const returnDate =
+    getReturnDate(formData)
+
   const {
     supabase,
     userId,
-  } = await requireAuth()
-
-  const returnDate =
-    getReturnDate(formData)
+  } = await requireLocationWriteAccess(
+    returnDate
+  )
 
   const name = getRequiredText(
     formData,
@@ -189,13 +191,15 @@ export async function createLocationLabel(
 export async function updateLocationLabel(
   formData: FormData
 ) {
+  const returnDate =
+    getReturnDate(formData)
+
   const {
     supabase,
     userId,
-  } = await requireAuth()
-
-  const returnDate =
-    getReturnDate(formData)
+  } = await requireLocationWriteAccess(
+    returnDate
+  )
 
   const labelId = getRequiredText(
     formData,
@@ -265,13 +269,15 @@ export async function updateLocationLabel(
 export async function setLocationLabelActive(
   formData: FormData
 ) {
+  const returnDate =
+    getReturnDate(formData)
+
   const {
     supabase,
     userId,
-  } = await requireAuth()
-
-  const returnDate =
-    getReturnDate(formData)
+  } = await requireLocationWriteAccess(
+    returnDate
+  )
 
   const labelId = getRequiredText(
     formData,
@@ -326,13 +332,15 @@ export async function setLocationLabelActive(
 export async function deleteLocationLabel(
   formData: FormData
 ) {
+  const returnDate =
+    getReturnDate(formData)
+
   const {
     supabase,
     userId,
-  } = await requireAuth()
-
-  const returnDate =
-    getReturnDate(formData)
+  } = await requireLocationWriteAccess(
+    returnDate
+  )
 
   const labelId = getRequiredText(
     formData,

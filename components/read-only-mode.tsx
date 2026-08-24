@@ -12,6 +12,17 @@ type FormControl =
   | HTMLSelectElement
   | HTMLTextAreaElement
 
+function isMutationForm(
+  form: HTMLFormElement
+) {
+  const method =
+    form
+      .getAttribute('method')
+      ?.toLowerCase()
+
+  return method !== 'get'
+}
+
 function applyReadOnlyMode() {
   const main =
     document.querySelector('main')
@@ -25,15 +36,17 @@ function applyReadOnlyMode() {
       'form'
     )
     .forEach((form) => {
-      if (
-        form.method.toLowerCase() !==
-        'post'
-      ) {
+      if (!isMutationForm(form)) {
         return
       }
 
       form.dataset.viewerReadOnly =
         'true'
+      form.hidden = true
+      form.setAttribute(
+        'aria-hidden',
+        'true'
+      )
 
       form
         .querySelectorAll<FormControl>(
@@ -45,13 +58,6 @@ function applyReadOnlyMode() {
             'aria-disabled',
             'true'
           )
-
-          if (
-            control instanceof
-            HTMLButtonElement
-          ) {
-            control.hidden = true
-          }
         })
     })
 
@@ -65,15 +71,15 @@ function applyReadOnlyMode() {
           details.querySelectorAll<HTMLFormElement>(
             'form'
           )
-        ).some(
-          (form) =>
-            form.method.toLowerCase() ===
-            'post'
-        )
+        ).some(isMutationForm)
 
       if (hasMutationForm) {
         details.open = false
         details.hidden = true
+        details.setAttribute(
+          'aria-hidden',
+          'true'
+        )
       }
     })
 

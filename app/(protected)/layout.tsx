@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import AppNavigation from '@/components/app-navigation'
 import OxfordLogo from '@/components/oxford-logo'
+import QuerySectionError from '@/components/query-section-error'
 import ReadOnlyMode from '@/components/read-only-mode'
 import SiteFooter from '@/components/site-footer'
 import Button from '@/components/ui/button'
@@ -48,6 +49,11 @@ export default async function ProtectedLayout({
     >
       <ReadOnlyMode
         enabled={isViewer}
+      />
+
+      <QuerySectionError
+        parameter="locationError"
+        targetId="location-labels"
       />
 
       <header className="border-b border-oxford-stone bg-white">

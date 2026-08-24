@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 function getRequiredText(
@@ -68,7 +69,7 @@ function redirectLocationError(
   redirect(
     `/hours?date=${encodeURIComponent(
       date
-    )}&sessionError=${encodeURIComponent(
+    )}&locationError=${encodeURIComponent(
       message
     )}#location-labels`
   )
@@ -77,23 +78,21 @@ function redirectLocationError(
 export async function setDefaultLocationLabel(
   formData: FormData
 ) {
-  const supabase =
-    await createClient()
-
-  const { data, error } =
-    await supabase.auth.getClaims()
-
-  const userId = data?.claims?.sub
-
-  if (
-    error ||
-    typeof userId !== 'string'
-  ) {
-    redirect('/login')
-  }
-
   const returnDate =
     getReturnDate(formData)
+
+  const access =
+    await requireDashboardAccess()
+
+  if (!access.canEdit) {
+    redirectLocationError(
+      returnDate,
+      'Viewer access is read-only. The default location cannot be changed.'
+    )
+  }
+
+  const supabase =
+    await createClient()
 
   const labelId = getRequiredText(
     formData,
