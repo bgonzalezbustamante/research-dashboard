@@ -100,8 +100,16 @@ export default {
         )
       }
 
+      const fallbackSubject =
+        ctx.jwtClaims?.sub
+
       const callerId =
-        ctx.userClaims?.id ?? null
+        ctx.userClaims?.id ??
+        (
+          typeof fallbackSubject === 'string'
+            ? fallbackSubject
+            : null
+        )
 
       if (!callerId) {
         return jsonResponse(
