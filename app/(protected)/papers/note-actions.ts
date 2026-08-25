@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+
+import { requireAppAccess } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 type NoteType =
@@ -84,31 +86,6 @@ function getAmsterdamDate() {
   return `${values.year}-${values.month}-${values.day}`
 }
 
-async function requireAuth() {
-  const supabase =
-    await createClient()
-
-  const {
-    data,
-    error,
-  } = await supabase.auth.getClaims()
-
-  const userId =
-    data?.claims?.sub
-
-  if (
-    error ||
-    typeof userId !== 'string'
-  ) {
-    redirect('/login')
-  }
-
-  return {
-    supabase,
-    userId,
-  }
-}
-
 function redirectWithError(
   paperId: string,
   message: string
@@ -131,16 +108,14 @@ function redirectToNotes(
 function getNotePayload(
   formData: FormData
 ) {
-  const body =
-    getRequiredText(
-      formData,
-      'body'
-    )
+  const body = getRequiredText(
+    formData,
+    'body'
+  )
 
   if (!body) {
     return {
-      error:
-        'Note text is required.',
+      error: 'Note text is required.',
     }
   }
 
@@ -149,8 +124,7 @@ function getNotePayload(
 
   if (!noteType) {
     return {
-      error:
-        'Invalid note category.',
+      error: 'Invalid note category.',
     }
   }
 
@@ -161,30 +135,80 @@ function getNotePayload(
           formData,
           'note_date'
         ) ?? getAmsterdamDate(),
-
       noteType,
-
       body,
     },
+  }
+}
+
+async function getPaperAccess(
+  paperId: string
+) {
+  const access =
+    await requireAppAccess()
+
+  const supabase =
+    await createClient()
+
+  if (access.canEditDashboard) {
+    return {
+      access,
+      supabase,
+      canCollaborate: true,
+      canEditAllNotes: true,
+    }
+  }
+
+  const {
+    data: membership,
+    error: membershipError,
+  } = await supabase
+    .from('paper_members')
+    .select('role')
+    .eq('paper_id', paperId)
+    .eq('user_id', access.userId)
+    .maybeSingle()
+
+  if (membershipError) {
+    throw new Error(
+      `Could not load paper membership: ${membershipError.message}`
+    )
+  }
+
+  return {
+    access,
+    supabase,
+    canCollaborate:
+      membership?.role === 'coauthor',
+    canEditAllNotes: false,
   }
 }
 
 export async function createNote(
   formData: FormData
 ) {
-  const {
-    supabase,
-    userId,
-  } = await requireAuth()
-
-  const paperId =
-    getRequiredText(
-      formData,
-      'paper_id'
-    )
+  const paperId = getRequiredText(
+    formData,
+    'paper_id'
+  )
 
   if (!paperId) {
     redirect('/papers')
+  }
+
+  const {
+    access,
+    supabase,
+    canCollaborate,
+  } = await getPaperAccess(
+    paperId
+  )
+
+  if (!canCollaborate) {
+    redirectWithError(
+      paperId,
+      'You do not have permission to add notes to this paper.'
+    )
   }
 
   const result =
@@ -212,10 +236,9 @@ export async function createNote(
         payload.noteDate,
       note_type:
         payload.noteType,
-      body:
-        payload.body,
+      body: payload.body,
       created_by:
-        userId,
+        access.userId,
     })
     .select('id')
     .single()
@@ -236,33 +259,40 @@ export async function createNote(
     `/papers/${paperId}`
   )
 
-  redirectToNotes(
-    paperId
-  )
+  redirectToNotes(paperId)
 }
 
 export async function updateNote(
   formData: FormData
 ) {
-  const {
-    supabase,
-    userId,
-  } = await requireAuth()
+  const paperId = getRequiredText(
+    formData,
+    'paper_id'
+  )
 
-  const paperId =
-    getRequiredText(
-      formData,
-      'paper_id'
-    )
-
-  const noteId =
-    getRequiredText(
-      formData,
-      'note_id'
-    )
+  const noteId = getRequiredText(
+    formData,
+    'note_id'
+  )
 
   if (!paperId || !noteId) {
     redirect('/papers')
+  }
+
+  const {
+    access,
+    supabase,
+    canCollaborate,
+    canEditAllNotes,
+  } = await getPaperAccess(
+    paperId
+  )
+
+  if (!canCollaborate) {
+    redirectWithError(
+      paperId,
+      'You do not have permission to edit notes on this paper.'
+    )
   }
 
   const result =
@@ -279,22 +309,29 @@ export async function updateNote(
   const payload =
     result.payload
 
-  const {
-    data,
-    error,
-  } = await supabase
+  let updateQuery = supabase
     .from('paper_notes')
     .update({
       note_date:
         payload.noteDate,
       note_type:
         payload.noteType,
-      body:
-        payload.body,
+      body: payload.body,
     })
     .eq('id', noteId)
     .eq('paper_id', paperId)
-    .eq('created_by', userId)
+
+  if (!canEditAllNotes) {
+    updateQuery = updateQuery.eq(
+      'created_by',
+      access.userId
+    )
+  }
+
+  const {
+    data,
+    error,
+  } = await updateQuery
     .select('id')
     .maybeSingle()
 
@@ -306,7 +343,9 @@ export async function updateNote(
 
     redirectWithError(
       paperId,
-      'The note could not be updated.'
+      canEditAllNotes
+        ? 'The note could not be updated.'
+        : 'You can edit only notes that you created.'
     )
   }
 
@@ -314,44 +353,59 @@ export async function updateNote(
     `/papers/${paperId}`
   )
 
-  redirectToNotes(
-    paperId
-  )
+  redirectToNotes(paperId)
 }
 
 export async function deleteNote(
   formData: FormData
 ) {
-  const {
-    supabase,
-    userId,
-  } = await requireAuth()
+  const paperId = getRequiredText(
+    formData,
+    'paper_id'
+  )
 
-  const paperId =
-    getRequiredText(
-      formData,
-      'paper_id'
-    )
-
-  const noteId =
-    getRequiredText(
-      formData,
-      'note_id'
-    )
+  const noteId = getRequiredText(
+    formData,
+    'note_id'
+  )
 
   if (!paperId || !noteId) {
     redirect('/papers')
   }
 
   const {
-    data,
-    error,
-  } = await supabase
+    access,
+    supabase,
+    canCollaborate,
+    canEditAllNotes,
+  } = await getPaperAccess(
+    paperId
+  )
+
+  if (!canCollaborate) {
+    redirectWithError(
+      paperId,
+      'You do not have permission to delete notes on this paper.'
+    )
+  }
+
+  let deleteQuery = supabase
     .from('paper_notes')
     .delete()
     .eq('id', noteId)
     .eq('paper_id', paperId)
-    .eq('created_by', userId)
+
+  if (!canEditAllNotes) {
+    deleteQuery = deleteQuery.eq(
+      'created_by',
+      access.userId
+    )
+  }
+
+  const {
+    data,
+    error,
+  } = await deleteQuery
     .select('id')
     .maybeSingle()
 
@@ -363,7 +417,9 @@ export async function deleteNote(
 
     redirectWithError(
       paperId,
-      'The note could not be deleted.'
+      canEditAllNotes
+        ? 'The note could not be deleted.'
+        : 'You can delete only notes that you created.'
     )
   }
 
@@ -371,7 +427,5 @@ export async function deleteNote(
     `/papers/${paperId}`
   )
 
-  redirectToNotes(
-    paperId
-  )
+  redirectToNotes(paperId)
 }

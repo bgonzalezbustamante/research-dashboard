@@ -41,6 +41,78 @@ function shouldHideForm(
   )
 }
 
+function setControlReadOnly(
+  control: FormControl
+) {
+  if (!control.disabled) {
+    control.dataset.viewerReadOnly =
+      'true'
+    control.disabled = true
+    control.setAttribute(
+      'aria-disabled',
+      'true'
+    )
+  }
+}
+
+function restoreControl(
+  control: FormControl
+) {
+  if (
+    control.dataset.viewerReadOnly !==
+    'true'
+  ) {
+    return
+  }
+
+  delete control.dataset.viewerReadOnly
+  control.disabled = false
+  control.removeAttribute(
+    'aria-disabled'
+  )
+}
+
+function hideForm(
+  form: HTMLFormElement
+) {
+  form.dataset.viewerReadOnly =
+    'true'
+  form.hidden = true
+  form.setAttribute(
+    'aria-hidden',
+    'true'
+  )
+
+  form
+    .querySelectorAll<FormControl>(
+      'button, input, select, textarea'
+    )
+    .forEach(setControlReadOnly)
+}
+
+function restoreForm(
+  form: HTMLFormElement
+) {
+  if (
+    form.dataset.viewerReadOnly !==
+    'true'
+  ) {
+    return
+  }
+
+  delete form.dataset.viewerReadOnly
+  form.hidden = false
+  form.removeAttribute(
+    'aria-hidden'
+  )
+
+  form
+    .querySelectorAll<FormControl>(
+      'button, input, select, textarea'
+    )
+    .forEach(restoreControl)
+}
+
 function applyReadOnlyMode() {
   const main =
     document.querySelector('main')
@@ -54,29 +126,12 @@ function applyReadOnlyMode() {
       'form'
     )
     .forEach((form) => {
-      if (!shouldHideForm(form)) {
+      if (shouldHideForm(form)) {
+        hideForm(form)
         return
       }
 
-      form.dataset.viewerReadOnly =
-        'true'
-      form.hidden = true
-      form.setAttribute(
-        'aria-hidden',
-        'true'
-      )
-
-      form
-        .querySelectorAll<FormControl>(
-          'button, input, select, textarea'
-        )
-        .forEach((control) => {
-          control.disabled = true
-          control.setAttribute(
-            'aria-disabled',
-            'true'
-          )
-        })
+      restoreForm(form)
     })
 
   main
@@ -92,11 +147,25 @@ function applyReadOnlyMode() {
         ).some(shouldHideForm)
 
       if (hasHiddenMutationForm) {
+        details.dataset.viewerReadOnly =
+          'true'
         details.open = false
         details.hidden = true
         details.setAttribute(
           'aria-hidden',
           'true'
+        )
+        return
+      }
+
+      if (
+        details.dataset.viewerReadOnly ===
+        'true'
+      ) {
+        delete details.dataset.viewerReadOnly
+        details.hidden = false
+        details.removeAttribute(
+          'aria-hidden'
         )
       }
     })
@@ -151,6 +220,10 @@ export default function ReadOnlyMode({
     observer.observe(main, {
       childList: true,
       subtree: true,
+      attributes: true,
+      attributeFilter: [
+        'data-coauthor-editable',
+      ],
     })
 
     return () => {

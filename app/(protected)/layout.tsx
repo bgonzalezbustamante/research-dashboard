@@ -3,6 +3,8 @@ import Link from 'next/link'
 import AppNavigation from '@/components/app-navigation'
 import OxfordLogo from '@/components/oxford-logo'
 import CoauthorPaperShortcut from '@/components/papers/coauthor-paper-shortcut'
+import FormattingHints from '@/components/papers/formatting-hints'
+import ResearchTextEnhancer from '@/components/papers/research-text-enhancer'
 import QuerySectionError from '@/components/query-section-error'
 import ReadOnlyMode from '@/components/read-only-mode'
 import SiteFooter from '@/components/site-footer'
@@ -91,6 +93,9 @@ export default async function ProtectedLayout({
       <ReadOnlyMode
         enabled={readOnlyByDefault}
       />
+
+      <FormattingHints />
+      <ResearchTextEnhancer />
 
       <QuerySectionError
         parameter="locationError"

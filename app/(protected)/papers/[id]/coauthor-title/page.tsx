@@ -14,7 +14,7 @@ type CoauthorTitlePageProps = {
     id: string
   }>
   searchParams: Promise<{
-    titleError?: string
+    editError?: string
   }>
 }
 
@@ -23,7 +23,7 @@ export default async function CoauthorTitlePage({
   searchParams,
 }: CoauthorTitlePageProps) {
   const { id } = await params
-  const { titleError } =
+  const { editError } =
     await searchParams
 
   const access =
@@ -61,35 +61,103 @@ export default async function CoauthorTitlePage({
     redirect(`/papers/${id}`)
   }
 
-  const {
-    data: paper,
-    error: paperError,
-  } = await supabase
-    .from('papers')
-    .select(`
-      id,
-      short_title,
-      title
-    `)
-    .eq('id', id)
-    .maybeSingle()
+  const [
+    paperResult,
+    authorResult,
+    linksResult,
+  ] = await Promise.all([
+    supabase
+      .from('papers')
+      .select(`
+        id,
+        short_title,
+        title,
+        abstract,
+        target_venue,
+        current_venue
+      `)
+      .eq('id', id)
+      .maybeSingle(),
 
-  if (paperError) {
+    supabase
+      .from('paper_authors')
+      .select(`
+        author_order,
+        authors (
+          full_name
+        )
+      `)
+      .eq('paper_id', id)
+      .order('author_order', {
+        ascending: true,
+      }),
+
+    supabase
+      .from('paper_links')
+      .select(`
+        link_type,
+        url,
+        sort_order
+      `)
+      .eq('paper_id', id)
+      .order('sort_order', {
+        ascending: true,
+      }),
+  ])
+
+  if (paperResult.error) {
     throw new Error(
-      `Could not load paper: ${paperError.message}`
+      `Could not load paper: ${paperResult.error.message}`
     )
   }
+
+  if (authorResult.error) {
+    throw new Error(
+      `Could not load authors: ${authorResult.error.message}`
+    )
+  }
+
+  if (linksResult.error) {
+    throw new Error(
+      `Could not load links: ${linksResult.error.message}`
+    )
+  }
+
+  const paper =
+    paperResult.data
 
   if (!paper) {
     notFound()
   }
+
+  const authors =
+    (authorResult.data ?? [])
+      .map((row) => {
+        const author =
+          Array.isArray(row.authors)
+            ? row.authors[0]
+            : row.authors
+
+        return author?.full_name ?? ''
+      })
+      .filter(Boolean)
+      .join('\n')
+
+  const links = new Map(
+    (linksResult.data ?? []).map(
+      (link) => [
+        link.link_type,
+        link.url,
+      ]
+    )
+  )
 
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title={paper.short_title}
-          description="Edit the full paper title with coauthor permission."
+          description="Edit the collaborative fields available to assigned coauthors."
         />
 
         <ButtonLink
@@ -102,8 +170,34 @@ export default async function CoauthorTitlePage({
 
       <CoauthorTitleEditor
         paperId={paper.id}
+        shortTitle={paper.short_title}
         title={paper.title}
-        error={titleError}
+        authors={authors}
+        abstract={paper.abstract ?? ''}
+        targetVenue={
+          paper.target_venue ?? ''
+        }
+        currentVenue={
+          paper.current_venue ?? ''
+        }
+        overleafUrl={
+          links.get('overleaf') ?? ''
+        }
+        dataverseUrl={
+          links.get('dataverse') ?? ''
+        }
+        githubUrl={
+          links.get('github') ?? ''
+        }
+        preprintUrl={
+          links.get('preprint') ?? ''
+        }
+        publicationUrl={
+          links.get('publication') ??
+          links.get('doi') ??
+          ''
+        }
+        error={editError}
       />
     </div>
   )

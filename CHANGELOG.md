@@ -1,5 +1,100 @@
 # CHANGELOG
 
+## v0.1.0-beta.3 "Misty Delta"
+
+### Summary
+
+- Added Phase F multi-user access with additive **Viewer** and paper-scoped **Coauthor** capabilities.
+- Added dashboard-wide read-only Viewer access for administrative/support users, enforced through both UI controls and Supabase RLS.
+- Added paper-scoped coauthor access, including collaborative editing of full title, authors, abstract, target/current venue, research links, milestones, presentations, and attributed notes.
+- Kept short title, workflow status, revision round, dates, submission/publication history, citations, archive state, Hours, and Planning owner-only.
+- Added note attribution rules so coauthors can edit/delete only their own notes while the Owner can edit/delete any note without changing its creator.
+- Added safe Markdown and LaTeX-style research-text rendering for abstracts, milestone notes, presentation notes, and paper notes.
+- Added managed location labels in Hours, including one selectable default location for new work sessions.
+- Refined Planning with FlowSavvy/Calendar wording, combined Selected period/Period load presentation, standby-paper shortcuts, and editable allocation periods.
+- Added default author prefill for new papers.
+- Refined Viewer warnings and read-only controls so mutation controls are hidden immediately while GET navigation/filter forms remain available.
+- Restored read-only coffee visibility in Daily context for Viewer accounts.
+- Updated release identity and footer for `v0.1.0-beta.3 "Misty Delta"`.
+
+### Code changes
+
+`permissions and collaboration`
+
+- Added `dashboard_members` support for Owner and Viewer dashboard roles.
+- Reused `paper_members` for paper-scoped Coauthor memberships.
+- Added combined Viewer + Coauthor behaviour so dashboard-wide access can remain read-only while assigned papers expose collaborative controls.
+- Added paper-specific RLS helpers and policies for collaborative author, link, milestone, presentation, and note operations.
+- Added trigger-level protection so coauthors cannot alter short title or owner-controlled workflow fields even through direct API requests.
+- Added an atomic coauthor metadata update path for title, abstract, venues, authors, and research links.
+- Added route restrictions so coauthor-only accounts can access only assigned papers rather than Dashboard, Hours, or Planning.
+- Hid owner-only paper hours from coauthor-only accounts instead of displaying misleading zero values.
+
+`paper notes and research text`
+
+- Preserved immutable note creator attribution.
+- Allowed the Owner to edit or delete collaborator notes while keeping the original creator.
+- Limited coauthor note editing/deletion to notes created by the same account.
+- Added safe Markdown rendering for headings, emphasis, lists, links, code, blockquotes, and fenced code blocks.
+- Added LaTeX-style notation support for `$...$`, `$$...$$`, `\(...\)`, `\[...\]`, common mathematical commands, and selected text-formatting commands.
+- Added formatting hints to abstract and research-note textareas.
+
+`working hours`
+
+- Added managed location labels alongside activity labels.
+- Backfilled distinct historical session-place values into location labels while retaining `work_sessions.place` as the historical snapshot.
+- Added active/inactive location labels and protected deletion when historical sessions use a label.
+- Added one default location per owner and preselected it for new work sessions while retaining the complete location dropdown.
+- Moved Location labels to the bottom of the Hours module after Activity labels.
+- Refined location-label validation messages so errors appear within the Location labels section.
+- Restored read-only display of recorded coffee counts for Viewer accounts.
+
+`planning`
+
+- Renamed FlowSavvy references to **FlowSavvy/Calendar**.
+- Placed Selected period and Period load in one responsive row.
+- Added a standby-paper card with direct links to paper workspaces.
+- Added period reassignment to existing planning-allocation edit controls.
+- Added duplicate-allocation protection when moving an allocation between periods.
+
+`papers`
+
+- Added `Bastián González-Bustamante` as the default author prefill on the new-paper form.
+- Added collaborative paper-detail editing without exposing the short title to coauthors.
+- Kept archive/restore and the full owner edit route owner-only.
+
+`viewer experience`
+
+- Added a visible Viewer badge and read-only access notice.
+- Hid mutation controls before hydration to avoid transient clickable edit controls.
+- Kept GET forms such as date navigation, search, sorting, and filters available.
+- Improved blocked-mutation fallbacks so they return accurate section-specific messages rather than generic page-load errors.
+
+`release and development`
+
+- Updated the application version to `0.1.0-beta.3` and codename to `Misty Delta`.
+- Updated README release identity and collaboration features.
+- Updated the site footer to show the release version/codename and author/developer links.
+- Extended reproducible Supabase migrations through the Phase F Viewer/Coauthor permission model.
+
+### Notes
+
+- Viewer and Coauthor capabilities are additive rather than mutually exclusive.
+- A Viewer can read Dashboard, Hours, Planning, and all accessible Papers but cannot mutate dashboard data.
+- A Coauthor-only account can access assigned papers and the permitted collaborative fields only.
+- A Viewer + Coauthor can read the complete dashboard and edit only the permitted fields on assigned papers.
+- Markdown/LaTeX support stores plain text; unsupported TeX commands remain visible rather than being executed as raw HTML.
+- Application data remain stored in Supabase and are not committed to the repository.
+- The web application remains authenticated even if the source-code repository is public.
+- Institutional branding assets remain subject to their respective rights and are not covered by any repository licence.
+
+### Roadmap
+
+- Add an owner-side access-management interface for Viewer and Coauthor permissions (Phase F.4).
+- Add invitation/onboarding workflows and auditability for collaborative changes.
+
+---
+
 ## v0.1.0-beta.2 "Ember Orchard"
 
 ### Summary
