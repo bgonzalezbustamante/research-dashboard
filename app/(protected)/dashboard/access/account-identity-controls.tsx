@@ -3,7 +3,7 @@ import Button from '@/components/ui/button'
 import {
   deleteManagedAccount,
   renameManagedAccount,
-} from './actions'
+} from './account-actions'
 
 type AccountIdentityControlsProps = {
   userId: string
