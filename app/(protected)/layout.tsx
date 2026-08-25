@@ -136,6 +136,9 @@ export default async function ProtectedLayout({
                 showAccessManagement={
                   isOwner
                 }
+                showAuthorDirectory={
+                  isOwner
+                }
               />
 
               <div className="hidden h-8 w-px bg-oxford-stone sm:block" />

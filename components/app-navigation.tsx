@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 type AppNavigationProps = {
   showDashboardModules?: boolean
   showAccessManagement?: boolean
+  showAuthorDirectory?: boolean
 }
 
 const dashboardLinks = [
@@ -28,14 +29,44 @@ const papersLink = {
   label: 'Papers',
 }
 
+const authorsLink = {
+  href: '/papers/authors',
+  label: 'Authors',
+}
+
 const accessLink = {
   href: '/dashboard/access',
   label: 'Access',
 }
 
+function isActiveLink(
+  pathname: string,
+  href: string
+) {
+  if (pathname === href) {
+    return true
+  }
+
+  if (href === '/dashboard') {
+    return false
+  }
+
+  if (href === '/papers') {
+    return (
+      pathname.startsWith('/papers/') &&
+      !pathname.startsWith('/papers/authors')
+    )
+  }
+
+  return pathname.startsWith(
+    `${href}/`
+  )
+}
+
 export default function AppNavigation({
   showDashboardModules = true,
   showAccessManagement = false,
+  showAuthorDirectory = false,
 }: AppNavigationProps) {
   const pathname = usePathname()
 
@@ -44,6 +75,9 @@ export default function AppNavigation({
       ? [
           ...dashboardLinks,
           papersLink,
+          ...(showAuthorDirectory
+            ? [authorsLink]
+            : []),
           ...(showAccessManagement
             ? [accessLink]
             : []),
@@ -57,12 +91,9 @@ export default function AppNavigation({
     >
       {links.map((link) => {
         const active =
-          pathname === link.href ||
-          (
-            link.href !== '/dashboard' &&
-            pathname.startsWith(
-              `${link.href}/`
-            )
+          isActiveLink(
+            pathname,
+            link.href
           )
 
         return (
