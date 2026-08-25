@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 
 type AppNavigationProps = {
   showDashboardModules?: boolean
+  showAccessManagement?: boolean
 }
 
 const dashboardLinks = [
@@ -27,8 +28,14 @@ const papersLink = {
   label: 'Papers',
 }
 
+const accessLink = {
+  href: '/dashboard/access',
+  label: 'Access',
+}
+
 export default function AppNavigation({
   showDashboardModules = true,
+  showAccessManagement = false,
 }: AppNavigationProps) {
   const pathname = usePathname()
 
@@ -37,6 +44,9 @@ export default function AppNavigation({
       ? [
           ...dashboardLinks,
           papersLink,
+          ...(showAccessManagement
+            ? [accessLink]
+            : []),
         ]
       : [papersLink]
 
@@ -48,7 +58,12 @@ export default function AppNavigation({
       {links.map((link) => {
         const active =
           pathname === link.href ||
-          pathname.startsWith(`${link.href}/`)
+          (
+            link.href !== '/dashboard' &&
+            pathname.startsWith(
+              `${link.href}/`
+            )
+          )
 
         return (
           <Link
