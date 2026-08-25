@@ -5,6 +5,9 @@ import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 import {
+  cancelAccessInvitation,
+  createAccessInvitation,
+  retryAccessInvitation,
   saveCoauthorAssignments,
   setViewerAccess,
 } from './actions'
@@ -40,6 +43,25 @@ type PaperMemberRow = {
   role: string
 }
 
+type AccessInvitationRow = {
+  id: string
+  email: string
+  viewer_enabled: boolean
+  status:
+    | 'pending'
+    | 'sent'
+    | 'failed'
+  auth_user_id: string | null
+  sent_at: string | null
+  created_at: string
+  last_error: string | null
+}
+
+type InvitationPaperRow = {
+  invitation_id: string
+  paper_id: string
+}
+
 function displayName(
   profile: ProfileRow
 ) {
@@ -48,6 +70,39 @@ function displayName(
     profile.email?.trim() ||
     'Unnamed account'
   )
+}
+
+function formatTimestamp(
+  value: string | null
+) {
+  if (!value) {
+    return 'Not sent yet'
+  }
+
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Amsterdam',
+    }
+  ).format(new Date(value))
+}
+
+function invitationStatusLabel(
+  status: AccessInvitationRow['status']
+) {
+  switch (status) {
+    case 'sent':
+      return 'Sent'
+    case 'failed':
+      return 'Send failed'
+    default:
+      return 'Pending'
+  }
 }
 
 export default async function AccessPage({
@@ -67,6 +122,8 @@ export default async function AccessPage({
     dashboardMembersResult,
     papersResult,
     paperMembersResult,
+    invitationsResult,
+    invitationPapersResult,
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -95,6 +152,24 @@ export default async function AccessPage({
       .from('paper_members')
       .select('paper_id, user_id, role')
       .eq('role', 'coauthor'),
+
+    supabase
+      .from('access_invitations')
+      .select(
+        'id, email, viewer_enabled, status, auth_user_id, sent_at, created_at, last_error'
+      )
+      .eq('owner_id', access.ownerId)
+      .in(
+        'status',
+        ['pending', 'sent', 'failed']
+      )
+      .order('created_at', {
+        ascending: false,
+      }),
+
+    supabase
+      .from('access_invitation_papers')
+      .select('invitation_id, paper_id'),
   ])
 
   if (profilesResult.error) {
@@ -121,6 +196,18 @@ export default async function AccessPage({
     )
   }
 
+  if (invitationsResult.error) {
+    throw new Error(
+      `Could not load invitations: ${invitationsResult.error.message}`
+    )
+  }
+
+  if (invitationPapersResult.error) {
+    throw new Error(
+      `Could not load invitation papers: ${invitationPapersResult.error.message}`
+    )
+  }
+
   const profiles =
     (profilesResult.data ?? []) as ProfileRow[]
 
@@ -133,16 +220,36 @@ export default async function AccessPage({
   const paperMembers =
     (paperMembersResult.data ?? []) as PaperMemberRow[]
 
+  const invitations =
+    (invitationsResult.data ?? []) as AccessInvitationRow[]
+
+  const invitationPapers =
+    (invitationPapersResult.data ?? []) as InvitationPaperRow[]
+
   const ownerProfile =
     profiles.find(
       (profile) =>
         profile.id === access.userId
     )
 
+  const invitedUserIds =
+    new Set(
+      invitations
+        .map(
+          (invitation) =>
+            invitation.auth_user_id
+        )
+        .filter(
+          (userId): userId is string =>
+            Boolean(userId)
+        )
+    )
+
   const accounts =
     profiles.filter(
       (profile) =>
-        profile.id !== access.userId
+        profile.id !== access.userId &&
+        !invitedUserIds.has(profile.id)
     )
 
   const viewerIds =
@@ -179,6 +286,33 @@ export default async function AccessPage({
     )
   }
 
+  const invitationPaperIds =
+    new Map<string, Set<string>>()
+
+  for (const row of invitationPapers) {
+    const existing =
+      invitationPaperIds.get(
+        row.invitation_id
+      ) ?? new Set<string>()
+
+    existing.add(row.paper_id)
+
+    invitationPaperIds.set(
+      row.invitation_id,
+      existing
+    )
+  }
+
+  const papersById =
+    new Map(
+      papers.map(
+        (paper) => [
+          paper.id,
+          paper,
+        ] as const
+      )
+    )
+
   const coauthorAccountIds =
     new Set(
       [...coauthorPaperIdsByUser.entries()]
@@ -202,7 +336,7 @@ export default async function AccessPage({
     <div>
       <PageHeader
         title="Access management"
-        description="Manage dashboard-wide Viewer access and paper-scoped Coauthor assignments for existing authenticated accounts."
+        description="Invite collaborators and manage dashboard-wide Viewer access and paper-scoped Coauthor assignments."
       />
 
       {params.notice && (
@@ -217,7 +351,7 @@ export default async function AccessPage({
         </div>
       )}
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <Card>
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Existing accounts
@@ -253,6 +387,15 @@ export default async function AccessPage({
             {combinedCount}
           </div>
         </Card>
+
+        <Card>
+          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+            Pending invitations
+          </div>
+          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
+            {invitations.length}
+          </div>
+        </Card>
       </div>
 
       <Card className="mb-6">
@@ -263,9 +406,7 @@ export default async function AccessPage({
             </div>
             <h2 className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
               {ownerProfile
-                ? displayName(
-                    ownerProfile
-                  )
+                ? displayName(ownerProfile)
                 : 'Owner'}
             </h2>
             {ownerProfile?.email && (
@@ -281,6 +422,248 @@ export default async function AccessPage({
         </div>
       </Card>
 
+      <Card className="mb-6">
+        <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
+          Invite account
+        </h2>
+        <p className="mt-1 max-w-3xl text-sm leading-6 text-oxford-ash">
+          Send a new collaborator an invitation by email. The selected permissions remain inactive until the recipient accepts the email, creates a password and completes onboarding.
+        </p>
+
+        <form
+          action={createAccessInvitation}
+          className="mt-5"
+        >
+          <div className="grid gap-6 lg:grid-cols-[minmax(240px,0.7fr)_minmax(0,1.3fr)]">
+            <div>
+              <label
+                htmlFor="invite_email"
+                className="mb-1 block text-sm font-medium text-oxford-charcoal"
+              >
+                Email address
+              </label>
+              <input
+                id="invite_email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                placeholder="collaborator@example.com"
+                className="w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue"
+              />
+
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-md border border-oxford-stone bg-oxford-off-white p-3">
+                <input
+                  type="checkbox"
+                  name="viewer_enabled"
+                  value="true"
+                  className="mt-1 h-4 w-4 accent-oxford-blue"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-oxford-charcoal">
+                    Dashboard Viewer
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
+                    Read-only access to Dashboard, Hours, Planning and all Papers.
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-oxford-charcoal">
+                Paper Coauthor
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-oxford-ash">
+                Optionally select the papers this person may collaborate on. Viewer and Coauthor permissions can be combined.
+              </p>
+
+              {papers.length === 0 ? (
+                <p className="mt-3 rounded-md border border-oxford-stone bg-oxford-shell px-4 py-3 text-sm text-oxford-ash">
+                  No papers are available for assignment.
+                </p>
+              ) : (
+                <div className="mt-3 max-h-72 space-y-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3">
+                  {papers.map(
+                    (paper) => (
+                      <label
+                        key={paper.id}
+                        className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm transition hover:bg-oxford-shell"
+                      >
+                        <input
+                          type="checkbox"
+                          name="paper_id"
+                          value={paper.id}
+                          className="mt-1 h-4 w-4 accent-oxford-blue"
+                        />
+                        <span className="min-w-0">
+                          <span className="font-medium text-oxford-charcoal">
+                            {paper.short_title}
+                          </span>
+                          <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
+                            {paper.title}
+                            {paper.archived_at
+                              ? ' · Archived'
+                              : ''}
+                          </span>
+                        </span>
+                      </label>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="mt-5"
+          >
+            Send invitation
+          </Button>
+        </form>
+      </Card>
+
+      {invitations.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-4">
+            <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
+              Pending invitations
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-oxford-ash">
+              These accounts have not completed onboarding, so their Viewer and Coauthor permissions are not active yet.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {invitations.map(
+              (invitation) => {
+                const selectedPaperIds =
+                  invitationPaperIds.get(
+                    invitation.id
+                  ) ?? new Set<string>()
+
+                const selectedPapers =
+                  [...selectedPaperIds]
+                    .map(
+                      (paperId) =>
+                        papersById.get(paperId)
+                    )
+                    .filter(
+                      (paper): paper is PaperRow =>
+                        Boolean(paper)
+                    )
+
+                return (
+                  <Card key={invitation.id}>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                          {invitation.email}
+                        </h3>
+                        <p className="mt-1 text-xs text-oxford-ash">
+                          {invitation.sent_at
+                            ? `Sent ${formatTimestamp(invitation.sent_at)}`
+                            : `Created ${formatTimestamp(invitation.created_at)}`}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <span className={
+                          invitation.status === 'failed'
+                            ? 'rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700'
+                            : invitation.status === 'sent'
+                              ? 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
+                              : 'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800'
+                        }>
+                          {invitationStatusLabel(
+                            invitation.status
+                          )}
+                        </span>
+
+                        {invitation.viewer_enabled && (
+                          <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
+                            Viewer
+                          </span>
+                        )}
+
+                        {selectedPapers.length > 0 && (
+                          <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
+                            Coauthor · {selectedPapers.length}{' '}
+                            {selectedPapers.length === 1
+                              ? 'paper'
+                              : 'papers'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {selectedPapers.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {selectedPapers.map(
+                          (paper) => (
+                            <span
+                              key={paper.id}
+                              className="rounded-md border border-oxford-stone bg-oxford-off-white px-2.5 py-1 text-xs text-oxford-charcoal"
+                            >
+                              {paper.short_title}
+                              {paper.archived_at
+                                ? ' · Archived'
+                                : ''}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    )}
+
+                    {invitation.status === 'failed' &&
+                      invitation.last_error && (
+                        <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                          {invitation.last_error}
+                        </p>
+                      )}
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {(invitation.status === 'pending' ||
+                        invitation.status === 'failed') && (
+                        <form action={retryAccessInvitation}>
+                          <input
+                            type="hidden"
+                            name="invitation_id"
+                            value={invitation.id}
+                          />
+                          <Button
+                            type="submit"
+                            variant="secondary"
+                          >
+                            Retry email
+                          </Button>
+                        </form>
+                      )}
+
+                      <form action={cancelAccessInvitation}>
+                        <input
+                          type="hidden"
+                          name="invitation_id"
+                          value={invitation.id}
+                        />
+                        <Button
+                          type="submit"
+                          variant="danger"
+                        >
+                          Cancel invitation
+                        </Button>
+                      </form>
+                    </div>
+                  </Card>
+                )
+              }
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="mb-4">
         <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
           Accounts
@@ -294,10 +677,10 @@ export default async function AccessPage({
         <Card>
           <div className="py-6 text-center">
             <h3 className="font-serif text-lg font-semibold text-oxford-blue">
-              No other authenticated accounts
+              No active collaborator accounts
             </h3>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-oxford-ash">
-              F.4 manages accounts that already exist in Supabase Auth. Invitation and onboarding support will be added in F.5.
+              Use the invitation form above to add a new Viewer, Coauthor, or combined account.
             </p>
           </div>
         </Card>
@@ -321,9 +704,7 @@ export default async function AccessPage({
                   <div className="flex flex-col gap-4 border-b border-oxford-stone pb-5 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-                        {displayName(
-                          profile
-                        )}
+                        {displayName(profile)}
                       </h3>
 
                       {profile.email && (
@@ -410,9 +791,7 @@ export default async function AccessPage({
                       </p>
 
                       <form
-                        action={
-                          saveCoauthorAssignments
-                        }
+                        action={saveCoauthorAssignments}
                         className="mt-4"
                       >
                         <input
@@ -466,9 +845,7 @@ export default async function AccessPage({
                           type="submit"
                           variant="primary"
                           className="mt-4"
-                          disabled={
-                            papers.length === 0
-                          }
+                          disabled={papers.length === 0}
                         >
                           Save paper access
                         </Button>
@@ -484,10 +861,10 @@ export default async function AccessPage({
 
       <Card className="mt-6 border-dashed">
         <h2 className="font-serif text-lg font-semibold text-oxford-blue">
-          Next: F.5 invitations and onboarding
+          Next: F.6 audit and hardening
         </h2>
         <p className="mt-2 text-sm leading-6 text-oxford-ash">
-          F.4 intentionally manages only accounts that already exist. F.5 will add owner-managed invitations so a new Viewer, Coauthor, or combined account can be invited by email and receive the intended permissions during onboarding.
+          The final Phase F checkpoint will audit permission transitions, invitation cancellation and stale accounts, archived-paper behaviour, direct API mutation attempts and access-change traceability before Misty Delta is tagged.
         </p>
       </Card>
     </div>
