@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import AppNavigation from '@/components/app-navigation'
 import OxfordLogo from '@/components/oxford-logo'
+import OwnerUtilityNavigation from '@/components/owner-utility-navigation'
 import CoauthorPaperShortcut from '@/components/papers/coauthor-paper-shortcut'
 import FormattingHints from '@/components/papers/formatting-hints'
 import ResearchTextEnhancer from '@/components/papers/research-text-enhancer'
@@ -133,12 +134,6 @@ export default async function ProtectedLayout({
                 showDashboardModules={
                   access.hasDashboardAccess
                 }
-                showAccessManagement={
-                  isOwner
-                }
-                showAuthorDirectory={
-                  isOwner
-                }
               />
 
               <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
@@ -196,6 +191,10 @@ export default async function ProtectedLayout({
           {children}
         </div>
       </main>
+
+      {isOwner && (
+        <OwnerUtilityNavigation />
+      )}
 
       <SiteFooter />
     </div>
