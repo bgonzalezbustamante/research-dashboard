@@ -181,7 +181,8 @@ export default {
 
       const {
         data: existingProfile,
-      } = await ctx.supabaseAdmin
+        error: existingProfileError,
+      } = await ctx.supabase
         .from('profiles')
         .select('id')
         .ilike(
@@ -190,25 +191,79 @@ export default {
         )
         .maybeSingle()
 
-      if (existingProfile) {
-        await ctx.supabaseAdmin
-          .from('access_invitations')
-          .update({
-            status: 'failed',
-            last_error:
-              'An account already exists for this email address.',
-            updated_at:
-              new Date().toISOString(),
-          })
-          .eq('id', invitation.id)
-
+      if (existingProfileError) {
         return jsonResponse(
           {
             error:
-              'An account already exists for this email address',
+              'Existing account status could not be checked',
           },
-          409
+          500
         )
+      }
+
+      if (existingProfile) {
+        const {
+          data: existingAuthData,
+          error: existingAuthError,
+        } =
+          await ctx.supabaseAdmin.auth.admin
+            .getUserById(
+              existingProfile.id
+            )
+
+        if (
+          existingAuthError ||
+          !existingAuthData.user
+        ) {
+          return jsonResponse(
+            {
+              error:
+                'Existing account status could not be checked',
+            },
+            500
+          )
+        }
+
+        const existingAuthUser =
+          existingAuthData.user
+
+        const isUnacceptedInvite =
+          !existingAuthUser.confirmed_at &&
+          Boolean(
+            existingAuthUser.invited_at
+          )
+
+        if (!isUnacceptedInvite) {
+          const {
+            error: markFailedError,
+          } = await ctx.supabase.rpc(
+            'mark_access_invitation_failed',
+            {
+              p_invitation_id:
+                invitation.id,
+              p_error:
+                'An account already exists for this email address.',
+            }
+          )
+
+          if (markFailedError) {
+            return jsonResponse(
+              {
+                error:
+                  'An account already exists for this email address, and the invitation record could not be updated.',
+              },
+              500
+            )
+          }
+
+          return jsonResponse(
+            {
+              error:
+                'An account already exists for this email address',
+            },
+            409
+          )
+        }
       }
 
       const {
@@ -235,16 +290,27 @@ export default {
           inviteError?.message ??
           'The invitation email could not be sent.'
 
-        await ctx.supabaseAdmin
-          .from('access_invitations')
-          .update({
-            status: 'failed',
-            last_error:
+        const {
+          error: markFailedError,
+        } = await ctx.supabase.rpc(
+          'mark_access_invitation_failed',
+          {
+            p_invitation_id:
+              invitation.id,
+            p_error:
               message.slice(0, 500),
-            updated_at:
-              new Date().toISOString(),
-          })
-          .eq('id', invitation.id)
+          }
+        )
+
+        if (markFailedError) {
+          return jsonResponse(
+            {
+              error:
+                `${message} The invitation record could not be updated.`,
+            },
+            500
+          )
+        }
 
         return jsonResponse(
           { error: message },
@@ -252,22 +318,19 @@ export default {
         )
       }
 
-      const { error: updateError } =
-        await ctx.supabaseAdmin
-          .from('access_invitations')
-          .update({
-            status: 'sent',
-            auth_user_id:
-              invitedUser.user.id,
-            sent_at:
-              new Date().toISOString(),
-            last_error: null,
-            updated_at:
-              new Date().toISOString(),
-          })
-          .eq('id', invitation.id)
+      const {
+        error: finalizeError,
+      } = await ctx.supabase.rpc(
+        'mark_access_invitation_sent',
+        {
+          p_invitation_id:
+            invitation.id,
+          p_auth_user_id:
+            invitedUser.user.id,
+        }
+      )
 
-      if (updateError) {
+      if (finalizeError) {
         return jsonResponse(
           {
             error:
