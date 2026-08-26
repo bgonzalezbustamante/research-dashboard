@@ -124,7 +124,7 @@ export default async function AccountPage({
           Email address
         </h2>
         <p className="mt-1 text-sm leading-6 text-oxford-ash">
-          Your email address is your sign-in identity. A change takes effect only after Supabase completes its email-verification process.
+          Your email address is your sign-in identity. A change takes effect only after the required email-verification steps are completed.
         </p>
 
         <div className="mt-5 max-w-xl rounded-md border border-oxford-stone bg-oxford-off-white px-4 py-3">
