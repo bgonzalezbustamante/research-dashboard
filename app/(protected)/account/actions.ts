@@ -185,14 +185,13 @@ export async function requestEmailChange(
 
     redirectAccount(
       'error',
-      error.message ||
-        'The email change could not be requested.'
+      'The email change could not be requested.'
     )
   }
 
   redirectAccount(
     'notice',
-    'Email change requested. Check both your current and new email addresses and complete all confirmation steps sent by Supabase.'
+    'Email change requested. Check both your current and new email addresses and complete all confirmation steps.'
   )
 }
 
@@ -241,8 +240,7 @@ export async function changeOwnPassword(
 
     redirectAccount(
       'error',
-      error.message ||
-        'Your password could not be updated.'
+      'Your password could not be updated.'
     )
   }
 
