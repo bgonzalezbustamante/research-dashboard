@@ -60,6 +60,10 @@ export default function ReleaseNotesPage() {
                           {release.status}
                         </span>
                       )}
+
+                      <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2.5 py-1 text-xs font-medium text-oxford-ash">
+                        {release.releasedOn}
+                      </span>
                     </div>
 
                     <p className="mt-2 text-sm font-medium text-oxford-charcoal">
