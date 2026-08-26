@@ -207,9 +207,9 @@ export default function PasswordRecoveryPage() {
   ) {
     event.preventDefault()
 
-    if (password.length < 8) {
+    if (password.length < 10) {
       setMessage(
-        'Choose a password with at least 8 characters.'
+        'Choose a password with at least 10 characters.'
       )
       return
     }
@@ -320,7 +320,7 @@ export default function PasswordRecoveryPage() {
                     name="password"
                     type="password"
                     required
-                    minLength={8}
+                    minLength={10}
                     autoComplete="new-password"
                     value={password}
                     onChange={(event) =>
@@ -343,7 +343,7 @@ export default function PasswordRecoveryPage() {
                     name="confirm_password"
                     type="password"
                     required
-                    minLength={8}
+                    minLength={10}
                     autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(event) =>
@@ -356,7 +356,7 @@ export default function PasswordRecoveryPage() {
                 </div>
 
                 <p className="text-xs leading-5 text-oxford-ash">
-                  Use at least 8 characters. After the password is changed, all current dashboard sessions for this account will be signed out.
+                  Use at least 10 characters. After the password is changed, all current dashboard sessions for this account will be signed out.
                 </p>
 
                 {message && (
