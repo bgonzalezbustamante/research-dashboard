@@ -70,11 +70,12 @@ select {
 
 /*
  * Non-owner accounts are read-only by default. GET forms remain
- * available for navigation and filtering. A paper-scoped coauthor form
- * must opt in explicitly with data-coauthor-editable="true".
+ * available for navigation and filtering. Paper-scoped coauthor forms
+ * opt in with data-coauthor-editable="true"; personal account forms
+ * opt in with data-self-service="true".
  */
-[data-app-read-only="true"] main form:not([method="get" i]):not([data-coauthor-editable="true"]),
-[data-app-read-only="true"] main details:has(form:not([method="get" i]):not([data-coauthor-editable="true"])),
+[data-app-read-only="true"] main form:not([method="get" i]):not([data-coauthor-editable="true"]):not([data-self-service="true"]),
+[data-app-read-only="true"] main details:has(form:not([method="get" i]):not([data-coauthor-editable="true"]):not([data-self-service="true"])),
 [data-app-read-only="true"] main a[href="/papers/new"],
 [data-app-read-only="true"] main a[href^="/papers/"][href$="/edit"] {
   display: none !important;
