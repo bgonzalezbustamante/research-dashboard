@@ -157,6 +157,13 @@ export default async function ProtectedLayout({
                   </span>
                 )}
 
+                <Link
+                  href="/account"
+                  className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal transition hover:border-oxford-blue hover:text-oxford-blue"
+                >
+                  Account
+                </Link>
+
                 <form
                   action="/auth/signout"
                   method="post"
