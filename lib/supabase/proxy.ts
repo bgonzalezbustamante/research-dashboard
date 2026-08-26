@@ -18,6 +18,16 @@ function isDashboardOnlyPath(
   )
 }
 
+function isPublicPath(
+  pathname: string
+) {
+  return (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/auth') ||
+    pathname === '/release-notes'
+  )
+}
+
 export async function updateSession(
   request: NextRequest
 ) {
@@ -96,11 +106,8 @@ export async function updateSession(
 
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith(
-      '/login'
-    ) &&
-    !request.nextUrl.pathname.startsWith(
-      '/auth'
+    !isPublicPath(
+      request.nextUrl.pathname
     )
   ) {
     const siteUrl =
