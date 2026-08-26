@@ -7,6 +7,7 @@ export type ReleaseNote = {
   version: string
   codename: string
   status?: string
+  releasedOn: string
   comparison: string
   summary: string
   sections: ReleaseNoteSection[]
@@ -17,6 +18,7 @@ export const releases: ReleaseNote[] = [
     version: 'v0.1.0-beta.3',
     codename: 'Misty Delta',
     status: 'Current beta',
+    releasedOn: '26 Aug 2026',
     comparison: 'What changed since beta.2',
     summary:
       'Misty Delta turns the Research Dashboard from a single-user workspace into a controlled collaborative environment, while also improving Hours, Planning, paper workspaces and personal account management.',
@@ -78,6 +80,7 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.2',
     codename: 'Ember Orchard',
+    releasedOn: '24 Aug 2026',
     comparison: 'What changed since beta.1',
     summary:
       'Ember Orchard focused on making working-time analytics more consistent and useful across Hours, Planning and the main Dashboard.',
@@ -111,6 +114,7 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.1',
     codename: 'Ember Willow',
+    releasedOn: '22 Aug 2026',
     comparison: 'First beta release',
     summary:
       'Ember Willow established the first production-ready version of the Research Dashboard and brought Papers, Hours, Planning and the executive Dashboard into one authenticated workspace.',
@@ -133,7 +137,7 @@ export const releases: ReleaseNote[] = [
         title: 'Planning',
         items: [
           'Added biweekly planning periods for the first and second half of each month.',
-          'Added 5-, 10- and 15-day paper commitments plus blocked time for teaching, conferences, holidays and administrative work.',
+          'Added 5-, 10-, and 15-day paper commitments plus blocked time for teaching, conferences, holidays and administrative work.',
           'Added monthly and annual planning views and planned-versus-actual research comparisons.',
         ],
       },
