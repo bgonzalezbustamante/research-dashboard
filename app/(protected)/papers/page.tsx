@@ -84,8 +84,11 @@ type PapersPageProps = {
     status?: string
     archive?: string
     sort?: string
+    page?: string
   }>
 }
+
+const PAPERS_PER_PAGE = 10
 
 const statusOptions = [
   {
@@ -645,6 +648,12 @@ export default async function PapersPage({
       ? params.sort!
       : 'updated-desc'
 
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
+
   const supabase =
     await createClient()
 
@@ -1059,6 +1068,111 @@ export default async function PapersPage({
     }
   })
 
+  const totalMatchingPapers =
+    filteredPapers.length
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalMatchingPapers /
+          PAPERS_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    PAPERS_PER_PAGE
+
+  const paginatedPapers =
+    filteredPapers.slice(
+      pageStart,
+      pageStart +
+        PAPERS_PER_PAGE
+    )
+
+  const visibleStart =
+    totalMatchingPapers === 0
+      ? 0
+      : pageStart + 1
+
+  const visibleEnd =
+    Math.min(
+      pageStart +
+        PAPERS_PER_PAGE,
+      totalMatchingPapers
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) => {
+    const pageParams =
+      new URLSearchParams()
+
+    if (query) {
+      pageParams.set(
+        'q',
+        query
+      )
+    }
+
+    if (
+      statusFilter !== 'all'
+    ) {
+      pageParams.set(
+        'status',
+        statusFilter
+      )
+    }
+
+    if (
+      archiveFilter !==
+      'active'
+    ) {
+      pageParams.set(
+        'archive',
+        archiveFilter
+      )
+    }
+
+    if (
+      sort !== 'updated-desc'
+    ) {
+      pageParams.set(
+        'sort',
+        sort
+      )
+    }
+
+    if (pageNumber > 1) {
+      pageParams.set(
+        'page',
+        String(pageNumber)
+      )
+    }
+
+    const pageQuery =
+      pageParams.toString()
+
+    return pageQuery
+      ? `/papers?${pageQuery}`
+      : '/papers'
+  }
+
   const activePapers =
     papers.filter(
       (paper) =>
@@ -1311,17 +1425,24 @@ export default async function PapersPage({
           </ButtonLink>
 
           <span className="ml-auto text-sm text-oxford-ash">
+            Showing{' '}
+            <strong className="font-medium text-oxford-charcoal">
+              {visibleStart ===
+              visibleEnd
+                ? visibleStart
+                : `${visibleStart}–${visibleEnd}`}
+            </strong>{' '}
+            of{' '}
             <strong className="font-medium text-oxford-charcoal">
               {
-                filteredPapers.length
+                totalMatchingPapers
               }
-            </strong>{' '}
-            shown
+            </strong>
           </span>
         </div>
       </form>
 
-      {filteredPapers.length ===
+      {totalMatchingPapers ===
       0 ? (
         <div className="rounded-lg border border-oxford-stone bg-white px-6 py-12 text-center">
           {papers.length ===
@@ -1370,209 +1491,254 @@ export default async function PapersPage({
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-oxford-stone bg-white">
-          <table className="w-full min-w-[1150px] text-left text-sm">
-            <thead className="border-b border-oxford-stone bg-oxford-shell">
-              <tr>
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Paper
-                </th>
+        <div className="space-y-4">
+          <div className="overflow-x-auto rounded-lg border border-oxford-stone bg-white">
+            <table className="w-full min-w-[1150px] text-left text-sm">
+              <thead className="border-b border-oxford-stone bg-oxford-shell">
+                <tr>
+                  <th className="px-4 py-3 font-medium text-oxford-charcoal">
+                    Paper
+                  </th>
 
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Status
-                </th>
+                  <th className="px-4 py-3 font-medium text-oxford-charcoal">
+                    Status
+                  </th>
 
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Next milestone
-                </th>
+                  <th className="px-4 py-3 font-medium text-oxford-charcoal">
+                    Next milestone
+                  </th>
 
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Latest activity
-                </th>
+                  <th className="px-4 py-3 font-medium text-oxford-charcoal">
+                    Latest activity
+                  </th>
 
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Citations
-                </th>
+                  <th className="px-4 py-3 font-medium text-oxford-charcoal">
+                    Citations
+                  </th>
 
-                <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                  Hours
-                </th>
-              </tr>
-            </thead>
+                  <th className="px-4 py-3 font-medium text-oxford-charcoal">
+                    Hours
+                  </th>
+                </tr>
+              </thead>
 
-            <tbody>
-              {filteredPapers.map(
-                (paper) => {
-                  const milestone =
-                    nextMilestoneByPaper.get(
-                      paper.id
-                    )
-
-                  const latestHistory =
-                    latestHistoryByPaper.get(
-                      paper.id
-                    )
-
-                  const authors =
-                    authorsByPaper.get(
-                      paper.id
-                    ) ?? []
-
-                  const citation =
-                    citationDisplayByPaper.get(
-                      paper.id
-                    )
-
-                  const paperMinutes =
-                    hoursByPaper.get(
-                      paper.id
-                    ) ?? 0
-
-                  return (
-                    <tr
-                      key={
+              <tbody>
+                {paginatedPapers.map(
+                  (paper) => {
+                    const milestone =
+                      nextMilestoneByPaper.get(
                         paper.id
-                      }
-                      className="border-b border-oxford-stone align-top last:border-b-0 hover:bg-oxford-off-white"
-                    >
-                      <td className="px-4 py-4">
-                        <Link
-                          href={`/papers/${paper.id}`}
-                          className="font-medium text-oxford-blue hover:underline"
-                        >
-                          {
-                            paper.short_title
-                          }
-                        </Link>
+                      )
 
-                        <div className="mt-1 max-w-md leading-5 text-oxford-charcoal">
-                          {
-                            paper.title
-                          }
-                        </div>
+                    const latestHistory =
+                      latestHistoryByPaper.get(
+                        paper.id
+                      )
 
-                        {authors.length >
-                          0 && (
-                          <div className="mt-2 max-w-md text-xs leading-5 text-oxford-ash">
-                            {authors.join(
-                              ', '
-                            )}
+                    const authors =
+                      authorsByPaper.get(
+                        paper.id
+                      ) ?? []
+
+                    const citation =
+                      citationDisplayByPaper.get(
+                        paper.id
+                      )
+
+                    const paperMinutes =
+                      hoursByPaper.get(
+                        paper.id
+                      ) ?? 0
+
+                    return (
+                      <tr
+                        key={
+                          paper.id
+                        }
+                        className="border-b border-oxford-stone align-top last:border-b-0 hover:bg-oxford-off-white"
+                      >
+                        <td className="px-4 py-4">
+                          <Link
+                            href={`/papers/${paper.id}`}
+                            className="font-medium text-oxford-blue hover:underline"
+                          >
+                            {
+                              paper.short_title
+                            }
+                          </Link>
+
+                          <div className="mt-1 max-w-md leading-5 text-oxford-charcoal">
+                            {
+                              paper.title
+                            }
                           </div>
-                        )}
 
-                        {paper.archived_at && (
-                          <span className="mt-2 inline-flex rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
-                            Archived
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <StatusBadge
-                          status={
-                            paper.status
-                          }
-                        />
-
-                        {paper.status ===
-                          'revise-round' &&
-                          paper.revision_round && (
-                            <div className="mt-2 text-xs text-oxford-ash">
-                              Round{' '}
-                              {
-                                paper.revision_round
-                              }
+                          {authors.length >
+                            0 && (
+                            <div className="mt-2 max-w-md text-xs leading-5 text-oxford-ash">
+                              {authors.join(
+                                ', '
+                              )}
                             </div>
                           )}
-                      </td>
 
-                      <td className="px-4 py-4">
-                        {milestone ? (
-                          <>
-                            <div className="max-w-52 text-oxford-charcoal">
-                              {
-                                milestone.title
-                              }
-                            </div>
+                          {paper.archived_at && (
+                            <span className="mt-2 inline-flex rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                              Archived
+                            </span>
+                          )}
+                        </td>
 
-                            <div className="mt-1 text-xs text-oxford-ash">
-                              {formatDate(
-                                milestone.target_date
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <span className="text-oxford-ash">
-                            —
-                          </span>
-                        )}
-                      </td>
+                        <td className="px-4 py-4">
+                          <StatusBadge
+                            status={
+                              paper.status
+                            }
+                          />
 
-                      <td className="px-4 py-4">
-                        {latestHistory ? (
-                          <>
-                            <div className="max-w-52 font-medium text-oxford-charcoal">
-                              {getHistoryLabel(
-                                latestHistory
-                              )}
-                            </div>
-
-                            <div className="mt-1 text-xs text-oxford-ash">
-                              {formatDate(
-                                latestHistory.event_date
-                              )}
-                            </div>
-
-                            {latestHistory.venue && (
-                              <div className="mt-1 max-w-52 truncate text-xs text-oxford-ash">
+                          {paper.status ===
+                            'revise-round' &&
+                            paper.revision_round && (
+                              <div className="mt-2 text-xs text-oxford-ash">
+                                Round{' '}
                                 {
-                                  latestHistory.venue
+                                  paper.revision_round
                                 }
                               </div>
                             )}
-                          </>
-                        ) : (
-                          <span className="text-oxford-ash">
-                            —
-                          </span>
-                        )}
-                      </td>
+                        </td>
 
-                      <td className="px-4 py-4">
-                        {citation ? (
-                          <>
-                            <div className="font-medium text-oxford-charcoal">
-                              {
-                                citation.value
-                              }
-                            </div>
+                        <td className="px-4 py-4">
+                          {milestone ? (
+                            <>
+                              <div className="max-w-52 text-oxford-charcoal">
+                                {
+                                  milestone.title
+                                }
+                              </div>
 
-                            <div className="mt-1 text-xs text-oxford-ash">
-                              {
-                                citation.detail
-                              }
-                            </div>
-                          </>
-                        ) : (
-                          <span className="text-oxford-ash">
-                            —
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="whitespace-nowrap px-4 py-4">
-                        <span className="font-medium text-oxford-charcoal">
-                          {formatDuration(
-                            paperMinutes
+                              <div className="mt-1 text-xs text-oxford-ash">
+                                {formatDate(
+                                  milestone.target_date
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-oxford-ash">
+                              —
+                            </span>
                           )}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                }
-              )}
-            </tbody>
-          </table>
+                        </td>
+
+                        <td className="px-4 py-4">
+                          {latestHistory ? (
+                            <>
+                              <div className="max-w-52 font-medium text-oxford-charcoal">
+                                {getHistoryLabel(
+                                  latestHistory
+                                )}
+                              </div>
+
+                              <div className="mt-1 text-xs text-oxford-ash">
+                                {formatDate(
+                                  latestHistory.event_date
+                                )}
+                              </div>
+
+                              {latestHistory.venue && (
+                                <div className="mt-1 max-w-52 truncate text-xs text-oxford-ash">
+                                  {
+                                    latestHistory.venue
+                                  }
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-oxford-ash">
+                              —
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="px-4 py-4">
+                          {citation ? (
+                            <>
+                              <div className="font-medium text-oxford-charcoal">
+                                {
+                                  citation.value
+                                }
+                              </div>
+
+                              <div className="mt-1 text-xs text-oxford-ash">
+                                {
+                                  citation.detail
+                                }
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-oxford-ash">
+                              —
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="whitespace-nowrap px-4 py-4">
+                          <span className="font-medium text-oxford-charcoal">
+                            {formatDuration(
+                              paperMinutes
+                            )}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  }
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <nav
+              aria-label="Papers pagination"
+              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <p className="text-sm text-oxford-ash">
+                Page{' '}
+                <strong className="font-medium text-oxford-charcoal">
+                  {currentPage}
+                </strong>{' '}
+                of{' '}
+                <strong className="font-medium text-oxford-charcoal">
+                  {totalPages}
+                </strong>
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {currentPage > 1 && (
+                  <ButtonLink
+                    href={getPageHref(
+                      currentPage - 1
+                    )}
+                    variant="secondary"
+                  >
+                    Previous
+                  </ButtonLink>
+                )}
+
+                {currentPage <
+                  totalPages && (
+                  <ButtonLink
+                    href={getPageHref(
+                      currentPage + 1
+                    )}
+                    variant="secondary"
+                  >
+                    Next
+                  </ButtonLink>
+                )}
+              </div>
+            </nav>
+          )}
         </div>
       )}
     </div>
