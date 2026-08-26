@@ -69,9 +69,9 @@ export async function completeOnboarding(
     )
   }
 
-  if (password.length < 8) {
+  if (password.length < 10) {
     redirectWithError(
-      'Choose a password with at least 8 characters.'
+      'Choose a password with at least 10 characters.'
     )
   }
 
