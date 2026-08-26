@@ -32,12 +32,22 @@ function isCoauthorEditableForm(
   )
 }
 
+function isSelfServiceForm(
+  form: HTMLFormElement
+) {
+  return (
+    form.dataset.selfService ===
+    'true'
+  )
+}
+
 function shouldHideForm(
   form: HTMLFormElement
 ) {
   return (
     isMutationForm(form) &&
-    !isCoauthorEditableForm(form)
+    !isCoauthorEditableForm(form) &&
+    !isSelfServiceForm(form)
   )
 }
 
@@ -223,6 +233,7 @@ export default function ReadOnlyMode({
       attributes: true,
       attributeFilter: [
         'data-coauthor-editable',
+        'data-self-service',
       ],
     })
 
