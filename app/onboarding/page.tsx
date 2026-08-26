@@ -250,7 +250,7 @@ export default async function OnboardingPage({
                         name="password"
                         type="password"
                         required
-                        minLength={8}
+                        minLength={10}
                         autoComplete="new-password"
                         className="w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue"
                       />
@@ -268,7 +268,7 @@ export default async function OnboardingPage({
                         name="confirm_password"
                         type="password"
                         required
-                        minLength={8}
+                        minLength={10}
                         autoComplete="new-password"
                         className="w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue"
                       />
@@ -276,7 +276,7 @@ export default async function OnboardingPage({
                   </div>
 
                   <p className="text-xs leading-5 text-oxford-ash">
-                    Use at least 8 characters. Completing onboarding activates only the permissions shown above.
+                    Use at least 10 characters. Completing onboarding activates only the permissions shown above.
                   </p>
 
                   {params.error && (
