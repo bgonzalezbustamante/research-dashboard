@@ -137,7 +137,7 @@ export const releases: ReleaseNote[] = [
         title: 'Planning',
         items: [
           'Added biweekly planning periods for the first and second half of each month.',
-          'Added 5-, 10-, and 15-day paper commitments plus blocked time for teaching, conferences, holidays and administrative work.',
+          'Added 5-, 10- and 15-day paper commitments plus blocked time for teaching, conferences, holidays and administrative work.',
           'Added monthly and annual planning views and planned-versus-actual research comparisons.',
         ],
       },
