@@ -31,11 +31,11 @@ enabled = false
 # key_path = "../certs/my-key.pem"
 
 [db]
-# Port to use for the API URL.
+# Port to use for the local database URL.
 port = 54322
 # Port used by db diff command to initialize the shadow database.
 shadow_port = 54320
-# Maximum amount of time to wait for health check when starting up.
+# Maximum amount of time to wait for health check when starting the local database.
 health_timeout = "2m"
 # The database major version to use. This has to be the same as your remote database's. Run `SHOW
 # server_version;` on the remote database to check.
@@ -66,7 +66,7 @@ schema_paths = []
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
 enabled = false
-# Specifies an ordered list of seed files to load during a db reset.
+# Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = ["./seed.sql"]
 
@@ -97,7 +97,7 @@ enabled = true
 port = 54323
 # External URL of the API server that frontend connects to.
 api_url = "http://127.0.0.1"
-# OpenAI API Key for Studio AI assistant.
+# OpenAI API Key to use for Supabase AI in the Supabase Studio.
 openai_api_key = "env(OPENAI_API_KEY)"
 
 # Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
@@ -190,14 +190,16 @@ password_requirements = ""
 
 # Configure WebAuthn relying party settings (required when passkey is enabled).
 # [auth.webauthn]
-# enabled = false
+# rp_display_name = "Supabase"
+# rp_id = "localhost"
+# rp_origins = ["http://127.0.0.1:3000"]
 
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
 email_sent = 2
 # Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
 sms_sent = 30
-# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins to be enabled.
+# Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
 anonymous_users = 30
 # Number of sessions that can be refreshed in a 5 minute interval per IP address.
 token_refresh = 150
@@ -332,7 +334,7 @@ skip_nonce_check = false
 # If enabled, it will allow the user to successfully authenticate when the provider does not return an email address.
 email_optional = false
 
-# Allow Solana wallet holders to sign in with Supabase Auth via the Sign in with Solana standard.
+# Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
 [auth.web3.solana]
 enabled = false
@@ -373,7 +375,7 @@ allow_dynamic_registration = false
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.
 # `per_worker` (default) — enables hot reload during local development.
-# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or symlinks).
+# `oneshot` — fallback mode if hot reload causes issues (e.g. in large repos or with symlinks).
 policy = "per_worker"
 # Port to attach the Chrome inspector for debugging edge functions.
 inspector_port = 8083
