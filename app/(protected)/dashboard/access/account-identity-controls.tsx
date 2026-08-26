@@ -71,7 +71,7 @@ export default function AccountIdentityControls({
               Delete account
             </h4>
             <p className="mt-1 text-sm leading-6 text-oxford-ash">
-              Delete the authentication login and revoke all Viewer and Coauthor access. The profile is deactivated and hidden rather than physically removed, preserving protected system records and scholarly attribution.
+              Delete the authentication login and revoke all Viewer and Coauthor access. If the profile still anchors historical attribution or personal dashboard data, a deactivated profile is retained; otherwise it is removed completely.
             </p>
 
             <form
