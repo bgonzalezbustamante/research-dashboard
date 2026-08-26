@@ -151,34 +151,53 @@ export default function AccountCard({
               </p>
             ) : (
               <div className="max-h-72 space-y-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3">
-                {papers.map((paper) => (
-                  <label
-                    key={paper.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm transition hover:bg-oxford-shell"
-                  >
-                    <input
-                      type="checkbox"
-                      name="paper_id"
-                      value={paper.id}
-                      defaultChecked={
-                        assigned.has(paper.id)
-                      }
-                      className="mt-1 h-4 w-4 accent-oxford-blue"
-                    />
+                {papers.map((paper) => {
+                  const archived =
+                    Boolean(
+                      paper.archived_at
+                    )
 
-                    <span className="min-w-0">
-                      <span className="font-medium text-oxford-charcoal">
-                        {paper.short_title}
+                  const alreadyAssigned =
+                    assigned.has(paper.id)
+
+                  const disabled =
+                    archived &&
+                    !alreadyAssigned
+
+                  return (
+                    <label
+                      key={paper.id}
+                      className={
+                        disabled
+                          ? 'flex cursor-not-allowed items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm opacity-60'
+                          : 'flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm transition hover:bg-oxford-shell'
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        name="paper_id"
+                        value={paper.id}
+                        defaultChecked={
+                          alreadyAssigned
+                        }
+                        disabled={disabled}
+                        className="mt-1 h-4 w-4 accent-oxford-blue"
+                      />
+
+                      <span className="min-w-0">
+                        <span className="font-medium text-oxford-charcoal">
+                          {paper.short_title}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
+                          {paper.title}
+                          {archived
+                            ? ' · Archived'
+                            : ''}
+                        </span>
                       </span>
-                      <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
-                        {paper.title}
-                        {paper.archived_at
-                          ? ' · Archived'
-                          : ''}
-                      </span>
-                    </span>
-                  </label>
-                ))}
+                    </label>
+                  )
+                })}
               </div>
             )}
 
@@ -190,6 +209,10 @@ export default function AccountCard({
             >
               Save paper access
             </Button>
+
+            <p className="mt-2 text-xs leading-5 text-oxford-ash">
+              Archived assignments may be removed, but archived papers cannot receive new Coauthor assignments.
+            </p>
           </form>
         </div>
       </div>

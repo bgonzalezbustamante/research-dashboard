@@ -22,6 +22,7 @@ type HoursPageProps = {
     period?: string
     dailyError?: string
     labelError?: string
+    locationError?: string
     sessionError?: string
   }>
 }
@@ -664,6 +665,9 @@ export default async function HoursPage({
         }
         error={
           params.sessionError
+        }
+        locationError={
+          params.locationError
         }
       />
 

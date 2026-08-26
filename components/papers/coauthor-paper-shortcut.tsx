@@ -84,6 +84,9 @@ export default function CoauthorPaperShortcut() {
   const [isCoauthor, setIsCoauthor] =
     useState(false)
 
+  const [isArchived, setIsArchived] =
+    useState(false)
+
   useEffect(() => {
     let active = true
 
@@ -93,6 +96,7 @@ export default function CoauthorPaperShortcut() {
       if (!paperId) {
         if (active) {
           setIsCoauthor(false)
+          setIsArchived(false)
         }
         return
       }
@@ -113,19 +117,34 @@ export default function CoauthorPaperShortcut() {
       ) {
         if (active) {
           setIsCoauthor(false)
+          setIsArchived(false)
         }
         return
       }
 
-      const {
-        data: membership,
-        error: membershipError,
-      } = await supabase
-        .from('paper_members')
-        .select('role')
-        .eq('paper_id', paperId)
-        .eq('user_id', userId)
-        .maybeSingle()
+      const [
+        membershipResult,
+        paperResult,
+      ] = await Promise.all([
+        supabase
+          .from('paper_members')
+          .select('role')
+          .eq('paper_id', paperId)
+          .eq('user_id', userId)
+          .maybeSingle(),
+
+        supabase
+          .from('papers')
+          .select('archived_at')
+          .eq('id', paperId)
+          .maybeSingle(),
+      ])
+
+      const membership =
+        membershipResult.data
+
+      const membershipError =
+        membershipResult.error
 
       if (
         !active ||
@@ -134,6 +153,31 @@ export default function CoauthorPaperShortcut() {
       ) {
         if (active) {
           setIsCoauthor(false)
+          setIsArchived(false)
+        }
+        return
+      }
+
+      if (
+        paperResult.error ||
+        !paperResult.data
+      ) {
+        if (active) {
+          setIsCoauthor(false)
+          setIsArchived(false)
+        }
+        return
+      }
+
+      const archived =
+        Boolean(
+          paperResult.data.archived_at
+        )
+
+      if (archived) {
+        if (active) {
+          setIsCoauthor(true)
+          setIsArchived(true)
         }
         return
       }
@@ -163,6 +207,7 @@ export default function CoauthorPaperShortcut() {
         ownNoteIds
       )
       setIsCoauthor(true)
+      setIsArchived(false)
     }
 
     void loadPermission()
@@ -178,6 +223,17 @@ export default function CoauthorPaperShortcut() {
     !isCoauthor
   ) {
     return null
+  }
+
+  if (isArchived) {
+    return (
+      <div className="mb-6 rounded-lg border border-oxford-stone bg-oxford-shell px-4 py-3 text-sm leading-6 text-oxford-charcoal">
+        <strong className="font-medium">
+          Archived paper.
+        </strong>{' '}
+        Your Coauthor assignment remains visible for reference, but the paper is read-only until the Owner restores it.
+      </div>
+    )
   }
 
   return (

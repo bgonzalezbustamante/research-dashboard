@@ -11,6 +11,7 @@ An authenticated personal research-management dashboard for tracking papers, wor
 - Paper workflow, milestones, revision history, notes, presentations, citations, and paper-scoped coauthor access
 - Dashboard-wide read-only Viewer access for administrative or support users
 - Collaborative paper editing with owner-controlled permissions
+- Owner-visible audit history for invitations and access changes
 - Markdown and LaTeX-style math notation in long-form research text
 - Manual working-hour logging and annual activity heatmap
 - Biweekly paper and blocked-time capacity planning
