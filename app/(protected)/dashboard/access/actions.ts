@@ -47,6 +47,17 @@ function redirectWithStatus(
   )
 }
 
+function redirectInvitationStatus(
+  kind: 'notice' | 'error',
+  message: string
+): never {
+  redirect(
+    `/dashboard/access?${kind}=${encodeURIComponent(
+      message
+    )}&section=invitations#invitations`
+  )
+}
+
 function getSiteUrl() {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ??
@@ -169,7 +180,7 @@ export async function createAccessInvitation(
     getPaperIds(formData)
 
   if (!email) {
-    redirectWithStatus(
+    redirectInvitationStatus(
       'error',
       'Enter an email address.'
     )
@@ -179,7 +190,7 @@ export async function createAccessInvitation(
     !viewerEnabled &&
     paperIds.length === 0
   ) {
-    redirectWithStatus(
+    redirectInvitationStatus(
       'error',
       'Select Viewer access, at least one Coauthor paper, or both.'
     )
@@ -215,9 +226,9 @@ export async function createAccessInvitation(
         'account already exists'
       )
     ) {
-      redirectWithStatus(
+      redirectInvitationStatus(
         'error',
-        'An account already exists for this email address. Manage it in the Accounts section below.'
+        'An account already exists for this email address. Manage it in the Accounts section above.'
       )
     }
 
@@ -226,7 +237,7 @@ export async function createAccessInvitation(
         'active invitation already exists'
       )
     ) {
-      redirectWithStatus(
+      redirectInvitationStatus(
         'error',
         'An active invitation already exists for this email address.'
       )
@@ -237,13 +248,13 @@ export async function createAccessInvitation(
         'valid email address'
       )
     ) {
-      redirectWithStatus(
+      redirectInvitationStatus(
         'error',
         'Enter a valid email address.'
       )
     }
 
-    redirectWithStatus(
+    redirectInvitationStatus(
       'error',
       'The invitation could not be created.'
     )
@@ -257,7 +268,7 @@ export async function createAccessInvitation(
 
   revalidatePath('/dashboard/access')
 
-  redirectWithStatus(
+  redirectInvitationStatus(
     result.ok
       ? 'notice'
       : 'error',
@@ -277,7 +288,7 @@ export async function retryAccessInvitation(
     )
 
   if (!invitationId) {
-    redirectWithStatus(
+    redirectInvitationStatus(
       'error',
       'Select an invitation to retry.'
     )
@@ -294,7 +305,7 @@ export async function retryAccessInvitation(
 
   revalidatePath('/dashboard/access')
 
-  redirectWithStatus(
+  redirectInvitationStatus(
     result.ok
       ? 'notice'
       : 'error',
@@ -316,7 +327,7 @@ export async function cancelAccessInvitation(
     )
 
   if (!invitationId) {
-    redirectWithStatus(
+    redirectInvitationStatus(
       'error',
       'Select an invitation to cancel.'
     )
@@ -340,7 +351,7 @@ export async function cancelAccessInvitation(
       error
     )
 
-    redirectWithStatus(
+    redirectInvitationStatus(
       'error',
       'The invitation could not be cancelled.'
     )
@@ -348,7 +359,7 @@ export async function cancelAccessInvitation(
 
   revalidatePath('/dashboard/access')
 
-  redirectWithStatus(
+  redirectInvitationStatus(
     'notice',
     'Invitation cancelled. No dashboard permissions were activated.'
   )
