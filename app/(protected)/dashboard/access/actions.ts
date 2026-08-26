@@ -142,11 +142,15 @@ async function ensureManagedProfile(
     error,
   } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, deactivated_at')
     .eq('id', userId)
     .maybeSingle()
 
-  if (error || !profile) {
+  if (
+    error ||
+    !profile ||
+    profile.deactivated_at
+  ) {
     redirectWithStatus(
       'error',
       'The selected account could not be loaded.'
@@ -254,6 +258,17 @@ export async function createAccessInvitation(
       )
     }
 
+    if (
+      message.includes(
+        'unavailable'
+      )
+    ) {
+      redirectInvitationStatus(
+        'error',
+        'One or more selected papers are archived or otherwise unavailable.'
+      )
+    }
+
     redirectInvitationStatus(
       'error',
       'The invitation could not be created.'
@@ -336,7 +351,7 @@ export async function cancelAccessInvitation(
   const supabase =
     await createClient()
 
-  const { error } =
+  const { data, error } =
     await supabase.rpc(
       'cancel_access_invitation',
       {
@@ -357,11 +372,53 @@ export async function cancelAccessInvitation(
     )
   }
 
+  const authUserId =
+    data &&
+    typeof data === 'object' &&
+    'auth_user_id' in data &&
+    typeof data.auth_user_id === 'string'
+      ? data.auth_user_id
+      : null
+
+  if (authUserId) {
+    const {
+      data: cleanup,
+      error: cleanupError,
+    } = await supabase.functions.invoke(
+      'delete-dashboard-account',
+      {
+        body: {
+          user_id: authUserId,
+        },
+      }
+    )
+
+    if (
+      cleanupError ||
+      !cleanup ||
+      cleanup.ok !== true
+    ) {
+      console.error(
+        'Cancelled invitation account cleanup failed:',
+        cleanupError ?? cleanup
+      )
+
+      revalidatePath('/dashboard/access')
+
+      redirectInvitationStatus(
+        'error',
+        'Invitation cancelled, but its unused onboarding account could not be removed automatically. It can be deleted from Accounts.'
+      )
+    }
+  }
+
   revalidatePath('/dashboard/access')
 
   redirectInvitationStatus(
     'notice',
-    'Invitation cancelled. No dashboard permissions were activated.'
+    authUserId
+      ? 'Invitation cancelled and its unused onboarding account removed.'
+      : 'Invitation cancelled. No dashboard permissions were activated.'
   )
 }
 
@@ -485,7 +542,11 @@ export async function saveCoauthorAssignments(
 
     redirectWithStatus(
       'error',
-      'Coauthor paper assignments could not be saved.'
+      error.message.includes(
+        'unavailable'
+      )
+        ? 'Archived papers cannot receive new Coauthor assignments.'
+        : 'Coauthor paper assignments could not be saved.'
     )
   }
 

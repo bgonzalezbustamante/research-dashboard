@@ -29,6 +29,7 @@ export const releases: ReleaseNote[] = [
           'Viewer and Coauthor access can be combined: a collaborator can read the wider dashboard while editing only their assigned papers.',
           'Added an Owner-only Access area for managing accounts, Viewer access and Coauthor paper assignments.',
           'Added invitation and onboarding flows so new collaborators can create their account from an email invitation.',
+          'Added an Owner-visible access history covering invitations, Viewer permissions, Coauthor assignments and managed-account changes.',
         ],
       },
       {
@@ -39,6 +40,7 @@ export const releases: ReleaseNote[] = [
           'Standardised new and changed passwords on a minimum of 10 characters.',
           'Email changes use confirmation before the new address becomes the sign-in identity.',
           'Improved account deletion so unused profiles are removed, while profiles needed for historical attribution are preserved.',
+          'Cancelled invitations now remove unused onboarding accounts automatically when one was already created.',
         ],
       },
       {
@@ -46,6 +48,7 @@ export const releases: ReleaseNote[] = [
         items: [
           'Coauthors can update collaborative research content such as the full title, authors, abstract, venues, research links, milestones, presentations and notes.',
           'Owner-controlled workflow fields such as status, revision round, dates, history, citations and archive state remain protected.',
+          'Archived papers remain visible to assigned Coauthors for reference but become read-only until restored.',
           'Notes retain their original author, and coauthors can change only notes they created themselves.',
           'Added an Author Directory for maintaining the canonical bibliographic names used across papers.',
           'Added safe Markdown and LaTeX-style rendering for research text and notes.',
@@ -67,6 +70,7 @@ export const releases: ReleaseNote[] = [
           'Kept navigation, search, date selection and filtering available even when editing is disabled.',
           'Separated personal account settings from Owner administration so users can manage their own credentials without receiving wider editing rights.',
           'Corrected Hours system-label handling so collaborator accounts no longer receive Owner-only Break labels.',
+          'Removed unnecessary direct-table privileges and added active-account checks beneath the application interface.',
         ],
       },
     ],

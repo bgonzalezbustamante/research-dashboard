@@ -16,6 +16,11 @@
 - Refined Viewer warnings and read-only controls so mutation controls are hidden immediately while GET navigation/filter forms remain available.
 - Restored read-only coffee visibility in Daily context for Viewer accounts.
 - Updated release identity and footer for `v0.1.0-beta.3 "Misty Delta"`.
+- Completed the Phase F.6 permission audit and hardening checkpoint.
+- Added an append-only, Owner-visible access history for invitations, Viewer permissions, Coauthor assignments, and managed-account changes.
+- Made archived papers read-only for assigned Coauthors while preserving reference access and Owner restoration.
+- Added automatic cleanup of unused onboarding accounts when invitations are cancelled.
+- Removed unnecessary `TRUNCATE`, `TRIGGER`, and `REFERENCES` privileges from Data API roles.
 
 ### Code changes
 
@@ -76,6 +81,7 @@
 - Updated README release identity and collaboration features.
 - Updated the site footer to show the release version/codename and author/developer links.
 - Extended reproducible Supabase migrations through the Phase F Viewer/Coauthor permission model.
+- Added the final Phase F.6 migration for access auditing, active-account enforcement, archived-paper collaboration rules, and direct-API privilege hardening.
 
 ### Notes
 
@@ -88,10 +94,10 @@
 - The web application remains authenticated even if the source-code repository is public.
 - Institutional branding assets remain subject to their respective rights and are not covered by any repository licence.
 
-### Roadmap
+### Release status
 
-- Add an owner-side access-management interface for Viewer and Coauthor permissions (Phase F.4).
-- Add invitation/onboarding workflows and auditability for collaborative changes.
+- Phase F is complete through F.6.
+- Misty Delta is ready for final verification and release tagging.
 
 ---
 

@@ -7,6 +7,7 @@ import AccountCard from './account-card'
 import InvitationCard from './invitation-card'
 import InviteAccountForm from './invite-account-form'
 import type {
+  AccessAuditRow,
   AccessInvitationRow,
   PaperRow,
   ProfileRow,
@@ -46,6 +47,84 @@ function displayName(
   )
 }
 
+function formatAuditTimestamp(
+  value: string
+) {
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Amsterdam',
+    }
+  ).format(new Date(value))
+}
+
+function auditEventLabel(
+  eventType: AccessAuditRow['event_type']
+) {
+  switch (eventType) {
+    case 'audit_enabled':
+      return 'Audit trail enabled'
+    case 'viewer_granted':
+      return 'Viewer access granted'
+    case 'viewer_revoked':
+      return 'Viewer access removed'
+    case 'coauthor_granted':
+      return 'Coauthor access granted'
+    case 'coauthor_revoked':
+      return 'Coauthor access removed'
+    case 'invitation_created':
+      return 'Invitation created'
+    case 'invitation_sent':
+      return 'Invitation sent'
+    case 'invitation_failed':
+      return 'Invitation delivery failed'
+    case 'invitation_cancelled':
+      return 'Invitation cancelled'
+    case 'invitation_accepted':
+      return 'Invitation accepted'
+    case 'account_renamed':
+      return 'Account renamed'
+    case 'account_deactivated':
+      return 'Account deactivated'
+    case 'account_deleted':
+      return 'Account deleted'
+  }
+}
+
+function auditEventContext(
+  entry: AccessAuditRow
+) {
+  const subject =
+    typeof entry.details.subject_label ===
+    'string'
+      ? entry.details.subject_label
+      : null
+
+  const paper =
+    typeof entry.details.paper_short_title ===
+    'string'
+      ? entry.details.paper_short_title
+      : null
+
+  if (subject && paper) {
+    return `${subject} · ${paper}`
+  }
+
+  if (subject) {
+    return subject
+  }
+
+  return entry.event_type ===
+    'audit_enabled'
+    ? 'Starting point for future access changes'
+    : 'Dashboard access'
+}
+
 export default async function AccessPage({
   searchParams,
 }: AccessPageProps) {
@@ -65,6 +144,7 @@ export default async function AccessPage({
     paperMembersResult,
     invitationsResult,
     invitationPapersResult,
+    auditResult,
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -113,6 +193,20 @@ export default async function AccessPage({
     supabase
       .from('access_invitation_papers')
       .select('invitation_id, paper_id'),
+
+    supabase
+      .from('access_audit_log')
+      .select(
+        'id, actor_id, target_user_id, paper_id, event_type, details, created_at'
+      )
+      .eq('owner_id', access.ownerId)
+      .order('created_at', {
+        ascending: false,
+      })
+      .order('id', {
+        ascending: false,
+      })
+      .limit(20),
   ])
 
   if (profilesResult.error) {
@@ -151,6 +245,12 @@ export default async function AccessPage({
     )
   }
 
+  if (auditResult.error) {
+    throw new Error(
+      `Could not load access history: ${auditResult.error.message}`
+    )
+  }
+
   const profiles =
     (profilesResult.data ?? []) as ProfileRow[]
 
@@ -168,6 +268,9 @@ export default async function AccessPage({
 
   const invitationPapers =
     (invitationPapersResult.data ?? []) as InvitationPaperRow[]
+
+  const auditEntries =
+    (auditResult.data ?? []) as AccessAuditRow[]
 
   const ownerProfile =
     profiles.find(
@@ -480,13 +583,48 @@ export default async function AccessPage({
         </div>
       )}
 
-      <Card className="mt-6 border-dashed">
-        <h2 className="font-serif text-lg font-semibold text-oxford-blue">
-          Next: F.6 audit and hardening
+      <Card className="mt-8">
+        <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+          Recent access changes
         </h2>
         <p className="mt-2 text-sm leading-6 text-oxford-ash">
-          The final Phase F checkpoint will audit permission transitions, invitation cancellation and stale accounts, archived-paper behaviour, direct API mutation attempts and access-change traceability before Misty Delta is tagged.
+          Owner-visible history of invitations, permission changes and managed-account lifecycle events. The latest 20 events are shown.
         </p>
+
+        {auditEntries.length === 0 ? (
+          <p className="mt-5 rounded-md border border-oxford-stone bg-oxford-off-white px-4 py-3 text-sm text-oxford-ash">
+            No access changes have been recorded yet.
+          </p>
+        ) : (
+          <ol className="mt-5 divide-y divide-oxford-stone border-y border-oxford-stone">
+            {auditEntries.map((entry) => (
+              <li
+                key={entry.id}
+                className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+              >
+                <div>
+                  <p className="text-sm font-medium text-oxford-charcoal">
+                    {auditEventLabel(
+                      entry.event_type
+                    )}
+                  </p>
+                  <p className="mt-0.5 text-xs leading-5 text-oxford-ash">
+                    {auditEventContext(entry)}
+                  </p>
+                </div>
+
+                <time
+                  dateTime={entry.created_at}
+                  className="shrink-0 text-xs text-oxford-ash"
+                >
+                  {formatAuditTimestamp(
+                    entry.created_at
+                  )}
+                </time>
+              </li>
+            ))}
+          </ol>
+        )}
       </Card>
     </div>
   )

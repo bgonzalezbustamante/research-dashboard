@@ -77,12 +77,21 @@ export default function InviteAccountForm({
                 {papers.map((paper) => (
                   <label
                     key={paper.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm transition hover:bg-oxford-shell"
+                    className={
+                      paper.archived_at
+                        ? 'flex cursor-not-allowed items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm opacity-60'
+                        : 'flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2.5 text-sm transition hover:bg-oxford-shell'
+                    }
                   >
                     <input
                       type="checkbox"
                       name="paper_id"
                       value={paper.id}
+                      disabled={
+                        Boolean(
+                          paper.archived_at
+                        )
+                      }
                       className="mt-1 h-4 w-4 accent-oxford-blue"
                     />
                     <span className="min-w-0">
@@ -100,6 +109,10 @@ export default function InviteAccountForm({
                 ))}
               </div>
             )}
+
+            <p className="mt-2 text-xs leading-5 text-oxford-ash">
+              Archived papers remain visible for reference but cannot receive new Coauthor invitations.
+            </p>
           </div>
         </div>
 
