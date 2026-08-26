@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import { login } from './actions'
 import OxfordLogo from '@/components/oxford-logo'
 import SiteFooter from '@/components/site-footer'
@@ -6,13 +8,14 @@ import Button from '@/components/ui/button'
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string
+    message?: string
   }>
 }
 
 export default async function LoginPage({
   searchParams,
 }: LoginPageProps) {
-  const { error } = await searchParams
+  const { error, message } = await searchParams
 
   return (
     <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">
@@ -30,6 +33,12 @@ export default async function LoginPage({
             <p className="mb-6 mt-2 text-sm text-oxford-ash">
               Sign in to continue.
             </p>
+
+            {message && (
+              <p className="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm leading-5 text-green-800">
+                {message}
+              </p>
+            )}
 
             <form action={login} className="space-y-4">
               <div>
@@ -51,12 +60,21 @@ export default async function LoginPage({
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="mb-1 block text-sm font-medium text-oxford-charcoal"
-                >
-                  Password
-                </label>
+                <div className="mb-1 flex items-center justify-between gap-4">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-oxford-charcoal"
+                  >
+                    Password
+                  </label>
+
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-xs font-medium text-oxford-blue underline-offset-4 hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
 
                 <input
                   id="password"
@@ -81,7 +99,6 @@ export default async function LoginPage({
               >
                 Sign in
               </Button>
-
             </form>
           </div>
         </div>
