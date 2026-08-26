@@ -16,6 +16,7 @@ type AccessPageProps = {
   searchParams: Promise<{
     notice?: string
     error?: string
+    section?: string
   }>
 }
 
@@ -275,6 +276,9 @@ export default async function AccessPage({
         )
     ).length
 
+  const invitationStatus =
+    params.section === 'invitations'
+
   return (
     <div>
       <PageHeader
@@ -282,13 +286,13 @@ export default async function AccessPage({
         description="Manage existing collaborator accounts, then invite new Viewers and paper-scoped Coauthors."
       />
 
-      {params.notice && (
+      {!invitationStatus && params.notice && (
         <div className="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
           {params.notice}
         </div>
       )}
 
-      {params.error && (
+      {!invitationStatus && params.error && (
         <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {params.error}
         </div>
@@ -407,7 +411,22 @@ export default async function AccessPage({
         </div>
       )}
 
-      <div className="mb-4 mt-8 border-t border-oxford-stone pt-8">
+      <div
+        id="invitations"
+        className="mb-4 mt-8 scroll-mt-6 border-t border-oxford-stone pt-8"
+      >
+        {invitationStatus && params.notice && (
+          <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            {params.notice}
+          </div>
+        )}
+
+        {invitationStatus && params.error && (
+          <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {params.error}
+          </div>
+        )}
+
         <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
           Invitations
         </h2>
