@@ -51,6 +51,7 @@ type WorkSessionsSectionProps = {
   labels: ActivityLabel[]
   papers: PaperOption[]
   error?: string
+  locationError?: string
 }
 
 const inputClass =
@@ -123,6 +124,7 @@ export default async function WorkSessionsSection({
   labels,
   papers,
   error,
+  locationError,
 }: WorkSessionsSectionProps) {
   const supabase =
     await createClient()
@@ -901,6 +903,9 @@ export default async function WorkSessionsSection({
 
       <LocationLabelsSection
         returnDate={date}
+        actionError={
+          locationError
+        }
       />
     </>
   )

@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server'
 
 type LocationLabelsSectionProps = {
   returnDate: string
+  actionError?: string
 }
 
 type LocationLabel = {
@@ -28,8 +29,31 @@ const inputClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
+function LocationErrorNotice({
+  message,
+}: {
+  message?: string
+}) {
+  const trimmedMessage =
+    message?.trim() ?? ''
+
+  if (!trimmedMessage) {
+    return null
+  }
+
+  return (
+    <div
+      role="alert"
+      className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
+      {trimmedMessage}
+    </div>
+  )
+}
+
 export default async function LocationLabelsSection({
   returnDate,
+  actionError,
 }: LocationLabelsSectionProps) {
   const supabase =
     await createClient()
@@ -73,6 +97,10 @@ export default async function LocationLabelsSection({
             locations for sessions.
           </p>
         </div>
+
+        <LocationErrorNotice
+          message={actionError}
+        />
 
         <Card>
           <p className="text-sm leading-6 text-oxford-ash">
@@ -149,6 +177,10 @@ export default async function LocationLabelsSection({
           </span>
         </div>
       </div>
+
+      <LocationErrorNotice
+        message={actionError}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(250px,0.7fr)_minmax(0,2fr)]">
         <Card>

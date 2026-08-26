@@ -6,7 +6,6 @@ import OwnerUtilityNavigation from '@/components/owner-utility-navigation'
 import CoauthorPaperShortcut from '@/components/papers/coauthor-paper-shortcut'
 import FormattingHints from '@/components/papers/formatting-hints'
 import ResearchTextEnhancer from '@/components/papers/research-text-enhancer'
-import QuerySectionError from '@/components/query-section-error'
 import ReadOnlyMode from '@/components/read-only-mode'
 import SiteFooter from '@/components/site-footer'
 import Button from '@/components/ui/button'
@@ -97,11 +96,6 @@ export default async function ProtectedLayout({
 
       <FormattingHints />
       <ResearchTextEnhancer />
-
-      <QuerySectionError
-        parameter="locationError"
-        targetId="location-labels"
-      />
 
       <header className="border-b border-oxford-stone bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4">
