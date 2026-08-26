@@ -7,6 +7,9 @@
 - Added Phase F multi-user access with additive **Viewer** and paper-scoped **Coauthor** capabilities.
 - Added dashboard-wide read-only Viewer access for administrative/support users, enforced through both UI controls and Supabase RLS.
 - Added paper-scoped coauthor access, including collaborative editing of full title, authors, abstract, target/current venue, research links, milestones, presentations, and attributed notes.
+- Added Owner-side access management with invitations, onboarding, Viewer permissions, Coauthor assignments, and managed-account lifecycle controls.
+- Added personal account management with display-name, email, and password changes, together with password recovery.
+- Added an Author Directory for maintaining canonical bibliographic author names across papers.
 - Kept short title, workflow status, revision round, dates, submission/publication history, citations, archive state, Hours, and Planning owner-only.
 - Added note attribution rules so coauthors can edit/delete only their own notes while the Owner can edit/delete any note without changing its creator.
 - Added safe Markdown and LaTeX-style research-text rendering for abstracts, milestone notes, presentation notes, and paper notes.
@@ -29,6 +32,8 @@
 - Added `dashboard_members` support for Owner and Viewer dashboard roles.
 - Reused `paper_members` for paper-scoped Coauthor memberships.
 - Added combined Viewer + Coauthor behaviour so dashboard-wide access can remain read-only while assigned papers expose collaborative controls.
+- Added an Owner-only Access area for invitations, Viewer permissions, Coauthor assignments, and managed-account administration.
+- Added invitation and onboarding workflows for new collaborators, including cancellation and unused-account cleanup.
 - Added paper-specific RLS helpers and policies for collaborative author, link, milestone, presentation, and note operations.
 - Added trigger-level protection so coauthors cannot alter short title or owner-controlled workflow fields even through direct API requests.
 - Added an atomic coauthor metadata update path for title, abstract, venues, authors, and research links.
@@ -65,6 +70,7 @@
 `papers`
 
 - Added `Bastián González-Bustamante` as the default author prefill on the new-paper form.
+- Added an Author Directory for maintaining canonical author names and reusing them across paper records.
 - Added collaborative paper-detail editing without exposing the short title to coauthors.
 - Kept archive/restore and the full owner edit route owner-only.
 
