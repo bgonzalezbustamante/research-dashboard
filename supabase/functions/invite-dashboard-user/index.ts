@@ -20,7 +20,7 @@ function jsonResponse(
   )
 }
 
-export default {
+const handler = {
   fetch: withSupabase(
     { auth: 'user' },
     async (req, ctx) => {
@@ -350,3 +350,5 @@ export default {
     }
   ),
 }
+
+export default handler
