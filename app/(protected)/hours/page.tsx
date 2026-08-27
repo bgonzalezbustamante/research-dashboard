@@ -3,7 +3,6 @@ import Link from 'next/link'
 import ActivityLabelsSection from '@/components/hours/activity-labels-section'
 import DailyLogSection from '@/components/hours/daily-log-section'
 import HoursAnalyticsSection from '@/components/hours/hours-analytics-section'
-import HoursVisualisationsSection from '@/components/hours/hours-visualisations-section'
 import WorkSessionsSection from '@/components/hours/work-sessions-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
@@ -678,15 +677,6 @@ export default async function HoursPage({
         }
         selectedPeriod={
           selectedPeriod
-        }
-        logs={
-          analyticsLogs
-        }
-      />
-
-      <HoursVisualisationsSection
-        selectedDate={
-          selectedDate
         }
         logs={
           analyticsLogs
