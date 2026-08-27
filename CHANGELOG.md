@@ -256,7 +256,7 @@
 
 - Added executive indicators for active papers, working hours, current planning, and research priorities.
 - Added annual cross-module summaries and monthly workload visualisation.
-- Added cumulative citation yield using the latest Google Scholar snapshot for papers with matched hours.
+- Added cumulative citation yield using the latest Google Scholar snapshot for papers with matched tracked hours.
 - Kept citation databases source-specific rather than combining Google Scholar, Scopus, and Web of Science counts.
 
 `authentication, database, and production`
@@ -273,7 +273,7 @@
 
 - This release is a single-owner beta intended for active use and testing.
 - Collaboration and paper-level coauthor permissions are deferred to Phase F.
-- Application data are stored in Supabase and are not committed to this repository.
+- Application data are stored in Supabase and are not committed to the repository.
 - Citation counts remain source-specific.
 - Citation yield uses Google Scholar only and is a descriptive cumulative indicator, not a causal measure of research productivity.
 - The web application remains authenticated even if the source-code repository is public.
