@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
-import Card from '@/components/ui/card'
 import ButtonLink from '@/components/ui/button-link'
+import Card from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -26,9 +26,11 @@ type WorkSessionRow = {
   activity_labels:
     | {
         is_break: boolean
+        major_activity: string | null
       }
     | {
         is_break: boolean
+        major_activity: string | null
       }[]
     | null
 }
@@ -78,8 +80,47 @@ type MonthlyStats =
     blockedDays: number
   }
 
+type MajorActivityKey =
+  | 'research'
+  | 'teaching'
+  | 'administration'
+  | 'outreach'
+  | 'breaks'
+
 const MINUTES_PER_PLANNED_DAY =
   8 * 60
+
+const majorActivities: {
+  key: MajorActivityKey
+  label: string
+  colour: string
+}[] = [
+  {
+    key: 'research',
+    label: 'Research',
+    colour: '#002147',
+  },
+  {
+    key: 'teaching',
+    label: 'Teaching',
+    colour: '#4F7FA8',
+  },
+  {
+    key: 'administration',
+    label: 'Administration',
+    colour: '#8A6A4A',
+  },
+  {
+    key: 'outreach',
+    label: 'Outreach',
+    colour: '#66846B',
+  },
+  {
+    key: 'breaks',
+    label: 'Breaks',
+    colour: '#C9963B',
+  },
+]
 
 function getAmsterdamDate() {
   const parts =
@@ -109,6 +150,25 @@ function getAmsterdamDate() {
   return `${values.year}-${values.month}-${values.day}`
 }
 
+function getActivityLabel(
+  activityLabels:
+    | {
+        is_break: boolean
+        major_activity?: string | null
+      }
+    | {
+        is_break: boolean
+        major_activity?: string | null
+      }[]
+    | null
+) {
+  return Array.isArray(
+    activityLabels
+  )
+    ? activityLabels[0] ?? null
+    : activityLabels
+}
+
 function getIsBreak(
   activityLabels:
     | {
@@ -119,16 +179,10 @@ function getIsBreak(
       }[]
     | null
 ) {
-  const label =
-    Array.isArray(
-      activityLabels
-    )
-      ? activityLabels[0]
-      : activityLabels
-
   return (
-    label?.is_break ??
-    false
+    getActivityLabel(
+      activityLabels
+    )?.is_break ?? false
   )
 }
 
@@ -160,10 +214,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const currentYear =
     Number(
-      today.slice(
-        0,
-        4
-      )
+      today.slice(0, 4)
     )
 
   const yearStart =
@@ -182,33 +233,20 @@ export default async function CrossModuleAnalyticsSection({
     cumulativeSessionsResult,
   ] = await Promise.all([
     supabase
-      .from(
-        'daily_logs'
-      )
+      .from('daily_logs')
       .select(`
         id,
         log_date,
         coffee_count
       `)
-      .gte(
-        'log_date',
-        yearStart
-      )
-      .lte(
-        'log_date',
-        yearEnd
-      )
-      .order(
-        'log_date',
-        {
-          ascending: true,
-        }
-      ),
+      .gte('log_date', yearStart)
+      .lte('log_date', yearEnd)
+      .order('log_date', {
+        ascending: true,
+      }),
 
     supabase
-      .from(
-        'planning_periods'
-      )
+      .from('planning_periods')
       .select(`
         id,
         period_start
@@ -221,17 +259,12 @@ export default async function CrossModuleAnalyticsSection({
         'period_start',
         yearEnd
       )
-      .order(
-        'period_start',
-        {
-          ascending: true,
-        }
-      ),
+      .order('period_start', {
+        ascending: true,
+      }),
 
     supabase
-      .from(
-        'citation_snapshots'
-      )
+      .from('citation_snapshots')
       .select(`
         paper_id,
         source,
@@ -243,23 +276,15 @@ export default async function CrossModuleAnalyticsSection({
         'source',
         'Google Scholar'
       )
-      .order(
-        'captured_on',
-        {
-          ascending: false,
-        }
-      )
-      .order(
-        'created_at',
-        {
-          ascending: false,
-        }
-      ),
+      .order('captured_on', {
+        ascending: false,
+      })
+      .order('created_at', {
+        ascending: false,
+      }),
 
     supabase
-      .from(
-        'work_sessions'
-      )
+      .from('work_sessions')
       .select(`
         paper_id,
         start_time,
@@ -275,90 +300,72 @@ export default async function CrossModuleAnalyticsSection({
       ),
   ])
 
-  if (
-    dailyLogsResult.error
-  ) {
+  if (dailyLogsResult.error) {
     throw new Error(
       `Could not load analytics daily logs: ${dailyLogsResult.error.message}`
     )
   }
 
-  if (
-    planningPeriodsResult.error
-  ) {
+  if (planningPeriodsResult.error) {
     throw new Error(
       `Could not load analytics planning periods: ${planningPeriodsResult.error.message}`
     )
   }
 
-  if (
-    citationSnapshotsResult.error
-  ) {
+  if (citationSnapshotsResult.error) {
     throw new Error(
       `Could not load citation snapshots: ${citationSnapshotsResult.error.message}`
     )
   }
 
-  if (
-    cumulativeSessionsResult.error
-  ) {
+  if (cumulativeSessionsResult.error) {
     throw new Error(
       `Could not load cumulative paper hours: ${cumulativeSessionsResult.error.message}`
     )
   }
 
   const dailyLogs =
-    (dailyLogsResult.data ??
-      []) as DailyLogRow[]
+    (dailyLogsResult.data ?? []) as DailyLogRow[]
 
   const planningPeriods =
-    (planningPeriodsResult.data ??
-      []) as PlanningPeriodRow[]
+    (planningPeriodsResult.data ?? []) as PlanningPeriodRow[]
 
   const citationSnapshots =
-    (citationSnapshotsResult.data ??
-      []) as CitationSnapshotRow[]
+    (citationSnapshotsResult.data ?? []) as CitationSnapshotRow[]
 
   const cumulativeSessions =
-    (cumulativeSessionsResult.data ??
-      []) as CumulativeWorkSessionRow[]
+    (cumulativeSessionsResult.data ?? []) as CumulativeWorkSessionRow[]
 
   const dailyLogIds =
     dailyLogs.map(
-      (log) =>
-        log.id
+      (log) => log.id
     )
 
   const planningPeriodIds =
     planningPeriods.map(
-      (period) =>
-        period.id
+      (period) => period.id
     )
 
   let workSessions:
     WorkSessionRow[] = []
 
   let planningAllocations:
-    PlanningAllocationRow[] =
-      []
+    PlanningAllocationRow[] = []
 
-  if (
-    dailyLogIds.length > 0
-  ) {
+  if (dailyLogIds.length > 0) {
     const {
       data,
       error,
     } = await supabase
-      .from(
-        'work_sessions'
-      )
+      .from('work_sessions')
       .select(`
         daily_log_id,
         paper_id,
         start_time,
         end_time,
         activity_labels (
-          is_break
+          is_break,
+          major_activity
         )
       `)
       .in(
@@ -373,8 +380,7 @@ export default async function CrossModuleAnalyticsSection({
     }
 
     workSessions =
-      (data ??
-        []) as WorkSessionRow[]
+      (data ?? []) as WorkSessionRow[]
   }
 
   if (
@@ -385,9 +391,7 @@ export default async function CrossModuleAnalyticsSection({
       data,
       error,
     } = await supabase
-      .from(
-        'planning_allocations'
-      )
+      .from('planning_allocations')
       .select(`
         planning_period_id,
         allocation_type,
@@ -405,8 +409,7 @@ export default async function CrossModuleAnalyticsSection({
     }
 
     planningAllocations =
-      (data ??
-        []) as PlanningAllocationRow[]
+      (data ?? []) as PlanningAllocationRow[]
   }
 
   const periodStartById =
@@ -455,10 +458,8 @@ export default async function CrossModuleAnalyticsSection({
     TimeAnalyticsDailyLog[] =
     dailyLogs.map(
       (log) => ({
-        id:
-          log.id,
-        log_date:
-          log.log_date,
+        id: log.id,
+        log_date: log.log_date,
         coffee_count:
           log.coffee_count,
         sessions:
@@ -494,16 +495,11 @@ export default async function CrossModuleAnalyticsSection({
 
     const month =
       Number(
-        periodStart.slice(
-          5,
-          7
-        )
+        periodStart.slice(5, 7)
       )
 
     const stats =
-      monthlyStats[
-        month - 1
-      ]
+      monthlyStats[month - 1]
 
     if (!stats) {
       continue
@@ -523,10 +519,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const annualNetMinutes =
     monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
+      (total, month) =>
         total +
         month.netMinutes,
       0
@@ -534,10 +527,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const annualPaperMinutes =
     monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
+      (total, month) =>
         total +
         month.paperMinutes,
       0
@@ -545,10 +535,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const annualUnassignedMinutes =
     monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
+      (total, month) =>
         total +
         month.unassignedMinutes,
       0
@@ -556,10 +543,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const annualResearchDays =
     monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
+      (total, month) =>
         total +
         month.researchDays,
       0
@@ -567,10 +551,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const annualBlockedDays =
     monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
+      (total, month) =>
         total +
         month.blockedDays,
       0
@@ -578,10 +559,7 @@ export default async function CrossModuleAnalyticsSection({
 
   const annualWorkingDays =
     monthlyStats.reduce(
-      (
-        total,
-        month
-      ) =>
+      (total, month) =>
         total +
         month.workingDays,
       0
@@ -604,16 +582,126 @@ export default async function CrossModuleAnalyticsSection({
       )
     )
 
-  /*
-   * Citation yield
-   *
-   * citationSnapshots is already sorted:
-   * captured_on DESC, created_at DESC.
-   *
-   * Therefore, the first Google Scholar
-   * row encountered for each paper is
-   * its latest stored snapshot.
-   */
+  const majorActivityMinutes =
+    new Map<
+      MajorActivityKey,
+      number
+    >(
+      majorActivities.map(
+        (activity) => [
+          activity.key,
+          0,
+        ]
+      )
+    )
+
+  let unclassifiedMinutes = 0
+
+  for (const session of
+    workSessions) {
+    const duration =
+      getDurationMinutes(
+        session.start_time,
+        session.end_time
+      )
+
+    const label =
+      getActivityLabel(
+        session.activity_labels
+      )
+
+    if (label?.is_break) {
+      majorActivityMinutes.set(
+        'breaks',
+        (
+          majorActivityMinutes.get(
+            'breaks'
+          ) ?? 0
+        ) + duration
+      )
+
+      continue
+    }
+
+    const key =
+      label?.major_activity as
+        | MajorActivityKey
+        | null
+        | undefined
+
+    if (
+      key &&
+      key !== 'breaks' &&
+      majorActivityMinutes.has(key)
+    ) {
+      majorActivityMinutes.set(
+        key,
+        (
+          majorActivityMinutes.get(
+            key
+          ) ?? 0
+        ) + duration
+      )
+    } else {
+      unclassifiedMinutes +=
+        duration
+    }
+  }
+
+  const classifiedMinutes =
+    [...majorActivityMinutes.values()].reduce(
+      (total, minutes) =>
+        total + minutes,
+      0
+    )
+
+  let pieCursor = 0
+
+  const pieSegments =
+    majorActivities
+      .map((activity) => {
+        const minutes =
+          majorActivityMinutes.get(
+            activity.key
+          ) ?? 0
+
+        const percentage =
+          classifiedMinutes > 0
+            ? (
+                minutes /
+                classifiedMinutes
+              ) * 100
+            : 0
+
+        const start = pieCursor
+        const end =
+          start + percentage
+
+        pieCursor = end
+
+        return {
+          ...activity,
+          minutes,
+          percentage,
+          start,
+          end,
+        }
+      })
+      .filter(
+        (activity) =>
+          activity.minutes > 0
+      )
+
+  const pieBackground =
+    pieSegments.length > 0
+      ? `conic-gradient(${pieSegments
+          .map(
+            (activity) =>
+              `${activity.colour} ${activity.start}% ${activity.end}%`
+          )
+          .join(', ')})`
+      : '#F1EEE9'
+
   const latestGoogleScholarByPaper =
     new Map<
       string,
@@ -635,20 +723,12 @@ export default async function CrossModuleAnalyticsSection({
   }
 
   const cumulativeMinutesByPaper =
-    new Map<
-      string,
-      number
-    >()
+    new Map<string, number>()
 
   for (const session of
     cumulativeSessions) {
     if (
-      !session.paper_id
-    ) {
-      continue
-    }
-
-    if (
+      !session.paper_id ||
       getIsBreak(
         session.activity_labels
       )
@@ -668,19 +748,10 @@ export default async function CrossModuleAnalyticsSection({
         cumulativeMinutesByPaper.get(
           session.paper_id
         ) ?? 0
-      ) +
-        duration
+      ) + duration
     )
   }
 
-  /*
-   * Coverage requires BOTH:
-   * - a latest Google Scholar snapshot
-   * - at least some tracked paper-linked time
-   *
-   * This ensures numerator and denominator
-   * refer to the same set of papers.
-   */
   const matchedPaperIds =
     [
       ...latestGoogleScholarByPaper.keys(),
@@ -695,26 +766,19 @@ export default async function CrossModuleAnalyticsSection({
 
   const matchedCitationCount =
     matchedPaperIds.reduce(
-      (
-        total,
-        paperId
-      ) =>
+      (total, paperId) =>
         total +
         (
           latestGoogleScholarByPaper.get(
             paperId
-          )?.citation_count ??
-          0
+          )?.citation_count ?? 0
         ),
       0
     )
 
   const matchedTrackedMinutes =
     matchedPaperIds.reduce(
-      (
-        total,
-        paperId
-      ) =>
+      (total, paperId) =>
         total +
         (
           cumulativeMinutesByPaper.get(
@@ -725,16 +789,14 @@ export default async function CrossModuleAnalyticsSection({
     )
 
   const matchedTrackedHours =
-    matchedTrackedMinutes /
-    60
+    matchedTrackedMinutes / 60
 
   const citationYield =
     matchedTrackedHours > 0
       ? (
           matchedCitationCount /
           matchedTrackedHours
-        ) *
-        100
+        ) * 100
       : null
 
   const googleScholarPaperCount =
@@ -752,11 +814,7 @@ export default async function CrossModuleAnalyticsSection({
           </h2>
 
           <p className="mt-1 text-sm text-oxford-ash">
-            Longitudinal working
-            and planning patterns
-            across {year}, with a
-            cumulative citation-yield
-            indicator.
+            Longitudinal working and planning patterns across {year}, with annual activity distribution and a cumulative citation-yield indicator.
           </p>
         </div>
 
@@ -789,20 +847,13 @@ export default async function CrossModuleAnalyticsSection({
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Net work
           </div>
-
           <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
             {formatDuration(
               annualNetMinutes
             )}
           </div>
-
           <div className="mt-1 text-xs text-oxford-ash">
-            {annualWorkingDays}{' '}
-            working days ·{' '}
-            {formatDuration(
-              averageNetPerWorkingDay
-            )}{' '}
-            average
+            {annualWorkingDays} working days · {formatDuration(averageNetPerWorkingDay)} average
           </div>
         </div>
 
@@ -810,16 +861,13 @@ export default async function CrossModuleAnalyticsSection({
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Paper-linked
           </div>
-
           <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
             {formatDuration(
               annualPaperMinutes
             )}
           </div>
-
           <div className="mt-1 text-xs text-oxford-ash">
-            Explicitly linked to
-            papers
+            Explicitly linked to papers
           </div>
         </div>
 
@@ -827,16 +875,13 @@ export default async function CrossModuleAnalyticsSection({
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Unassigned
           </div>
-
           <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
             {formatDuration(
               annualUnassignedMinutes
             )}
           </div>
-
           <div className="mt-1 text-xs text-oxford-ash">
-            Non-break work without
-            paper
+            Non-break work without paper
           </div>
         </div>
 
@@ -844,17 +889,14 @@ export default async function CrossModuleAnalyticsSection({
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Research planned
           </div>
-
           <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
             {formatDuration(
               annualResearchDays *
                 MINUTES_PER_PLANNED_DAY
             )}
           </div>
-
           <div className="mt-1 text-xs text-oxford-ash">
-            {annualResearchDays}{' '}
-            planned days
+            {annualResearchDays} planned days
           </div>
         </div>
 
@@ -862,34 +904,27 @@ export default async function CrossModuleAnalyticsSection({
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
             Blocked planned
           </div>
-
           <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
             {formatDuration(
               annualBlockedDays *
                 MINUTES_PER_PLANNED_DAY
             )}
           </div>
-
           <div className="mt-1 text-xs text-oxford-ash">
-            {annualBlockedDays}{' '}
-            blocked days
+            {annualBlockedDays} blocked days
           </div>
         </div>
       </div>
 
       <div className="mt-6">
         <Card>
-          <div>
-            <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-              Monthly workload
-            </h3>
+          <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+            Monthly workload
+          </h3>
 
-            <p className="mt-1 text-sm text-oxford-ash">
-              Net recorded working
-              hours by calendar
-              month.
-            </p>
-          </div>
+          <p className="mt-1 text-sm text-oxford-ash">
+            Net recorded working hours by calendar month.
+          </p>
 
           <div className="mt-5 space-y-3">
             {monthlyStats.map(
@@ -898,14 +933,11 @@ export default async function CrossModuleAnalyticsSection({
                   (
                     month.netMinutes /
                     maxMonthlyNetMinutes
-                  ) *
-                  100
+                  ) * 100
 
                 return (
                   <div
-                    key={
-                      month.month
-                    }
+                    key={month.month}
                     className="grid grid-cols-[44px_72px_minmax(0,1fr)_60px] items-center gap-3"
                   >
                     <div className="text-sm font-medium text-oxford-charcoal">
@@ -931,10 +963,7 @@ export default async function CrossModuleAnalyticsSection({
                     </div>
 
                     <div className="text-right text-xs text-oxford-ash">
-                      {
-                        month.workingDays
-                      }{' '}
-                      days
+                      {month.workingDays} days
                     </div>
                   </div>
                 )
@@ -946,35 +975,111 @@ export default async function CrossModuleAnalyticsSection({
 
       <div className="mt-6">
         <Card>
-          <div>
-            <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-              Citation yield
-            </h3>
+          <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+            Major activity distribution
+          </h3>
 
-            <p className="mt-1 text-sm text-oxford-ash">
-              Cumulative Google
-              Scholar citations
-              relative to tracked
-              paper-linked working
-              hours.
-            </p>
+          <p className="mt-1 text-sm text-oxford-ash">
+            Gross recorded time in {year}, grouped from Hours activity labels into Research, Teaching, Administration, Outreach, and Breaks.
+          </p>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center">
+            <div className="mx-auto">
+              <div
+                role="img"
+                aria-label={`Pie chart of classified activity time for ${year}`}
+                className="h-56 w-56 rounded-full border border-oxford-stone shadow-inner"
+                style={{
+                  background:
+                    pieBackground,
+                }}
+              />
+            </div>
+
+            <div className="space-y-3">
+              {majorActivities.map(
+                (activity) => {
+                  const minutes =
+                    majorActivityMinutes.get(
+                      activity.key
+                    ) ?? 0
+
+                  const percentage =
+                    classifiedMinutes > 0
+                      ? (
+                          minutes /
+                          classifiedMinutes
+                        ) * 100
+                      : 0
+
+                  return (
+                    <div
+                      key={activity.key}
+                      className="grid grid-cols-[14px_minmax(0,1fr)_80px_56px] items-center gap-3 text-sm"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="h-3 w-3 rounded-full"
+                        style={{
+                          backgroundColor:
+                            activity.colour,
+                        }}
+                      />
+
+                      <span className="font-medium text-oxford-charcoal">
+                        {activity.label}
+                      </span>
+
+                      <span className="text-right text-oxford-blue">
+                        {formatDuration(
+                          minutes
+                        )}
+                      </span>
+
+                      <span className="text-right text-xs text-oxford-ash">
+                        {percentage.toFixed(1)}%
+                      </span>
+                    </div>
+                  )
+                }
+              )}
+
+              <div className="border-t border-oxford-stone pt-3 text-xs leading-5 text-oxford-ash">
+                Percentages use classified gross time as the denominator. Break sessions are assigned to Breaks automatically.
+              </div>
+
+              {unclassifiedMinutes > 0 && (
+                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+                  {formatDuration(
+                    unclassifiedMinutes
+                  )} remains unclassified and is not included in the pie. Assign major activities in Hours → Activity labels.
+                </div>
+              )}
+            </div>
           </div>
+        </Card>
+      </div>
+
+      <div className="mt-6">
+        <Card>
+          <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+            Citation yield
+          </h3>
+
+          <p className="mt-1 text-sm text-oxford-ash">
+            Cumulative Google Scholar citations relative to tracked paper-linked working hours.
+          </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-lg border border-oxford-stone bg-oxford-shell px-4 py-3">
               <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
                 GS citations
               </div>
-
               <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
-                {
-                  matchedCitationCount
-                }
+                {matchedCitationCount}
               </div>
-
               <div className="mt-1 text-xs text-oxford-ash">
-                Latest snapshot per
-                matched paper
+                Latest snapshot per matched paper
               </div>
             </div>
 
@@ -982,16 +1087,13 @@ export default async function CrossModuleAnalyticsSection({
               <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
                 Tracked hours
               </div>
-
               <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
                 {formatDuration(
                   matchedTrackedMinutes
                 )}
               </div>
-
               <div className="mt-1 text-xs text-oxford-ash">
-                Same papers as
-                citation count
+                Same papers as citation count
               </div>
             </div>
 
@@ -999,19 +1101,13 @@ export default async function CrossModuleAnalyticsSection({
               <div className="text-xs font-medium uppercase tracking-wide text-green-800">
                 Citations / 100h
               </div>
-
               <div className="mt-1 font-serif text-xl font-semibold text-green-900">
-                {citationYield ===
-                null
+                {citationYield === null
                   ? '—'
-                  : citationYield.toFixed(
-                      1
-                    )}
+                  : citationYield.toFixed(1)}
               </div>
-
               <div className="mt-1 text-xs text-green-800">
-                Cumulative citation
-                yield
+                Cumulative citation yield
               </div>
             </div>
 
@@ -1019,55 +1115,23 @@ export default async function CrossModuleAnalyticsSection({
               <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
                 Coverage
               </div>
-
               <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
-                {
-                  matchedPaperIds.length
-                }
-                /
-                {
-                  googleScholarPaperCount
-                }
+                {matchedPaperIds.length}/{googleScholarPaperCount}
               </div>
-
               <div className="mt-1 text-xs text-oxford-ash">
-                GS papers with
-                tracked hours
+                GS papers with tracked hours
               </div>
             </div>
           </div>
 
-          {matchedPaperIds.length ===
-          0 ? (
+          {matchedPaperIds.length === 0 && (
             <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Citation yield cannot
-              yet be calculated
-              because no paper has
-              both a Google Scholar
-              citation snapshot and
-              tracked paper-linked
-              working hours.
+              Citation yield cannot yet be calculated because no paper has both a Google Scholar citation snapshot and tracked paper-linked working hours.
             </div>
-          ) : null}
+          )}
 
           <p className="mt-4 text-xs leading-5 text-oxford-ash">
-            Citation yield uses the
-            latest stored Google
-            Scholar snapshot for
-            each paper and cumulative
-            tracked hours for the
-            same set of papers.
-            Scopus and Web of Science
-            are excluded so citation
-            databases are not mixed.
-            This is a descriptive
-            indicator rather than a
-            measure of causal research
-            productivity, because
-            citations are lagged and
-            tracked working hours may
-            begin well after a paper
-            was first developed.
+            Citation yield uses the latest stored Google Scholar snapshot for each paper and cumulative tracked hours for the same set of papers. Scopus and Web of Science are excluded so citation databases are not mixed. This is a descriptive indicator rather than a measure of causal research productivity, because citations are lagged and tracked working hours may begin well after a paper was first developed.
           </p>
         </Card>
       </div>
