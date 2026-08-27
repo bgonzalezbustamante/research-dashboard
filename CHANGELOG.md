@@ -11,6 +11,7 @@
 - Simplified authenticated navigation by showing the signed-in profile name directly on the Account button instead of as a separate navbar label.
 - Added pagination and configurable ordering to the Author Directory.
 - Added major-activity classification for Hours labels and a yearly Dashboard activity-distribution pie chart.
+- Added yearly coffee totals and average coffees per working day to the major-activity analytics.
 
 ### Code changes
 
@@ -31,6 +32,7 @@
 - Reset Papers pagination naturally to page 1 when filters are reapplied.
 - Added pagination to the Author Directory with 10 authors per page.
 - Added Author Directory ordering by alphabetical name or descending number of associated papers.
+- Refined Dashboard research-pipeline ranking after dated milestones to prioritise Revise round, Writing, Under review, then all other statuses.
 
 `navigation`
 
@@ -44,6 +46,9 @@
 - Added owner controls in Hours for classifying custom activity labels, including an explicit unclassified state for historical labels not yet assigned.
 - Added a yearly major-activity pie chart to Dashboard Cross-module analytics between Monthly workload and Citation yield.
 - Reported unclassified historical time separately rather than forcing it into a major activity or silently including it in the pie denominator.
+- Compacted the major-activity classification control and added a small confirmation notice after a classification is saved.
+- Refined the major-activity chart palette with pastel tones for Research, Teaching, Administration, Outreach, and Breaks.
+- Added the total number of recorded coffees in the selected year and the average number of coffees per working day below the major-activity distribution.
 
 ### Release status
 
@@ -184,7 +189,7 @@
 
 `dashboard and analytics`
 
-- Reused the shared Hours aggregation logic for monthly workload and period summaries.
+- Reused the shared Hours calculations for monthly workload and period summaries.
 - Added Monday–Sunday gross-workload traffic-light indicators:
   - below 30 hours: orange
   - 30–39 hours: yellow
