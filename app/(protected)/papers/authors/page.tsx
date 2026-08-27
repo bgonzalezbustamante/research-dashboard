@@ -42,12 +42,34 @@ type PaperAuthorRow = {
     | null
 }
 
+type AuthorSort =
+  | 'name-asc'
+  | 'papers-desc'
+
 type AuthorDirectoryPageProps = {
   searchParams: Promise<{
     error?: string
     message?: string
+    sort?: string
+    page?: string
   }>
 }
+
+const AUTHORS_PER_PAGE = 10
+
+const sortOptions: {
+  value: AuthorSort
+  label: string
+}[] = [
+  {
+    value: 'name-asc',
+    label: 'Alphabetical',
+  },
+  {
+    value: 'papers-desc',
+    label: 'Number of papers',
+  },
+]
 
 const inputClass =
   'w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue'
@@ -74,6 +96,21 @@ export default async function AuthorDirectoryPage({
   const params =
     await searchParams
 
+  const sort: AuthorSort =
+    sortOptions.some(
+      (option) =>
+        option.value ===
+        params.sort
+    )
+      ? (params.sort as AuthorSort)
+      : 'name-asc'
+
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
+
   const supabase =
     await createClient()
 
@@ -94,10 +131,7 @@ export default async function AuthorDirectoryPage({
         created_at,
         updated_at
       `)
-      .eq('owner_id', access.ownerId)
-      .order('full_name', {
-        ascending: true,
-      }),
+      .eq('owner_id', access.ownerId),
 
     supabase
       .from('paper_authors')
@@ -171,36 +205,117 @@ export default async function AuthorDirectoryPage({
     )
   }
 
-  const orderedAuthors = [
-    ...authors,
-  ].sort((a, b) => {
-    const aCount =
-      usage.get(a.id)?.length ?? 0
-    const bCount =
-      usage.get(b.id)?.length ?? 0
-
-    if (
-      aCount === 0 &&
-      bCount !== 0
-    ) {
-      return -1
-    }
-
-    if (
-      aCount !== 0 &&
-      bCount === 0
-    ) {
-      return 1
-    }
-
-    return a.full_name.localeCompare(
+  const compareNames = (
+    a: AuthorRow,
+    b: AuthorRow
+  ) =>
+    a.full_name.localeCompare(
       b.full_name,
       'en',
       {
         sensitivity: 'base',
       }
     )
+
+  const orderedAuthors = [
+    ...authors,
+  ].sort((a, b) => {
+    if (
+      sort ===
+      'papers-desc'
+    ) {
+      const countDifference =
+        (usage.get(b.id)?.length ?? 0) -
+        (usage.get(a.id)?.length ?? 0)
+
+      if (
+        countDifference !== 0
+      ) {
+        return countDifference
+      }
+    }
+
+    return compareNames(a, b)
   })
+
+  const totalAuthors =
+    orderedAuthors.length
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalAuthors /
+          AUTHORS_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    AUTHORS_PER_PAGE
+
+  const paginatedAuthors =
+    orderedAuthors.slice(
+      pageStart,
+      pageStart +
+        AUTHORS_PER_PAGE
+    )
+
+  const visibleStart =
+    totalAuthors === 0
+      ? 0
+      : pageStart + 1
+
+  const visibleEnd =
+    Math.min(
+      pageStart +
+        AUTHORS_PER_PAGE,
+      totalAuthors
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) => {
+    const pageParams =
+      new URLSearchParams()
+
+    if (
+      sort !== 'name-asc'
+    ) {
+      pageParams.set(
+        'sort',
+        sort
+      )
+    }
+
+    if (pageNumber > 1) {
+      pageParams.set(
+        'page',
+        String(pageNumber)
+      )
+    }
+
+    const query =
+      pageParams.toString()
+
+    return query
+      ? `/papers/authors?${query}`
+      : '/papers/authors'
+  }
 
   const unusedCount =
     authors.filter(
@@ -284,7 +399,59 @@ export default async function AuthorDirectoryPage({
         </p>
       </Card>
 
-      <section className="mt-8 space-y-4">
+      <form
+        method="get"
+        className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white p-4 sm:flex-row sm:items-end sm:justify-between"
+      >
+        <div className="w-full sm:max-w-xs">
+          <label
+            htmlFor="sort"
+            className="mb-1 block text-sm font-medium text-oxford-charcoal"
+          >
+            Order authors
+          </label>
+
+          <select
+            id="sort"
+            name="sort"
+            defaultValue={sort}
+            className={inputClass}
+          >
+            {sortOptions.map(
+              (option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                >
+                  {option.label}
+                </option>
+              )
+            )}
+          </select>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit">
+            Apply order
+          </Button>
+
+          <span className="text-sm text-oxford-ash">
+            Showing{' '}
+            <strong className="font-medium text-oxford-charcoal">
+              {visibleStart ===
+              visibleEnd
+                ? visibleStart
+                : `${visibleStart}–${visibleEnd}`}
+            </strong>{' '}
+            of{' '}
+            <strong className="font-medium text-oxford-charcoal">
+              {totalAuthors}
+            </strong>
+          </span>
+        </div>
+      </form>
+
+      <section className="mt-6 space-y-4">
         {orderedAuthors.length === 0 ? (
           <Card>
             <p className="text-sm text-oxford-ash">
@@ -292,7 +459,7 @@ export default async function AuthorDirectoryPage({
             </p>
           </Card>
         ) : (
-          orderedAuthors.map(
+          paginatedAuthors.map(
             (author) => {
               const papers =
                 usage.get(author.id) ?? []
@@ -442,6 +609,41 @@ export default async function AuthorDirectoryPage({
           )
         )}
       </section>
+
+      {totalAuthors >
+        AUTHORS_PER_PAGE && (
+        <div className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+
+          <div className="flex gap-2">
+            {currentPage > 1 ? (
+              <ButtonLink
+                href={getPageHref(
+                  currentPage - 1
+                )}
+                variant="secondary"
+              >
+                Previous
+              </ButtonLink>
+            ) : null}
+
+            {currentPage <
+            totalPages ? (
+              <ButtonLink
+                href={getPageHref(
+                  currentPage + 1
+                )}
+                variant="secondary"
+              >
+                Next
+              </ButtonLink>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
