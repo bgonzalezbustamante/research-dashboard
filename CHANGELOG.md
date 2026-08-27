@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## v0.1.0-beta.4 (in development)
+## v0.1.0-beta.4 "Golden Vale"
 
 ### Summary
 
-- Beta.4 development has started and remains open for additional changes before release.
+- Released `v0.1.0-beta.4 "Golden Vale"` on 27 Aug 2026.
 - Corrected local Supabase Auth redirect configuration for HTTP localhost and 127.0.0.1 development URLs.
 - Added release-date tags to the in-app Release Notes.
 - Added pagination to the Papers module with 10 papers per page while preserving search, status, archive, and sort selections.
@@ -12,18 +12,19 @@
 - Added pagination and configurable ordering to the Author Directory.
 - Added major-activity classification for Hours labels and a yearly Dashboard activity-distribution pie chart.
 - Added yearly coffee totals and average coffees per working day to the major-activity analytics.
+- Moved the yearly Activity over time heatmap from Hours to Dashboard Cross-module analytics.
 
 ### Code changes
 
 `development and configuration`
 
 - Updated `supabase/config.toml` so local Auth redirect URLs use HTTP consistently for both `localhost` and `127.0.0.1`.
-- Kept the package version and footer identity on `v0.1.0-beta.3 "Misty Delta"` while beta.4 remains in development.
+- Updated the package and application release identity to `v0.1.0-beta.4 "Golden Vale"`.
 
 `release notes`
 
 - Added release-date metadata to each release entry and displayed it as a compact tag alongside release status.
-- Added an in-development beta.4 entry so ongoing changes can be documented before the release is finalised.
+- Finalised the beta.4 release entry as `Golden Vale` with a 27 Aug 2026 release date.
 
 `papers and authors`
 
@@ -44,18 +45,18 @@
 - Added a `major_activity` classification to activity labels for Research, Teaching, Administration, and Outreach.
 - Treated the protected system Break label as Breaks automatically without weakening existing system-label protections.
 - Added owner controls in Hours for classifying custom activity labels, including an explicit unclassified state for historical labels not yet assigned.
-- Added a yearly major-activity pie chart to Dashboard Cross-module analytics between Monthly workload and Citation yield.
+- Added a yearly major-activity pie chart to Dashboard Cross-module analytics.
 - Reported unclassified historical time separately rather than forcing it into a major activity or silently including it in the pie denominator.
 - Compacted the major-activity classification control and added a small confirmation notice after a classification is saved.
 - Refined the major-activity chart palette with pastel tones for Research, Teaching, Administration, Outreach, and Breaks.
 - Added the total number of recorded coffees in the selected year and the average number of coffees per working day below the major-activity distribution.
+- Moved the yearly Activity over time heatmap from Hours into Dashboard Cross-module analytics, between Monthly workload and Major activity distribution.
+- Kept the heatmap based on daily net working time and connected it to the same selected-year navigation as the surrounding Dashboard analytics.
 
 ### Release status
 
-- Beta.4 is in development.
-- Additional changes may be added before release.
-- Release date: TBC.
-- The current released beta remains `v0.1.0-beta.3 "Misty Delta"`.
+- Golden Vale is the current beta release.
+- Released: 27 Aug 2026.
 
 ---
 
