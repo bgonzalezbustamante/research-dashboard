@@ -1079,10 +1079,10 @@ export default async function DashboardPage({
             'revise-round'
             ? 0
             : a.status ===
-                'under-review'
+                'writing'
               ? 1
               : a.status ===
-                  'writing'
+                  'under-review'
                 ? 2
                 : 3
 
@@ -1091,10 +1091,10 @@ export default async function DashboardPage({
             'revise-round'
             ? 0
             : b.status ===
-                'under-review'
+                'writing'
               ? 1
               : b.status ===
-                  'writing'
+                  'under-review'
                 ? 2
                 : 3
 
