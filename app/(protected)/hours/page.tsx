@@ -22,6 +22,7 @@ type HoursPageProps = {
     period?: string
     dailyError?: string
     labelError?: string
+    labelMessage?: string
     locationError?: string
     sessionError?: string
   }>
@@ -698,6 +699,9 @@ export default async function HoursPage({
         }
         error={
           params.labelError
+        }
+        message={
+          params.labelMessage
         }
         returnDate={
           selectedDate
