@@ -187,7 +187,7 @@
 
 `planning`
 
-- Added direct navigation from paper allocations to the associated paper workspace.
+- Added direct navigation from Planning allocations to the associated paper workspace.
 - Kept blocked-time allocations as non-linked planning entries.
 
 `authentication and navigation`
@@ -279,7 +279,7 @@
 
 - This release is a single-owner beta intended for active use and testing.
 - Collaboration and paper-level coauthor permissions are deferred to Phase F.
-- Application data are stored in Supabase and are not committed to this repository.
+- Application data are stored in Supabase and are not committed to the repository.
 - Citation counts remain source-specific.
 - Citation yield uses Google Scholar only and is a descriptive cumulative indicator, not a causal measure of research productivity.
 - The web application remains authenticated even if the source-code repository is public.
