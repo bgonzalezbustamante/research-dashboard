@@ -464,7 +464,7 @@ export default async function ActivityLabelsSection({
 
                               <input
                                 id={`label-name-${label.id}`}
-                                name="full_name"
+                                name="name"
                                 type="text"
                                 required
                                 defaultValue={label.name}
