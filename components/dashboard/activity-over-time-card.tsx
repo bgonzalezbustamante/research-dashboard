@@ -125,19 +125,19 @@ function getHeatmapClass(
     return 'bg-oxford-shell'
   }
 
-  if (minutes < 120) {
+  if (minutes < 240) {
     return 'bg-sky-100'
   }
 
-  if (minutes < 240) {
+  if (minutes < 360) {
     return 'bg-sky-300'
   }
 
-  if (minutes < 360) {
+  if (minutes < 480) {
     return 'bg-sky-500'
   }
 
-  if (minutes < 480) {
+  if (minutes < 600) {
     return 'bg-sky-700'
   }
 
@@ -397,11 +397,11 @@ export default function ActivityOverTimeCard({
 
         <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-oxford-stone pt-3 text-xs text-oxford-ash">
           <span>0h</span>
-          <span>&lt;2h</span>
-          <span>2–4h</span>
+          <span>&lt;4h</span>
           <span>4–6h</span>
           <span>6–8h</span>
-          <span>8h+</span>
+          <span>8–10h</span>
+          <span>10h+</span>
         </div>
       </Card>
     </div>
