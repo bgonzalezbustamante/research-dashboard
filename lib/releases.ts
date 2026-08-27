@@ -59,6 +59,7 @@ export const releases: ReleaseNote[] = [
           'Kept existing unclassified historical activity visible as a separate warning rather than assigning categories automatically.',
           'Compacted the major-activity control within Hours activity-label cards and added a small confirmation notice after a classification is saved.',
           'Refined the major-activity chart palette with pastel tomato for Research, blue for Teaching, softer Administration tones, gold Outreach and green Breaks.',
+          'Added the yearly total of recorded coffees and average coffees per working day beneath the major-activity distribution.',
         ],
       },
     ],
