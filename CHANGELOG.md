@@ -187,7 +187,7 @@
 
 `planning`
 
-- Added direct navigation from Planning allocations to the associated paper workspace.
+- Added direct navigation from paper allocations to the associated paper workspace.
 - Kept blocked-time allocations as non-linked planning entries.
 
 `authentication and navigation`
