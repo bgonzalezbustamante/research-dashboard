@@ -16,18 +16,18 @@ export type ReleaseNote = {
 export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.4',
-    codename: 'TBC',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
-    comparison: 'Changes since beta.3',
+    codename: 'Golden Vale',
+    status: 'Current beta',
+    releasedOn: '27 Aug 2026',
+    comparison: 'What changed since beta.3',
     summary:
-      'Beta.4 is now in development. Its scope remains open and may expand as further maintenance and usability improvements are identified before release.',
+      'Golden Vale improves list navigation and yearly research analytics, while refining activity classification, dashboard presentation and local development configuration.',
     sections: [
       {
         title: 'Development and configuration',
         items: [
           'Corrected local Supabase Auth redirect configuration so localhost and 127.0.0.1 development URLs use HTTP consistently.',
-          'Kept v0.1.0-beta.3 "Misty Delta" as the current released version while beta.4 remains in development.',
+          'Updated the application release identity to v0.1.0-beta.4 "Golden Vale".',
         ],
       },
       {
@@ -55,11 +55,12 @@ export const releases: ReleaseNote[] = [
         title: 'Hours and Dashboard analytics',
         items: [
           'Added owner-managed major activity classification for Hours labels: Research, Teaching, Administration and Outreach, with Break sessions assigned to Breaks automatically.',
-          'Added a yearly major-activity pie chart to Cross-module analytics, positioned between Monthly workload and Citation yield.',
+          'Added a yearly major-activity pie chart to Cross-module analytics, positioned between the activity heatmap and Citation yield.',
           'Kept existing unclassified historical activity visible as a separate warning rather than assigning categories automatically.',
           'Compacted the major-activity control within Hours activity-label cards and added a small confirmation notice after a classification is saved.',
           'Refined the major-activity chart palette with pastel tomato for Research, blue for Teaching, softer Administration tones, gold Outreach and green Breaks.',
           'Added the yearly total of recorded coffees and average coffees per working day beneath the major-activity distribution.',
+          'Moved the yearly Activity over time heatmap from Hours into Dashboard Cross-module analytics, between Monthly workload and Major activity distribution.',
         ],
       },
     ],
@@ -67,7 +68,6 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.3',
     codename: 'Misty Delta',
-    status: 'Current beta',
     releasedOn: '26 Aug 2026',
     comparison: 'What changed since beta.2',
     summary:
