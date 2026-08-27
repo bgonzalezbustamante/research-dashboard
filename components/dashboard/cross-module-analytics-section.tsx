@@ -655,15 +655,27 @@ export default async function CrossModuleAnalyticsSection({
       0
     )
 
-  let pieCursor = 0
-
   const pieSegments =
-    majorActivities
-      .map((activity) => {
+    majorActivities.reduce<
+      {
+        key: MajorActivityKey
+        label: string
+        colour: string
+        minutes: number
+        percentage: number
+        start: number
+        end: number
+      }[]
+    >(
+      (segments, activity) => {
         const minutes =
           majorActivityMinutes.get(
             activity.key
           ) ?? 0
+
+        if (minutes <= 0) {
+          return segments
+        }
 
         const percentage =
           classifiedMinutes > 0
@@ -673,24 +685,25 @@ export default async function CrossModuleAnalyticsSection({
               ) * 100
             : 0
 
-        const start = pieCursor
+        const start =
+          segments.at(-1)?.end ?? 0
+
         const end =
           start + percentage
 
-        pieCursor = end
-
-        return {
-          ...activity,
-          minutes,
-          percentage,
-          start,
-          end,
-        }
-      })
-      .filter(
-        (activity) =>
-          activity.minutes > 0
-      )
+        return [
+          ...segments,
+          {
+            ...activity,
+            minutes,
+            percentage,
+            start,
+            end,
+          },
+        ]
+      },
+      []
+    )
 
   const pieBackground =
     pieSegments.length > 0
