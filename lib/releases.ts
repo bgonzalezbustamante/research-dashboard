@@ -15,6 +15,36 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v0.1.0-beta.4',
+    codename: 'TBC',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since beta.3',
+    summary:
+      'Beta.4 is now in development. Its scope remains open and may expand as further maintenance and usability improvements are identified before release.',
+    sections: [
+      {
+        title: 'Development and configuration',
+        items: [
+          'Corrected local Supabase Auth redirect configuration so localhost and 127.0.0.1 development URLs use HTTP consistently.',
+          'Kept v0.1.0-beta.3 "Misty Delta" as the current released version while beta.4 remains in development.',
+        ],
+      },
+      {
+        title: 'Release notes',
+        items: [
+          'Added release-date metadata to release notes and displayed each date as a compact tag alongside release status.',
+        ],
+      },
+      {
+        title: 'Papers',
+        items: [
+          'Added pagination to the Papers list with 10 papers per page while preserving search, status, archive and sort selections across pages.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v0.1.0-beta.3',
     codename: 'Misty Delta',
     status: 'Current beta',
@@ -153,4 +183,9 @@ export const releases: ReleaseNote[] = [
   },
 ]
 
-export const currentRelease = releases[0]
+export const currentRelease =
+  releases.find(
+    (release) =>
+      release.status ===
+      'Current beta'
+  ) ?? releases[0]
