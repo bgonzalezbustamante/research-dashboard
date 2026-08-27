@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v0.1.0-beta.3 "Misty Delta"**
+**v0.1.0-beta.4 "Golden Vale"**
 
 An authenticated personal research-management dashboard for tracking papers, working hours, biweekly capacity planning, collaborative paper workflows, and cross-module research analytics.
 
@@ -13,7 +13,7 @@ An authenticated personal research-management dashboard for tracking papers, wor
 - Collaborative paper editing with owner-controlled permissions
 - Owner-visible audit history for invitations and access changes
 - Markdown and LaTeX-style math notation in long-form research text
-- Manual working-hour logging and annual activity heatmap
+- Manual working-hour logging with an annual activity heatmap in Dashboard analytics
 - Biweekly paper and blocked-time capacity planning
 - Planned-versus-actual research effort
 - Executive and annual cross-module analytics
