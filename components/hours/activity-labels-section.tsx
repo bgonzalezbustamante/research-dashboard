@@ -28,6 +28,7 @@ type MajorActivity =
 type ActivityLabelsSectionProps = {
   labels: ActivityLabel[]
   error?: string
+  message?: string
   returnDate: string
 }
 
@@ -56,12 +57,16 @@ const majorActivityOptions: {
 const inputClass =
   'w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue'
 
+const compactSelectClass =
+  'w-full rounded-md border border-oxford-stone bg-white px-2.5 py-1.5 text-xs text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue'
+
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
 export default async function ActivityLabelsSection({
   labels,
   error,
+  message,
   returnDate,
 }: ActivityLabelsSectionProps) {
   const supabase =
@@ -170,6 +175,12 @@ export default async function ActivityLabelsSection({
           </span>
         </div>
       </div>
+
+      {message && (
+        <div className="mb-3 inline-flex rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs font-medium text-green-800">
+          {message}
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -306,23 +317,23 @@ export default async function ActivityLabelsSection({
                     </p>
                   )}
 
-                  <div className="mt-3 rounded-md border border-oxford-stone bg-oxford-shell p-3">
-                    <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+                  <div className="mt-3 rounded-md border border-oxford-stone bg-oxford-shell px-2.5 py-2">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-oxford-ash">
                       Major activity
                     </div>
 
                     {label.is_break ? (
-                      <div className="mt-1 text-sm font-medium text-oxford-charcoal">
+                      <div className="mt-1 text-xs font-medium text-oxford-charcoal">
                         Breaks
                       </div>
                     ) : label.is_system ? (
-                      <div className="mt-1 text-sm font-medium text-oxford-charcoal">
+                      <div className="mt-1 text-xs font-medium text-oxford-charcoal">
                         {majorActivityLabel}
                       </div>
                     ) : (
                       <form
                         action={setMajorActivity}
-                        className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end"
+                        className="mt-1.5 flex items-end gap-2"
                       >
                         <input
                           type="hidden"
@@ -350,7 +361,7 @@ export default async function ActivityLabelsSection({
                             defaultValue={
                               majorActivity ?? ''
                             }
-                            className={inputClass}
+                            className={compactSelectClass}
                           >
                             <option value="">
                               Unclassified
@@ -372,6 +383,7 @@ export default async function ActivityLabelsSection({
                         <Button
                           type="submit"
                           variant="secondary"
+                          className="!px-2.5 !py-1.5 !text-xs"
                         >
                           Save
                         </Button>
@@ -452,7 +464,7 @@ export default async function ActivityLabelsSection({
 
                               <input
                                 id={`label-name-${label.id}`}
-                                name="name"
+                                name="full_name"
                                 type="text"
                                 required
                                 defaultValue={label.name}
