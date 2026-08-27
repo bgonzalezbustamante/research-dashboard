@@ -9,6 +9,8 @@
 - Added release-date tags to the in-app Release Notes.
 - Added pagination to the Papers module with 10 papers per page while preserving search, status, archive, and sort selections.
 - Simplified authenticated navigation by showing the signed-in profile name directly on the Account button instead of as a separate navbar label.
+- Added pagination and configurable ordering to the Author Directory.
+- Added major-activity classification for Hours labels and a yearly Dashboard activity-distribution pie chart.
 
 ### Code changes
 
@@ -22,16 +24,26 @@
 - Added release-date metadata to each release entry and displayed it as a compact tag alongside release status.
 - Added an in-development beta.4 entry so ongoing changes can be documented before the release is finalised.
 
-`papers`
+`papers and authors`
 
 - Added pagination to the Papers list with 10 papers per page.
-- Preserved existing search, status, archive, and sort parameters when navigating between pages.
-- Reset pagination naturally to page 1 when filters are reapplied.
+- Preserved existing search, status, archive, and sort parameters when navigating between paper pages.
+- Reset Papers pagination naturally to page 1 when filters are reapplied.
+- Added pagination to the Author Directory with 10 authors per page.
+- Added Author Directory ordering by alphabetical name or descending number of associated papers.
 
 `navigation`
 
 - Removed the separate signed-in profile-name label from the authenticated navbar.
 - Reused the existing profile name as the `/account` button label, with `Account` retained as a fallback when no profile name is available.
+
+`hours and dashboard analytics`
+
+- Added a `major_activity` classification to activity labels for Research, Teaching, Administration, and Outreach.
+- Treated the protected system Break label as Breaks automatically without weakening existing system-label protections.
+- Added owner controls in Hours for classifying custom activity labels, including an explicit unclassified state for historical labels not yet assigned.
+- Added a yearly major-activity pie chart to Dashboard Cross-module analytics between Monthly workload and Citation yield.
+- Reported unclassified historical time separately rather than forcing it into a major activity or silently including it in the pie denominator.
 
 ### Release status
 
