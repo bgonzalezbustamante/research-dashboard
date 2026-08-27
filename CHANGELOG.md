@@ -104,7 +104,7 @@
 - Restored read-only coffee visibility in Daily context for Viewer accounts.
 - Updated release identity and footer for `v0.1.0-beta.3 "Misty Delta"`.
 - Completed the Phase F.6 permission audit and hardening checkpoint.
-- Added an append-only, Owner-visible access history for invitations, Viewer permissions, Coauthor assignments and managed-account changes.
+- Added an append-only, Owner-visible access history for invitations, Viewer permissions, Coauthor assignments, and managed-account changes.
 - Made archived papers read-only for assigned Coauthors while preserving reference access and Owner restoration.
 - Added automatic cleanup of unused onboarding accounts when invitations are cancelled.
 - Removed unnecessary `TRUNCATE`, `TRIGGER`, and `REFERENCES` privileges from Data API roles.
