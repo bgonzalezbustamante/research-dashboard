@@ -98,7 +98,7 @@ const majorActivities: {
   {
     key: 'research',
     label: 'Research',
-    colour: '#002147',
+    colour: '#F28C82',
   },
   {
     key: 'teaching',
@@ -108,17 +108,17 @@ const majorActivities: {
   {
     key: 'administration',
     label: 'Administration',
-    colour: '#8A6A4A',
+    colour: '#B89B7A',
   },
   {
     key: 'outreach',
     label: 'Outreach',
-    colour: '#66846B',
+    colour: '#E4C27A',
   },
   {
     key: 'breaks',
     label: 'Breaks',
-    colour: '#C9963B',
+    colour: '#9BB49F',
   },
 ]
 
