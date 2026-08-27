@@ -42,7 +42,8 @@ function getReturnDate(
 
 function redirectToLabels(
   date: string,
-  error?: string
+  error?: string,
+  message?: string
 ): never {
   const params =
     new URLSearchParams()
@@ -55,6 +56,13 @@ function redirectToLabels(
     params.set(
       'labelError',
       error
+    )
+  }
+
+  if (message) {
+    params.set(
+      'labelMessage',
+      message
     )
   }
 
@@ -151,5 +159,9 @@ export async function setMajorActivity(
   revalidatePath('/hours')
   revalidatePath('/dashboard')
 
-  redirectToLabels(returnDate)
+  redirectToLabels(
+    returnDate,
+    undefined,
+    'Major activity saved.'
+  )
 }
