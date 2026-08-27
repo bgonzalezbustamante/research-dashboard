@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import ActivityOverTimeCard from '@/components/dashboard/activity-over-time-card'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
@@ -998,6 +999,11 @@ export default async function CrossModuleAnalyticsSection({
           </div>
         </Card>
       </div>
+
+      <ActivityOverTimeCard
+        year={year}
+        logs={analyticsLogs}
+      />
 
       <div className="mt-6">
         <Card>
