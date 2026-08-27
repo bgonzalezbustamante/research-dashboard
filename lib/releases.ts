@@ -48,6 +48,7 @@ export const releases: ReleaseNote[] = [
           'Added pagination to the Papers list with 10 papers per page while preserving search, status, archive and sort selections across pages.',
           'Added pagination to the Author Directory with 10 authors per page.',
           'Added Author Directory ordering by alphabetical name or by number of associated papers.',
+          'Refined the Dashboard research-pipeline ranking after dated milestones to prioritise Revise round, Writing, Under review, then all other statuses.',
         ],
       },
       {
@@ -56,6 +57,8 @@ export const releases: ReleaseNote[] = [
           'Added owner-managed major activity classification for Hours labels: Research, Teaching, Administration and Outreach, with Break sessions assigned to Breaks automatically.',
           'Added a yearly major-activity pie chart to Cross-module analytics, positioned between Monthly workload and Citation yield.',
           'Kept existing unclassified historical activity visible as a separate warning rather than assigning categories automatically.',
+          'Compacted the major-activity control within Hours activity-label cards and added a small confirmation notice after a classification is saved.',
+          'Refined the major-activity chart palette with pastel tomato for Research, blue for Teaching, softer Administration tones, gold Outreach and green Breaks.',
         ],
       },
     ],
