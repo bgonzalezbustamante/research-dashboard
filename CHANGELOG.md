@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## v0.1.0-beta.5 (in development)
+
+### Summary
+
+- Beta.5 development has started and remains open for additional changes before release.
+- Added five compact yearly top-activity cards beneath Major activity distribution, showing the most-used non-Break Hours activity labels and their recorded time.
+
+### Code changes
+
+`dashboard analytics`
+
+- Aggregated non-Break work-session durations by Hours activity label within the selected Dashboard year.
+- Ranked activity labels by total recorded duration, using alphabetical order only as a tie-breaker, and displayed the top five beneath the major-activity plot and coffee indicator.
+- Kept activity-label ranking independent of major-activity classification, so unclassified labels can still appear when they are among the five most-used activities.
+
+### Release status
+
+- Beta.5 is in development.
+- Additional changes may be added before release.
+- Release date: TBC.
+- The current released beta remains `v0.1.0-beta.4 "Golden Vale"`.
+
+---
+
 ## v0.1.0-beta.4 "Golden Vale"
 
 ### Summary
@@ -80,7 +104,7 @@
 - Restored read-only coffee visibility in Daily context for Viewer accounts.
 - Updated release identity and footer for `v0.1.0-beta.3 "Misty Delta"`.
 - Completed the Phase F.6 permission audit and hardening checkpoint.
-- Added an append-only, Owner-visible access history for invitations, Viewer permissions, Coauthor assignments, and managed-account changes.
+- Added an append-only, Owner-visible access history for invitations, Viewer permissions, Coauthor assignments and managed-account changes.
 - Made archived papers read-only for assigned Coauthors while preserving reference access and Owner restoration.
 - Added automatic cleanup of unused onboarding accounts when invitations are cancelled.
 - Removed unnecessary `TRUNCATE`, `TRIGGER`, and `REFERENCES` privileges from Data API roles.
