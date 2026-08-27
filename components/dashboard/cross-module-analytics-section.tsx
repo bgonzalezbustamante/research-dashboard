@@ -565,6 +565,19 @@ export default async function CrossModuleAnalyticsSection({
       0
     )
 
+  const annualCoffeeCount =
+    dailyLogs.reduce(
+      (total, log) =>
+        total + log.coffee_count,
+      0
+    )
+
+  const averageCoffeesPerWorkingDay =
+    annualWorkingDays > 0
+      ? annualCoffeeCount /
+        annualWorkingDays
+      : 0
+
   const averageNetPerWorkingDay =
     annualWorkingDays > 0
       ? Math.round(
@@ -1068,6 +1081,10 @@ export default async function CrossModuleAnalyticsSection({
                   )} remains unclassified and is not included in the pie. Assign major activities in Hours → Activity labels.
                 </div>
               )}
+
+              <div className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2 text-xs leading-5 text-oxford-ash">
+                Coffee in {year}: {annualCoffeeCount} total · {averageCoffeesPerWorkingDay.toFixed(1)} per working day.
+              </div>
             </div>
           </div>
         </Card>
