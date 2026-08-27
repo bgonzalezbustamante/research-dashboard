@@ -8,6 +8,7 @@
 - Corrected local Supabase Auth redirect configuration for HTTP localhost and 127.0.0.1 development URLs.
 - Added release-date tags to the in-app Release Notes.
 - Added pagination to the Papers module with 10 papers per page while preserving search, status, archive, and sort selections.
+- Simplified authenticated navigation by showing the signed-in profile name directly on the Account button instead of as a separate navbar label.
 
 ### Code changes
 
@@ -26,6 +27,11 @@
 - Added pagination to the Papers list with 10 papers per page.
 - Preserved existing search, status, archive, and sort parameters when navigating between pages.
 - Reset pagination naturally to page 1 when filters are reapplied.
+
+`navigation`
+
+- Removed the separate signed-in profile-name label from the authenticated navbar.
+- Reused the existing profile name as the `/account` button label, with `Account` retained as a fallback when no profile name is available.
 
 ### Release status
 
@@ -273,7 +279,7 @@
 
 - This release is a single-owner beta intended for active use and testing.
 - Collaboration and paper-level coauthor permissions are deferred to Phase F.
-- Application data are stored in Supabase and are not committed to the repository.
+- Application data are stored in Supabase and are not committed to this repository.
 - Citation counts remain source-specific.
 - Citation yield uses Google Scholar only and is a descriptive cumulative indicator, not a causal measure of research productivity.
 - The web application remains authenticated even if the source-code repository is public.
