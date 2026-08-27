@@ -1,5 +1,41 @@
 # CHANGELOG
 
+## v0.1.0-beta.4 (in development)
+
+### Summary
+
+- Beta.4 development has started and remains open for additional changes before release.
+- Corrected local Supabase Auth redirect configuration for HTTP localhost and 127.0.0.1 development URLs.
+- Added release-date tags to the in-app Release Notes.
+- Added pagination to the Papers module with 10 papers per page while preserving search, status, archive, and sort selections.
+
+### Code changes
+
+`development and configuration`
+
+- Updated `supabase/config.toml` so local Auth redirect URLs use HTTP consistently for both `localhost` and `127.0.0.1`.
+- Kept the package version and footer identity on `v0.1.0-beta.3 "Misty Delta"` while beta.4 remains in development.
+
+`release notes`
+
+- Added release-date metadata to each release entry and displayed it as a compact tag alongside release status.
+- Added an in-development beta.4 entry so ongoing changes can be documented before the release is finalised.
+
+`papers`
+
+- Added pagination to the Papers list with 10 papers per page.
+- Preserved existing search, status, archive, and sort parameters when navigating between pages.
+- Reset pagination naturally to page 1 when filters are reapplied.
+
+### Release status
+
+- Beta.4 is in development.
+- Additional changes may be added before release.
+- Release date: TBC.
+- The current released beta remains `v0.1.0-beta.3 "Misty Delta"`.
+
+---
+
 ## v0.1.0-beta.3 "Misty Delta"
 
 ### Summary
@@ -220,7 +256,7 @@
 
 - Added executive indicators for active papers, working hours, current planning, and research priorities.
 - Added annual cross-module summaries and monthly workload visualisation.
-- Added cumulative citation yield using the latest Google Scholar snapshot for papers with matched tracked hours.
+- Added cumulative citation yield using the latest Google Scholar snapshot for papers with matched hours.
 - Kept citation databases source-specific rather than combining Google Scholar, Scopus, and Web of Science counts.
 
 `authentication, database, and production`
