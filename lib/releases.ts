@@ -37,6 +37,12 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'Navigation',
+        items: [
+          'Simplified the authenticated navbar by removing the separate profile-name label and showing the signed-in account name directly on the Account button.',
+        ],
+      },
+      {
         title: 'Papers',
         items: [
           'Added pagination to the Papers list with 10 papers per page while preserving search, status, archive and sort selections across pages.',
