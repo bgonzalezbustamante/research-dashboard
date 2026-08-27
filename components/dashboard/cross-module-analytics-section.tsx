@@ -26,10 +26,12 @@ type WorkSessionRow = {
   end_time: string
   activity_labels:
     | {
+        name: string
         is_break: boolean
         major_activity: string | null
       }
     | {
+        name: string
         is_break: boolean
         major_activity: string | null
       }[]
@@ -154,10 +156,12 @@ function getAmsterdamDate() {
 function getActivityLabel(
   activityLabels:
     | {
+        name?: string
         is_break: boolean
         major_activity?: string | null
       }
     | {
+        name?: string
         is_break: boolean
         major_activity?: string | null
       }[]
@@ -365,6 +369,7 @@ export default async function CrossModuleAnalyticsSection({
         start_time,
         end_time,
         activity_labels (
+          name,
           is_break,
           major_activity
         )
@@ -609,6 +614,9 @@ export default async function CrossModuleAnalyticsSection({
       )
     )
 
+  const activityMinutesByName =
+    new Map<string, number>()
+
   let unclassifiedMinutes = 0
 
   for (const session of
@@ -623,6 +631,20 @@ export default async function CrossModuleAnalyticsSection({
       getActivityLabel(
         session.activity_labels
       )
+
+    if (
+      label?.name &&
+      !label.is_break
+    ) {
+      activityMinutesByName.set(
+        label.name,
+        (
+          activityMinutesByName.get(
+            label.name
+          ) ?? 0
+        ) + duration
+      )
+    }
 
     if (label?.is_break) {
       majorActivityMinutes.set(
@@ -661,6 +683,26 @@ export default async function CrossModuleAnalyticsSection({
         duration
     }
   }
+
+  const topActivities =
+    [
+      ...activityMinutesByName.entries(),
+    ]
+      .map(
+        ([name, minutes]) => ({
+          name,
+          minutes,
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.minutes - a.minutes ||
+          a.name.localeCompare(
+            b.name,
+            'en'
+          )
+      )
+      .slice(0, 5)
 
   const classifiedMinutes =
     [...majorActivityMinutes.values()].reduce(
@@ -1092,6 +1134,38 @@ export default async function CrossModuleAnalyticsSection({
                 Coffee in {year}: {annualCoffeeCount} total · {averageCoffeesPerWorkingDay.toFixed(1)} per working day.
               </div>
             </div>
+          </div>
+
+          <div className="mt-5 border-t border-oxford-stone pt-4">
+            <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+              Top activities in {year}
+            </div>
+
+            {topActivities.length > 0 ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                {topActivities.map(
+                  (activity) => (
+                    <div
+                      key={activity.name}
+                      className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2"
+                    >
+                      <div className="text-xs font-medium leading-4 text-oxford-charcoal">
+                        {activity.name}
+                      </div>
+                      <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
+                        {formatDuration(
+                          activity.minutes
+                        )}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-oxford-ash">
+                No non-break activity has been recorded for {year}.
+              </p>
+            )}
           </div>
         </Card>
       </div>
