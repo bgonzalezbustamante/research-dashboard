@@ -15,6 +15,23 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v0.1.0-beta.5',
+    codename: 'TBC',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since beta.4',
+    summary:
+      'Beta.5 development has started and remains open for additional changes before release.',
+    sections: [
+      {
+        title: 'Dashboard analytics',
+        items: [
+          'Added five compact yearly top-activity cards beneath Major activity distribution, ranking Hours activity labels by recorded non-Break time.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v0.1.0-beta.4',
     codename: 'Golden Vale',
     status: 'Current beta',
