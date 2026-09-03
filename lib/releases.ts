@@ -29,6 +29,13 @@ export const releases: ReleaseNote[] = [
           'Added five compact yearly top-activity cards beneath Major activity distribution, ranking Hours activity labels by recorded non-Break time.',
         ],
       },
+      {
+        title: 'Reliability',
+        items: [
+          'Paginated yearly work-session reads in Hours and Dashboard analytics so datasets above Supabase’s 1,000-row response limit remain complete.',
+          'Used deterministic work-session ordering across pagination batches to prevent late-day sessions from disappearing as the dataset grows.',
+        ],
+      },
     ],
   },
   {
