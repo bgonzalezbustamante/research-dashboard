@@ -6,6 +6,8 @@
 
 - Beta.5 development has started and remains open for additional changes before release.
 - Added five compact yearly top-activity cards beneath Major activity distribution, showing the most-used non-Break Hours activity labels and their recorded time.
+- Added FTE-equivalent estimates to the yearly top-activity cards using a 40-hour week, prorating the current-year reference through the current day.
+- Hardened Hours and Dashboard yearly work-session reads so datasets above Supabase’s 1,000-row response limit remain complete.
 
 ### Code changes
 
@@ -14,6 +16,13 @@
 - Aggregated non-Break work-session durations by Hours activity label within the selected Dashboard year.
 - Ranked activity labels by total recorded duration, using alphabetical order only as a tie-breaker, and displayed the top five beneath the major-activity plot and coffee indicator.
 - Kept activity-label ranking independent of major-activity classification, so unclassified labels can still appear when they are among the five most-used activities.
+- Added an FTE-equivalent line beneath each top activity, using 1.0 FTE = 40 hours/week × 52 weeks = 2,080 hours for completed years.
+- Prorated the 2,080-hour reference by the fraction of the calendar year elapsed for the current year so in-progress FTE estimates are not understated.
+
+`reliability`
+
+- Paginated yearly work-session reads in Hours and Dashboard analytics in deterministic 1,000-row batches.
+- Ordered pagination by daily log, start time, and session ID so late-day sessions remain visible as the dataset grows.
 
 ### Release status
 
