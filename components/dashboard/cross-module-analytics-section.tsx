@@ -97,6 +97,12 @@ const MINUTES_PER_PLANNED_DAY =
 const SESSION_PAGE_SIZE =
   1000
 
+const FULL_YEAR_FTE_HOURS =
+  40 * 52
+
+const MILLISECONDS_PER_DAY =
+  24 * 60 * 60 * 1000
+
 const majorActivities: {
   key: MajorActivityKey
   label: string
@@ -155,6 +161,69 @@ function getAmsterdamDate() {
     )
 
   return `${values.year}-${values.month}-${values.day}`
+}
+
+function getFteReferenceHours(
+  year: number,
+  today: string
+) {
+  const currentYear =
+    Number(
+      today.slice(0, 4)
+    )
+
+  if (year !== currentYear) {
+    return FULL_YEAR_FTE_HOURS
+  }
+
+  const [, month, day] =
+    today
+      .split('-')
+      .map(Number)
+
+  const yearStart =
+    Date.UTC(
+      year,
+      0,
+      1
+    )
+
+  const nextYearStart =
+    Date.UTC(
+      year + 1,
+      0,
+      1
+    )
+
+  const currentDate =
+    Date.UTC(
+      year,
+      month - 1,
+      day
+    )
+
+  const elapsedDays =
+    Math.floor(
+      (
+        currentDate -
+        yearStart
+      ) /
+        MILLISECONDS_PER_DAY
+    ) + 1
+
+  const daysInYear =
+    Math.floor(
+      (
+        nextYearStart -
+        yearStart
+      ) /
+        MILLISECONDS_PER_DAY
+    )
+
+  return (
+    FULL_YEAR_FTE_HOURS *
+    (elapsedDays / daysInYear)
+  )
 }
 
 function getActivityLabel(
@@ -224,6 +293,12 @@ export default async function CrossModuleAnalyticsSection({
   const currentYear =
     Number(
       today.slice(0, 4)
+    )
+
+  const fteReferenceHours =
+    getFteReferenceHours(
+      year,
+      today
     )
 
   const yearStart =
@@ -1189,25 +1264,40 @@ export default async function CrossModuleAnalyticsSection({
             </div>
 
             {topActivities.length > 0 ? (
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                {topActivities.map(
-                  (activity) => (
-                    <div
-                      key={activity.name}
-                      className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2"
-                    >
-                      <div className="text-xs font-medium leading-4 text-oxford-charcoal">
-                        {activity.name}
+              <>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                  {topActivities.map(
+                    (activity) => (
+                      <div
+                        key={activity.name}
+                        className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2"
+                      >
+                        <div className="text-xs font-medium leading-4 text-oxford-charcoal">
+                          {activity.name}
+                        </div>
+                        <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
+                          {formatDuration(
+                            activity.minutes
+                          )}
+                        </div>
+                        <div className="mt-1 text-xs font-medium leading-4 text-oxford-ash">
+                          ≈ {(
+                            activity.minutes /
+                            60 /
+                            fteReferenceHours
+                          ).toFixed(2)} FTE equiv.
+                        </div>
                       </div>
-                      <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                        {formatDuration(
-                          activity.minutes
-                        )}
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
+                    )
+                  )}
+                </div>
+
+                <p className="mt-3 text-xs leading-5 text-oxford-ash">
+                  FTE equivalent uses a 40-hour week. {year === currentYear
+                    ? `For ${year}, the 2,080-hour annual reference is prorated through today (${Math.round(fteReferenceHours).toLocaleString('en-GB')} hours).`
+                    : 'Completed years use 1.0 FTE = 2,080 hours.'}
+                </p>
+              </>
             ) : (
               <p className="mt-2 text-xs text-oxford-ash">
                 No non-break activity has been recorded for {year}.
