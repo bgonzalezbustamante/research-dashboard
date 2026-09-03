@@ -20,6 +20,7 @@ type DailyLogRow = {
 }
 
 type WorkSessionRow = {
+  id: string
   daily_log_id: string
   paper_id: string | null
   start_time: string
@@ -92,6 +93,9 @@ type MajorActivityKey =
 
 const MINUTES_PER_PLANNED_DAY =
   8 * 60
+
+const SESSION_PAGE_SIZE =
+  1000
 
 const majorActivities: {
   key: MajorActivityKey
@@ -358,35 +362,78 @@ export default async function CrossModuleAnalyticsSection({
     PlanningAllocationRow[] = []
 
   if (dailyLogIds.length > 0) {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from('work_sessions')
-      .select(`
-        daily_log_id,
-        paper_id,
-        start_time,
-        end_time,
-        activity_labels (
-          name,
-          is_break,
-          major_activity
+    let from = 0
+
+    while (true) {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from('work_sessions')
+        .select(`
+          id,
+          daily_log_id,
+          paper_id,
+          start_time,
+          end_time,
+          activity_labels (
+            name,
+            is_break,
+            major_activity
+          )
+        `)
+        .in(
+          'daily_log_id',
+          dailyLogIds
         )
-      `)
-      .in(
-        'daily_log_id',
-        dailyLogIds
+        .order(
+          'daily_log_id',
+          {
+            ascending: true,
+          }
+        )
+        .order(
+          'start_time',
+          {
+            ascending: true,
+          }
+        )
+        .order(
+          'id',
+          {
+            ascending: true,
+          }
+        )
+        .range(
+          from,
+          from +
+            SESSION_PAGE_SIZE -
+            1
+        )
+
+      if (error) {
+        throw new Error(
+          `Could not load analytics work sessions: ${error.message}`
+        )
+      }
+
+      const rows =
+        (data ?? []) as WorkSessionRow[]
+
+      workSessions.push(
+        ...rows
       )
 
-    if (error) {
-      throw new Error(
-        `Could not load analytics work sessions: ${error.message}`
-      )
+      if (
+        rows.length <
+        SESSION_PAGE_SIZE
+      ) {
+        break
+      }
+
+      from +=
+        SESSION_PAGE_SIZE
     }
-
-    workSessions =
-      (data ?? []) as WorkSessionRow[]
   }
 
   if (
