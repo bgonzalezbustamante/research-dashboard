@@ -27,6 +27,7 @@ export const releases: ReleaseNote[] = [
         title: 'Dashboard analytics',
         items: [
           'Added five compact yearly top-activity cards beneath Major activity distribution, ranking Hours activity labels by recorded non-Break time.',
+          'Added FTE-equivalent estimates beneath each top activity using a 40-hour week, with the current-year 2,080-hour reference prorated through the current day and completed years using the full annual denominator.',
         ],
       },
       {
