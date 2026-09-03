@@ -355,7 +355,7 @@ export default async function CrossModuleAnalyticsSection({
       (period) => period.id
     )
 
-  let workSessions:
+  const workSessions:
     WorkSessionRow[] = []
 
   let planningAllocations:
