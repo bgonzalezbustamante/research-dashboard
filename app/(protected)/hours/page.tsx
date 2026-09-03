@@ -35,6 +35,9 @@ const analyticsPeriods:
     'year',
   ]
 
+const SESSION_PAGE_SIZE =
+  1000
+
 function isValidDateString(
   value: string
 ) {
@@ -360,50 +363,86 @@ export default async function HoursPage({
     dailyLogIds.length >
     0
   ) {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from(
-        'work_sessions'
-      )
-      .select(`
-        id,
-        daily_log_id,
-        start_time,
-        end_time,
-        place,
-        activity_label_id,
-        paper_id,
-        activity_labels (
-          name,
-          is_break,
-          is_active
-        ),
-        papers (
-          short_title,
-          archived_at
+    let from = 0
+
+    while (true) {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from(
+          'work_sessions'
         )
-      `)
-      .in(
-        'daily_log_id',
-        dailyLogIds
-      )
-      .order(
-        'start_time',
-        {
-          ascending: true,
-        }
+        .select(`
+          id,
+          daily_log_id,
+          start_time,
+          end_time,
+          place,
+          activity_label_id,
+          paper_id,
+          activity_labels (
+            name,
+            is_break,
+            is_active
+          ),
+          papers (
+            short_title,
+            archived_at
+          )
+        `)
+        .in(
+          'daily_log_id',
+          dailyLogIds
+        )
+        .order(
+          'daily_log_id',
+          {
+            ascending: true,
+          }
+        )
+        .order(
+          'start_time',
+          {
+            ascending: true,
+          }
+        )
+        .order(
+          'id',
+          {
+            ascending: true,
+          }
+        )
+        .range(
+          from,
+          from +
+            SESSION_PAGE_SIZE -
+            1
+        )
+
+      if (error) {
+        throw new Error(
+          `Could not load work sessions: ${error.message}`
+        )
+      }
+
+      const rows =
+        data ?? []
+
+      allSessionRows.push(
+        ...rows
       )
 
-    if (error) {
-      throw new Error(
-        `Could not load work sessions: ${error.message}`
-      )
+      if (
+        rows.length <
+        SESSION_PAGE_SIZE
+      ) {
+        break
+      }
+
+      from +=
+        SESSION_PAGE_SIZE
     }
-
-    allSessionRows =
-      data ?? []
   }
 
   const sessionsByLog =
