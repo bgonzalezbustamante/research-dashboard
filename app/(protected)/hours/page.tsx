@@ -326,7 +326,7 @@ export default async function HoursPage({
         log.id
     )
 
-  let allSessionRows:
+  const allSessionRows:
     {
       id: string
       daily_log_id: string
