@@ -37,6 +37,12 @@ export const releases: ReleaseNote[] = [
           'Used deterministic work-session ordering across pagination batches to prevent late-day sessions from disappearing as the dataset grows.',
         ],
       },
+      {
+        title: 'Security and maintenance',
+        items: [
+          'Upgraded Next.js from 16.3.2 to exactly pinned 16.3.6 for GHSA-vcvr-r3jv-pc5j / CVE-2026-94545 after confirming the Dashboard does not use the affected Node.js next/og ImageResponse path.',
+        ],
+      },
     ],
   },
   {
