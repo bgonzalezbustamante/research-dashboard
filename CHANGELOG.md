@@ -9,6 +9,7 @@
 - Added FTE-equivalent estimates to the yearly top-activity cards using a 40-hour week, prorating the current-year reference through the current day.
 - Hardened Hours and Dashboard yearly work-session reads so datasets above Supabase’s 1,000-row response limit remain complete.
 - Updated Next.js from 16.3.2 to the patched 16.3.6 release for GHSA-vcvr-r3jv-pc5j / CVE-2026-94545.
+- Patched the transitive development dependency `js-yaml` from 4.3.1 to 4.3.2 to resolve GHSA-2883-xcg3-v3hh reported by `npm audit`.
 
 ### Code changes
 
@@ -30,6 +31,7 @@
 - Upgraded the production Next.js runtime from exactly pinned 16.3.2 to exactly pinned 16.3.6, which contains the fix for GHSA-vcvr-r3jv-pc5j / CVE-2026-94545.
 - Audited the application for the affected Node.js `next/og` / `ImageResponse` path and found no use of dynamic Open Graph image generation or request-controlled SVG content in that path.
 - Kept `eslint-config-next` at 16.3.2 because the advisory affects the Next.js runtime and verification found no compatibility requirement to broaden the patch.
+- Updated the transitive ESLint development dependency `js-yaml` from 4.3.1 to 4.3.2 to resolve GHSA-2883-xcg3-v3hh and clear the remaining `npm audit` finding.
 
 ### Release status
 
