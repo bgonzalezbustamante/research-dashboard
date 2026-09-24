@@ -36,6 +36,7 @@ export const releases: ReleaseNote[] = [
           'Added one-to-one public presentation metadata for papers, with every existing and newly created paper Private by default and internal workflow status remaining independent.',
           'Added explicit anonymous RPC contracts for listed Public papers and slug-based Public or Unlisted paper lookup without granting anonymous SELECT access to private paper, author, link, workflow, or administrative tables.',
           'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links; private author fields, Overleaf links, arbitrary links, hours, planning, milestones, notes, history, permissions, invitations, audit data, and profiles remain excluded.',
+          'Restricted legacy anonymous function grants so the two deliberate public-paper RPCs are the only application functions executable by the anon role.',
         ],
       },
     ],
