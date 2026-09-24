@@ -22,7 +22,7 @@ const slugPattern =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const assetFilenamePattern =
-  /^[A-Za-z0-9][A-Za-z0-9._-]*\.(png|webp|jpg|jpeg)$/
+  /^[A-Za-z0-9][A-Za-z0-9._-]*\.(png|webp|jpg|jpeg)$/i
 
 function getRequiredText(
   formData: FormData,
