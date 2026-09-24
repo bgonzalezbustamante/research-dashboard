@@ -958,6 +958,54 @@ export default async function ProjectsPage({
 
             <details className="mt-4 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
               <summary className="cursor-pointer text-sm font-medium text-oxford-blue">
+                Associated presentations
+              </summary>
+
+              {presentations.length > 0 ? (
+                <div className="mt-4 grid gap-2 md:grid-cols-2">
+                  {presentations.map(
+                    (presentation) => (
+                      <label
+                        key={presentation.id}
+                        className="flex items-start gap-2 rounded-md bg-white px-3 py-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          name="presentation_ids"
+                          value={presentation.id}
+                          className="mt-0.5 h-4 w-4"
+                        />
+
+                        <span>
+                          <span className="font-medium text-oxford-charcoal">
+                            {presentation.event_short_name}
+                          </span>
+
+                          <span className="ml-2 text-xs text-oxford-ash">
+                            {formatPresentationDate(
+                              presentation.presentation_date
+                            )}
+                          </span>
+
+                          {presentation.presentation_title && (
+                            <span className="mt-1 block text-xs text-oxford-ash">
+                              {presentation.presentation_title}
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    )
+                  )}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-oxford-ash">
+                  No conference presentations available.
+                </p>
+              )}
+            </details>
+
+            <details className="mt-4 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+              <summary className="cursor-pointer text-sm font-medium text-oxford-blue">
                 Activity labels for
                 tracked hours
               </summary>
@@ -1077,6 +1125,12 @@ export default async function ProjectsPage({
                 ) ??
                 new Set<string>()
 
+              const linkedPresentationIds =
+                presentationsByProject.get(
+                  project.id
+                ) ??
+                new Set<string>()
+
               const linkedLabelIds =
                 labelsByProject.get(
                   project.id
@@ -1113,6 +1167,50 @@ export default async function ProjectsPage({
                       b.short_title
                     )
                   )
+
+              const linkedPresentations =
+                [
+                  ...linkedPresentationIds,
+                ]
+                  .map((id) =>
+                    presentationById.get(
+                      id
+                    )
+                  )
+                  .filter(
+                    (
+                      presentation
+                    ): presentation is ConferencePresentationRow =>
+                      Boolean(
+                        presentation
+                      )
+                  )
+                  .sort((a, b) => {
+                    if (
+                      a.presentation_date !==
+                      b.presentation_date
+                    ) {
+                      if (
+                        !a.presentation_date
+                      ) {
+                        return 1
+                      }
+
+                      if (
+                        !b.presentation_date
+                      ) {
+                        return -1
+                      }
+
+                      return b.presentation_date.localeCompare(
+                        a.presentation_date
+                      )
+                    }
+
+                    return a.event_name.localeCompare(
+                      b.event_name
+                    )
+                  })
 
               const linkedLabels =
                 [
@@ -1316,6 +1414,53 @@ export default async function ProjectsPage({
                             <p className="mt-2 text-sm text-oxford-ash">
                               No linked
                               papers.
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                            Associated
+                            presentations
+                          </h3>
+
+                          {linkedPresentations.length >
+                          0 ? (
+                            <ul className="mt-2 space-y-3 text-sm">
+                              {linkedPresentations.map(
+                                (presentation) => (
+                                  <li
+                                    key={
+                                      presentation.id
+                                    }
+                                  >
+                                    <div className="font-medium text-oxford-charcoal">
+                                      {
+                                        presentation.event_short_name
+                                      }
+                                    </div>
+
+                                    <div className="text-xs text-oxford-ash">
+                                      {formatPresentationDate(
+                                        presentation.presentation_date
+                                      )}
+                                      {presentation.presentation_title && (
+                                        <>
+                                          {' · '}
+                                          {
+                                            presentation.presentation_title
+                                          }
+                                        </>
+                                      )}
+                                    </div>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          ) : (
+                            <p className="mt-2 text-sm text-oxford-ash">
+                              No linked
+                              presentations.
                             </p>
                           )}
                         </div>
@@ -1799,6 +1944,76 @@ export default async function ProjectsPage({
                               )
                             )}
                           </div>
+                        </details>
+
+                        <details className="mt-4 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+                          <summary className="cursor-pointer text-sm font-medium text-oxford-blue">
+                            Associated
+                            presentations (
+                            {
+                              linkedPresentations.length
+                            }
+                            )
+                          </summary>
+
+                          {presentations.length > 0 ? (
+                            <div className="mt-4 grid gap-2 md:grid-cols-2">
+                              {presentations.map(
+                                (
+                                  presentation
+                                ) => (
+                                  <label
+                                    key={
+                                      presentation.id
+                                    }
+                                    className="flex items-start gap-2 rounded-md bg-white px-3 py-2 text-sm"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      name="presentation_ids"
+                                      value={
+                                        presentation.id
+                                      }
+                                      defaultChecked={
+                                        linkedPresentationIds.has(
+                                          presentation.id
+                                        )
+                                      }
+                                      className="mt-0.5 h-4 w-4"
+                                    />
+
+                                    <span>
+                                      <span className="font-medium text-oxford-charcoal">
+                                        {
+                                          presentation.event_short_name
+                                        }
+                                      </span>
+
+                                      <span className="ml-2 text-xs text-oxford-ash">
+                                        {formatPresentationDate(
+                                          presentation.presentation_date
+                                        )}
+                                      </span>
+
+                                      {presentation.presentation_title && (
+                                        <span className="mt-1 block text-xs text-oxford-ash">
+                                          {
+                                            presentation.presentation_title
+                                          }
+                                        </span>
+                                      )}
+                                    </span>
+                                  </label>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <p className="mt-3 text-sm text-oxford-ash">
+                              No conference
+                              presentations
+                              available.
+                            </p>
+                          )}
                         </details>
 
                         <details className="mt-4 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
