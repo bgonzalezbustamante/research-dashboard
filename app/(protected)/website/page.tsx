@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
@@ -40,7 +39,7 @@ type PublicMetadataRow = {
   featured: boolean
   publication_index: string | null
   highlight_text: string | null
-  highlight_image_url: string | null
+  highlight_image_filename: string | null
   highlight_image_alt: string | null
   highlight_image_caption: string | null
 }
@@ -225,7 +224,7 @@ export default async function WebsitePage({
         featured,
         publication_index,
         highlight_text,
-        highlight_image_url,
+        highlight_image_filename,
         highlight_image_alt,
         highlight_image_caption
       `),
@@ -371,7 +370,7 @@ export default async function WebsitePage({
               null,
             highlight_text:
               null,
-            highlight_image_url:
+            highlight_image_filename:
               null,
             highlight_image_alt:
               null,
@@ -699,8 +698,8 @@ export default async function WebsitePage({
                                 metadata.publication_index,
                               highlight_text:
                                 metadata.highlight_text,
-                              highlight_image_url:
-                                metadata.highlight_image_url,
+                              highlight_image_filename:
+                                metadata.highlight_image_filename,
                               highlight_image_alt:
                                 metadata.highlight_image_alt,
                               highlight_image_caption:
@@ -971,33 +970,43 @@ export default async function WebsitePage({
 
                               <div className="md:col-span-2 xl:col-span-4">
                                 <label
-                                  htmlFor={`highlight-image-url-${paper.id}`}
+                                  htmlFor={`highlight-image-filename-${paper.id}`}
                                   className={
                                     labelClass
                                   }
                                 >
                                   Highlight
-                                  image URL
+                                  image filename
                                 </label>
 
                                 <input
-                                  id={`highlight-image-url-${paper.id}`}
-                                  name="highlight_image_url"
+                                  id={`highlight-image-filename-${paper.id}`}
+                                  name="highlight_image_filename"
                                   type="url"
                                   inputMode="url"
                                   defaultValue={
-                                    metadata.highlight_image_url ??
+                                    metadata.highlight_image_filename ??
                                     ''
                                   }
-                                  placeholder="https://…"
+                                  placeholder="figure-1.png"
                                   className={
                                     inputClass
                                   }
                                 />
 
                                 <p className="mt-1 text-xs leading-5 text-oxford-ash">
-                                  HTTPS only. Replace the image by changing this URL; remove the image reference by clearing it. Dashboard-managed uploads are deferred until a revocable private-Storage delivery layer is introduced.
+                                  Store only the filename. Supported formats: PNG, WebP, JPG and JPEG. The academic website will resolve it under <code>/publication-highlights/&lt;slug&gt;/&lt;filename&gt;</code>.
                                 </p>
+
+                                {metadata.slug &&
+                                  metadata.highlight_image_filename && (
+                                    <p className="mt-1 text-xs leading-5 text-oxford-ash">
+                                      Public path:{' '}
+                                      <code>
+                                        {`/publication-highlights/${metadata.slug}/${metadata.highlight_image_filename}`}
+                                      </code>
+                                    </p>
+                                  )}
                               </div>
 
                               <div className="md:col-span-2">
@@ -1054,34 +1063,7 @@ export default async function WebsitePage({
                                 />
                               </div>
 
-                              {metadata.highlight_image_url && (
-                                <div className="md:col-span-2 xl:col-span-4">
-                                  <div className="rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
-                                    <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-                                      Current image preview
-                                    </div>
 
-                                    <img
-                                      src={
-                                        metadata.highlight_image_url
-                                      }
-                                      alt={
-                                        metadata.highlight_image_alt ??
-                                        ''
-                                      }
-                                      className="mt-3 max-h-80 w-auto max-w-full rounded-md border border-oxford-stone bg-white object-contain"
-                                    />
-
-                                    {metadata.highlight_image_caption && (
-                                      <p className="mt-2 text-xs leading-5 text-oxford-ash">
-                                        {
-                                          metadata.highlight_image_caption
-                                        }
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
                             </div>
 
                             <div className="mt-5 flex flex-wrap items-center gap-3">
