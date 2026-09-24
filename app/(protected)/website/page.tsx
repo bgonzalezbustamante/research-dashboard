@@ -13,6 +13,7 @@ type WebsitePageProps = {
   searchParams: Promise<{
     error?: string
     saved?: string
+    page?: string
   }>
 }
 
@@ -70,6 +71,8 @@ const visibilityOrder: PublicVisibility[] = [
   'public',
   'private',
 ]
+
+const WEBSITE_PAPERS_PER_PAGE = 10
 
 const visibilityLabels: Record<
   PublicVisibility,
@@ -168,8 +171,17 @@ export default async function WebsitePage({
   const access =
     await requireDashboardOwner()
 
-  const { error, saved } =
+  const params =
     await searchParams
+
+  const { error, saved } =
+    params
+
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
 
   const supabase =
     await createClient()
@@ -372,6 +384,73 @@ export default async function WebsitePage({
       number
     >
 
+  const orderedForDisplay =
+    visibilityOrder.flatMap(
+      (visibility) =>
+        papersWithMetadata.filter(
+          (item) =>
+            item.metadata
+              .visibility ===
+            visibility
+        )
+    )
+
+  const totalPapers =
+    orderedForDisplay.length
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalPapers /
+          WEBSITE_PAPERS_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    WEBSITE_PAPERS_PER_PAGE
+
+  const paginatedPapers =
+    orderedForDisplay.slice(
+      pageStart,
+      pageStart +
+        WEBSITE_PAPERS_PER_PAGE
+    )
+
+  const visibleStart =
+    totalPapers === 0
+      ? 0
+      : pageStart + 1
+
+  const visibleEnd =
+    Math.min(
+      pageStart +
+        WEBSITE_PAPERS_PER_PAGE,
+      totalPapers
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) =>
+    pageNumber > 1
+      ? `/website?page=${pageNumber}`
+      : '/website'
+
   return (
     <div>
       <PageHeader
@@ -480,11 +559,33 @@ export default async function WebsitePage({
         </Card>
       </div>
 
+      <div className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm text-oxford-ash">
+          Showing{' '}
+          <strong className="font-medium text-oxford-charcoal">
+            {visibleStart ===
+            visibleEnd
+              ? visibleStart
+              : `${visibleStart}–${visibleEnd}`}
+          </strong>{' '}
+          of{' '}
+          <strong className="font-medium text-oxford-charcoal">
+            {totalPapers}
+          </strong>{' '}
+          papers
+        </span>
+
+        <span className="text-sm text-oxford-ash">
+          Page {currentPage} of{' '}
+          {totalPages}
+        </span>
+      </div>
+
       <div className="mt-8 space-y-10">
         {visibilityOrder.map(
           (visibility) => {
             const items =
-              papersWithMetadata.filter(
+              paginatedPapers.filter(
                 (item) =>
                   item.metadata
                     .visibility ===
@@ -687,6 +788,14 @@ export default async function WebsitePage({
                               }
                             />
 
+                            <input
+                              type="hidden"
+                              name="current_page"
+                              value={
+                                currentPage
+                              }
+                            />
+
                             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                               <div>
                                 <label
@@ -868,6 +977,43 @@ export default async function WebsitePage({
           }
         )}
       </div>
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Website pagination"
+          className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+
+          <div className="flex gap-2">
+            {currentPage > 1 && (
+              <ButtonLink
+                href={getPageHref(
+                  currentPage - 1
+                )}
+                variant="secondary"
+              >
+                Previous
+              </ButtonLink>
+            )}
+
+            {currentPage <
+              totalPages && (
+              <ButtonLink
+                href={getPageHref(
+                  currentPage + 1
+                )}
+                variant="secondary"
+              >
+                Next
+              </ButtonLink>
+            )}
+          </div>
+        </nav>
+      )}
 
       <div className="mt-8 text-sm text-oxford-ash">
         <Link
