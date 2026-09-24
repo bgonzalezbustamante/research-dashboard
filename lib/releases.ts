@@ -15,7 +15,7 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
-    version: 'v1.0.0-rc.5',
+    version: 'v1.0.0-rc.1',
     codename: 'Distant Forge',
     status: 'In development',
     releasedOn: 'Release date TBC',
