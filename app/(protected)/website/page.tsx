@@ -982,8 +982,9 @@ export default async function WebsitePage({
                                 <input
                                   id={`highlight-image-filename-${paper.id}`}
                                   name="highlight_image_filename"
-                                  type="url"
-                                  inputMode="url"
+                                  type="text"
+                                  autoCapitalize="none"
+                                  spellCheck={false}
                                   defaultValue={
                                     metadata.highlight_image_filename ??
                                     ''
