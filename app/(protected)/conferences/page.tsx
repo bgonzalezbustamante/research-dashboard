@@ -27,6 +27,7 @@ type ConferencePresentation = {
   id: string
   paper_id: string | null
   event_name: string
+  event_short_name: string
   location: string | null
   presentation_date: string | null
   presentation_title: string | null
@@ -202,6 +203,7 @@ export default async function ConferencesPage({
         id,
         paper_id,
         event_name,
+        event_short_name,
         location,
         presentation_date,
         presentation_title,
@@ -374,6 +376,28 @@ export default async function ConferencesPage({
                   placeholder="ECPR General Conference"
                   className={inputClass}
                 />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="new-conference-short-name"
+                  className={labelClass}
+                >
+                  Short name
+                </label>
+
+                <input
+                  id="new-conference-short-name"
+                  name="event_short_name"
+                  required
+                  placeholder="ECPR 2026"
+                  className={inputClass}
+                />
+
+                <p className="mt-1 text-xs text-oxford-ash">
+                  Public short label for
+                  the academic website.
+                </p>
               </div>
 
               <div>
@@ -602,6 +626,12 @@ export default async function ConferencesPage({
                           }
                         </h2>
 
+                        <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium text-oxford-ash">
+                          {
+                            presentation.event_short_name
+                          }
+                        </span>
+
                         {upcoming && (
                           <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
                             Upcoming
@@ -731,6 +761,35 @@ export default async function ConferencesPage({
                                   inputClass
                                 }
                               />
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor={`short-name-${presentation.id}`}
+                                className={
+                                  labelClass
+                                }
+                              >
+                                Short name
+                              </label>
+
+                              <input
+                                id={`short-name-${presentation.id}`}
+                                name="event_short_name"
+                                required
+                                defaultValue={
+                                  presentation.event_short_name
+                                }
+                                className={
+                                  inputClass
+                                }
+                              />
+
+                              <p className="mt-1 text-xs text-oxford-ash">
+                                Public short
+                                label for the
+                                academic website.
+                              </p>
                             </div>
 
                             <div>
