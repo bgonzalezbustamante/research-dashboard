@@ -35,8 +35,8 @@ export const releases: ReleaseNote[] = [
         title: 'Projects',
         items: [
           'Added Projects with titles, abstract, funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
-          'Linked projects to papers and Dashboard-only activity labels so project hours can be tracked without exposing work-session detail.',
-          'Added anonymous-safe project list/detail contracts that expose only Public project data and slugs of associated papers that are themselves Public.',
+          'Linked projects to papers, existing conference presentations, and Dashboard-only activity labels so public project pages can reuse publication/presentation metadata while project hours remain private.',
+          'Added anonymous-safe project list/detail contracts that expose only Public project data, slugs of associated Public papers, and public-safe metadata for associated conference presentations.',
         ],
       },
       {
