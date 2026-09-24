@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## v1.0.0-rc.5 "Distant Forge" (in development)
+## v1.0.0-rc.1 "Distant Forge" (in development)
 
 ### Summary
 
-- Started `v1.0.0-rc.5 "Distant Forge"` as the public-website administration phase for Research Dashboard.
+- Started `v1.0.0-rc.1 "Distant Forge"` as the public-website administration phase for Research Dashboard.
 - Added a separate public presentation layer for papers while keeping internal research workflow and collaboration data private.
 - Added an Owner-only Website management area for curating future public research content.
 - Added a narrowly scoped anonymous Supabase RPC boundary instead of granting anonymous access to the existing paper tables.
@@ -36,7 +36,7 @@
 ### Release status
 
 - Distant Forge is in development.
-- Red Raven remains the current released beta until rc.5 is finalised.
+- Red Raven remains the current released beta until rc.1 is finalised.
 - Release date: TBC.
 
 ---
