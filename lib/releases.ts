@@ -30,6 +30,7 @@ export const releases: ReleaseNote[] = [
           'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
           'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
           'Added Website pagination with 10 papers per page and preserved the current page after saving public settings.',
+          'Added optional Key highlight editing with short text, an HTTPS image reference, required alt text for configured images, an optional caption/source line, and a saved-image preview.',
         ],
       },
       {
@@ -44,6 +45,8 @@ export const releases: ReleaseNote[] = [
           'Kept paper presentation metadata separate from internal workflow data and all papers Private by default.',
           'Exposed Public papers only through explicit anonymous RPC contracts without granting anonymous SELECT access to private application tables.',
           'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links while excluding internal workflow, collaboration, account, and audit data.',
+          'Extended publication detail lookup with nullable Key highlight fields while leaving the smaller public publication-list contract unchanged.',
+          'Deferred Dashboard-managed image uploads because no revocable Supabase Storage delivery layer exists yet; this iteration stores an optional manually supplied HTTPS image URL instead.',
         ],
       },
       {
