@@ -9,7 +9,6 @@ import { createClient } from '@/lib/supabase/server'
 const allowedVisibilities = new Set([
   'private',
   'public',
-  'unlisted',
 ])
 
 const slugPattern =
@@ -36,39 +35,6 @@ function getOptionalText(
   return value.length > 0
     ? value
     : null
-}
-
-function getOptionalOrder(
-  formData: FormData
-) {
-  const raw =
-    getOptionalText(
-      formData,
-      'display_order'
-    )
-
-  if (raw === null) {
-    return {
-      value: null,
-    }
-  }
-
-  const parsed =
-    Number.parseInt(raw, 10)
-
-  if (
-    !Number.isInteger(parsed) ||
-    parsed < 0
-  ) {
-    return {
-      error:
-        'Display order must be a non-negative whole number.',
-    }
-  }
-
-  return {
-    value: parsed,
-  }
 }
 
 function websiteRedirect(
@@ -138,22 +104,12 @@ export async function updatePublicPaperMetadata(
   }
 
   if (
-    visibility !== 'private' &&
+    visibility === 'public' &&
     !slug
   ) {
     websiteRedirect(
       'error',
-      'Public and Unlisted papers require a slug.'
-    )
-  }
-
-  const orderResult =
-    getOptionalOrder(formData)
-
-  if (orderResult.error) {
-    websiteRedirect(
-      'error',
-      orderResult.error
+      'Public papers require a slug.'
     )
   }
 
@@ -173,23 +129,11 @@ export async function updatePublicPaperMetadata(
       featured:
         formData.get('featured') ===
         'on',
-      public_category:
+      publication_index:
         getOptionalText(
           formData,
-          'public_category'
+          'publication_index'
         ),
-      public_summary:
-        getOptionalText(
-          formData,
-          'public_summary'
-        ),
-      public_venue:
-        getOptionalText(
-          formData,
-          'public_venue'
-        ),
-      display_order:
-        orderResult.value,
     })
     .eq('paper_id', paperId)
     .select('paper_id')
