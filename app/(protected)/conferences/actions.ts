@@ -32,6 +32,37 @@ function getOptionalText(
     : null
 }
 
+function parseAuthors(
+  formData: FormData
+) {
+  const raw =
+    getRequiredText(
+      formData,
+      'authors'
+    )
+
+  const seen = new Set<string>()
+
+  return raw
+    .split(/\r?\n/)
+    .map((author) =>
+      author.trim()
+    )
+    .filter(Boolean)
+    .filter((author) => {
+      const key =
+        author.toLocaleLowerCase()
+
+      if (seen.has(key)) {
+        return false
+      }
+
+      seen.add(key)
+
+      return true
+    })
+}
+
 function getOptionalDate(
   formData: FormData,
   name: string
@@ -141,6 +172,8 @@ function validateConferenceFields(
         formData,
         'presentation_title'
       ),
+    authors:
+      parseAuthors(formData),
     presentationType:
       getOptionalText(
         formData,
@@ -196,6 +229,8 @@ export async function createConferencePresentation(
         fields.presentationDate,
       presentation_title:
         fields.presentationTitle,
+      authors:
+        fields.authors,
       presentation_type:
         fields.presentationType,
       url:
@@ -279,6 +314,8 @@ export async function updateConferencePresentation(
         fields.presentationDate,
       presentation_title:
         fields.presentationTitle,
+      authors:
+        fields.authors,
       presentation_type:
         fields.presentationType,
       url:
