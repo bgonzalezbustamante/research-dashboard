@@ -30,7 +30,7 @@ export const releases: ReleaseNote[] = [
           'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
           'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
           'Added Website pagination with 10 papers per page and preserved the current page after saving public settings.',
-          'Added optional Key highlight editing with short text, a static image filename, required alt text for configured images, and an optional caption/source line.',
+          'Added optional Key highlight editing with short text, a static image filename, required alt text for configured images, and an optional caption/source line; the filename field accepts local asset names directly rather than URL syntax.',
           'Standardised publication highlight assets under academic-website/public/publication-highlights/<paper-slug>/<filename>, accepting PNG, WebP, JPG, and JPEG files.',
         ],
       },
@@ -48,9 +48,9 @@ export const releases: ReleaseNote[] = [
         title: 'Conferences',
         items: [
           'Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.',
-          'Kept event, location, date, presentation title/type, URL, and notes as canonical conference fields, and added ordered presentation-specific authors independent of linked-paper author order.',
+          'Kept full event name, short event name, location, date, presentation title/type, URL, and notes as canonical conference fields, with ordered presentation-specific authors independent of linked-paper author order.',
           'Migrated the existing presentation automatically and made paper deletion clear the optional conference link rather than delete the conference record.',
-          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that exposes ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.',
+          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that exposes full/short event names and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.',
         ],
       },
       {
