@@ -40,7 +40,7 @@ create function public.create_project_with_details(
 )
 returns uuid
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 declare
