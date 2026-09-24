@@ -148,6 +148,12 @@ export async function updatePublicPaperMetadata(
     )
   }
 
+  const citation =
+    getOptionalText(
+      formData,
+      'citation'
+    )
+
   const highlightText =
     getOptionalText(
       formData,
@@ -171,6 +177,17 @@ export async function updatePublicPaperMetadata(
       formData,
       'highlight_image_caption'
     )
+
+  if (
+    citation &&
+    citation.length > 2000
+  ) {
+    websiteRedirect(
+      'error',
+      'Citation must be 2,000 characters or fewer.',
+      currentPage
+    )
+  }
 
   if (
     highlightText &&
@@ -262,6 +279,7 @@ export async function updatePublicPaperMetadata(
           formData,
           'publication_index'
         ),
+      citation,
       highlight_text:
         highlightText,
       highlight_image_filename:
