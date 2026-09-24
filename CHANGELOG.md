@@ -16,7 +16,7 @@
 - Added Website to the bottom Owner utilities navigation and ordered the links as Authors, Access, Website; moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
 - Styled the bottom Sign out control as an Oxford-blue action while leaving Authors, Access, and Website unchanged.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
-- Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, and Publication index.
+- Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
@@ -32,7 +32,7 @@
 - Removed public summary, public venue, and display-order fields from the presentation table.
 - Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract and current venue and to return only explicitly Public papers.
 - Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
-- Extended `get_public_paper(slug)` with nullable Key highlight detail fields while leaving `list_public_papers()` unchanged.
+- Extended `get_public_paper(slug)` with nullable preferred Citation and Key highlight detail fields while leaving `list_public_papers()` unchanged.
 - Returned only the Key highlight filename rather than a deployment-specific URL so the academic website can resolve the asset from its own `public` directory.
 - Continued to exclude working-session detail, planning, milestones, notes, submission/revision history, internal workflow status, permissions, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
 
