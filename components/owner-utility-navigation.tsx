@@ -18,7 +18,11 @@ const links = [
   },
 ]
 
-export default function OwnerUtilityNavigation() {
+export default function OwnerUtilityNavigation({
+  showOwnerLinks = true,
+}: {
+  showOwnerLinks?: boolean
+}) {
   const pathname = usePathname()
 
   return (
@@ -28,7 +32,8 @@ export default function OwnerUtilityNavigation() {
           className="flex items-center gap-1"
           aria-label="Utility navigation"
         >
-          {links.map((link) => {
+          {showOwnerLinks &&
+            links.map((link) => {
             const active =
               pathname === link.href ||
               pathname.startsWith(
