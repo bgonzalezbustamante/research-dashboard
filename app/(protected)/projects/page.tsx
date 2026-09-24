@@ -39,6 +39,8 @@ type ProjectRow = {
   abstract: string
   funder: string
   url: string | null
+  start_year: number | null
+  end_year: number | null
   status: ProjectStatus
   created_at: string
   updated_at: string
@@ -48,6 +50,7 @@ type ProjectMetadataRow = {
   project_id: string
   visibility: ProjectVisibility
   slug: string | null
+  featured: boolean
   project_image_filename: string | null
   funder_image_filename: string | null
 }
@@ -200,6 +203,8 @@ export default async function ProjectsPage({
         abstract,
         funder,
         url,
+        start_year,
+        end_year,
         status,
         created_at,
         updated_at
@@ -217,6 +222,7 @@ export default async function ProjectsPage({
         project_id,
         visibility,
         slug,
+        featured,
         project_image_filename,
         funder_image_filename
       `),
@@ -481,10 +487,11 @@ export default async function ProjectsPage({
             Projects are Private by
             default. Public projects
             expose only canonical
-            project content, the
-            canonical project URL,
-            static asset filenames, and
-            the slugs of associated papers
+            project content, canonical
+            URL, start/end years,
+            Featured state, static asset
+            filenames, and the slugs of
+            associated papers
             that are themselves Public.
             Activity-label links and
             tracked hours remain
@@ -599,6 +606,44 @@ export default async function ProjectsPage({
                 </p>
               </div>
 
+              <div>
+                <label
+                  htmlFor="new-project-start-year"
+                  className={labelClass}
+                >
+                  Start year
+                </label>
+
+                <input
+                  id="new-project-start-year"
+                  name="start_year"
+                  type="number"
+                  min={1000}
+                  max={9999}
+                  placeholder="2025"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="new-project-end-year"
+                  className={labelClass}
+                >
+                  End year
+                </label>
+
+                <input
+                  id="new-project-end-year"
+                  name="end_year"
+                  type="number"
+                  min={1000}
+                  max={9999}
+                  placeholder="2027"
+                  className={inputClass}
+                />
+              </div>
+
               <div className="md:col-span-2">
                 <label
                   htmlFor="new-project-abstract"
@@ -676,6 +721,17 @@ export default async function ProjectsPage({
                   placeholder="project-slug"
                   className={inputClass}
                 />
+              </div>
+
+              <div className="flex items-start pt-7">
+                <label className="inline-flex items-center gap-2 text-sm font-medium text-oxford-charcoal">
+                  <input
+                    name="featured"
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-oxford-stone"
+                  />
+                  Featured
+                </label>
               </div>
 
               <div>
@@ -863,6 +919,7 @@ export default async function ProjectsPage({
                     null,
                   funder_image_filename:
                     null,
+                  featured: false,
                 }
 
               const linkedPaperIds =
@@ -986,6 +1043,12 @@ export default async function ProjectsPage({
                             ? 'Public'
                             : 'Private'}
                         </span>
+
+                        {metadata.featured && (
+                          <span className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
+                            Featured
+                          </span>
+                        )}
                       </div>
 
                       <p className="mt-1 text-sm font-medium text-oxford-charcoal">
@@ -993,6 +1056,20 @@ export default async function ProjectsPage({
                           project.title
                         }
                       </p>
+
+                      {(project.start_year ||
+                        project.end_year) && (
+                        <p className="mt-2 text-sm text-oxford-ash">
+                          Years:{' '}
+                          <span className="text-oxford-charcoal">
+                            {project.start_year ??
+                              '—'}
+                            {'–'}
+                            {project.end_year ??
+                              'present'}
+                          </span>
+                        </p>
+                      )}
 
                       <p className="mt-2 text-sm text-oxford-ash">
                         Funder:{' '}
@@ -1233,6 +1310,58 @@ export default async function ProjectsPage({
                             </p>
                           </div>
 
+                          <div>
+                            <label
+                              htmlFor={`start-year-${project.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              Start year
+                            </label>
+
+                            <input
+                              id={`start-year-${project.id}`}
+                              name="start_year"
+                              type="number"
+                              min={1000}
+                              max={9999}
+                              defaultValue={
+                                project.start_year ??
+                                ''
+                              }
+                              className={
+                                inputClass
+                              }
+                            />
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor={`end-year-${project.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              End year
+                            </label>
+
+                            <input
+                              id={`end-year-${project.id}`}
+                              name="end_year"
+                              type="number"
+                              min={1000}
+                              max={9999}
+                              defaultValue={
+                                project.end_year ??
+                                ''
+                              }
+                              className={
+                                inputClass
+                              }
+                            />
+                          </div>
+
                           <div className="md:col-span-2">
                             <label
                               htmlFor={`abstract-${project.id}`}
@@ -1338,6 +1467,20 @@ export default async function ProjectsPage({
                                 inputClass
                               }
                             />
+                          </div>
+
+                          <div className="flex items-start pt-7">
+                            <label className="inline-flex items-center gap-2 text-sm font-medium text-oxford-charcoal">
+                              <input
+                                name="featured"
+                                type="checkbox"
+                                defaultChecked={
+                                  metadata.featured
+                                }
+                                className="h-4 w-4 rounded border-oxford-stone"
+                              />
+                              Featured
+                            </label>
                           </div>
 
                           <div>
