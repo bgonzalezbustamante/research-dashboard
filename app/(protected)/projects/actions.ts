@@ -51,6 +51,30 @@ function getOptionalText(
     : null
 }
 
+function getOptionalYear(
+  formData: FormData,
+  name: string
+) {
+  const value =
+    getOptionalText(
+      formData,
+      name
+    )
+
+  if (!value) {
+    return null
+  }
+
+  if (!/^\d{4}$/.test(value)) {
+    return Number.NaN
+  }
+
+  return Number.parseInt(
+    value,
+    10
+  )
+}
+
 function isValidHttpUrl(
   value: string
 ) {
@@ -107,6 +131,8 @@ type ValidProjectFields = {
   abstract: string
   funder: string
   url: string | null
+  startYear: number | null
+  endYear: number | null
   status: string
   visibility: string
   slug: string | null
@@ -156,6 +182,18 @@ function validateProjectFields(
     getOptionalText(
       formData,
       'url'
+    )
+
+  const startYear =
+    getOptionalYear(
+      formData,
+      'start_year'
+    )
+
+  const endYear =
+    getOptionalYear(
+      formData,
+      'end_year'
     )
 
   const status =
@@ -213,6 +251,55 @@ function validateProjectFields(
       ok: false,
       error:
         'Project URL must be a valid HTTP or HTTPS URL.',
+    }
+  }
+
+  if (
+    (startYear !== null &&
+      !Number.isInteger(startYear)) ||
+    (endYear !== null &&
+      !Number.isInteger(endYear))
+  ) {
+    return {
+      ok: false,
+      error:
+        'Project start and end years must use four digits.',
+    }
+  }
+
+  if (
+    startYear !== null &&
+    (startYear < 1000 ||
+      startYear > 9999)
+  ) {
+    return {
+      ok: false,
+      error:
+        'Project start year must be between 1000 and 9999.',
+    }
+  }
+
+  if (
+    endYear !== null &&
+    (endYear < 1000 ||
+      endYear > 9999)
+  ) {
+    return {
+      ok: false,
+      error:
+        'Project end year must be between 1000 and 9999.',
+    }
+  }
+
+  if (
+    startYear !== null &&
+    endYear !== null &&
+    endYear < startYear
+  ) {
+    return {
+      ok: false,
+      error:
+        'Project end year cannot be earlier than the start year.',
     }
   }
 
@@ -296,6 +383,8 @@ function validateProjectFields(
     abstract,
     funder,
     url,
+    startYear,
+    endYear,
     status,
     visibility,
     slug,
@@ -381,12 +470,20 @@ export async function createProject(
         fields.funder,
       p_url:
         fields.url,
+      p_start_year:
+        fields.startYear,
+      p_end_year:
+        fields.endYear,
       p_status:
         fields.status,
       p_visibility:
         fields.visibility,
       p_slug:
         fields.slug,
+      p_featured:
+        formData.get(
+          'featured'
+        ) === 'on',
       p_project_image_filename:
         fields.projectImageFilename,
       p_funder_image_filename:
@@ -473,12 +570,20 @@ export async function updateProject(
         fields.funder,
       p_url:
         fields.url,
+      p_start_year:
+        fields.startYear,
+      p_end_year:
+        fields.endYear,
       p_status:
         fields.status,
       p_visibility:
         fields.visibility,
       p_slug:
         fields.slug,
+      p_featured:
+        formData.get(
+          'featured'
+        ) === 'on',
       p_project_image_filename:
         fields.projectImageFilename,
       p_funder_image_filename:
