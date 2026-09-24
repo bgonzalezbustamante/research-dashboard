@@ -6,32 +6,43 @@
 
 - Started `v1.0.0-rc.1 "Distant Forge"` as the public-website administration phase for Research Dashboard.
 - Added a separate public presentation layer for papers while keeping internal research workflow and collaboration data private.
-- Added an Owner-only Website management area for curating future public research content.
-- Added a narrowly scoped anonymous Supabase RPC boundary instead of granting anonymous access to the existing paper tables.
+- Added an Owner-only Website management area alongside Authors and Access.
+- Added narrowly scoped anonymous Supabase RPC contracts for curated publications and aggregate work analytics.
 
 ### Code changes
 
 `website administration`
 
-- Added Website to the main navigation for Owner accounts only.
-- Added paper-level controls for Private, Public, and Unlisted visibility, unique stable slugs, Featured state, public category, public venue, display order, and public summary.
-- Kept full title, authors, abstract, publication dates, and research links in the existing paper workspace rather than duplicating the complete paper editor.
-- Added a simple public-contract preview and a direct link back to each normal paper workspace.
+- Added Website to the bottom Owner utilities navigation alongside Authors and Access rather than the main Dashboard navigation.
+- Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
+- Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, and Publication index.
+- Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
+- Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
+- Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 
-`public data boundary`
+`public publication boundary`
 
-- Added `paper_public_metadata` as a one-to-one presentation table keyed to `papers`, with all existing and future papers Private by default.
-- Added `list_public_papers()` for discoverable Public papers and `get_public_paper(slug)` for Public or Unlisted slug lookup.
-- Exposed only curated public fields: slug, visibility, title, author names, abstract, public summary, public venue, publication date, whitelisted public research links, Featured state, category, and display order.
-- Excluded internal workflow status, revision rounds, target/current venues, working hours, planning, milestones, notes, submission/revision history, memberships, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
+- Retained `paper_public_metadata` as a one-to-one presentation table keyed to `papers`, with all papers Private by default.
+- Simplified visibility from Private/Public/Unlisted to Private/Public.
+- Renamed the optional public category field to Publication index.
+- Removed public summary, public venue, and display-order fields from the presentation table.
+- Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract and current venue and to return only explicitly Public papers.
+- Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
+- Continued to exclude working-session detail, planning, milestones, notes, submission/revision history, internal workflow status, permissions, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
+
+`public work analytics`
+
+- Added `get_public_work_analytics(year)` for the future public website.
+- Exposed only daily net working minutes for reproducing Activity over time, yearly average net working minutes per working day, and yearly average coffees per working day.
+- Kept raw session start/end times, activity labels, locations, linked papers, break records, and daily coffee counts private.
+- Reused the Dashboard definition of a working day: a daily log with at least one work session.
 
 `database and security`
 
-- Enabled RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
-- Added explicit Data API grants suitable for the October 30 Supabase behaviour: no anonymous table grants, with anonymous access limited to explicit RPC `EXECUTE` grants.
-- Required valid unique lowercase slugs for Public and Unlisted records and backfilled all existing papers as Private.
-- Restricted legacy anonymous function execution so the only application RPCs callable by `anon` are the two intentional public-paper contracts.
-- Added automatic Private metadata creation for newly created papers.
+- Kept RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
+- Kept anonymous access behind explicit RPC `EXECUTE` grants rather than anonymous table access, consistent with the October 30 Supabase Data API behaviour.
+- Preserved unique lowercase public slugs and automatic Private metadata creation for newly created papers.
+- Restricted the anonymous application function surface to the deliberate public publication and aggregate analytics RPCs.
 
 ### Release status
 
