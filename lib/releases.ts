@@ -26,9 +26,9 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Website and publications',
         items: [
-          'Added an Owner Website area for curating Public papers with stable slugs, Featured state and Publication index while reusing canonical Paper metadata.',
+          'Added an Owner Website area for curating Public papers with stable slugs, Featured state, Publication index and an optional preferred citation while reusing canonical Paper metadata.',
           'Added publication pagination and anonymous-safe list/detail contracts ordered by publication date.',
-          'Added optional Key highlights for publication detail pages, including local static images with accessible alt text and optional captions.',
+          'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
         ],
       },
       {
