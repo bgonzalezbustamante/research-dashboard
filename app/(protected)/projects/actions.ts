@@ -84,9 +84,33 @@ function projectsRedirect(
   )
 }
 
+type ValidProjectFields = {
+  ok: true
+  shortTitle: string
+  title: string
+  abstract: string
+  funder: string
+  status: string
+  visibility: string
+  slug: string | null
+  projectImageFilename: string | null
+  funderImageFilename: string | null
+  paperIds: string[]
+  activityLabelIds: string[]
+}
+
+type InvalidProjectFields = {
+  ok: false
+  error: string
+}
+
+type ProjectValidationResult =
+  | ValidProjectFields
+  | InvalidProjectFields
+
 function validateProjectFields(
   formData: FormData
-) {
+): ProjectValidationResult {
   const shortTitle =
     getRequiredText(
       formData,
@@ -152,6 +176,7 @@ function validateProjectFields(
     !funder
   ) {
     return {
+      ok: false,
       error:
         'Short title, long title, abstract, and funder are required.',
     }
@@ -163,6 +188,7 @@ function validateProjectFields(
     )
   ) {
     return {
+      ok: false,
       error:
         'Invalid project status.',
     }
@@ -174,6 +200,7 @@ function validateProjectFields(
     )
   ) {
     return {
+      ok: false,
       error:
         'Invalid public visibility.',
     }
@@ -184,6 +211,7 @@ function validateProjectFields(
     !slugPattern.test(slug)
   ) {
     return {
+      ok: false,
       error:
         'Public slug must use lowercase letters, numbers, and single hyphens only.',
     }
@@ -194,6 +222,7 @@ function validateProjectFields(
     !slug
   ) {
     return {
+      ok: false,
       error:
         'Public projects require a slug.',
     }
@@ -226,6 +255,7 @@ function validateProjectFields(
   }
 
   return {
+    ok: true,
     shortTitle,
     title,
     abstract,
@@ -289,7 +319,7 @@ export async function createProject(
       formData
     )
 
-  if ('error' in fields) {
+  if (!fields.ok) {
     projectsRedirect(
       'error',
       fields.error
@@ -378,7 +408,7 @@ export async function updateProject(
       formData
     )
 
-  if ('error' in fields) {
+  if (!fields.ok) {
     projectsRedirect(
       'error',
       fields.error
