@@ -14,6 +14,7 @@
 `website administration`
 
 - Added Website to the bottom Owner utilities navigation and ordered the links as Authors, Access, Website; moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
+- Styled the bottom Sign out control as an Oxford-blue action while leaving Authors, Access, and Website unchanged.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, and Publication index.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
@@ -38,13 +39,13 @@
 
 `projects`
 
-- Added a new Dashboard Projects module with short title, long title, abstract, funder, optional canonical project URL, optional start/end years, and Active/Completed status.
+- Added a new Dashboard Projects module with short title, long title, abstract, funder, optional public funder note, optional canonical project URL, optional start/end years, and Active/Completed status.
 - Added Private/Public project visibility with a stable public slug and Featured state; projects remain Private by default.
 - Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
 - Added many-to-many project-paper associations without changing canonical paper metadata.
 - Added project-to-activity-label assignments for Dashboard-only hour tracking, with each activity label restricted to one project to prevent double-counting.
 - Added tracked project hours derived from assigned activity labels without exposing the label assignments or work-session detail publicly.
-- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional canonical project URL, start/end years, and Featured state.
+- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional funder note, canonical project URL, start/end years, and Featured state.
 - Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
 
@@ -55,11 +56,13 @@
 - Made the paper association optional and Dashboard-only; conference records can exist without a linked paper.
 - Migrated the existing conference presentation in place and changed paper deletion behaviour to clear the optional link rather than delete the conference record.
 - Added Owner editing and Viewer read-only access; paper-scoped Coauthors no longer edit conference records through Paper workspaces.
+- Added a read-only linked-presentations section to each Paper workspace and an authenticated `list_paper_conference_presentations(paper_id)` contract so anyone who can view that paper can see its linked presentation metadata without receiving conference edit rights or access to private conference notes.
 - Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
 
 `release notes`
 
 - Added pagination to the public Release Notes page with 3 releases per page.
+- Condensed Distant Forge release notes into an easy-to-read capability summary while retaining implementation detail in this CHANGELOG.
 
 `public work analytics`
 
