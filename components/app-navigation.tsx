@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation'
 
 type AppNavigationProps = {
   showDashboardModules?: boolean
-  showWebsite?: boolean
 }
 
 const dashboardLinks = [
@@ -28,11 +27,6 @@ const papersLink = {
   label: 'Papers',
 }
 
-const websiteLink = {
-  href: '/website',
-  label: 'Website',
-}
-
 function isActiveLink(
   pathname: string,
   href: string
@@ -52,7 +46,6 @@ function isActiveLink(
 
 export default function AppNavigation({
   showDashboardModules = true,
-  showWebsite = false,
 }: AppNavigationProps) {
   const pathname = usePathname()
 
@@ -61,9 +54,6 @@ export default function AppNavigation({
       ? [
           ...dashboardLinks,
           papersLink,
-          ...(showWebsite
-            ? [websiteLink]
-            : []),
         ]
       : [papersLink]
 
