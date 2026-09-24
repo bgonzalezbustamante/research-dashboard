@@ -26,7 +26,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Website administration',
         items: [
-          'Moved Website into the Owner utilities navigation and ordered the links as Authors, Access, Website.',
+          'Moved Website into the bottom Owner utilities navigation, ordered the links as Authors, Access, Website, and moved Sign out out of the header into the same bottom utility area.',
           'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
           'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
           'Added Website pagination with 10 papers per page and preserved the current page after saving public settings.',
@@ -48,9 +48,9 @@ export const releases: ReleaseNote[] = [
         title: 'Conferences',
         items: [
           'Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.',
-          'Kept event, location, date, presentation title/type, URL, and notes as canonical conference fields; the optional linked paper remains Dashboard-only.',
+          'Kept event, location, date, presentation title/type, URL, and notes as canonical conference fields, and added ordered presentation-specific authors independent of linked-paper author order.',
           'Migrated the existing presentation automatically and made paper deletion clear the optional conference link rather than delete the conference record.',
-          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that includes public notes but excludes owner and paper identifiers.',
+          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that exposes ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.',
         ],
       },
       {
