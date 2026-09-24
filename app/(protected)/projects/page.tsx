@@ -61,9 +61,26 @@ type ProjectPaperRow = {
   paper_id: string
 }
 
+type ProjectPresentationRow = {
+  project_id: string
+  presentation_id: string
+}
+
 type ProjectActivityLabelRow = {
   project_id: string
   activity_label_id: string
+}
+
+type ConferencePresentationRow = {
+  id: string
+  event_name: string
+  event_short_name: string
+  location: string | null
+  presentation_date: string | null
+  presentation_title: string | null
+  authors: string[]
+  presentation_type: string | null
+  url: string | null
 }
 
 type PaperRow = {
@@ -122,6 +139,37 @@ function formatDuration(
   }
 
   return `${minutes}m`
+}
+
+function formatPresentationDate(
+  value: string | null
+) {
+  if (!value) {
+    return 'Undated'
+  }
+
+  const [year, month, day] =
+    value
+      .slice(0, 10)
+      .split('-')
+      .map(Number)
+
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }
+  ).format(
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day
+      )
+    )
+  )
 }
 
 function statusClass(
@@ -189,8 +237,10 @@ export default async function ProjectsPage({
     projectsResult,
     metadataResult,
     projectPapersResult,
+    projectPresentationsResult,
     projectLabelsResult,
     papersResult,
+    presentationsResult,
     labelsResult,
     hoursResult,
   ] = await Promise.all([
@@ -237,6 +287,14 @@ export default async function ProjectsPage({
 
     supabase
       .from(
+        'project_conference_presentations'
+      )
+      .select(
+        'project_id, presentation_id'
+      ),
+
+    supabase
+      .from(
         'project_activity_labels'
       )
       .select(
@@ -258,6 +316,39 @@ export default async function ProjectsPage({
       )
       .order(
         'short_title',
+        {
+          ascending: true,
+        }
+      ),
+
+    supabase
+      .from(
+        'conference_presentations'
+      )
+      .select(`
+        id,
+        event_name,
+        event_short_name,
+        location,
+        presentation_date,
+        presentation_title,
+        authors,
+        presentation_type,
+        url
+      `)
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .order(
+        'presentation_date',
+        {
+          ascending: false,
+          nullsFirst: false,
+        }
+      )
+      .order(
+        'event_name',
         {
           ascending: true,
         }
@@ -307,10 +398,18 @@ export default async function ProjectsPage({
       projectPapersResult,
     ],
     [
+      'project presentations',
+      projectPresentationsResult,
+    ],
+    [
       'project activity labels',
       projectLabelsResult,
     ],
     ['papers', papersResult],
+    [
+      'conference presentations',
+      presentationsResult,
+    ],
     [
       'activity labels',
       labelsResult,
@@ -336,6 +435,10 @@ export default async function ProjectsPage({
     (projectPapersResult.data ??
       []) as ProjectPaperRow[]
 
+  const projectPresentationRows =
+    (projectPresentationsResult.data ??
+      []) as ProjectPresentationRow[]
+
   const projectLabelRows =
     (projectLabelsResult.data ??
       []) as ProjectActivityLabelRow[]
@@ -343,6 +446,10 @@ export default async function ProjectsPage({
   const papers =
     (papersResult.data ??
       []) as PaperRow[]
+
+  const presentations =
+    (presentationsResult.data ??
+      []) as ConferencePresentationRow[]
 
   const activityLabels =
     (labelsResult.data ??
@@ -366,6 +473,12 @@ export default async function ProjectsPage({
     groupIds(
       projectPaperRows,
       'paper_id'
+    )
+
+  const presentationsByProject =
+    groupIds(
+      projectPresentationRows,
+      'presentation_id'
     )
 
   const labelsByProject =
@@ -419,6 +532,16 @@ export default async function ProjectsPage({
         (paper) => [
           paper.id,
           paper,
+        ]
+      )
+    )
+
+  const presentationById =
+    new Map(
+      presentations.map(
+        (presentation) => [
+          presentation.id,
+          presentation,
         ]
       )
     )
