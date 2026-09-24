@@ -480,7 +480,6 @@ as $$
         then 0
       else 1
     end,
-    p.start_year desc nulls last,
     p.title asc;
 $$;
 
