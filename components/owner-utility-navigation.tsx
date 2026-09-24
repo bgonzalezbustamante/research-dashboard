@@ -26,7 +26,7 @@ export default function OwnerUtilityNavigation() {
       <div className="mx-auto flex max-w-7xl justify-end px-6 py-3">
         <nav
           className="flex items-center gap-1"
-          aria-label="Owner utilities"
+          aria-label="Utility navigation"
         >
           {links.map((link) => {
             const active =
@@ -50,6 +50,18 @@ export default function OwnerUtilityNavigation() {
               </Link>
             )
           })}
+
+          <form
+            action="/auth/signout"
+            method="post"
+          >
+            <button
+              type="submit"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-oxford-ash transition hover:bg-white hover:text-oxford-blue"
+            >
+              Sign out
+            </button>
+          </form>
         </nav>
       </div>
     </div>
