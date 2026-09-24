@@ -20,7 +20,7 @@
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 - Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
-- Added an optional Key highlight editor for publication detail pages with short highlight text, a static image filename, required accessible alt text when an image is configured, and an optional caption/source line.
+- Added an optional Key highlight editor for publication detail pages with short highlight text, a static image filename, required accessible alt text when an image is configured, and an optional caption/source line; corrected the filename input so local asset names such as `diff_lm_retweets.png` are accepted without browser URL validation.
 - Standardised publication highlight assets under `academic-website/public/publication-highlights/<paper-slug>/<filename>` and accepted PNG, WebP, JPG, and JPEG filenames.
 
 `public publication boundary`
@@ -51,11 +51,11 @@
 `conferences`
 
 - Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.
-- Preserved the existing conference fields: event name, location, presentation date, presentation title, presentation type, URL, and notes, and added ordered presentation-specific authors so conference author order can differ from the linked paper.
+- Preserved the existing conference fields and added a required short event name alongside the full conference/event name; both names are public, while ordered presentation-specific authors can differ from the linked paper.
 - Made the paper association optional and Dashboard-only; conference records can exist without a linked paper.
 - Migrated the existing conference presentation in place and changed paper deletion behaviour to clear the optional link rather than delete the conference record.
 - Added Owner editing and Viewer read-only access; paper-scoped Coauthors no longer edit conference records through Paper workspaces.
-- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing event metadata and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
+- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
 
 `release notes`
 
