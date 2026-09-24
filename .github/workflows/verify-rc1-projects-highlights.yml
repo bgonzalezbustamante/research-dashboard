@@ -1,0 +1,30 @@
+name: Verify rc.1 projects and highlights
+
+on:
+  push:
+    branches:
+      - feature/rc1-key-highlight
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
