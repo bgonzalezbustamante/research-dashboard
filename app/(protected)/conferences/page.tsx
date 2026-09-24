@@ -30,6 +30,7 @@ type ConferencePresentation = {
   location: string | null
   presentation_date: string | null
   presentation_title: string | null
+  authors: string[]
   presentation_type: string | null
   url: string | null
   notes: string | null
@@ -204,6 +205,7 @@ export default async function ConferencesPage({
         location,
         presentation_date,
         presentation_title,
+        authors,
         presentation_type,
         url,
         notes
@@ -334,10 +336,11 @@ export default async function ConferencesPage({
             Public contract
           </div>
           <p className="mt-2 text-sm leading-6 text-oxford-ash">
-            Conference fields,
-            including notes, are
-            public. The optional
-            linked paper remains
+            Conference metadata and
+            ordered presentation
+            authors are public.
+            Notes and the optional
+            linked paper remain
             Dashboard-only.
           </p>
         </Card>
@@ -461,6 +464,29 @@ export default async function ConferencesPage({
                 />
               </div>
 
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="new-conference-authors"
+                  className={labelClass}
+                >
+                  Authors
+                </label>
+
+                <textarea
+                  id="new-conference-authors"
+                  name="authors"
+                  rows={3}
+                  placeholder="One author per line, in presentation order"
+                  className={inputClass}
+                />
+
+                <p className="mt-1 text-xs text-oxford-ash">
+                  Enter one author per
+                  line, in presentation
+                  order.
+                </p>
+              </div>
+
               <div>
                 <label
                   htmlFor="new-conference-type"
@@ -510,8 +536,9 @@ export default async function ConferencesPage({
                 />
 
                 <p className="mt-1 text-xs text-oxford-ash">
-                  Notes are included
-                  in the public
+                  Dashboard-only;
+                  notes are not exposed
+                  through the public
                   academic-website
                   contract.
                 </p>
@@ -611,6 +638,12 @@ export default async function ConferencesPage({
                           {
                             presentation.presentation_title
                           }
+                        </p>
+                      )}
+
+                      {presentation.authors.length > 0 && (
+                        <p className="mt-2 text-sm text-oxford-ash">
+                          {presentation.authors.join(', ')}
                         </p>
                       )}
 
@@ -818,6 +851,39 @@ export default async function ConferencesPage({
                               />
                             </div>
 
+                            <div className="md:col-span-2">
+                              <label
+                                htmlFor={`authors-${presentation.id}`}
+                                className={
+                                  labelClass
+                                }
+                              >
+                                Authors
+                              </label>
+
+                              <textarea
+                                id={`authors-${presentation.id}`}
+                                name="authors"
+                                rows={3}
+                                defaultValue={
+                                  presentation.authors.join(
+                                    '\n'
+                                  )
+                                }
+                                className={
+                                  inputClass
+                                }
+                              />
+
+                              <p className="mt-1 text-xs text-oxford-ash">
+                                Enter one
+                                author per
+                                line, in
+                                presentation
+                                order.
+                              </p>
+                            </div>
+
                             <div>
                               <label
                                 htmlFor={`type-${presentation.id}`}
@@ -890,8 +956,9 @@ export default async function ConferencesPage({
                               />
 
                               <p className="mt-1 text-xs text-oxford-ash">
-                                Notes are
-                                public.
+                                Dashboard-only;
+                                notes are
+                                private.
                               </p>
                             </div>
                           </div>
