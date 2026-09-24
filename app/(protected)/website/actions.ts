@@ -59,21 +59,8 @@ function websiteRedirect(
   )
 }
 
-function isValidHttpsUrl(
-  value: string
-) {
-  try {
-    const url =
-      new URL(value)
-
-    return (
-      url.protocol === 'https:' &&
-      value.length <= 2048
-    )
-  } catch {
-    return false
-  }
-}
+const assetFilenamePattern =
+  /^[A-Za-z0-9][A-Za-z0-9._-]*\.(png|webp|jpg|jpeg)$/
 
 export async function updatePublicPaperMetadata(
   formData: FormData
@@ -167,10 +154,10 @@ export async function updatePublicPaperMetadata(
       'highlight_text'
     )
 
-  const highlightImageUrl =
+  const highlightImageFilename =
     getOptionalText(
       formData,
-      'highlight_image_url'
+      'highlight_image_filename'
     )
 
   const rawHighlightImageAlt =
@@ -197,25 +184,25 @@ export async function updatePublicPaperMetadata(
   }
 
   if (
-    highlightImageUrl &&
-    !isValidHttpsUrl(
-      highlightImageUrl
+    highlightImageFilename &&
+    !assetFilenamePattern.test(
+      highlightImageFilename
     )
   ) {
     websiteRedirect(
       'error',
-      'Key highlight image must use a valid HTTPS URL.',
+      'Key highlight image must be a single PNG, WebP, JPG, or JPEG filename without folders.',
       currentPage
     )
   }
 
   if (
-    highlightImageUrl &&
+    highlightImageFilename &&
     !rawHighlightImageAlt
   ) {
     websiteRedirect(
       'error',
-      'Image alt text is required when a Key highlight image is configured.',
+      'Image alt text is required when a Key highlight image filename is configured.',
       currentPage
     )
   }
@@ -245,12 +232,12 @@ export async function updatePublicPaperMetadata(
   }
 
   const highlightImageAlt =
-    highlightImageUrl
+    highlightImageFilename
       ? rawHighlightImageAlt
       : null
 
   const highlightImageCaption =
-    highlightImageUrl
+    highlightImageFilename
       ? rawHighlightImageCaption
       : null
 
@@ -277,8 +264,8 @@ export async function updatePublicPaperMetadata(
         ),
       highlight_text:
         highlightText,
-      highlight_image_url:
-        highlightImageUrl,
+      highlight_image_filename:
+        highlightImageFilename,
       highlight_image_alt:
         highlightImageAlt,
       highlight_image_caption:
