@@ -51,6 +51,22 @@ function getOptionalText(
     : null
 }
 
+function isValidHttpUrl(
+  value: string
+) {
+  try {
+    const url =
+      new URL(value)
+
+    return (
+      url.protocol === 'http:' ||
+      url.protocol === 'https:'
+    )
+  } catch {
+    return false
+  }
+}
+
 function getUuidList(
   formData: FormData,
   name: string
@@ -90,6 +106,7 @@ type ValidProjectFields = {
   title: string
   abstract: string
   funder: string
+  url: string | null
   status: string
   visibility: string
   slug: string | null
@@ -133,6 +150,12 @@ function validateProjectFields(
     getRequiredText(
       formData,
       'funder'
+    )
+
+  const url =
+    getOptionalText(
+      formData,
+      'url'
     )
 
   const status =
@@ -179,6 +202,17 @@ function validateProjectFields(
       ok: false,
       error:
         'Short title, long title, abstract, and funder are required.',
+    }
+  }
+
+  if (
+    url &&
+    !isValidHttpUrl(url)
+  ) {
+    return {
+      ok: false,
+      error:
+        'Project URL must be a valid HTTP or HTTPS URL.',
     }
   }
 
@@ -261,6 +295,7 @@ function validateProjectFields(
     title,
     abstract,
     funder,
+    url,
     status,
     visibility,
     slug,
@@ -344,6 +379,8 @@ export async function createProject(
         fields.abstract,
       p_funder:
         fields.funder,
+      p_url:
+        fields.url,
       p_status:
         fields.status,
       p_visibility:
@@ -434,6 +471,8 @@ export async function updateProject(
         fields.abstract,
       p_funder:
         fields.funder,
+      p_url:
+        fields.url,
       p_status:
         fields.status,
       p_visibility:
