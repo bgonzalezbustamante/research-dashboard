@@ -24,57 +24,34 @@ export const releases: ReleaseNote[] = [
       'Distant Forge adds the public-website administration and data boundary while keeping private research-management data isolated.',
     sections: [
       {
-        title: 'Website administration',
+        title: 'Website and publications',
         items: [
-          'Moved Website into the bottom Owner utilities navigation, ordered the links as Authors, Access, Website, and moved Sign out out of the header into the same bottom utility area.',
-          'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
-          'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
-          'Added Website pagination with 10 papers per page and preserved the current page after saving public settings.',
-          'Added optional Key highlight editing with short text, a static image filename, required alt text for configured images, and an optional caption/source line; the filename field accepts local asset names directly rather than URL syntax.',
-          'Standardised publication highlight assets under academic-website/public/publication-highlights/<paper-slug>/<filename>, accepting PNG, WebP, JPG, and JPEG files.',
+          'Added an Owner Website area for curating Public papers with stable slugs, Featured state and Publication index while reusing canonical Paper metadata.',
+          'Added publication pagination and anonymous-safe list/detail contracts ordered by publication date.',
+          'Added optional Key highlights for publication detail pages, including local static images with accessible alt text and optional captions.',
         ],
       },
       {
         title: 'Projects',
         items: [
-          'Added a Dashboard Projects module with short/long titles, abstract, funder, optional canonical project URL, optional start/end years, Active/Completed status, and Owner editing with Viewer read-only access.',
-          'Added Private/Public project presentation metadata with stable slugs, a Featured flag, plus optional project and funder image filenames for academic-website/public assets.',
-          'Added many-to-many project-paper links and Public project contracts that expose only associated papers that are themselves Public.',
-          'Added Dashboard-only activity-label assignment and aggregate tracked project hours, with each activity label limited to one project to prevent double-counting.',
-          'Added anonymous-safe list_public_projects() and get_public_project(slug) contracts exposing the optional canonical project URL, start/end years, and Featured state without granting anon table access.',
+          'Added Projects with titles, abstract, funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
+          'Linked projects to papers and Dashboard-only activity labels so project hours can be tracked without exposing work-session detail.',
+          'Added anonymous-safe project list/detail contracts that expose only Public project data and slugs of associated papers that are themselves Public.',
         ],
       },
       {
         title: 'Conferences',
         items: [
-          'Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.',
-          'Kept full event name, short event name, location, date, presentation title/type, URL, and notes as canonical conference fields, with ordered presentation-specific authors independent of linked-paper author order.',
-          'Migrated the existing presentation automatically and made paper deletion clear the optional conference link rather than delete the conference record.',
-          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that exposes full/short event names and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.',
+          'Added a standalone Conferences module with full and short event names, presentation-specific ordered authors, date, location, type and optional URL; conference notes remain private.',
+          'Kept the optional paper relationship internal while showing linked presentations read-only inside the relevant Paper workspace; editing remains in Conferences.',
+          'Added an anonymous-safe conference listing that excludes notes, owner metadata and the private paper relationship.',
         ],
       },
       {
-        title: 'Release notes',
+        title: 'Public data and analytics',
         items: [
-          'Added pagination to the public Release Notes page with 3 releases per page.',
-        ],
-      },
-      {
-        title: 'Public data boundary',
-        items: [
-          'Kept paper presentation metadata separate from internal workflow data and all papers Private by default.',
-          'Exposed Public papers only through explicit anonymous RPC contracts without granting anonymous SELECT access to private application tables.',
-          'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links while excluding internal workflow, collaboration, account, and audit data.',
-          'Extended publication detail lookup with nullable Key highlight fields while leaving the smaller public publication-list contract unchanged.',
-          'Stored only validated static asset filenames for publication/project imagery so the academic website resolves files from its own public directory without deployment-specific URLs.',
-        ],
-      },
-      {
-        title: 'Public work analytics',
-        items: [
-          'Added an anonymous aggregate analytics contract for the Activity over time heatmap using daily net working minutes.',
-          'Added yearly average net working time per working day and average coffees per working day using the same definitions as Dashboard analytics.',
-          'Kept raw work sessions, activities, locations, linked papers, break records, and daily coffee counts private.',
+          'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication/project assets resolved by the academic website.',
+          'Added aggregate public work analytics for Activity over time, yearly average net working time and coffees per working day while keeping raw work records private.',
         ],
       },
     ],
