@@ -15,6 +15,33 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.5',
+    codename: 'Distant Forge',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since beta.5',
+    summary:
+      'Distant Forge begins the public-website administration layer by separating curated public paper presentation from private research workflow data.',
+    sections: [
+      {
+        title: 'Website administration',
+        items: [
+          'Added an Owner-only Website area for curating paper visibility, stable public slugs, featured state, public category, public venue, display order, and public summary.',
+          'Kept the normal paper workspace as the canonical editor for title, authors, abstract, publication dates, and research links, with a public-contract preview in Website management.',
+        ],
+      },
+      {
+        title: 'Public data boundary',
+        items: [
+          'Added one-to-one public presentation metadata for papers, with every existing and newly created paper Private by default and internal workflow status remaining independent.',
+          'Added explicit anonymous RPC contracts for listed Public papers and slug-based Public or Unlisted paper lookup without granting anonymous SELECT access to private paper, author, link, workflow, or administrative tables.',
+          'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links; private author fields, Overleaf links, arbitrary links, hours, planning, milestones, notes, history, permissions, invitations, audit data, and profiles remain excluded.',
+          'Restricted legacy anonymous function grants so the two deliberate public-paper RPCs are the only application functions executable by the anon role.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v0.1.0-beta.5',
     codename: 'Red Raven',
     status: 'Current beta',
