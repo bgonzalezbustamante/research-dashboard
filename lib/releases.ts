@@ -26,9 +26,16 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Website administration',
         items: [
-          'Moved Website into the Owner utilities navigation alongside Authors and Access.',
+          'Moved Website into the Owner utilities navigation and ordered the links as Authors, Access, Website.',
           'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
           'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
+          'Added Website pagination with 10 papers per page and preserved the current page after saving public settings.',
+        ],
+      },
+      {
+        title: 'Release notes',
+        items: [
+          'Added pagination to the public Release Notes page with 3 releases per page.',
         ],
       },
       {

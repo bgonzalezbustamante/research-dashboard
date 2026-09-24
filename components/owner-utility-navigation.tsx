@@ -9,12 +9,12 @@ const links = [
     label: 'Authors',
   },
   {
-    href: '/website',
-    label: 'Website',
-  },
-  {
     href: '/dashboard/access',
     label: 'Access',
+  },
+  {
+    href: '/website',
+    label: 'Website',
   },
 ]
 

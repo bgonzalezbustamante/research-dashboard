@@ -39,12 +39,23 @@ function getOptionalText(
 
 function websiteRedirect(
   key: 'error' | 'saved',
-  value: string
+  value: string,
+  page: number
 ): never {
+  const params =
+    new URLSearchParams({
+      [key]: value,
+    })
+
+  if (page > 1) {
+    params.set(
+      'page',
+      String(page)
+    )
+  }
+
   redirect(
-    `/website?${key}=${encodeURIComponent(
-      value
-    )}`
+    `/website?${params.toString()}`
   )
 }
 
@@ -59,6 +70,23 @@ export async function updatePublicPaperMetadata(
       'paper_id'
     )
 
+  const requestedPage =
+    Number.parseInt(
+      getRequiredText(
+        formData,
+        'current_page'
+      ) || '1',
+      10
+    )
+
+  const currentPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
   const visibility =
     getRequiredText(
       formData,
@@ -68,7 +96,8 @@ export async function updatePublicPaperMetadata(
   if (!paperId) {
     websiteRedirect(
       'error',
-      'Paper ID is required.'
+      'Paper ID is required.',
+      currentPage
     )
   }
 
@@ -79,7 +108,8 @@ export async function updatePublicPaperMetadata(
   ) {
     websiteRedirect(
       'error',
-      'Invalid public visibility.'
+      'Invalid public visibility.',
+      currentPage
     )
   }
 
@@ -99,7 +129,8 @@ export async function updatePublicPaperMetadata(
   ) {
     websiteRedirect(
       'error',
-      'Slug must use lowercase letters, numbers, and single hyphens only.'
+      'Slug must use lowercase letters, numbers, and single hyphens only.',
+      currentPage
     )
   }
 
@@ -109,7 +140,8 @@ export async function updatePublicPaperMetadata(
   ) {
     websiteRedirect(
       'error',
-      'Public papers require a slug.'
+      'Public papers require a slug.',
+      currentPage
     )
   }
 
@@ -148,20 +180,23 @@ export async function updatePublicPaperMetadata(
     if (error.code === '23505') {
       websiteRedirect(
         'error',
-        'That public slug is already in use.'
+        'That public slug is already in use.',
+        currentPage
       )
     }
 
     websiteRedirect(
       'error',
-      'The public paper settings could not be saved.'
+      'The public paper settings could not be saved.',
+      currentPage
     )
   }
 
   if (!data) {
     websiteRedirect(
       'error',
-      'Public metadata was not found for that paper.'
+      'Public metadata was not found for that paper.',
+      currentPage
     )
   }
 
@@ -169,6 +204,7 @@ export async function updatePublicPaperMetadata(
 
   websiteRedirect(
     'saved',
-    paperId
+    paperId,
+    currentPage
   )
 }

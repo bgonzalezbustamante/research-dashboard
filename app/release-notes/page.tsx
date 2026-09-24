@@ -2,9 +2,73 @@ import Link from 'next/link'
 
 import OxfordLogo from '@/components/oxford-logo'
 import SiteFooter from '@/components/site-footer'
+import ButtonLink from '@/components/ui/button-link'
 import { releases } from '@/lib/releases'
 
-export default function ReleaseNotesPage() {
+type ReleaseNotesPageProps = {
+  searchParams: Promise<{
+    page?: string
+  }>
+}
+
+const RELEASES_PER_PAGE = 3
+
+export default async function ReleaseNotesPage({
+  searchParams,
+}: ReleaseNotesPageProps) {
+  const params =
+    await searchParams
+
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
+
+  const totalReleases =
+    releases.length
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalReleases /
+          RELEASES_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    RELEASES_PER_PAGE
+
+  const paginatedReleases =
+    releases.slice(
+      pageStart,
+      pageStart +
+        RELEASES_PER_PAGE
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) =>
+    pageNumber > 1
+      ? `/release-notes?page=${pageNumber}`
+      : '/release-notes'
+
   return (
     <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">
       <header className="border-b border-oxford-stone bg-white px-6 py-5">
@@ -43,69 +107,115 @@ export default function ReleaseNotesPage() {
           </div>
 
           <div className="mt-10 space-y-8">
-            {releases.map((release) => (
-              <article
-                key={release.version}
-                className="rounded-xl border border-oxford-stone bg-white p-6 shadow-sm sm:p-8"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
-                        {release.version} &quot;{release.codename}&quot;
-                      </h2>
+            {paginatedReleases.map(
+              (release) => (
+                <article
+                  key={release.version}
+                  className="rounded-xl border border-oxford-stone bg-white p-6 shadow-sm sm:p-8"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
+                          {release.version}{' '}
+                          &quot;{release.codename}&quot;
+                        </h2>
 
-                      {release.status && (
-                        <span className="rounded-full border border-oxford-sky-blue bg-oxford-cool-grey px-2.5 py-1 text-xs font-medium text-oxford-blue">
-                          {release.status}
+                        {release.status && (
+                          <span className="rounded-full border border-oxford-sky-blue bg-oxford-cool-grey px-2.5 py-1 text-xs font-medium text-oxford-blue">
+                            {release.status}
+                          </span>
+                        )}
+
+                        <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2.5 py-1 text-xs font-medium text-oxford-ash">
+                          {release.releasedOn}
                         </span>
-                      )}
+                      </div>
 
-                      <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2.5 py-1 text-xs font-medium text-oxford-ash">
-                        {release.releasedOn}
-                      </span>
+                      <p className="mt-2 text-sm font-medium text-oxford-charcoal">
+                        {release.comparison}
+                      </p>
                     </div>
-
-                    <p className="mt-2 text-sm font-medium text-oxford-charcoal">
-                      {release.comparison}
-                    </p>
                   </div>
-                </div>
 
-                <p className="mt-5 max-w-4xl text-sm leading-6 text-oxford-ash">
-                  {release.summary}
-                </p>
+                  <p className="mt-5 max-w-4xl text-sm leading-6 text-oxford-ash">
+                    {release.summary}
+                  </p>
 
-                <div className="mt-7 grid gap-6 lg:grid-cols-2">
-                  {release.sections.map((section) => (
-                    <section
-                      key={section.title}
-                      className="rounded-lg border border-oxford-stone bg-oxford-off-white p-5"
-                    >
-                      <h3 className="font-serif text-lg font-semibold text-oxford-blue">
-                        {section.title}
-                      </h3>
+                  <div className="mt-7 grid gap-6 lg:grid-cols-2">
+                    {release.sections.map(
+                      (section) => (
+                        <section
+                          key={section.title}
+                          className="rounded-lg border border-oxford-stone bg-oxford-off-white p-5"
+                        >
+                          <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                            {section.title}
+                          </h3>
 
-                      <ul className="mt-3 space-y-2 text-sm leading-6 text-oxford-charcoal">
-                        {section.items.map((item) => (
-                          <li
-                            key={item}
-                            className="flex gap-3"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-oxford-blue"
-                            />
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  ))}
-                </div>
-              </article>
-            ))}
+                          <ul className="mt-3 space-y-2 text-sm leading-6 text-oxford-charcoal">
+                            {section.items.map(
+                              (item) => (
+                                <li
+                                  key={item}
+                                  className="flex gap-3"
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-oxford-blue"
+                                  />
+                                  <span>
+                                    {item}
+                                  </span>
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </section>
+                      )
+                    )}
+                  </div>
+                </article>
+              )
+            )}
           </div>
+
+          {totalPages > 1 && (
+            <nav
+              aria-label="Release notes pagination"
+              className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span className="text-sm text-oxford-ash">
+                Page {currentPage} of{' '}
+                {totalPages}
+              </span>
+
+              <div className="flex gap-2">
+                {currentPage > 1 && (
+                  <ButtonLink
+                    href={getPageHref(
+                      currentPage - 1
+                    )}
+                    variant="secondary"
+                  >
+                    Previous
+                  </ButtonLink>
+                )}
+
+                {currentPage <
+                  totalPages && (
+                  <ButtonLink
+                    href={getPageHref(
+                      currentPage + 1
+                    )}
+                    variant="secondary"
+                  >
+                    Next
+                  </ButtonLink>
+                )}
+              </div>
+            </nav>
+          )}
         </div>
       </main>
 
