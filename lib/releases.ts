@@ -37,11 +37,11 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Projects',
         items: [
-          'Added a Dashboard Projects module with short/long titles, abstract, funder, Active/Completed status, and Owner editing with Viewer read-only access.',
+          'Added a Dashboard Projects module with short/long titles, abstract, funder, optional canonical project URL, Active/Completed status, and Owner editing with Viewer read-only access.',
           'Added Private/Public project presentation metadata with stable slugs plus optional project and funder image filenames for academic-website/public assets.',
           'Added many-to-many project-paper links and Public project contracts that expose only associated papers that are themselves Public.',
           'Added Dashboard-only activity-label assignment and aggregate tracked project hours, with each activity label limited to one project to prevent double-counting.',
-          'Added anonymous-safe list_public_projects() and get_public_project(slug) contracts without granting anon table access.',
+          'Added anonymous-safe list_public_projects() and get_public_project(slug) contracts exposing the optional canonical project URL without granting anon table access.',
         ],
       },
       {
