@@ -20,6 +20,7 @@
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 - Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
+- Added an optional Key highlight editor for publication detail pages with short highlight text, an HTTPS image reference, required accessible alt text when an image is configured, an optional caption/source line, and a saved-image preview.
 
 `public publication boundary`
 
@@ -29,6 +30,7 @@
 - Removed public summary, public venue, and display-order fields from the presentation table.
 - Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract and current venue and to return only explicitly Public papers.
 - Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
+- Extended `get_public_paper(slug)` with nullable Key highlight detail fields while leaving `list_public_papers()` unchanged.
 - Continued to exclude working-session detail, planning, milestones, notes, submission/revision history, internal workflow status, permissions, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
 
 `release notes`
@@ -47,6 +49,7 @@
 - Kept RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
 - Kept anonymous access behind explicit RPC `EXECUTE` grants rather than anonymous table access, consistent with the October 30 Supabase Data API behaviour.
 - Preserved unique lowercase public slugs and automatic Private metadata creation for newly created papers.
+- Kept highlight images outside Supabase Storage for this iteration because the project has no existing Storage architecture and a public bucket would not support revocation when a paper becomes Private; Dashboard-managed uploads remain deferred pending a revocable private-asset delivery layer.
 - Restricted the anonymous application function surface to the deliberate public publication and aggregate analytics RPCs.
 
 ### Release status
