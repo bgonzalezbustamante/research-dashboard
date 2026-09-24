@@ -132,6 +132,20 @@ function validateConferenceFields(
     }
   }
 
+  const eventShortName =
+    getRequiredText(
+      formData,
+      'event_short_name'
+    )
+
+  if (!eventShortName) {
+    return {
+      ok: false as const,
+      error:
+        'Conference or event short name is required.',
+    }
+  }
+
   const url =
     getOptionalText(
       formData,
@@ -152,6 +166,7 @@ function validateConferenceFields(
   return {
     ok: true as const,
     eventName,
+    eventShortName,
     paperId:
       getOptionalText(
         formData,
@@ -223,6 +238,8 @@ export async function createConferencePresentation(
         fields.paperId,
       event_name:
         fields.eventName,
+      event_short_name:
+        fields.eventShortName,
       location:
         fields.location,
       presentation_date:
@@ -308,6 +325,8 @@ export async function updateConferencePresentation(
         fields.paperId,
       event_name:
         fields.eventName,
+      event_short_name:
+        fields.eventShortName,
       location:
         fields.location,
       presentation_date:
