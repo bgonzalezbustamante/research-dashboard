@@ -38,6 +38,40 @@ type PaperPageProps = {
   }>
 }
 
+function formatDisplayDate(
+  value: string | null
+) {
+  if (!value) {
+    return '—'
+  }
+
+  const [
+    year,
+    month,
+    day,
+  ] = value
+    .slice(0, 10)
+    .split('-')
+    .map(Number)
+
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }
+  ).format(
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day
+      )
+    )
+  )
+}
+
 function getAmsterdamDate() {
   const parts =
     new Intl.DateTimeFormat(
@@ -177,6 +211,7 @@ export default async function PaperPage({
     notesResult,
     citationsResult,
     workSessionsResult,
+    conferencePresentationsResult,
   ] = await Promise.all([
     supabase
       .from('paper_authors')
@@ -285,6 +320,13 @@ export default async function PaperPage({
         end_time
       `)
       .eq('paper_id', id),
+
+    supabase.rpc(
+      'list_paper_conference_presentations',
+      {
+        p_paper_id: id,
+      }
+    ),
   ])
 
   if (authorResult.error) {
@@ -329,6 +371,14 @@ export default async function PaperPage({
     )
   }
 
+  if (
+    conferencePresentationsResult.error
+  ) {
+    throw new Error(
+      `Could not load linked conference presentations: ${conferencePresentationsResult.error.message}`
+    )
+  }
+
   const authorRows =
     authorResult.data ?? []
 
@@ -349,6 +399,10 @@ export default async function PaperPage({
 
   const workSessions =
     workSessionsResult.data ?? []
+
+  const conferencePresentations =
+    conferencePresentationsResult.data ??
+    []
 
   const totalPaperMinutes =
     workSessions.reduce(
@@ -789,6 +843,108 @@ export default async function PaperPage({
           </Card>
         </div>
       </section>
+
+      {conferencePresentations.length >
+        0 && (
+        <section
+          id="conferences"
+          className="mt-6 scroll-mt-6"
+        >
+          <Card>
+            <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+              Conference presentations
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-oxford-ash">
+              Read-only presentations
+              linked to this paper.
+              Conference editing remains
+              in the Conferences module.
+            </p>
+
+            <div className="mt-5 divide-y divide-oxford-stone">
+              {conferencePresentations.map(
+                (presentation) => (
+                  <div
+                    key={
+                      presentation.id
+                    }
+                    className="py-4 first:pt-0 last:pb-0"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-medium text-oxford-charcoal">
+                        {
+                          presentation.event_name
+                        }
+                      </h3>
+
+                      <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium text-oxford-ash">
+                        {
+                          presentation.event_short_name
+                        }
+                      </span>
+                    </div>
+
+                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-oxford-ash">
+                      <span>
+                        {formatDisplayDate(
+                          presentation.presentation_date
+                        )}
+                      </span>
+
+                      {presentation.location && (
+                        <span>
+                          {
+                            presentation.location
+                          }
+                        </span>
+                      )}
+
+                      {presentation.presentation_type && (
+                        <span>
+                          {
+                            presentation.presentation_type
+                          }
+                        </span>
+                      )}
+                    </div>
+
+                    {presentation.presentation_title && (
+                      <p className="mt-2 text-sm font-medium text-oxford-charcoal">
+                        {
+                          presentation.presentation_title
+                        }
+                      </p>
+                    )}
+
+                    {presentation.authors.length >
+                      0 && (
+                      <p className="mt-1 text-sm text-oxford-ash">
+                        {presentation.authors.join(
+                          ', '
+                        )}
+                      </p>
+                    )}
+
+                    {presentation.url && (
+                      <a
+                        href={
+                          presentation.url
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 inline-block text-sm font-medium text-oxford-blue hover:underline"
+                      >
+                        Presentation link
+                      </a>
+                    )}
+                  </div>
+                )
+              )}
+            </div>
+          </Card>
+        </section>
+      )}
 
       <MilestonesSection
         paperId={
