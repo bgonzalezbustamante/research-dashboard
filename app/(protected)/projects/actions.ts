@@ -248,6 +248,7 @@ function validateProjectFields(
       )
     ) {
       return {
+        ok: false,
         error:
           `${label} filename must be a single PNG, WebP, JPG, or JPEG filename without folders.`,
       }
