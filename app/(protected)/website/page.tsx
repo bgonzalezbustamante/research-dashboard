@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
@@ -38,6 +39,10 @@ type PublicMetadataRow = {
   slug: string | null
   featured: boolean
   publication_index: string | null
+  highlight_text: string | null
+  highlight_image_url: string | null
+  highlight_image_alt: string | null
+  highlight_image_caption: string | null
 }
 
 type PaperAuthorRow = {
@@ -218,7 +223,11 @@ export default async function WebsitePage({
         visibility,
         slug,
         featured,
-        publication_index
+        publication_index,
+        highlight_text,
+        highlight_image_url,
+        highlight_image_alt,
+        highlight_image_caption
       `),
 
     supabase
@@ -359,6 +368,14 @@ export default async function WebsitePage({
             slug: null,
             featured: false,
             publication_index:
+              null,
+            highlight_text:
+              null,
+            highlight_image_url:
+              null,
+            highlight_image_alt:
+              null,
+            highlight_image_caption:
               null,
           },
       }))
@@ -680,6 +697,14 @@ export default async function WebsitePage({
                                 metadata.featured,
                               publication_index:
                                 metadata.publication_index,
+                              highlight_text:
+                                metadata.highlight_text,
+                              highlight_image_url:
+                                metadata.highlight_image_url,
+                              highlight_image_alt:
+                                metadata.highlight_image_alt,
+                              highlight_image_caption:
+                                metadata.highlight_image_caption,
                             }
                           : null
 
@@ -900,6 +925,163 @@ export default async function WebsitePage({
                                   }
                                 />
                               </div>
+
+                              <div className="md:col-span-2 xl:col-span-4 border-t border-oxford-stone pt-5">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h4 className="font-serif text-lg font-semibold text-oxford-blue">
+                                    Key highlight
+                                  </h4>
+
+                                  <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium text-oxford-ash">
+                                    Optional
+                                  </span>
+                                </div>
+
+                                <p className="mt-2 text-xs leading-5 text-oxford-ash">
+                                  This detail-page content is returned by the public contract only while the paper is Public. You can prepare it while the paper is Private without exposing it anonymously.
+                                </p>
+                              </div>
+
+                              <div className="md:col-span-2 xl:col-span-4">
+                                <label
+                                  htmlFor={`highlight-text-${paper.id}`}
+                                  className={
+                                    labelClass
+                                  }
+                                >
+                                  Highlight
+                                  text
+                                </label>
+
+                                <textarea
+                                  id={`highlight-text-${paper.id}`}
+                                  name="highlight_text"
+                                  rows={4}
+                                  maxLength={2000}
+                                  defaultValue={
+                                    metadata.highlight_text ??
+                                    ''
+                                  }
+                                  placeholder="Optional short public-facing statement of the paper’s key result or contribution."
+                                  className={
+                                    inputClass
+                                  }
+                                />
+                              </div>
+
+                              <div className="md:col-span-2 xl:col-span-4">
+                                <label
+                                  htmlFor={`highlight-image-url-${paper.id}`}
+                                  className={
+                                    labelClass
+                                  }
+                                >
+                                  Highlight
+                                  image URL
+                                </label>
+
+                                <input
+                                  id={`highlight-image-url-${paper.id}`}
+                                  name="highlight_image_url"
+                                  type="url"
+                                  inputMode="url"
+                                  defaultValue={
+                                    metadata.highlight_image_url ??
+                                    ''
+                                  }
+                                  placeholder="https://…"
+                                  className={
+                                    inputClass
+                                  }
+                                />
+
+                                <p className="mt-1 text-xs leading-5 text-oxford-ash">
+                                  HTTPS only. Replace the image by changing this URL; remove the image reference by clearing it. Dashboard-managed uploads are deferred until a revocable private-Storage delivery layer is introduced.
+                                </p>
+                              </div>
+
+                              <div className="md:col-span-2">
+                                <label
+                                  htmlFor={`highlight-image-alt-${paper.id}`}
+                                  className={
+                                    labelClass
+                                  }
+                                >
+                                  Image alt
+                                  text
+                                </label>
+
+                                <input
+                                  id={`highlight-image-alt-${paper.id}`}
+                                  name="highlight_image_alt"
+                                  type="text"
+                                  maxLength={500}
+                                  defaultValue={
+                                    metadata.highlight_image_alt ??
+                                    ''
+                                  }
+                                  placeholder="Required whenever an image URL is configured"
+                                  className={
+                                    inputClass
+                                  }
+                                />
+                              </div>
+
+                              <div className="md:col-span-2">
+                                <label
+                                  htmlFor={`highlight-image-caption-${paper.id}`}
+                                  className={
+                                    labelClass
+                                  }
+                                >
+                                  Image caption
+                                  / source
+                                </label>
+
+                                <input
+                                  id={`highlight-image-caption-${paper.id}`}
+                                  name="highlight_image_caption"
+                                  type="text"
+                                  maxLength={500}
+                                  defaultValue={
+                                    metadata.highlight_image_caption ??
+                                    ''
+                                  }
+                                  placeholder="Optional short caption or source line"
+                                  className={
+                                    inputClass
+                                  }
+                                />
+                              </div>
+
+                              {metadata.highlight_image_url && (
+                                <div className="md:col-span-2 xl:col-span-4">
+                                  <div className="rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+                                    <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+                                      Current image preview
+                                    </div>
+
+                                    <img
+                                      src={
+                                        metadata.highlight_image_url
+                                      }
+                                      alt={
+                                        metadata.highlight_image_alt ??
+                                        ''
+                                      }
+                                      className="mt-3 max-h-80 w-auto max-w-full rounded-md border border-oxford-stone bg-white object-contain"
+                                    />
+
+                                    {metadata.highlight_image_caption && (
+                                      <p className="mt-2 text-xs leading-5 text-oxford-ash">
+                                        {
+                                          metadata.highlight_image_caption
+                                        }
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             <div className="mt-5 flex flex-wrap items-center gap-3">
