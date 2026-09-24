@@ -38,6 +38,7 @@ type PublicMetadataRow = {
   slug: string | null
   featured: boolean
   publication_index: string | null
+  citation: string | null
   highlight_text: string | null
   highlight_image_filename: string | null
   highlight_image_alt: string | null
@@ -223,6 +224,7 @@ export default async function WebsitePage({
         slug,
         featured,
         publication_index,
+        citation,
         highlight_text,
         highlight_image_filename,
         highlight_image_alt,
@@ -367,6 +369,8 @@ export default async function WebsitePage({
             slug: null,
             featured: false,
             publication_index:
+              null,
+            citation:
               null,
             highlight_text:
               null,
@@ -696,6 +700,8 @@ export default async function WebsitePage({
                                 metadata.featured,
                               publication_index:
                                 metadata.publication_index,
+                              citation:
+                                metadata.citation,
                               highlight_text:
                                 metadata.highlight_text,
                               highlight_image_filename:
@@ -923,6 +929,36 @@ export default async function WebsitePage({
                                     inputClass
                                   }
                                 />
+                              </div>
+
+                              <div className="md:col-span-2 xl:col-span-4">
+                                <label
+                                  htmlFor={`citation-${paper.id}`}
+                                  className={
+                                    labelClass
+                                  }
+                                >
+                                  Citation
+                                </label>
+
+                                <textarea
+                                  id={`citation-${paper.id}`}
+                                  name="citation"
+                                  rows={3}
+                                  maxLength={2000}
+                                  defaultValue={
+                                    metadata.citation ??
+                                    ''
+                                  }
+                                  placeholder="Enter the preferred citation exactly as it should appear on the public site."
+                                  className={
+                                    inputClass
+                                  }
+                                />
+
+                                <p className="mt-1 text-xs leading-5 text-oxford-ash">
+                                  Optional. Returned only for Public papers through the publication detail contract.
+                                </p>
                               </div>
 
                               <div className="md:col-span-2 xl:col-span-4 border-t border-oxford-stone pt-5">
