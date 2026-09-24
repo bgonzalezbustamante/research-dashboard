@@ -370,6 +370,8 @@ export default async function WebsitePage({
             featured: false,
             publication_index:
               null,
+            citation:
+              null,
             highlight_text:
               null,
             highlight_image_filename:
