@@ -26,6 +26,18 @@ type PaperStatus =
   | 'standby'
   | 'deprecated'
 
+type LinkedConferencePresentation = {
+  id: string
+  event_name: string
+  event_short_name: string
+  location: string | null
+  presentation_date: string | null
+  presentation_title: string | null
+  authors: string[]
+  presentation_type: string | null
+  url: string | null
+}
+
 type PaperPageProps = {
   params: Promise<{
     id: string
@@ -401,8 +413,8 @@ export default async function PaperPage({
     workSessionsResult.data ?? []
 
   const conferencePresentations =
-    conferencePresentationsResult.data ??
-    []
+    (conferencePresentationsResult.data ??
+      []) as LinkedConferencePresentation[]
 
   const totalPaperMinutes =
     workSessions.reduce(
