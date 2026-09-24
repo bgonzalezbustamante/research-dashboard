@@ -13,12 +13,13 @@
 
 `website administration`
 
-- Added Website to the bottom Owner utilities navigation alongside Authors and Access rather than the main Dashboard navigation.
+- Added Website to the bottom Owner utilities navigation and ordered the links as Authors, Access, Website rather than placing Website in the main Dashboard navigation.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, and Publication index.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
+- Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
 
 `public publication boundary`
 
@@ -29,6 +30,10 @@
 - Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract and current venue and to return only explicitly Public papers.
 - Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
 - Continued to exclude working-session detail, planning, milestones, notes, submission/revision history, internal workflow status, permissions, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
+
+`release notes`
+
+- Added pagination to the public Release Notes page with 3 releases per page.
 
 `public work analytics`
 
