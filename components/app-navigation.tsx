@@ -27,6 +27,11 @@ const papersLink = {
   label: 'Papers',
 }
 
+const projectsLink = {
+  href: '/projects',
+  label: 'Projects',
+}
+
 function isActiveLink(
   pathname: string,
   href: string
@@ -54,6 +59,7 @@ export default function AppNavigation({
       ? [
           ...dashboardLinks,
           papersLink,
+          projectsLink,
         ]
       : [papersLink]
 
