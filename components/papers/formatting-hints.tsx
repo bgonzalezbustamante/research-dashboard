@@ -6,8 +6,8 @@ import { useEffect } from 'react'
 const formattingFieldSelector = [
   'textarea[name="abstract"]',
   '#milestones textarea[name="notes"]',
-  '#presentations textarea[name="notes"]',
   '#notes textarea[name="body"]',
+  '#conferences textarea[name="notes"]',
 ].join(', ')
 
 function addFormattingHints() {
