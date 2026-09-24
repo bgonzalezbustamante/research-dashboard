@@ -13,7 +13,7 @@
 
 `website administration`
 
-- Added Website to the bottom Owner utilities navigation and ordered the links as Authors, Access, Website rather than placing Website in the main Dashboard navigation.
+- Added Website to the bottom Owner utilities navigation and ordered the links as Authors, Access, Website; moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, and Publication index.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
@@ -51,11 +51,11 @@
 `conferences`
 
 - Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.
-- Preserved the existing conference fields: event name, location, presentation date, presentation title, presentation type, URL, and notes.
+- Preserved the existing conference fields: event name, location, presentation date, presentation title, presentation type, URL, and notes, and added ordered presentation-specific authors so conference author order can differ from the linked paper.
 - Made the paper association optional and Dashboard-only; conference records can exist without a linked paper.
 - Migrated the existing conference presentation in place and changed paper deletion behaviour to clear the optional link rather than delete the conference record.
 - Added Owner editing and Viewer read-only access; paper-scoped Coauthors no longer edit conference records through Paper workspaces.
-- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing all conference fields, including notes, while excluding owner and linked-paper identifiers.
+- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing event metadata and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
 
 `release notes`
 
