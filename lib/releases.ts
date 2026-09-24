@@ -21,22 +21,30 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since beta.5',
     summary:
-      'Distant Forge begins the public-website administration layer by separating curated public paper presentation from private research workflow data.',
+      'Distant Forge adds the public-website administration and data boundary while keeping private research-management data isolated.',
     sections: [
       {
         title: 'Website administration',
         items: [
-          'Added an Owner-only Website area for curating paper visibility, stable public slugs, featured state, public category, public venue, display order, and public summary.',
-          'Kept the normal paper workspace as the canonical editor for title, authors, abstract, publication dates, and research links, with a public-contract preview in Website management.',
+          'Moved Website into the Owner utilities navigation alongside Authors and Access.',
+          'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
+          'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
         ],
       },
       {
         title: 'Public data boundary',
         items: [
-          'Added one-to-one public presentation metadata for papers, with every existing and newly created paper Private by default and internal workflow status remaining independent.',
-          'Added explicit anonymous RPC contracts for listed Public papers and slug-based Public or Unlisted paper lookup without granting anonymous SELECT access to private paper, author, link, workflow, or administrative tables.',
-          'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links; private author fields, Overleaf links, arbitrary links, hours, planning, milestones, notes, history, permissions, invitations, audit data, and profiles remain excluded.',
-          'Restricted legacy anonymous function grants so the two deliberate public-paper RPCs are the only application functions executable by the anon role.',
+          'Kept paper presentation metadata separate from internal workflow data and all papers Private by default.',
+          'Exposed Public papers only through explicit anonymous RPC contracts without granting anonymous SELECT access to private application tables.',
+          'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links while excluding internal workflow, collaboration, account, and audit data.',
+        ],
+      },
+      {
+        title: 'Public work analytics',
+        items: [
+          'Added an anonymous aggregate analytics contract for the Activity over time heatmap using daily net working minutes.',
+          'Added yearly average net working time per working day and average coffees per working day using the same definitions as Dashboard analytics.',
+          'Kept raw work sessions, activities, locations, linked papers, break records, and daily coffee counts private.',
         ],
       },
     ],
