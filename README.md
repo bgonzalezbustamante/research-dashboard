@@ -2,13 +2,14 @@
 
 **v0.1.0-beta.5 "Red Raven"**
 
-An authenticated personal research-management dashboard for tracking papers, working hours, biweekly capacity planning, collaborative paper workflows, and cross-module research analytics.
+An authenticated personal research-management dashboard for tracking papers, projects, conferences, working hours, biweekly capacity planning, collaborative paper workflows, and cross-module research analytics.
 
 **Production:** [dashboard.bgonzalezbustamante.com](https://dashboard.bgonzalezbustamante.com)
 
 ## Features
 
-- Paper workflow, milestones, revision history, notes, presentations, citations, and paper-scoped coauthor access
+- Paper workflow, milestones, revision history, notes, citations, and paper-scoped coauthor access
+- Dashboard-level Projects and Conferences modules with public academic-website contracts
 - Dashboard-wide read-only Viewer access for administrative or support users
 - Collaborative paper editing with owner-controlled permissions
 - Owner-visible audit history for invitations and access changes

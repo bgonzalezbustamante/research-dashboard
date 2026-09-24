@@ -59,6 +59,9 @@ function websiteRedirect(
   )
 }
 
+const assetFilenamePattern =
+  /^[A-Za-z0-9][A-Za-z0-9._-]*\.(png|webp|jpg|jpeg)$/i
+
 export async function updatePublicPaperMetadata(
   formData: FormData
 ) {
@@ -145,6 +148,99 @@ export async function updatePublicPaperMetadata(
     )
   }
 
+  const highlightText =
+    getOptionalText(
+      formData,
+      'highlight_text'
+    )
+
+  const highlightImageFilename =
+    getOptionalText(
+      formData,
+      'highlight_image_filename'
+    )
+
+  const rawHighlightImageAlt =
+    getOptionalText(
+      formData,
+      'highlight_image_alt'
+    )
+
+  const rawHighlightImageCaption =
+    getOptionalText(
+      formData,
+      'highlight_image_caption'
+    )
+
+  if (
+    highlightText &&
+    highlightText.length > 2000
+  ) {
+    websiteRedirect(
+      'error',
+      'Key highlight text must be 2,000 characters or fewer.',
+      currentPage
+    )
+  }
+
+  if (
+    highlightImageFilename &&
+    !assetFilenamePattern.test(
+      highlightImageFilename
+    )
+  ) {
+    websiteRedirect(
+      'error',
+      'Key highlight image must be a single PNG, WebP, JPG, or JPEG filename without folders.',
+      currentPage
+    )
+  }
+
+  if (
+    highlightImageFilename &&
+    !rawHighlightImageAlt
+  ) {
+    websiteRedirect(
+      'error',
+      'Image alt text is required when a Key highlight image filename is configured.',
+      currentPage
+    )
+  }
+
+  if (
+    rawHighlightImageAlt &&
+    rawHighlightImageAlt.length >
+      500
+  ) {
+    websiteRedirect(
+      'error',
+      'Image alt text must be 500 characters or fewer.',
+      currentPage
+    )
+  }
+
+  if (
+    rawHighlightImageCaption &&
+    rawHighlightImageCaption.length >
+      500
+  ) {
+    websiteRedirect(
+      'error',
+      'Image caption must be 500 characters or fewer.',
+      currentPage
+    )
+  }
+
+  const highlightImageAlt =
+    highlightImageFilename
+      ? rawHighlightImageAlt
+      : null
+
+  const highlightImageCaption =
+    highlightImageFilename
+      ? rawHighlightImageCaption
+      : null
+
   const supabase =
     await createClient()
 
@@ -166,6 +262,14 @@ export async function updatePublicPaperMetadata(
           formData,
           'publication_index'
         ),
+      highlight_text:
+        highlightText,
+      highlight_image_filename:
+        highlightImageFilename,
+      highlight_image_alt:
+        highlightImageAlt,
+      highlight_image_caption:
+        highlightImageCaption,
     })
     .eq('paper_id', paperId)
     .select('paper_id')

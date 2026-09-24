@@ -4,7 +4,6 @@ import CitationsSection from '@/components/papers/citations-section'
 import HistorySection from '@/components/papers/history-section'
 import MilestonesSection from '@/components/papers/milestones-section'
 import NotesSection from '@/components/papers/notes-section'
-import PresentationsSection from '@/components/papers/presentations-section'
 import PaperSummary from '@/components/papers/paper-summary'
 import PaperWorkspaceNav from '@/components/papers/paper-workspace-nav'
 import PageHeader from '@/components/page-header'
@@ -34,7 +33,6 @@ type PaperPageProps = {
   searchParams: Promise<{
     milestoneError?: string
     historyError?: string
-    presentationError?: string
     noteError?: string
     citationError?: string
   }>
@@ -133,7 +131,6 @@ export default async function PaperPage({
   const {
     milestoneError,
     historyError,
-    presentationError,
     noteError,
     citationError,
   } = await searchParams
@@ -177,7 +174,6 @@ export default async function PaperPage({
     linksResult,
     milestonesResult,
     historyResult,
-    presentationsResult,
     notesResult,
     citationsResult,
     workSessionsResult,
@@ -240,20 +236,6 @@ export default async function PaperPage({
       .order('created_at', {
         ascending: true,
       }),
-
-    supabase
-      .from('paper_presentations')
-      .select(`
-        id,
-        event_name,
-        location,
-        presentation_date,
-        presentation_title,
-        presentation_type,
-        url,
-        notes
-      `)
-      .eq('paper_id', id),
 
     supabase
       .from('paper_notes')
@@ -329,12 +311,6 @@ export default async function PaperPage({
     )
   }
 
-  if (presentationsResult.error) {
-    throw new Error(
-      `Could not load presentations: ${presentationsResult.error.message}`
-    )
-  }
-
   if (notesResult.error) {
     throw new Error(
       `Could not load paper notes: ${notesResult.error.message}`
@@ -364,9 +340,6 @@ export default async function PaperPage({
 
   const historyEvents =
     historyResult.data ?? []
-
-  const presentations =
-    presentationsResult.data ?? []
 
   const notes =
     notesResult.data ?? []
@@ -460,29 +433,6 @@ export default async function PaperPage({
             1
         ]
       : null
-
-  const upcomingPresentations =
-    presentations
-      .filter(
-        (presentation) =>
-          presentation.presentation_date !==
-            null &&
-          presentation.presentation_date >=
-            today
-      )
-      .sort((a, b) =>
-        (
-          a.presentation_date ??
-          ''
-        ).localeCompare(
-          b.presentation_date ??
-            ''
-        )
-      )
-
-  const nextPresentation =
-    upcomingPresentations[0] ??
-    null
 
   const latestCitationBySource =
     new Map<
@@ -625,9 +575,6 @@ export default async function PaperPage({
         historyCount={
           historyEvents.length
         }
-        presentationCount={
-          presentations.length
-        }
         noteCount={
           normalizedNotes.length
         }
@@ -667,19 +614,6 @@ export default async function PaperPage({
                   latestHistory.event_date,
                 detail:
                   latestHistory.venue,
-              }
-            : null
-        }
-        nextPresentation={
-          nextPresentation &&
-          nextPresentation.presentation_date
-            ? {
-                eventName:
-                  nextPresentation.event_name,
-                date:
-                  nextPresentation.presentation_date,
-                location:
-                  nextPresentation.location,
               }
             : null
         }
@@ -877,18 +811,6 @@ export default async function PaperPage({
         }
         error={
           historyError
-        }
-      />
-
-      <PresentationsSection
-        paperId={
-          paper.id
-        }
-        presentations={
-          presentations
-        }
-        error={
-          presentationError
         }
       />
 

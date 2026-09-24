@@ -1457,7 +1457,6 @@ export default async function PapersPage({
                 to start tracking its
                 status, milestones,
                 publication history,
-                presentations,
                 citations, and
                 research activity.
               </p>

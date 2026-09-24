@@ -1,7 +1,6 @@
 type PaperWorkspaceNavProps = {
   milestoneCount: number
   historyCount: number
-  presentationCount: number
   noteCount: number
   citationCount: number
   totalMinutes: number
@@ -22,11 +21,6 @@ const items = [
     href: '#history',
     label: 'History',
     countKey: 'historyCount',
-  },
-  {
-    href: '#presentations',
-    label: 'Presentations',
-    countKey: 'presentationCount',
   },
   {
     href: '#notes',

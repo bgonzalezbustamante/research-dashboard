@@ -39,7 +39,7 @@ function markCoauthorForms(
 
   document
     .querySelectorAll<HTMLFormElement>(
-      '#milestones form, #presentations form'
+      '#milestones form'
     )
     .forEach((form) => {
       form.dataset.coauthorManaged =
@@ -245,7 +245,7 @@ export default function CoauthorPaperShortcut() {
         You can edit the full title,
         authors, abstract, target/current
         venue, research links, milestones,
-        presentations, and your own notes.
+        and your own notes.
         The short title and workflow fields
         remain owner-only.
       </div>

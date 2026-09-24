@@ -30,6 +30,27 @@ export const releases: ReleaseNote[] = [
           'Simplified paper visibility to Private or Public and retained only website-specific controls for stable slugs, Featured state, and Publication index.',
           'Ordered public publications by publication date and reused the canonical Paper workspace abstract, current venue, authors, dates, and approved links.',
           'Added Website pagination with 10 papers per page and preserved the current page after saving public settings.',
+          'Added optional Key highlight editing with short text, a static image filename, required alt text for configured images, and an optional caption/source line.',
+          'Standardised publication highlight assets under academic-website/public/publication-highlights/<paper-slug>/<filename>, accepting PNG, WebP, JPG, and JPEG files.',
+        ],
+      },
+      {
+        title: 'Projects',
+        items: [
+          'Added a Dashboard Projects module with short/long titles, abstract, funder, Active/Completed status, and Owner editing with Viewer read-only access.',
+          'Added Private/Public project presentation metadata with stable slugs plus optional project and funder image filenames for academic-website/public assets.',
+          'Added many-to-many project-paper links and Public project contracts that expose only associated papers that are themselves Public.',
+          'Added Dashboard-only activity-label assignment and aggregate tracked project hours, with each activity label limited to one project to prevent double-counting.',
+          'Added anonymous-safe list_public_projects() and get_public_project(slug) contracts without granting anon table access.',
+        ],
+      },
+      {
+        title: 'Conferences',
+        items: [
+          'Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.',
+          'Kept event, location, date, presentation title/type, URL, and notes as canonical conference fields; the optional linked paper remains Dashboard-only.',
+          'Migrated the existing presentation automatically and made paper deletion clear the optional conference link rather than delete the conference record.',
+          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that includes public notes but excludes owner and paper identifiers.',
         ],
       },
       {
@@ -44,6 +65,8 @@ export const releases: ReleaseNote[] = [
           'Kept paper presentation metadata separate from internal workflow data and all papers Private by default.',
           'Exposed Public papers only through explicit anonymous RPC contracts without granting anonymous SELECT access to private application tables.',
           'Projected author names only and whitelisted DOI/publication, preprint, GitHub, and Dataverse links while excluding internal workflow, collaboration, account, and audit data.',
+          'Extended publication detail lookup with nullable Key highlight fields while leaving the smaller public publication-list contract unchanged.',
+          'Stored only validated static asset filenames for publication/project imagery so the academic website resolves files from its own public directory without deployment-specific URLs.',
         ],
       },
       {
