@@ -20,7 +20,8 @@
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 - Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
-- Added an optional Key highlight editor for publication detail pages with short highlight text, an HTTPS image reference, required accessible alt text when an image is configured, an optional caption/source line, and a saved-image preview.
+- Added an optional Key highlight editor for publication detail pages with short highlight text, a static image filename, required accessible alt text when an image is configured, and an optional caption/source line.
+- Standardised publication highlight assets under `academic-website/public/publication-highlights/<paper-slug>/<filename>` and accepted PNG, WebP, JPG, and JPEG filenames.
 
 `public publication boundary`
 
@@ -31,7 +32,20 @@
 - Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract and current venue and to return only explicitly Public papers.
 - Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
 - Extended `get_public_paper(slug)` with nullable Key highlight detail fields while leaving `list_public_papers()` unchanged.
+- Returned only the Key highlight filename rather than a deployment-specific URL so the academic website can resolve the asset from its own `public` directory.
 - Continued to exclude working-session detail, planning, milestones, notes, submission/revision history, internal workflow status, permissions, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
+
+
+`projects`
+
+- Added a new Dashboard Projects module with short title, long title, abstract, funder, and Active/Completed status.
+- Added Private/Public project visibility with a stable public slug; projects remain Private by default.
+- Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
+- Added many-to-many project-paper associations without changing canonical paper metadata.
+- Added project-to-activity-label assignments for Dashboard-only hour tracking, with each activity label restricted to one project to prevent double-counting.
+- Added tracked project hours derived from assigned activity labels without exposing the label assignments or work-session detail publicly.
+- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts.
+- Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
 `release notes`
 
@@ -49,7 +63,7 @@
 - Kept RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
 - Kept anonymous access behind explicit RPC `EXECUTE` grants rather than anonymous table access, consistent with the October 30 Supabase Data API behaviour.
 - Preserved unique lowercase public slugs and automatic Private metadata creation for newly created papers.
-- Kept highlight images outside Supabase Storage for this iteration because the project has no existing Storage architecture and a public bucket would not support revocation when a paper becomes Private; Dashboard-managed uploads remain deferred pending a revocable private-asset delivery layer.
+- Kept publication/project images as static assets owned by the separate academic website repository rather than introducing Supabase Storage; the Dashboard stores only validated filenames and never stores deployment-specific asset URLs.
 - Restricted the anonymous application function surface to the deliberate public publication and aggregate analytics RPCs.
 
 ### Release status
