@@ -8,7 +8,6 @@ import FormattingHints from '@/components/papers/formatting-hints'
 import ResearchTextEnhancer from '@/components/papers/research-text-enhancer'
 import ReadOnlyMode from '@/components/read-only-mode'
 import SiteFooter from '@/components/site-footer'
-import Button from '@/components/ui/button'
 import { requireAppAccess } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
@@ -152,17 +151,6 @@ export default async function ProtectedLayout({
                   {fullName || 'Account'}
                 </Link>
 
-                <form
-                  action="/auth/signout"
-                  method="post"
-                >
-                  <Button
-                    type="submit"
-                    variant="secondary"
-                  >
-                    Sign out
-                  </Button>
-                </form>
               </div>
             </div>
           </div>
@@ -187,9 +175,9 @@ export default async function ProtectedLayout({
         </div>
       </main>
 
-      {isOwner && (
-        <OwnerUtilityNavigation />
-      )}
+      <OwnerUtilityNavigation
+        showOwnerLinks={isOwner}
+      />
 
       <SiteFooter />
     </div>
