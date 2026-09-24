@@ -10,12 +10,6 @@ type LatestHistory = {
   detail: string | null
 } | null
 
-type NextPresentation = {
-  eventName: string
-  date: string
-  location: string | null
-} | null
-
 type CitationSummary = {
   value: string
   detail: string
@@ -24,7 +18,6 @@ type CitationSummary = {
 type PaperSummaryProps = {
   nextMilestone: NextMilestone
   latestHistory: LatestHistory
-  nextPresentation: NextPresentation
   noteCount: number
   latestNoteDate: string | null
   citationSummary: CitationSummary
@@ -63,7 +56,6 @@ function formatDate(
 export default function PaperSummary({
   nextMilestone,
   latestHistory,
-  nextPresentation,
   noteCount,
   latestNoteDate,
   citationSummary,
@@ -71,7 +63,7 @@ export default function PaperSummary({
   return (
     <section
       aria-label="Paper summary"
-      className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5"
+      className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       <a
         href="#milestones"
@@ -140,41 +132,6 @@ export default function PaperSummary({
         ) : (
           <div className="mt-2 text-sm text-oxford-ash">
             No history yet
-          </div>
-        )}
-      </a>
-
-      <a
-        href="#presentations"
-        className="rounded-lg border border-oxford-stone bg-white p-4 transition hover:border-oxford-blue"
-      >
-        <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-          Next presentation
-        </div>
-
-        {nextPresentation ? (
-          <>
-            <div className="mt-2 font-medium text-oxford-charcoal">
-              {nextPresentation.eventName}
-            </div>
-
-            <div className="mt-1 text-sm text-oxford-ash">
-              {formatDate(
-                nextPresentation.date
-              )}
-            </div>
-
-            {nextPresentation.location && (
-              <div className="mt-1 truncate text-xs text-oxford-ash">
-                {
-                  nextPresentation.location
-                }
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="mt-2 text-sm text-oxford-ash">
-            No upcoming presentation
           </div>
         )}
       </a>
