@@ -38,6 +38,7 @@ type ProjectRow = {
   title: string
   abstract: string
   funder: string
+  funder_note: string | null
   url: string | null
   start_year: number | null
   end_year: number | null
@@ -202,6 +203,7 @@ export default async function ProjectsPage({
         title,
         abstract,
         funder,
+        funder_note,
         url,
         start_year,
         end_year,
@@ -487,8 +489,9 @@ export default async function ProjectsPage({
             Projects are Private by
             default. Public projects
             expose only canonical
-            project content, canonical
-            URL, start/end years,
+            project content, funder
+            note, canonical URL,
+            start/end years,
             Featured state, static asset
             filenames, and the slugs of
             associated papers
@@ -581,6 +584,29 @@ export default async function ProjectsPage({
                   required
                   className={inputClass}
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="new-project-funder-note"
+                  className={labelClass}
+                >
+                  Funder note
+                </label>
+
+                <textarea
+                  id="new-project-funder-note"
+                  name="funder_note"
+                  rows={3}
+                  maxLength={1000}
+                  placeholder="Optional public note about the funder, grant, or funding arrangement"
+                  className={inputClass}
+                />
+
+                <p className="mt-1 text-xs text-oxford-ash">
+                  Optional and public for
+                  Public projects.
+                </p>
               </div>
 
               <div className="md:col-span-2">
@@ -1080,6 +1106,14 @@ export default async function ProjectsPage({
                         </span>
                       </p>
 
+                      {project.funder_note && (
+                        <p className="mt-1 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-oxford-ash">
+                          {
+                            project.funder_note
+                          }
+                        </p>
+                      )}
+
                       {project.url && (
                         <a
                           href={project.url}
@@ -1275,6 +1309,38 @@ export default async function ProjectsPage({
                                 inputClass
                               }
                             />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <label
+                              htmlFor={`funder-note-${project.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              Funder note
+                            </label>
+
+                            <textarea
+                              id={`funder-note-${project.id}`}
+                              name="funder_note"
+                              rows={3}
+                              maxLength={1000}
+                              defaultValue={
+                                project.funder_note ??
+                                ''
+                              }
+                              placeholder="Optional public note about the funder, grant, or funding arrangement"
+                              className={
+                                inputClass
+                              }
+                            />
+
+                            <p className="mt-1 text-xs text-oxford-ash">
+                              Optional and
+                              public for
+                              Public projects.
+                            </p>
                           </div>
 
                           <div className="md:col-span-2">

@@ -130,6 +130,7 @@ type ValidProjectFields = {
   title: string
   abstract: string
   funder: string
+  funderNote: string | null
   url: string | null
   startYear: number | null
   endYear: number | null
@@ -176,6 +177,12 @@ function validateProjectFields(
     getRequiredText(
       formData,
       'funder'
+    )
+
+  const funderNote =
+    getOptionalText(
+      formData,
+      'funder_note'
     )
 
   const url =
@@ -240,6 +247,17 @@ function validateProjectFields(
       ok: false,
       error:
         'Short title, long title, abstract, and funder are required.',
+    }
+  }
+
+  if (
+    funderNote &&
+    funderNote.length > 1000
+  ) {
+    return {
+      ok: false,
+      error:
+        'Funder note must be 1,000 characters or fewer.',
     }
   }
 
@@ -382,6 +400,7 @@ function validateProjectFields(
     title,
     abstract,
     funder,
+    funderNote,
     url,
     startYear,
     endYear,
@@ -468,6 +487,8 @@ export async function createProject(
         fields.abstract,
       p_funder:
         fields.funder,
+      p_funder_note:
+        fields.funderNote,
       p_url:
         fields.url,
       p_start_year:
@@ -568,6 +589,8 @@ export async function updateProject(
         fields.abstract,
       p_funder:
         fields.funder,
+      p_funder_note:
+        fields.funderNote,
       p_url:
         fields.url,
       p_start_year:
