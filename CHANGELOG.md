@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## v0.1.0-beta.5 (in development)
+## v0.1.0-beta.5 "Red Raven"
 
 ### Summary
 
-- Beta.5 development has started and remains open for additional changes before release.
+- Released `v0.1.0-beta.5 "Red Raven"` on 24 Sep 2026.
 - Added five compact yearly top-activity cards beneath Major activity distribution, showing the most-used non-Break Hours activity labels and their recorded time.
 - Added FTE-equivalent estimates to the yearly top-activity cards using a 40-hour week, prorating the current-year reference through the current day.
 - Hardened Hours and Dashboard yearly work-session reads so datasets above Supabase’s 1,000-row response limit remain complete.
@@ -35,10 +35,8 @@
 
 ### Release status
 
-- Beta.5 is in development.
-- Additional changes may be added before release.
-- Release date: TBC.
-- The current released beta remains `v0.1.0-beta.4 "Golden Vale"`.
+- Red Raven is the current beta release.
+- Released: 24 Sep 2026.
 
 ---
 

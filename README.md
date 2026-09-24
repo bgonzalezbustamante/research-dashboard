@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v0.1.0-beta.4 "Golden Vale"**
+**v0.1.0-beta.5 "Red Raven"**
 
 An authenticated personal research-management dashboard for tracking papers, working hours, biweekly capacity planning, collaborative paper workflows, and cross-module research analytics.
 
