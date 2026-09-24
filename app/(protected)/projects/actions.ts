@@ -140,6 +140,7 @@ type ValidProjectFields = {
   projectImageFilename: string | null
   funderImageFilename: string | null
   paperIds: string[]
+  presentationIds: string[]
   activityLabelIds: string[]
 }
 
@@ -414,6 +415,11 @@ function validateProjectFields(
         formData,
         'paper_ids'
       ),
+    presentationIds:
+      getUuidList(
+        formData,
+        'presentation_ids'
+      ),
     activityLabelIds:
       getUuidList(
         formData,
@@ -447,7 +453,7 @@ function getProjectErrorMessage(
   }
 
   if (code === '23514') {
-    return 'One of the selected papers or activity labels is not valid for this project.'
+    return 'One of the selected papers, presentations, or activity labels is not valid for this project.'
   }
 
   return 'The project could not be saved.'
@@ -511,6 +517,8 @@ export async function createProject(
         fields.funderImageFilename,
       p_paper_ids:
         fields.paperIds,
+      p_presentation_ids:
+        fields.presentationIds,
       p_activity_label_ids:
         fields.activityLabelIds,
     }
@@ -613,6 +621,8 @@ export async function updateProject(
         fields.funderImageFilename,
       p_paper_ids:
         fields.paperIds,
+      p_presentation_ids:
+        fields.presentationIds,
       p_activity_label_ids:
         fields.activityLabelIds,
     }

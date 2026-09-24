@@ -43,9 +43,10 @@
 - Added Private/Public project visibility with a stable public slug and Featured state; projects remain Private by default.
 - Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
 - Added many-to-many project-paper associations without changing canonical paper metadata.
+- Added many-to-many project-conference-presentation associations using the existing conference records rather than duplicating presentation metadata.
 - Added project-to-activity-label assignments for Dashboard-only hour tracking, with each activity label restricted to one project to prevent double-counting.
 - Added tracked project hours derived from assigned activity labels without exposing the label assignments or work-session detail publicly.
-- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional funder note, canonical project URL, start/end years, and Featured state.
+- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional funder note, canonical project URL, start/end years, Featured state, Public paper slugs, and public-safe associated conference-presentation metadata.
 - Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
 
