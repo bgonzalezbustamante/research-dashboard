@@ -38,13 +38,13 @@
 
 `projects`
 
-- Added a new Dashboard Projects module with short title, long title, abstract, funder, and Active/Completed status.
+- Added a new Dashboard Projects module with short title, long title, abstract, funder, optional canonical project URL, and Active/Completed status.
 - Added Private/Public project visibility with a stable public slug; projects remain Private by default.
 - Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
 - Added many-to-many project-paper associations without changing canonical paper metadata.
 - Added project-to-activity-label assignments for Dashboard-only hour tracking, with each activity label restricted to one project to prevent double-counting.
 - Added tracked project hours derived from assigned activity labels without exposing the label assignments or work-session detail publicly.
-- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts.
+- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional canonical project URL.
 - Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
 
