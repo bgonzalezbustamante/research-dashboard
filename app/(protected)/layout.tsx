@@ -128,6 +128,9 @@ export default async function ProtectedLayout({
                 showDashboardModules={
                   access.hasDashboardAccess
                 }
+                showWebsite={
+                  isOwner
+                }
               />
 
               <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
