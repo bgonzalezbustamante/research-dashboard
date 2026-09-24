@@ -18,7 +18,6 @@ type WebsitePageProps = {
 
 type PublicVisibility =
   | 'public'
-  | 'unlisted'
   | 'private'
 
 type PaperRow = {
@@ -27,6 +26,7 @@ type PaperRow = {
   title: string
   abstract: string | null
   status: string
+  current_venue: string | null
   published_on: string | null
   archived_at: string | null
 }
@@ -36,10 +36,7 @@ type PublicMetadataRow = {
   visibility: PublicVisibility
   slug: string | null
   featured: boolean
-  public_category: string | null
-  public_summary: string | null
-  public_venue: string | null
-  display_order: number | null
+  publication_index: string | null
 }
 
 type PaperAuthorRow = {
@@ -71,7 +68,6 @@ const labelClass =
 
 const visibilityOrder: PublicVisibility[] = [
   'public',
-  'unlisted',
   'private',
 ]
 
@@ -80,21 +76,15 @@ const visibilityLabels: Record<
   string
 > = {
   public: 'Public',
-  unlisted: 'Unlisted',
   private: 'Private',
 }
 
 function visibilityClass(
   visibility: PublicVisibility
 ) {
-  switch (visibility) {
-    case 'public':
-      return 'border-green-200 bg-green-50 text-green-800'
-    case 'unlisted':
-      return 'border-amber-200 bg-amber-50 text-amber-800'
-    default:
-      return 'border-gray-300 bg-gray-100 text-gray-700'
-  }
+  return visibility === 'public'
+    ? 'border-green-200 bg-green-50 text-green-800'
+    : 'border-gray-300 bg-gray-100 text-gray-700'
 }
 
 function normalizeAuthorName(
@@ -137,6 +127,41 @@ function getLink(
   )
 }
 
+function compareByPublicationDate(
+  a: {
+    paper: PaperRow
+  },
+  b: {
+    paper: PaperRow
+  }
+) {
+  if (
+    a.paper.published_on &&
+    b.paper.published_on
+  ) {
+    const dateComparison =
+      b.paper.published_on.localeCompare(
+        a.paper.published_on
+      )
+
+    if (dateComparison !== 0) {
+      return dateComparison
+    }
+  } else if (
+    a.paper.published_on
+  ) {
+    return -1
+  } else if (
+    b.paper.published_on
+  ) {
+    return 1
+  }
+
+  return a.paper.short_title.localeCompare(
+    b.paper.short_title
+  )
+}
+
 export default async function WebsitePage({
   searchParams,
 }: WebsitePageProps) {
@@ -163,16 +188,14 @@ export default async function WebsitePage({
         title,
         abstract,
         status,
+        current_venue,
         published_on,
         archived_at
       `)
       .eq(
         'owner_id',
         access.ownerId
-      )
-      .order('short_title', {
-        ascending: true,
-      }),
+      ),
 
     supabase
       .from(
@@ -183,10 +206,7 @@ export default async function WebsitePage({
         visibility,
         slug,
         featured,
-        public_category,
-        public_summary,
-        public_venue,
-        display_order
+        publication_index
       `),
 
     supabase
@@ -314,27 +334,25 @@ export default async function WebsitePage({
   }
 
   const papersWithMetadata =
-    papers.map((paper) => {
-      const metadata =
-        metadataByPaper.get(
-          paper.id
-        ) ?? {
-          paper_id: paper.id,
-          visibility:
-            'private' as const,
-          slug: null,
-          featured: false,
-          public_category: null,
-          public_summary: null,
-          public_venue: null,
-          display_order: null,
-        }
-
-      return {
+    papers
+      .map((paper) => ({
         paper,
-        metadata,
-      }
-    })
+        metadata:
+          metadataByPaper.get(
+            paper.id
+          ) ?? {
+            paper_id: paper.id,
+            visibility:
+              'private' as const,
+            slug: null,
+            featured: false,
+            publication_index:
+              null,
+          },
+      }))
+      .sort(
+        compareByPublicationDate
+      )
 
   const counts =
     Object.fromEntries(
@@ -358,7 +376,7 @@ export default async function WebsitePage({
     <div>
       <PageHeader
         title="Website"
-        description="Curate the research content that may be exposed to the future public academic website."
+        description="Curate the papers and aggregate work analytics intended for the future public academic website."
       />
 
       {error && (
@@ -373,7 +391,7 @@ export default async function WebsitePage({
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {visibilityOrder.map(
           (visibility) => (
             <Card
@@ -400,102 +418,78 @@ export default async function WebsitePage({
               <p className="mt-3 text-sm text-oxford-ash">
                 {visibility ===
                 'public'
-                  ? 'Included in the anonymous public listing and retrievable by slug.'
-                  : visibility ===
-                      'unlisted'
-                    ? 'Retrievable by a known slug but excluded from the anonymous listing.'
-                    : 'Unavailable through the anonymous public data contract.'}
+                  ? 'Included in the future public website listing and retrievable by its stable slug.'
+                  : 'Unavailable to anonymous clients and excluded from the future public website.'}
               </p>
             </Card>
           )
         )}
       </div>
 
-      <Card className="mt-6">
-        <h2 className="font-serif text-xl font-semibold text-oxford-blue">
-          Public data boundary
-        </h2>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card>
+          <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+            Publication contract
+          </h2>
 
-        <p className="mt-2 text-sm leading-6 text-oxford-ash">
-          Website visibility is
-          independent of the
-          paper&apos;s internal
-          workflow status. The normal
-          paper workspace remains the
-          canonical editor for title,
-          authors, abstract, dates,
-          and research links. This
-          area controls only the
-          public presentation layer.
-        </p>
+          <p className="mt-2 text-sm leading-6 text-oxford-ash">
+            Website visibility is
+            independent of internal
+            workflow status. Public
+            papers reuse the canonical
+            title, authors, abstract,
+            current venue, publication
+            date and approved research
+            links from the normal paper
+            workspace.
+          </p>
 
-        <p className="mt-2 text-sm leading-6 text-oxford-ash">
-          Anonymous clients can call
-          only the curated public
-          paper RPCs. Hours, planning,
-          milestones, notes, history,
-          permissions, invitations,
-          audit records, profiles,
-          author emails, and other
-          private fields are not part
-          of that contract.
-        </p>
-      </Card>
+          <p className="mt-2 text-sm leading-6 text-oxford-ash">
+            Public publication lists
+            are ordered by publication
+            date, newest first. Papers
+            without a publication date
+            follow dated publications.
+          </p>
+        </Card>
+
+        <Card>
+          <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+            Public work analytics
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-oxford-ash">
+            The future website can
+            reproduce the Dashboard
+            Activity over time heatmap
+            from daily net working
+            minutes and display yearly
+            average net working time
+            per working day together
+            with coffees per working
+            day.
+          </p>
+
+          <p className="mt-2 text-sm leading-6 text-oxford-ash">
+            Raw sessions, activities,
+            locations, linked papers,
+            break records and daily
+            coffee counts remain
+            private.
+          </p>
+        </Card>
+      </div>
 
       <div className="mt-8 space-y-10">
         {visibilityOrder.map(
           (visibility) => {
             const items =
-              papersWithMetadata
-                .filter(
-                  (item) =>
-                    item.metadata
-                      .visibility ===
-                    visibility
-                )
-                .sort((a, b) => {
-                  const aOrder =
-                    a.metadata
-                      .display_order
-
-                  const bOrder =
-                    b.metadata
-                      .display_order
-
-                  if (
-                    aOrder !== null ||
-                    bOrder !== null
-                  ) {
-                    if (
-                      aOrder === null
-                    ) {
-                      return 1
-                    }
-
-                    if (
-                      bOrder === null
-                    ) {
-                      return -1
-                    }
-
-                    if (
-                      aOrder !==
-                      bOrder
-                    ) {
-                      return (
-                        aOrder -
-                        bOrder
-                      )
-                    }
-                  }
-
-                  return a.paper
-                    .short_title
-                    .localeCompare(
-                      b.paper
-                        .short_title
-                    )
-                })
+              papersWithMetadata.filter(
+                (item) =>
+                  item.metadata
+                    .visibility ===
+                  visibility
+              )
 
             if (
               items.length === 0
@@ -543,22 +537,17 @@ export default async function WebsitePage({
 
                       const preview =
                         metadata.visibility ===
-                        'private'
-                          ? null
-                          : {
+                        'public'
+                          ? {
                               slug:
                                 metadata.slug,
-                              visibility:
-                                metadata.visibility,
                               title:
                                 paper.title,
                               authors,
                               abstract:
                                 paper.abstract,
-                              summary:
-                                metadata.public_summary,
                               venue:
-                                metadata.public_venue,
+                                paper.current_venue,
                               publication_date:
                                 paper.published_on,
                               doi_url:
@@ -588,11 +577,10 @@ export default async function WebsitePage({
                                 ),
                               featured:
                                 metadata.featured,
-                              category:
-                                metadata.public_category,
-                              display_order:
-                                metadata.display_order,
+                              publication_index:
+                                metadata.publication_index,
                             }
+                          : null
 
                       return (
                         <Card
@@ -647,13 +635,33 @@ export default async function WebsitePage({
                                 }
                               </p>
 
-                              <p className="mt-1 text-xs text-oxford-ash">
-                                Internal
-                                status:{' '}
-                                {
-                                  paper.status
-                                }
-                              </p>
+                              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-oxford-ash">
+                                <span>
+                                  Internal
+                                  status:{' '}
+                                  {
+                                    paper.status
+                                  }
+                                </span>
+
+                                <span>
+                                  Publication
+                                  date:{' '}
+                                  {
+                                    paper.published_on ??
+                                    '—'
+                                  }
+                                </span>
+
+                                <span>
+                                  Current
+                                  venue:{' '}
+                                  {
+                                    paper.current_venue ??
+                                    '—'
+                                  }
+                                </span>
+                              </div>
                             </div>
 
                             <ButtonLink
@@ -706,9 +714,6 @@ export default async function WebsitePage({
                                   <option value="public">
                                     Public
                                   </option>
-                                  <option value="unlisted">
-                                    Unlisted
-                                  </option>
                                 </select>
                               </div>
 
@@ -739,99 +744,11 @@ export default async function WebsitePage({
 
                                 <p className="mt-1 text-xs text-oxford-ash">
                                   Required
-                                  for Public
-                                  or
-                                  Unlisted.
+                                  when Public.
                                   Lowercase
                                   letters,
-                                  numbers
-                                  and
+                                  numbers and
                                   hyphens.
-                                </p>
-                              </div>
-
-                              <div>
-                                <label
-                                  htmlFor={`display-order-${paper.id}`}
-                                  className={
-                                    labelClass
-                                  }
-                                >
-                                  Display
-                                  order
-                                </label>
-
-                                <input
-                                  id={`display-order-${paper.id}`}
-                                  name="display_order"
-                                  type="number"
-                                  min="0"
-                                  defaultValue={
-                                    metadata.display_order ??
-                                    ''
-                                  }
-                                  className={
-                                    inputClass
-                                  }
-                                />
-                              </div>
-
-                              <div>
-                                <label
-                                  htmlFor={`category-${paper.id}`}
-                                  className={
-                                    labelClass
-                                  }
-                                >
-                                  Public
-                                  category
-                                </label>
-
-                                <input
-                                  id={`category-${paper.id}`}
-                                  name="public_category"
-                                  type="text"
-                                  defaultValue={
-                                    metadata.public_category ??
-                                    ''
-                                  }
-                                  className={
-                                    inputClass
-                                  }
-                                />
-                              </div>
-
-                              <div className="md:col-span-1 xl:col-span-2">
-                                <label
-                                  htmlFor={`venue-${paper.id}`}
-                                  className={
-                                    labelClass
-                                  }
-                                >
-                                  Public
-                                  venue
-                                </label>
-
-                                <input
-                                  id={`venue-${paper.id}`}
-                                  name="public_venue"
-                                  type="text"
-                                  defaultValue={
-                                    metadata.public_venue ??
-                                    ''
-                                  }
-                                  className={
-                                    inputClass
-                                  }
-                                />
-
-                                <p className="mt-1 text-xs text-oxford-ash">
-                                  Separate
-                                  from the
-                                  internal
-                                  current or
-                                  target
-                                  venue.
                                 </p>
                               </div>
 
@@ -851,23 +768,24 @@ export default async function WebsitePage({
 
                               <div className="md:col-span-2 xl:col-span-4">
                                 <label
-                                  htmlFor={`summary-${paper.id}`}
+                                  htmlFor={`publication-index-${paper.id}`}
                                   className={
                                     labelClass
                                   }
                                 >
-                                  Public
-                                  summary
+                                  Publication
+                                  index
                                 </label>
 
-                                <textarea
-                                  id={`summary-${paper.id}`}
-                                  name="public_summary"
-                                  rows={4}
+                                <input
+                                  id={`publication-index-${paper.id}`}
+                                  name="publication_index"
+                                  type="text"
                                   defaultValue={
-                                    metadata.public_summary ??
+                                    metadata.publication_index ??
                                     ''
                                   }
+                                  placeholder="Optional public-facing index or classification"
                                   className={
                                     inputClass
                                   }
@@ -908,10 +826,17 @@ export default async function WebsitePage({
                             {preview ? (
                               <>
                                 <p className="mt-2 text-xs leading-5 text-oxford-ash">
-                                  {metadata.visibility ===
-                                  'public'
-                                    ? 'This record is returned by the public listing and by slug lookup.'
-                                    : 'This record is excluded from the public listing but returned by a known slug lookup.'}
+                                  This is the
+                                  paper record
+                                  available to
+                                  the future
+                                  public
+                                  website.
+                                  Canonical
+                                  paper fields
+                                  update from
+                                  the Paper
+                                  workspace.
                                 </p>
 
                                 <pre className="mt-3 overflow-x-auto rounded-md border border-oxford-stone bg-oxford-shell p-4 text-xs leading-5 text-oxford-charcoal">
@@ -926,10 +851,9 @@ export default async function WebsitePage({
                               <p className="mt-2 text-sm text-oxford-ash">
                                 No
                                 anonymous
-                                paper data
-                                is exposed
-                                while this
-                                record is
+                                paper data is
+                                exposed while
+                                this record is
                                 Private.
                               </p>
                             )}
