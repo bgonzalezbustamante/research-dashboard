@@ -16,12 +16,12 @@ export type ReleaseNote = {
 export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.5',
-    codename: 'TBC',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
-    comparison: 'Changes since beta.4',
+    codename: 'Red Raven',
+    status: 'Current beta',
+    releasedOn: '24 Sep 2026',
+    comparison: 'What changed since beta.4',
     summary:
-      'Beta.5 development has started and remains open for additional changes before release.',
+      'Red Raven extends yearly work analytics with top-activity and FTE-equivalent measures, while hardening large work-session datasets and dependency security.',
     sections: [
       {
         title: 'Dashboard analytics',
@@ -49,7 +49,6 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.4',
     codename: 'Golden Vale',
-    status: 'Current beta',
     releasedOn: '27 Aug 2026',
     comparison: 'What changed since beta.3',
     summary:
