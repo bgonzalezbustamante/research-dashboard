@@ -1,5 +1,45 @@
 # CHANGELOG
 
+## v1.0.0-rc.5 "Distant Forge" (in development)
+
+### Summary
+
+- Started `v1.0.0-rc.5 "Distant Forge"` as the public-website administration phase for Research Dashboard.
+- Added a separate public presentation layer for papers while keeping internal research workflow and collaboration data private.
+- Added an Owner-only Website management area for curating future public research content.
+- Added a narrowly scoped anonymous Supabase RPC boundary instead of granting anonymous access to the existing paper tables.
+
+### Code changes
+
+`website administration`
+
+- Added Website to the main navigation for Owner accounts only.
+- Added paper-level controls for Private, Public, and Unlisted visibility, unique stable slugs, Featured state, public category, public venue, display order, and public summary.
+- Kept full title, authors, abstract, publication dates, and research links in the existing paper workspace rather than duplicating the complete paper editor.
+- Added a simple public-contract preview and a direct link back to each normal paper workspace.
+
+`public data boundary`
+
+- Added `paper_public_metadata` as a one-to-one presentation table keyed to `papers`, with all existing and future papers Private by default.
+- Added `list_public_papers()` for discoverable Public papers and `get_public_paper(slug)` for Public or Unlisted slug lookup.
+- Exposed only curated public fields: slug, visibility, title, author names, abstract, public summary, public venue, publication date, whitelisted public research links, Featured state, category, and display order.
+- Excluded internal workflow status, revision rounds, target/current venues, working hours, planning, milestones, notes, submission/revision history, memberships, invitations, audit records, profiles, author emails/affiliations/ORCIDs, Overleaf links, and arbitrary links.
+
+`database and security`
+
+- Enabled RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
+- Added explicit Data API grants suitable for the October 30 Supabase behaviour: no anonymous table grants, with anonymous access limited to explicit RPC `EXECUTE` grants.
+- Required valid unique lowercase slugs for Public and Unlisted records and backfilled all existing papers as Private.
+- Added automatic Private metadata creation for newly created papers.
+
+### Release status
+
+- Distant Forge is in development.
+- Red Raven remains the current released beta until rc.5 is finalised.
+- Release date: TBC.
+
+---
+
 ## v0.1.0-beta.5 "Red Raven"
 
 ### Summary
