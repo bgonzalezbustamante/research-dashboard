@@ -59,6 +59,22 @@ function websiteRedirect(
   )
 }
 
+function isValidHttpsUrl(
+  value: string
+) {
+  try {
+    const url =
+      new URL(value)
+
+    return (
+      url.protocol === 'https:' &&
+      value.length <= 2048
+    )
+  } catch {
+    return false
+  }
+}
+
 export async function updatePublicPaperMetadata(
   formData: FormData
 ) {
@@ -145,6 +161,99 @@ export async function updatePublicPaperMetadata(
     )
   }
 
+  const highlightText =
+    getOptionalText(
+      formData,
+      'highlight_text'
+    )
+
+  const highlightImageUrl =
+    getOptionalText(
+      formData,
+      'highlight_image_url'
+    )
+
+  const rawHighlightImageAlt =
+    getOptionalText(
+      formData,
+      'highlight_image_alt'
+    )
+
+  const rawHighlightImageCaption =
+    getOptionalText(
+      formData,
+      'highlight_image_caption'
+    )
+
+  if (
+    highlightText &&
+    highlightText.length > 2000
+  ) {
+    websiteRedirect(
+      'error',
+      'Key highlight text must be 2,000 characters or fewer.',
+      currentPage
+    )
+  }
+
+  if (
+    highlightImageUrl &&
+    !isValidHttpsUrl(
+      highlightImageUrl
+    )
+  ) {
+    websiteRedirect(
+      'error',
+      'Key highlight image must use a valid HTTPS URL.',
+      currentPage
+    )
+  }
+
+  if (
+    highlightImageUrl &&
+    !rawHighlightImageAlt
+  ) {
+    websiteRedirect(
+      'error',
+      'Image alt text is required when a Key highlight image is configured.',
+      currentPage
+    )
+  }
+
+  if (
+    rawHighlightImageAlt &&
+    rawHighlightImageAlt.length >
+      500
+  ) {
+    websiteRedirect(
+      'error',
+      'Image alt text must be 500 characters or fewer.',
+      currentPage
+    )
+  }
+
+  if (
+    rawHighlightImageCaption &&
+    rawHighlightImageCaption.length >
+      500
+  ) {
+    websiteRedirect(
+      'error',
+      'Image caption must be 500 characters or fewer.',
+      currentPage
+    )
+  }
+
+  const highlightImageAlt =
+    highlightImageUrl
+      ? rawHighlightImageAlt
+      : null
+
+  const highlightImageCaption =
+    highlightImageUrl
+      ? rawHighlightImageCaption
+      : null
+
   const supabase =
     await createClient()
 
@@ -166,6 +275,14 @@ export async function updatePublicPaperMetadata(
           formData,
           'publication_index'
         ),
+      highlight_text:
+        highlightText,
+      highlight_image_url:
+        highlightImageUrl,
+      highlight_image_alt:
+        highlightImageAlt,
+      highlight_image_caption:
+        highlightImageCaption,
     })
     .eq('paper_id', paperId)
     .select('paper_id')
