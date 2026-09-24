@@ -38,6 +38,7 @@ type ProjectRow = {
   title: string
   abstract: string
   funder: string
+  url: string | null
   status: ProjectStatus
   created_at: string
   updated_at: string
@@ -198,6 +199,7 @@ export default async function ProjectsPage({
         title,
         abstract,
         funder,
+        url,
         status,
         created_at,
         updated_at
@@ -479,9 +481,10 @@ export default async function ProjectsPage({
             Projects are Private by
             default. Public projects
             expose only canonical
-            project content, static
-            asset filenames, and the
-            slugs of associated papers
+            project content, the
+            canonical project URL,
+            static asset filenames, and
+            the slugs of associated papers
             that are themselves Public.
             Activity-label links and
             tracked hours remain
@@ -571,6 +574,29 @@ export default async function ProjectsPage({
                   required
                   className={inputClass}
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="new-project-url"
+                  className={labelClass}
+                >
+                  Project URL
+                </label>
+
+                <input
+                  id="new-project-url"
+                  name="url"
+                  type="url"
+                  placeholder="https://..."
+                  className={inputClass}
+                />
+
+                <p className="mt-1 text-xs text-oxford-ash">
+                  Optional. Public projects
+                  expose this URL to the
+                  academic website.
+                </p>
               </div>
 
               <div className="md:col-span-2">
@@ -976,6 +1002,17 @@ export default async function ProjectsPage({
                           }
                         </span>
                       </p>
+
+                      {project.url && (
+                        <a
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-block text-sm font-medium text-oxford-blue hover:underline"
+                        >
+                          Project website
+                        </a>
+                      )}
                     </div>
 
                     <div className="rounded-lg border border-oxford-stone bg-oxford-off-white px-4 py-3 text-right">
@@ -1161,6 +1198,39 @@ export default async function ProjectsPage({
                                 inputClass
                               }
                             />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <label
+                              htmlFor={`url-${project.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              Project URL
+                            </label>
+
+                            <input
+                              id={`url-${project.id}`}
+                              name="url"
+                              type="url"
+                              defaultValue={
+                                project.url ??
+                                ''
+                              }
+                              placeholder="https://..."
+                              className={
+                                inputClass
+                              }
+                            />
+
+                            <p className="mt-1 text-xs text-oxford-ash">
+                              Optional.
+                              Public projects
+                              expose this URL
+                              to the academic
+                              website.
+                            </p>
                           </div>
 
                           <div className="md:col-span-2">
