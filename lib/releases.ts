@@ -45,6 +45,15 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'Conferences',
+        items: [
+          'Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.',
+          'Kept event, location, date, presentation title/type, URL, and notes as canonical conference fields; the optional linked paper remains Dashboard-only.',
+          'Migrated the existing presentation automatically and made paper deletion clear the optional conference link rather than delete the conference record.',
+          'Added Owner editing, Viewer read-only access, and an anonymous-safe list_public_conference_presentations() contract that includes public notes but excludes owner and paper identifiers.',
+        ],
+      },
+      {
         title: 'Release notes',
         items: [
           'Added pagination to the public Release Notes page with 3 releases per page.',
