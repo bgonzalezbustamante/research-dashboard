@@ -581,7 +581,7 @@ export default async function ProjectsPage({
     <div>
       <PageHeader
         title="Projects"
-        description="Manage funded and research projects, public presentation, associated publications, and Dashboard-only activity tracking."
+        description="Manage funded and research projects, public presentation, associated papers and conference presentations, and Dashboard-only activity tracking."
       />
 
       {params.error && (
