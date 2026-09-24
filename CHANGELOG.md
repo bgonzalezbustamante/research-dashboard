@@ -30,6 +30,7 @@
 - Enabled RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
 - Added explicit Data API grants suitable for the October 30 Supabase behaviour: no anonymous table grants, with anonymous access limited to explicit RPC `EXECUTE` grants.
 - Required valid unique lowercase slugs for Public and Unlisted records and backfilled all existing papers as Private.
+- Restricted legacy anonymous function execution so the only application RPCs callable by `anon` are the two intentional public-paper contracts.
 - Added automatic Private metadata creation for newly created papers.
 
 ### Release status
