@@ -47,6 +47,16 @@
 - Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts.
 - Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
+
+`conferences`
+
+- Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.
+- Preserved the existing conference fields: event name, location, presentation date, presentation title, presentation type, URL, and notes.
+- Made the paper association optional and Dashboard-only; conference records can exist without a linked paper.
+- Migrated the existing conference presentation in place and changed paper deletion behaviour to clear the optional link rather than delete the conference record.
+- Added Owner editing and Viewer read-only access; paper-scoped Coauthors no longer edit conference records through Paper workspaces.
+- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing all conference fields, including notes, while excluding owner and linked-paper identifiers.
+
 `release notes`
 
 - Added pagination to the public Release Notes page with 3 releases per page.
