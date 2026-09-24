@@ -62,7 +62,7 @@ export default function OwnerUtilityNavigation({
           >
             <button
               type="submit"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-oxford-ash transition hover:bg-white hover:text-oxford-blue"
+              className="rounded-md border border-oxford-blue bg-oxford-blue px-3 py-1.5 text-sm font-medium text-white transition hover:bg-oxford-blue-dark"
             >
               Sign out
             </button>
