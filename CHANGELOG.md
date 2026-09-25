@@ -26,6 +26,7 @@
 - Deprecated Target journal or venue from the active Paper UI; Current journal or venue remains the canonical venue and continues to feed the public publication contract.
 - Made Started an automatic derived date based on the earliest Activity-labelled work session linked to the paper; papers without a labelled work session display no start date.
 - Changed the Papers list default ordering to Started most recently, using the same derived start date, and replaced the Next milestone table column with Started.
+- Refined Papers sorting to three options only: Published most recently, Started most recently, and Recently updated. Published most recently is now the default; undated publications follow dated publications and are ordered by derived Started date.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
 - Replaced free-text Publication index with a controlled optional category: WoS-SSCI, Scopus, WoS-ESCI, Book chapter, SciELO/Latindex, Working paper, or Preprint.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
