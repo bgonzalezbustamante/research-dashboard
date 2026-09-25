@@ -50,7 +50,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Teaching Portfolio',
         items: [
-          'Added a Teaching module for courses and teaching activities with period, level, institution, cumulative teaching/student counts, summaries and optional public course images.',
+          'Added a Teaching module for courses and teaching activities with period, one or more academic levels, institution, cumulative teaching/student counts, summaries and optional public course images.',
           'Linked Teaching-classified Hours labels to individual courses for private tracked-hour/session totals, while exposing only explicitly Public teaching-card data to the academic website.',
         ],
       },

@@ -39,7 +39,7 @@ type TeachingRow = {
   start_year: number
   end_year: number | null
   is_current: boolean
-  level: TeachingLevel
+  levels: TeachingLevel[]
   times_taught: number
   student_count: number
   created_at: string
@@ -192,7 +192,7 @@ export default async function TeachingPage({
         start_year,
         end_year,
         is_current,
-        level,
+        levels,
         times_taught,
         student_count,
         created_at,
@@ -587,31 +587,44 @@ export default async function TeachingPage({
               </label>
 
               <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label
-                    htmlFor="new-teaching-level"
+                <fieldset>
+                  <legend
                     className={labelClass}
                   >
                     Level
-                  </label>
+                  </legend>
 
-                  <select
-                    id="new-teaching-level"
-                    name="level"
-                    defaultValue="master"
-                    className={inputClass}
-                  >
-                    <option value="undergraduate">
-                      Undergraduate
-                    </option>
-                    <option value="master">
-                      Master
-                    </option>
-                    <option value="phd">
-                      PhD
-                    </option>
-                  </select>
-                </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        'undergraduate',
+                        'master',
+                        'phd',
+                      ] as TeachingLevel[]
+                    ).map((level) => (
+                      <label
+                        key={level}
+                        className="inline-flex items-center gap-2 rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal"
+                      >
+                        <input
+                          type="checkbox"
+                          name="levels"
+                          value={level}
+                          defaultChecked={
+                            level ===
+                            'master'
+                          }
+                          className="h-4 w-4 rounded border-oxford-stone"
+                        />
+                        {
+                          levelLabels[
+                            level
+                          ]
+                        }
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
 
                 <div>
                   <label
@@ -855,7 +868,7 @@ export default async function TeachingPage({
               Public: name,
               institution, summary,
               period, current status,
-              level, times taught,
+              one or more levels, times taught,
               cumulative students,
               optional slug, and course
               image filename.
@@ -974,13 +987,22 @@ export default async function TeachingPage({
                             {item.name}
                           </h3>
 
-                          <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium text-oxford-charcoal">
-                            {
-                              levelLabels[
-                                item.level
-                              ]
-                            }
-                          </span>
+                          {item.levels.map(
+                            (level) => (
+                              <span
+                                key={
+                                  level
+                                }
+                                className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium text-oxford-charcoal"
+                              >
+                                {
+                                  levelLabels[
+                                    level
+                                  ]
+                                }
+                              </span>
+                            )
+                          )}
 
                           <span
                             className={
@@ -1370,43 +1392,53 @@ export default async function TeachingPage({
                           </div>
 
                           <div className="grid gap-4 sm:grid-cols-2">
-                            <div>
-                              <label
-                                htmlFor={
-                                  'teaching-level-' +
-                                  item.id
-                                }
+                            <fieldset>
+                              <legend
                                 className={
                                   labelClass
                                 }
                               >
                                 Level
-                              </label>
+                              </legend>
 
-                              <select
-                                id={
-                                  'teaching-level-' +
-                                  item.id
-                                }
-                                name="level"
-                                defaultValue={
-                                  item.level
-                                }
-                                className={
-                                  inputClass
-                                }
-                              >
-                                <option value="undergraduate">
-                                  Undergraduate
-                                </option>
-                                <option value="master">
-                                  Master
-                                </option>
-                                <option value="phd">
-                                  PhD
-                                </option>
-                              </select>
-                            </div>
+                              <div className="flex flex-wrap gap-2">
+                                {(
+                                  [
+                                    'undergraduate',
+                                    'master',
+                                    'phd',
+                                  ] as TeachingLevel[]
+                                ).map(
+                                  (
+                                    level
+                                  ) => (
+                                    <label
+                                      key={
+                                        level
+                                      }
+                                      className="inline-flex items-center gap-2 rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        name="levels"
+                                        value={
+                                          level
+                                        }
+                                        defaultChecked={item.levels.includes(
+                                          level
+                                        )}
+                                        className="h-4 w-4 rounded border-oxford-stone"
+                                      />
+                                      {
+                                        levelLabels[
+                                          level
+                                        ]
+                                      }
+                                    </label>
+                                  )
+                                )}
+                              </div>
+                            </fieldset>
 
                             <label className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-oxford-charcoal">
                               <input

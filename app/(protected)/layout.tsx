@@ -122,19 +122,14 @@ export default async function ProtectedLayout({
               </Link>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-start gap-2 lg:items-end">
               <AppNavigation
                 showDashboardModules={
                   access.hasDashboardAccess
                 }
               />
 
-              {(isViewer || isCoauthor) && (
-                <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
-              )}
-
-              {(isViewer || isCoauthor) && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                 {isViewer && (
                   <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
                     Viewer
@@ -146,8 +141,26 @@ export default async function ProtectedLayout({
                     Coauthor
                   </span>
                 )}
+
+                <Link
+                  href="/account"
+                  className="rounded-md border border-oxford-blue bg-transparent px-2.5 py-1.5 text-xs font-medium text-oxford-blue transition hover:bg-oxford-shell"
+                >
+                  {fullName || 'Account'}
+                </Link>
+
+                <form
+                  action="/auth/signout"
+                  method="post"
+                >
+                  <button
+                    type="submit"
+                    className="rounded-md border border-oxford-blue bg-oxford-blue px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-oxford-blue-dark"
+                  >
+                    Sign out
+                  </button>
+                </form>
               </div>
-              )}
             </div>
           </div>
         </div>
@@ -173,9 +186,6 @@ export default async function ProtectedLayout({
 
       <OwnerUtilityNavigation
         showOwnerLinks={isOwner}
-        accountLabel={
-          fullName || 'Account'
-        }
       />
 
       <SiteFooter />

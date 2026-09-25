@@ -137,7 +137,7 @@ type ValidTeachingFields = {
   startYear: number
   endYear: number | null
   isCurrent: boolean
-  level: string
+  levels: string[]
   timesTaught: number
   studentCount: number
   visibility: string
@@ -195,11 +195,22 @@ function validateTeachingFields(
           'end_year'
         )
 
-  const level =
-    getRequiredText(
-      formData,
-      'level'
-    )
+  const levels = [
+    ...new Set(
+      formData
+        .getAll('levels')
+        .filter(
+          (value):
+            value is string =>
+            typeof value ===
+            'string'
+        )
+        .map((value) =>
+          value.trim()
+        )
+        .filter(Boolean)
+    ),
+  ]
 
   const timesTaught =
     getInteger(
@@ -320,14 +331,18 @@ function validateTeachingFields(
   }
 
   if (
-    !allowedLevels.has(
-      level
+    levels.length === 0 ||
+    levels.some(
+      (level) =>
+        !allowedLevels.has(
+          level
+        )
     )
   ) {
     return {
       ok: false,
       error:
-        'Select Undergraduate, Master, or PhD as the course level.',
+        'Select at least one course level: Undergraduate, Master, or PhD.',
     }
   }
 
@@ -401,7 +416,7 @@ function validateTeachingFields(
     startYear,
     endYear,
     isCurrent,
-    level,
+    levels,
     timesTaught,
     studentCount,
     visibility,
@@ -484,8 +499,8 @@ export async function createTeachingItem(
         fields.endYear,
       p_is_current:
         fields.isCurrent,
-      p_level:
-        fields.level,
+      p_levels:
+        fields.levels,
       p_times_taught:
         fields.timesTaught,
       p_student_count:
@@ -577,8 +592,8 @@ export async function updateTeachingItem(
           fields.endYear,
         p_is_current:
           fields.isCurrent,
-        p_level:
-          fields.level,
+        p_levels:
+          fields.levels,
         p_times_taught:
           fields.timesTaught,
         p_student_count:
