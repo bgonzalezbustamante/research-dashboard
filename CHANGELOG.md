@@ -99,6 +99,11 @@
 - Kept raw session start/end times, activity labels, locations, linked papers, break records, and daily coffee counts private.
 - Reused the Dashboard definition of a working day: a daily log with at least one work session.
 
+`author directory`
+
+- Fixed Dashboard-account linking for bibliographic authors by matching an active Owner/Coauthor account to exactly one author record on a shared paper using an exact canonical-name or email match.
+- Backfilled existing unambiguous author/account links and added private triggers so future paper membership and authorship changes keep the Author directory linkage in sync automatically.
+
 `database and security`
 
 - Kept RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
