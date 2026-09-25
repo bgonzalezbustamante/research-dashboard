@@ -20,20 +20,11 @@ type PaperRow = {
   title: string
   status: PaperStatus
   revision_round: number | null
-  target_venue: string | null
   current_venue: string | null
-  started_on: string | null
   published_on: string | null
   archived_at: string | null
   created_at: string
   updated_at: string
-}
-
-type MilestoneRow = {
-  paper_id: string
-  title: string
-  target_date: string | null
-  status: string
 }
 
 type CitationRow = {
@@ -69,8 +60,17 @@ type AuthorJoinRow = {
 
 type WorkSessionRow = {
   paper_id: string
+  activity_label_id: string | null
   start_time: string
   end_time: string
+  daily_logs:
+    | {
+        log_date: string
+      }
+    | {
+        log_date: string
+      }[]
+    | null
 }
 
 type CitationDisplay = {
@@ -138,20 +138,16 @@ const archiveOptions = [
 
 const sortOptions = [
   {
+    value: 'started-desc',
+    label: 'Started most recently',
+  },
+  {
     value: 'updated-desc',
     label: 'Recently updated',
   },
   {
     value: 'title-asc',
     label: 'Short title A–Z',
-  },
-  {
-    value: 'started-desc',
-    label: 'Started most recently',
-  },
-  {
-    value: 'milestone-asc',
-    label: 'Next milestone',
   },
 ]
 
@@ -278,6 +274,50 @@ function getHoursByPaper(
   return totals
 }
 
+function getStartedDatesByPaper(
+  sessions: WorkSessionRow[]
+) {
+  const dates =
+    new Map<string, string>()
+
+  for (const session of sessions) {
+    if (!session.activity_label_id) {
+      continue
+    }
+
+    const dailyLog =
+      Array.isArray(
+        session.daily_logs
+      )
+        ? session.daily_logs[0]
+        : session.daily_logs
+
+    const logDate =
+      dailyLog?.log_date
+
+    if (!logDate) {
+      continue
+    }
+
+    const current =
+      dates.get(
+        session.paper_id
+      )
+
+    if (
+      !current ||
+      logDate < current
+    ) {
+      dates.set(
+        session.paper_id,
+        logDate
+      )
+    }
+  }
+
+  return dates
+}
+
 function getHistoryLabel(
   event: HistoryRow
 ) {
@@ -314,56 +354,6 @@ function getHistoryLabel(
     default:
       return 'Other'
   }
-}
-
-function getNextMilestones(
-  milestones: MilestoneRow[]
-) {
-  const sorted = [
-    ...milestones,
-  ].sort((a, b) => {
-    if (
-      a.target_date &&
-      b.target_date
-    ) {
-      return a.target_date.localeCompare(
-        b.target_date
-      )
-    }
-
-    if (a.target_date) {
-      return -1
-    }
-
-    if (b.target_date) {
-      return 1
-    }
-
-    return a.title.localeCompare(
-      b.title
-    )
-  })
-
-  const result =
-    new Map<
-      string,
-      MilestoneRow
-    >()
-
-  for (const milestone of sorted) {
-    if (
-      !result.has(
-        milestone.paper_id
-      )
-    ) {
-      result.set(
-        milestone.paper_id,
-        milestone
-      )
-    }
-  }
-
-  return result
 }
 
 function getLatestHistory(
@@ -646,7 +636,7 @@ export default async function PapersPage({
         params.sort
     )
       ? params.sort!
-      : 'updated-desc'
+      : 'started-desc'
 
   const requestedPage =
     Number.parseInt(
@@ -668,9 +658,7 @@ export default async function PapersPage({
       title,
       status,
       revision_round,
-      target_venue,
       current_venue,
-      started_on,
       published_on,
       archived_at,
       created_at,
@@ -699,9 +687,6 @@ export default async function PapersPage({
         paper.id
     )
 
-  let milestones:
-    MilestoneRow[] = []
-
   let citations:
     CitationRow[] = []
 
@@ -718,31 +703,11 @@ export default async function PapersPage({
     paperIds.length > 0
   ) {
     const [
-      milestoneResult,
       citationResult,
       historyResult,
       authorResult,
       workSessionResult,
     ] = await Promise.all([
-      supabase
-        .from(
-          'paper_milestones'
-        )
-        .select(`
-          paper_id,
-          title,
-          target_date,
-          status
-        `)
-        .in(
-          'paper_id',
-          paperIds
-        )
-        .eq(
-          'status',
-          'planned'
-        ),
-
       supabase
         .from(
           'citation_snapshots'
@@ -805,22 +770,18 @@ export default async function PapersPage({
         )
         .select(`
           paper_id,
+          activity_label_id,
           start_time,
-          end_time
+          end_time,
+          daily_logs (
+            log_date
+          )
         `)
         .in(
           'paper_id',
           paperIds
         ),
     ])
-
-    if (
-      milestoneResult.error
-    ) {
-      throw new Error(
-        `Could not load milestones: ${milestoneResult.error.message}`
-      )
-    }
 
     if (
       citationResult.error
@@ -854,10 +815,6 @@ export default async function PapersPage({
       )
     }
 
-    milestones =
-      (milestoneResult.data ??
-        []) as MilestoneRow[]
-
     citations =
       (citationResult.data ??
         []) as CitationRow[]
@@ -874,11 +831,6 @@ export default async function PapersPage({
       (workSessionResult.data ??
         []) as WorkSessionRow[]
   }
-
-  const nextMilestoneByPaper =
-    getNextMilestones(
-      milestones
-    )
 
   const latestHistoryByPaper =
     getLatestHistory(
@@ -897,6 +849,11 @@ export default async function PapersPage({
 
   const hoursByPaper =
     getHoursByPaper(
+      workSessions
+    )
+
+  const startedDateByPaper =
+    getStartedDatesByPaper(
       workSessions
     )
 
@@ -950,7 +907,6 @@ export default async function PapersPage({
             [
               paper.short_title,
               paper.title,
-              paper.target_venue,
               paper.current_venue,
               ...authors,
               latestHistory?.venue,
@@ -982,76 +938,31 @@ export default async function PapersPage({
           b.short_title
         )
 
-      case 'started-desc':
-        if (
-          a.started_on &&
-          b.started_on
-        ) {
-          return b.started_on.localeCompare(
-            a.started_on
-          )
-        }
-
-        if (a.started_on) {
-          return -1
-        }
-
-        if (b.started_on) {
-          return 1
-        }
-
-        return a.short_title.localeCompare(
-          b.short_title
-        )
-
-      case 'milestone-asc': {
-        const aMilestone =
-          nextMilestoneByPaper.get(
+      case 'started-desc': {
+        const aStarted =
+          startedDateByPaper.get(
             a.id
           )
 
-        const bMilestone =
-          nextMilestoneByPaper.get(
+        const bStarted =
+          startedDateByPaper.get(
             b.id
           )
 
-        const aDate =
-          aMilestone?.target_date
-
-        const bDate =
-          bMilestone?.target_date
-
         if (
-          aDate &&
-          bDate
+          aStarted &&
+          bStarted
         ) {
-          return aDate.localeCompare(
-            bDate
+          return bStarted.localeCompare(
+            aStarted
           )
         }
 
-        if (aDate) {
+        if (aStarted) {
           return -1
         }
 
-        if (bDate) {
-          return 1
-        }
-
-        if (
-          aMilestone &&
-          bMilestone
-        ) {
-          return aMilestone.title.localeCompare(
-            bMilestone.title
-          )
-        }
-
-        if (aMilestone) {
-          return -1
-        }
-
-        if (bMilestone) {
+        if (bStarted) {
           return 1
         }
 
@@ -1061,10 +972,12 @@ export default async function PapersPage({
       }
 
       case 'updated-desc':
-      default:
         return b.updated_at.localeCompare(
           a.updated_at
         )
+
+      default:
+        return 0
     }
   })
 
@@ -1150,7 +1063,7 @@ export default async function PapersPage({
     }
 
     if (
-      sort !== 'updated-desc'
+      sort !== 'started-desc'
     ) {
       pageParams.set(
         'sort',
@@ -1215,7 +1128,7 @@ export default async function PapersPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title="Papers"
-          description="Track manuscripts, milestones, submissions, publications, and research activity."
+          description="Track manuscripts, submissions, revisions, publications, citations, and research activity."
         />
 
         <ButtonLink
@@ -1455,8 +1368,8 @@ export default async function PapersPage({
               <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-oxford-ash">
                 Add your first paper
                 to start tracking its
-                status, milestones,
-                publication history,
+                status, submission and
+                revision history,
                 citations, and
                 research activity.
               </p>
@@ -1504,7 +1417,7 @@ export default async function PapersPage({
                   </th>
 
                   <th className="px-4 py-3 font-medium text-oxford-charcoal">
-                    Next milestone
+                    Started
                   </th>
 
                   <th className="px-4 py-3 font-medium text-oxford-charcoal">
@@ -1524,8 +1437,8 @@ export default async function PapersPage({
               <tbody>
                 {paginatedPapers.map(
                   (paper) => {
-                    const milestone =
-                      nextMilestoneByPaper.get(
+                    const startedDate =
+                      startedDateByPaper.get(
                         paper.id
                       )
 
@@ -1607,26 +1520,13 @@ export default async function PapersPage({
                             )}
                         </td>
 
-                        <td className="px-4 py-4">
-                          {milestone ? (
-                            <>
-                              <div className="max-w-52 text-oxford-charcoal">
-                                {
-                                  milestone.title
-                                }
-                              </div>
-
-                              <div className="mt-1 text-xs text-oxford-ash">
-                                {formatDate(
-                                  milestone.target_date
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            <span className="text-oxford-ash">
-                              —
-                            </span>
-                          )}
+                        <td className="whitespace-nowrap px-4 py-4">
+                          <span className="text-oxford-charcoal">
+                            {formatDate(
+                              startedDate ??
+                                null
+                            )}
+                          </span>
                         </td>
 
                         <td className="px-4 py-4">
