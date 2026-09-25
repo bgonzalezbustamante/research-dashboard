@@ -171,17 +171,40 @@ export default function WebsiteSection({
                   Publication index
                 </label>
 
-                <input
+                <select
                   id="paper-publication-index"
                   name="publication_index"
-                  type="text"
                   defaultValue={
                     metadata.publication_index ??
                     ''
                   }
-                  placeholder="Optional public-facing index or classification"
                   className={inputClass}
-                />
+                >
+                  <option value="">
+                    Not specified
+                  </option>
+                  <option value="WoS-SSCI">
+                    WoS-SSCI
+                  </option>
+                  <option value="Scopus">
+                    Scopus
+                  </option>
+                  <option value="WoS-ESCI">
+                    WoS-ESCI
+                  </option>
+                  <option value="Book chapter">
+                    Book chapter
+                  </option>
+                  <option value="SciELO/Latindex">
+                    SciELO/Latindex
+                  </option>
+                  <option value="Working paper">
+                    Working paper
+                  </option>
+                  <option value="Preprint">
+                    Preprint
+                  </option>
+                </select>
               </div>
 
               <div className="md:col-span-2 xl:col-span-4">
