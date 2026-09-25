@@ -1,8 +1,9 @@
 type PaperWorkspaceNavProps = {
-  milestoneCount: number
   historyCount: number
   noteCount: number
   citationCount: number
+  projectCount: number
+  conferenceCount: number
   totalMinutes: number
 }
 
@@ -13,18 +14,8 @@ const items = [
     countKey: null,
   },
   {
-    href: '#website',
-    label: 'Website',
-    countKey: null,
-  },
-  {
-    href: '#milestones',
-    label: 'Milestones',
-    countKey: 'milestoneCount',
-  },
-  {
     href: '#history',
-    label: 'History',
+    label: 'Submissions & revisions',
     countKey: 'historyCount',
   },
   {
@@ -36,6 +27,21 @@ const items = [
     href: '#citations',
     label: 'Citations',
     countKey: 'citationCount',
+  },
+  {
+    href: '#projects',
+    label: 'Projects',
+    countKey: 'projectCount',
+  },
+  {
+    href: '#conferences',
+    label: 'Conferences',
+    countKey: 'conferenceCount',
+  },
+  {
+    href: '#website',
+    label: 'Website',
+    countKey: null,
   },
 ] as const
 
