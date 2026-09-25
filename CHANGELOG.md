@@ -19,7 +19,13 @@
 - Removed Website from the bottom utility navigation and retired the standalone Website page as an editing surface; /website now redirects to Papers.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Moved website-specific paper controls into each Paper workspace: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
-- Added Website to the Paper workspace section navigation so public presentation settings sit alongside Overview, Milestones, History, Notes, and Citations.
+- Reorganised each Paper workspace as Overview → Submission and revision history → Notes → Citations → Associated projects → Conference presentations → Website, keeping Website at the bottom.
+- Deprecated Milestones from the active Paper UI and removed Next milestone from Paper summaries, list columns, and sort options while retaining the legacy data structure for compatibility.
+- Replaced the top Next milestone summary card with the number of associated conference presentations.
+- Added a read-only Associated projects section above Conference presentations in each Paper workspace.
+- Deprecated Target journal or venue from the active Paper UI; Current journal or venue remains the canonical venue and continues to feed the public publication contract.
+- Made Started an automatic derived date based on the earliest Activity-labelled work session linked to the paper; papers without a labelled work session display no start date.
+- Changed the Papers list default ordering to Started most recently, using the same derived start date, and replaced the Next milestone table column with Started.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
