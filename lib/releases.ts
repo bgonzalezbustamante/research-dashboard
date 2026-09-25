@@ -26,8 +26,8 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Website and publications',
         items: [
-          'Added an Owner Website area for curating Public papers with stable slugs, Featured state, Publication index and an optional preferred citation while reusing canonical Paper metadata.',
-          'Added publication pagination and anonymous-safe list/detail contracts ordered by publication date.',
+          'Integrated Public paper curation directly into each Paper workspace, with stable slugs, Featured state, Publication index, preferred citation and Key highlights while reusing canonical Paper metadata.',
+          'Retired the standalone Website editing page, consolidated bottom utilities, and kept anonymous-safe publication list/detail contracts ordered by publication date.',
           'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
         ],
       },
@@ -42,7 +42,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Conferences',
         items: [
-          'Added a standalone Conferences module with full and short event names, presentation-specific ordered authors, conference date ranges, location, constrained presentation types (Conference paper, Keynote, Workshop) and optional URL; conference notes remain private.',
+          'Added a standalone paginated Conferences module with full and short event names, presentation-specific ordered authors, conference date ranges, location, constrained presentation types (Conference paper, Keynote, Workshop) and optional URL; conference notes remain private.',
           'Kept the optional paper relationship internal while showing linked presentations read-only inside the relevant Paper workspace; editing remains in Conferences.',
           'Added an anonymous-safe conference listing that excludes notes, owner metadata and the private paper relationship.',
         ],
