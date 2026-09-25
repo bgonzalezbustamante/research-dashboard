@@ -405,7 +405,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if exists (
     select 1
@@ -426,7 +426,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 revoke all
   on function private.guard_linked_teaching_label_classification()
