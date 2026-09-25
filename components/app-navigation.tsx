@@ -37,6 +37,11 @@ const conferencesLink = {
   label: 'Conferences',
 }
 
+const teachingLink = {
+  href: '/teaching',
+  label: 'Teaching',
+}
+
 function isActiveLink(
   pathname: string,
   href: string
@@ -66,6 +71,7 @@ export default function AppNavigation({
           papersLink,
           projectsLink,
           conferencesLink,
+          teachingLink,
         ]
       : [papersLink]
 
