@@ -29,7 +29,8 @@ type ConferencePresentation = {
   event_name: string
   event_short_name: string
   location: string | null
-  presentation_date: string | null
+  start_date: string
+  end_date: string
   presentation_title: string | null
   authors: string[]
   presentation_type: string | null
@@ -84,6 +85,23 @@ function formatDate(
   )
 }
 
+function formatDateRange(
+  startDate: string,
+  endDate: string
+) {
+  if (startDate === endDate) {
+    return formatDate(
+      startDate
+    )
+  }
+
+  return `${formatDate(
+    startDate
+  )} – ${formatDate(
+    endDate
+  )}`
+}
+
 function getToday() {
   const parts =
     new Intl.DateTimeFormat(
@@ -118,16 +136,10 @@ function sortPresentations(
     ...presentations,
   ].sort((a, b) => {
     const aUpcoming =
-      a.presentation_date !==
-        null &&
-      a.presentation_date >=
-        today
+      a.end_date >= today
 
     const bUpcoming =
-      b.presentation_date !==
-        null &&
-      b.presentation_date >=
-        today
+      b.end_date >= today
 
     if (
       aUpcoming &&
@@ -144,33 +156,21 @@ function sortPresentations(
     }
 
     if (
-      a.presentation_date &&
-      b.presentation_date
+      aUpcoming &&
+      bUpcoming
     ) {
-      if (
-        aUpcoming &&
-        bUpcoming
-      ) {
-        return a.presentation_date.localeCompare(
-          b.presentation_date
-        )
-      }
-
-      return b.presentation_date.localeCompare(
-        a.presentation_date
+      return a.start_date.localeCompare(
+        b.start_date
       )
     }
 
     if (
-      a.presentation_date
+      a.start_date !==
+      b.start_date
     ) {
-      return -1
-    }
-
-    if (
-      b.presentation_date
-    ) {
-      return 1
+      return b.start_date.localeCompare(
+        a.start_date
+      )
     }
 
     return a.event_name.localeCompare(
@@ -205,7 +205,8 @@ export default async function ConferencesPage({
         event_name,
         event_short_name,
         location,
-        presentation_date,
+        start_date,
+        end_date,
         presentation_title,
         authors,
         presentation_type,
@@ -280,10 +281,8 @@ export default async function ConferencesPage({
   const upcomingCount =
     presentations.filter(
       (presentation) =>
-        presentation.presentation_date !==
-          null &&
-        presentation.presentation_date >=
-          today
+        presentation.end_date >=
+        today
     ).length
 
   const isOwner =
@@ -402,16 +401,34 @@ export default async function ConferencesPage({
 
               <div>
                 <label
-                  htmlFor="new-conference-date"
+                  htmlFor="new-conference-start-date"
                   className={labelClass}
                 >
-                  Date
+                  Start date
                 </label>
 
                 <input
-                  id="new-conference-date"
-                  name="presentation_date"
+                  id="new-conference-start-date"
+                  name="start_date"
                   type="date"
+                  required
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="new-conference-end-date"
+                  className={labelClass}
+                >
+                  End date
+                </label>
+
+                <input
+                  id="new-conference-end-date"
+                  name="end_date"
+                  type="date"
+                  required
                   className={inputClass}
                 />
               </div>
@@ -519,12 +536,23 @@ export default async function ConferencesPage({
                   Presentation type
                 </label>
 
-                <input
+                <select
                   id="new-conference-type"
                   name="presentation_type"
-                  placeholder="Conference paper, workshop, keynote..."
+                  defaultValue="Conference paper"
+                  required
                   className={inputClass}
-                />
+                >
+                  <option value="Conference paper">
+                    Conference paper
+                  </option>
+                  <option value="Keynote">
+                    Keynote
+                  </option>
+                  <option value="Workshop">
+                    Workshop
+                  </option>
+                </select>
               </div>
 
               <div>
@@ -591,10 +619,8 @@ export default async function ConferencesPage({
           sortedPresentations.map(
             (presentation) => {
               const upcoming =
-                presentation.presentation_date !==
-                  null &&
-                presentation.presentation_date >=
-                  today
+                presentation.end_date >=
+                today
 
               const linkedPaper =
                 presentation.paper_id
@@ -641,8 +667,9 @@ export default async function ConferencesPage({
 
                       <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-oxford-ash">
                         <span>
-                          {formatDate(
-                            presentation.presentation_date
+                          {formatDateRange(
+                            presentation.start_date,
+                            presentation.end_date
                           )}
                         </span>
 
@@ -794,21 +821,45 @@ export default async function ConferencesPage({
 
                             <div>
                               <label
-                                htmlFor={`date-${presentation.id}`}
+                                htmlFor={`start-date-${presentation.id}`}
                                 className={
                                   labelClass
                                 }
                               >
-                                Date
+                                Start date
                               </label>
 
                               <input
-                                id={`date-${presentation.id}`}
-                                name="presentation_date"
+                                id={`start-date-${presentation.id}`}
+                                name="start_date"
                                 type="date"
+                                required
                                 defaultValue={
-                                  presentation.presentation_date ??
-                                  ''
+                                  presentation.start_date
+                                }
+                                className={
+                                  inputClass
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor={`end-date-${presentation.id}`}
+                                className={
+                                  labelClass
+                                }
+                              >
+                                End date
+                              </label>
+
+                              <input
+                                id={`end-date-${presentation.id}`}
+                                name="end_date"
+                                type="date"
+                                required
+                                defaultValue={
+                                  presentation.end_date
                                 }
                                 className={
                                   inputClass
@@ -954,17 +1005,27 @@ export default async function ConferencesPage({
                                 type
                               </label>
 
-                              <input
+                              <select
                                 id={`type-${presentation.id}`}
                                 name="presentation_type"
+                                required
                                 defaultValue={
-                                  presentation.presentation_type ??
-                                  ''
+                                  presentation.presentation_type
                                 }
                                 className={
                                   inputClass
                                 }
-                              />
+                              >
+                                <option value="Conference paper">
+                                  Conference paper
+                                </option>
+                                <option value="Keynote">
+                                  Keynote
+                                </option>
+                                <option value="Workshop">
+                                  Workshop
+                                </option>
+                              </select>
                             </div>
 
                             <div>
