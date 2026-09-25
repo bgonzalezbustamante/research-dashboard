@@ -15,9 +15,9 @@
 
 - Added Website to the bottom Owner utilities navigation and moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
 - Added Teaching after Conferences in the main authenticated navigation.
-- Kept the main module navigation on the first header row and placed the signed-in account-name and Sign out controls in a compact second row on the right.
-- Styled the account-name control as an Oxford-blue outline button and Sign out as a filled Oxford-blue button.
-- Restored the bottom Owner utility navigation to Authors, Access, Website.
+- Kept the main module navigation in the header and moved the signed-in account-name and Sign out controls below the bottom Owner utility links.
+- Styled the account-name control as a compact Oxford-blue outline button and Sign out as a compact filled Oxford-blue button.
+- Finalised the bottom Owner utility area as two rows: Authors, Access, Website first; Account and Sign out second. Non-owner accounts retain only the applicable Account and Sign out controls.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
