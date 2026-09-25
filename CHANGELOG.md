@@ -6,20 +6,20 @@
 
 - Started `v1.0.0-rc.1 "Distant Forge"` as the public-website administration phase for Research Dashboard.
 - Added a separate public presentation layer for papers while keeping internal research workflow and collaboration data private.
-- Added an Owner-only Website management area alongside Authors and Access.
+- Integrated paper-specific public website settings directly into each Paper workspace rather than maintaining a separate Website editing module.
 - Added narrowly scoped anonymous Supabase RPC contracts for curated publications and aggregate work analytics.
 
 ### Code changes
 
 `website administration`
 
-- Added Website to the bottom Owner utilities navigation and moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
+- Consolidated the bottom utility navigation into one compact row: Authors, Access, Account, and Sign out.
 - Added Teaching after Conferences in the main authenticated navigation.
-- Kept the main module navigation in the header and moved the signed-in account-name and Sign out controls below the bottom Owner utility links.
-- Styled the account-name control as a compact Oxford-blue outline button and Sign out as a compact filled Oxford-blue button.
-- Finalised the bottom Owner utility area as two rows: Account and Sign out first; Authors, Access, Website second. Non-owner accounts retain only the applicable Account and Sign out controls.
+- Styled Authors, Access, and Account as matching compact Oxford-blue outline controls; Sign out uses the same compact dimensions with its filled Oxford-blue treatment.
+- Removed Website from the bottom utility navigation and retired the standalone Website page as an editing surface; /website now redirects to Papers.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
-- Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
+- Moved website-specific paper controls into each Paper workspace: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
+- Added Website to the Paper workspace section navigation so public presentation settings sit alongside Overview, Milestones, History, Notes, and Citations.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
@@ -78,6 +78,7 @@
 - Added Owner editing and Viewer read-only access; paper-scoped Coauthors no longer edit conference records through Paper workspaces.
 - Added a read-only linked-presentations section to each Paper workspace and an authenticated `list_paper_conference_presentations(paper_id)` contract so anyone who can view that paper can see its linked presentation metadata without receiving conference edit rights or access to private conference notes.
 - Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, start/end dates, constrained presentation type, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
+- Added Conferences pagination with 10 presentations per page while retaining full-dataset KPI counts and the existing upcoming-first ordering.
 
 `release notes`
 

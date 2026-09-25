@@ -6,17 +6,26 @@ import MilestonesSection from '@/components/papers/milestones-section'
 import NotesSection from '@/components/papers/notes-section'
 import PaperSummary from '@/components/papers/paper-summary'
 import PaperWorkspaceNav from '@/components/papers/paper-workspace-nav'
+import WebsiteSection, {
+  type PaperPublicMetadata,
+} from '@/components/papers/website-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import StatusBadge from '@/components/ui/status-badge'
+import {
+  requireAppAccess,
+} from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 import {
   archivePaper,
   restorePaper,
 } from '../actions'
+import {
+  updatePublicPaperMetadata,
+} from '../../website/actions'
 
 type PaperStatus =
   | 'writing'
@@ -48,6 +57,8 @@ type PaperPageProps = {
     historyError?: string
     noteError?: string
     citationError?: string
+    websiteError?: string
+    websiteSaved?: string
   }>
 }
 
@@ -197,7 +208,12 @@ export default async function PaperPage({
     historyError,
     noteError,
     citationError,
+    websiteError,
+    websiteSaved,
   } = await searchParams
+
+  const access =
+    await requireAppAccess()
 
   const supabase =
     await createClient()
@@ -242,6 +258,7 @@ export default async function PaperPage({
     citationsResult,
     workSessionsResult,
     conferencePresentationsResult,
+    publicMetadataResult,
   ] = await Promise.all([
     supabase
       .from('paper_authors')
@@ -357,6 +374,24 @@ export default async function PaperPage({
         p_paper_id: id,
       }
     ),
+
+    supabase
+      .from(
+        'paper_public_metadata'
+      )
+      .select(`
+        visibility,
+        slug,
+        featured,
+        publication_index,
+        citation,
+        highlight_text,
+        highlight_image_filename,
+        highlight_image_alt,
+        highlight_image_caption
+      `)
+      .eq('paper_id', id)
+      .maybeSingle(),
   ])
 
   if (authorResult.error) {
@@ -409,6 +444,12 @@ export default async function PaperPage({
     )
   }
 
+  if (publicMetadataResult.error) {
+    throw new Error(
+      `Could not load paper Website settings: ${publicMetadataResult.error.message}`
+    )
+  }
+
   const authorRows =
     authorResult.data ?? []
 
@@ -433,6 +474,19 @@ export default async function PaperPage({
   const conferencePresentations =
     (conferencePresentationsResult.data ??
       []) as LinkedConferencePresentation[]
+
+  const publicMetadata =
+    (publicMetadataResult.data ?? {
+      visibility: 'private',
+      slug: null,
+      featured: false,
+      publication_index: null,
+      citation: null,
+      highlight_text: null,
+      highlight_image_filename: null,
+      highlight_image_alt: null,
+      highlight_image_caption: null,
+    }) as PaperPublicMetadata
 
   const totalPaperMinutes =
     workSessions.reduce(
@@ -873,6 +927,21 @@ export default async function PaperPage({
           </Card>
         </div>
       </section>
+
+      <WebsiteSection
+        paperId={paper.id}
+        metadata={publicMetadata}
+        canEdit={
+          access.canEditDashboard
+        }
+        error={websiteError}
+        saved={
+          websiteSaved === '1'
+        }
+        action={
+          updatePublicPaperMetadata
+        }
+      />
 
       {conferencePresentations.length >
         0 && (

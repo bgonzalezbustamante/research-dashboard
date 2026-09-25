@@ -37,25 +37,18 @@ function getOptionalText(
     : null
 }
 
-function websiteRedirect(
-  key: 'error' | 'saved',
-  value: string,
-  page: number
+function paperWebsiteRedirect(
+  paperId: string,
+  key: 'websiteError' | 'websiteSaved',
+  value: string
 ): never {
   const params =
     new URLSearchParams({
       [key]: value,
     })
 
-  if (page > 1) {
-    params.set(
-      'page',
-      String(page)
-    )
-  }
-
   redirect(
-    `/website?${params.toString()}`
+    `/papers/${paperId}?${params.toString()}#website`
   )
 }
 
@@ -73,23 +66,6 @@ export async function updatePublicPaperMetadata(
       'paper_id'
     )
 
-  const requestedPage =
-    Number.parseInt(
-      getRequiredText(
-        formData,
-        'current_page'
-      ) || '1',
-      10
-    )
-
-  const currentPage =
-    Number.isFinite(
-      requestedPage
-    ) &&
-    requestedPage > 0
-      ? requestedPage
-      : 1
-
   const visibility =
     getRequiredText(
       formData,
@@ -97,10 +73,10 @@ export async function updatePublicPaperMetadata(
     )
 
   if (!paperId) {
-    websiteRedirect(
-      'error',
-      'Paper ID is required.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Paper ID is required.'
     )
   }
 
@@ -109,10 +85,10 @@ export async function updatePublicPaperMetadata(
       visibility
     )
   ) {
-    websiteRedirect(
-      'error',
-      'Invalid public visibility.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Invalid public visibility.'
     )
   }
 
@@ -130,10 +106,10 @@ export async function updatePublicPaperMetadata(
     slug &&
     !slugPattern.test(slug)
   ) {
-    websiteRedirect(
-      'error',
-      'Slug must use lowercase letters, numbers, and single hyphens only.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Slug must use lowercase letters, numbers, and single hyphens only.'
     )
   }
 
@@ -141,10 +117,10 @@ export async function updatePublicPaperMetadata(
     visibility === 'public' &&
     !slug
   ) {
-    websiteRedirect(
-      'error',
-      'Public papers require a slug.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Public papers require a slug.'
     )
   }
 
@@ -182,10 +158,10 @@ export async function updatePublicPaperMetadata(
     citation &&
     citation.length > 2000
   ) {
-    websiteRedirect(
-      'error',
-      'Citation must be 2,000 characters or fewer.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Citation must be 2,000 characters or fewer.'
     )
   }
 
@@ -193,10 +169,10 @@ export async function updatePublicPaperMetadata(
     highlightText &&
     highlightText.length > 2000
   ) {
-    websiteRedirect(
-      'error',
-      'Key highlight text must be 2,000 characters or fewer.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Key highlight text must be 2,000 characters or fewer.'
     )
   }
 
@@ -206,10 +182,10 @@ export async function updatePublicPaperMetadata(
       highlightImageFilename
     )
   ) {
-    websiteRedirect(
-      'error',
-      'Key highlight image must be a single PNG, WebP, JPG, or JPEG filename without folders.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Key highlight image must be a single PNG, WebP, JPG, or JPEG filename without folders.'
     )
   }
 
@@ -217,10 +193,10 @@ export async function updatePublicPaperMetadata(
     highlightImageFilename &&
     !rawHighlightImageAlt
   ) {
-    websiteRedirect(
-      'error',
-      'Image alt text is required when a Key highlight image filename is configured.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Image alt text is required when a Key highlight image filename is configured.'
     )
   }
 
@@ -229,10 +205,10 @@ export async function updatePublicPaperMetadata(
     rawHighlightImageAlt.length >
       500
   ) {
-    websiteRedirect(
-      'error',
-      'Image alt text must be 500 characters or fewer.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Image alt text must be 500 characters or fewer.'
     )
   }
 
@@ -241,10 +217,10 @@ export async function updatePublicPaperMetadata(
     rawHighlightImageCaption.length >
       500
   ) {
-    websiteRedirect(
-      'error',
-      'Image caption must be 500 characters or fewer.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Image caption must be 500 characters or fewer.'
     )
   }
 
@@ -300,33 +276,35 @@ export async function updatePublicPaperMetadata(
     )
 
     if (error.code === '23505') {
-      websiteRedirect(
-        'error',
-        'That public slug is already in use.',
-        currentPage
+      paperWebsiteRedirect(
+        paperId,
+        'websiteError',
+        'That public slug is already in use.'
       )
     }
 
-    websiteRedirect(
-      'error',
-      'The public paper settings could not be saved.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'The public paper settings could not be saved.'
     )
   }
 
   if (!data) {
-    websiteRedirect(
-      'error',
-      'Public metadata was not found for that paper.',
-      currentPage
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Public metadata was not found for that paper.'
     )
   }
 
-  revalidatePath('/website')
+  revalidatePath(
+    `/papers/${paperId}`
+  )
 
-  websiteRedirect(
-    'saved',
+  paperWebsiteRedirect(
     paperId,
-    currentPage
+    'websiteSaved',
+    '1'
   )
 }

@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import {
   requireDashboardAccess,
@@ -20,6 +21,7 @@ type ConferencesPageProps = {
     created?: string
     saved?: string
     deleted?: string
+    page?: string
   }>
 }
 
@@ -53,6 +55,8 @@ const inputClass =
 
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
+
+const CONFERENCES_PER_PAGE = 10
 
 function formatDate(
   value: string | null
@@ -191,6 +195,12 @@ export default async function ConferencesPage({
   const params =
     await searchParams
 
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
+
   const supabase =
     await createClient()
 
@@ -287,6 +297,60 @@ export default async function ConferencesPage({
         presentation.end_date >=
         today
     ).length
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        sortedPresentations.length /
+          CONFERENCES_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    CONFERENCES_PER_PAGE
+
+  const paginatedPresentations =
+    sortedPresentations.slice(
+      pageStart,
+      pageStart +
+        CONFERENCES_PER_PAGE
+    )
+
+  const visibleStart =
+    sortedPresentations.length === 0
+      ? 0
+      : pageStart + 1
+
+  const visibleEnd =
+    Math.min(
+      pageStart +
+        CONFERENCES_PER_PAGE,
+      sortedPresentations.length
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) =>
+    pageNumber > 1
+      ? '/conferences?page=' +
+        pageNumber
+      : '/conferences'
 
   const isOwner =
     access.canEdit
@@ -609,7 +673,35 @@ export default async function ConferencesPage({
         </Card>
       )}
 
-      <div className="mt-8 space-y-5">
+      <div className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-sm text-oxford-ash">
+          Showing{' '}
+          <strong className="font-medium text-oxford-charcoal">
+            {visibleStart ===
+            visibleEnd
+              ? visibleStart
+              : String(
+                  visibleStart
+                ) +
+                '–' +
+                String(
+                  visibleEnd
+                )}
+          </strong>{' '}
+          of{' '}
+          <strong className="font-medium text-oxford-charcoal">
+            {sortedPresentations.length}
+          </strong>{' '}
+          presentations
+        </span>
+
+        <span className="text-sm text-oxford-ash">
+          Page {currentPage} of{' '}
+          {totalPages}
+        </span>
+      </div>
+
+      <div className="mt-5 space-y-5">
         {sortedPresentations.length ===
         0 ? (
           <Card>
@@ -619,7 +711,7 @@ export default async function ConferencesPage({
             </p>
           </Card>
         ) : (
-          sortedPresentations.map(
+          paginatedPresentations.map(
             (presentation) => {
               const upcoming =
                 presentation.end_date >=
@@ -1125,6 +1217,43 @@ export default async function ConferencesPage({
           )
         )}
       </div>
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Conference pagination"
+          className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+
+          <div className="flex gap-2">
+            {currentPage > 1 && (
+              <ButtonLink
+                href={getPageHref(
+                  currentPage - 1
+                )}
+                variant="secondary"
+              >
+                Previous
+              </ButtonLink>
+            )}
+
+            {currentPage <
+              totalPages && (
+              <ButtonLink
+                href={getPageHref(
+                  currentPage + 1
+                )}
+                variant="secondary"
+              >
+                Next
+              </ButtonLink>
+            )}
+          </div>
+        </nav>
+      )}
     </div>
   )
 }
