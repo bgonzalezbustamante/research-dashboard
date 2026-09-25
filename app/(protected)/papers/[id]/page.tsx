@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 
 import CitationsSection from '@/components/papers/citations-section'
 import HistorySection from '@/components/papers/history-section'
-import NotesSection from '@/components/papers/notes-section'
+import MilestonesSection from '@/components/papers/milestones-section'
 import PaperSummary from '@/components/papers/paper-summary'
 import PaperWorkspaceNav from '@/components/papers/paper-workspace-nav'
 import WebsiteSection, {
@@ -85,7 +85,7 @@ type PaperPageProps = {
   }>
   searchParams: Promise<{
     historyError?: string
-    noteError?: string
+    milestoneError?: string
     citationError?: string
     websiteError?: string
     websiteSaved?: string
@@ -211,7 +211,7 @@ export default async function PaperPage({
 
   const {
     historyError,
-    noteError,
+    milestoneError,
     citationError,
     websiteError,
     websiteSaved,
@@ -256,7 +256,7 @@ export default async function PaperPage({
     authorResult,
     linksResult,
     historyResult,
-    notesResult,
+    milestonesResult,
     citationsResult,
     workSessionsResult,
     conferencePresentationsResult,
@@ -311,27 +311,16 @@ export default async function PaperPage({
       }),
 
     supabase
-      .from('paper_notes')
+      .from('paper_milestones')
       .select(`
         id,
-        note_date,
-        note_type,
-        body,
-        created_by,
-        created_at,
-        updated_at,
-        profiles (
-          full_name,
-          email
-        )
+        title,
+        target_date,
+        completed_on,
+        status,
+        notes
       `)
-      .eq('paper_id', id)
-      .order('note_date', {
-        ascending: false,
-      })
-      .order('created_at', {
-        ascending: false,
-      }),
+      .eq('paper_id', id),
 
     supabase
       .from('citation_snapshots')
@@ -422,9 +411,9 @@ export default async function PaperPage({
     )
   }
 
-  if (notesResult.error) {
+  if (milestonesResult.error) {
     throw new Error(
-      `Could not load paper notes: ${notesResult.error.message}`
+      `Could not load milestones: ${milestonesResult.error.message}`
     )
   }
 
@@ -469,8 +458,8 @@ export default async function PaperPage({
   const historyEvents =
     historyResult.data ?? []
 
-  const notes =
-    notesResult.data ?? []
+  const milestones =
+    milestonesResult.data ?? []
 
   const citationSnapshots =
     citationsResult.data ?? []
@@ -555,34 +544,6 @@ export default async function PaperPage({
         ? logDate
         : earliest
     }, null)
-
-  const normalizedNotes =
-    notes.map((note) => {
-      const profile =
-        Array.isArray(
-          note.profiles
-        )
-          ? note.profiles[0]
-          : note.profiles
-
-      return {
-        id: note.id,
-        note_date:
-          note.note_date,
-        note_type:
-          note.note_type,
-        body:
-          note.body,
-        created_at:
-          note.created_at,
-        updated_at:
-          note.updated_at,
-        creator_name:
-          profile?.full_name ??
-          profile?.email ??
-          'You',
-      }
-    })
 
   const latestHistory =
     historyEvents.length > 0
@@ -730,8 +691,8 @@ export default async function PaperPage({
         historyCount={
           historyEvents.length
         }
-        noteCount={
-          normalizedNotes.length
+        milestoneCount={
+          milestones.length
         }
         citationCount={
           citationSnapshots.length
@@ -766,13 +727,15 @@ export default async function PaperPage({
               }
             : null
         }
-        noteCount={
-          normalizedNotes.length
+        milestoneCount={
+          milestones.length
         }
-        latestNoteDate={
-          normalizedNotes[0]
-            ?.note_date ??
-          null
+        plannedMilestoneCount={
+          milestones.filter(
+            (milestone) =>
+              milestone.status ===
+              'planned'
+          ).length
         }
         citationSummary={
           citationSummary
@@ -936,15 +899,15 @@ export default async function PaperPage({
         }
       />
 
-      <NotesSection
+      <MilestonesSection
         paperId={
           paper.id
         }
-        notes={
-          normalizedNotes
+        milestones={
+          milestones
         }
         error={
-          noteError
+          milestoneError
         }
       />
 

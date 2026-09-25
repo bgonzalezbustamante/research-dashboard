@@ -12,8 +12,8 @@ type CitationSummary = {
 type PaperSummaryProps = {
   conferenceCount: number
   latestHistory: LatestHistory
-  noteCount: number
-  latestNoteDate: string | null
+  milestoneCount: number
+  plannedMilestoneCount: number
   citationSummary: CitationSummary
 }
 
@@ -50,8 +50,8 @@ function formatDate(
 export default function PaperSummary({
   conferenceCount,
   latestHistory,
-  noteCount,
-  latestNoteDate,
+  milestoneCount,
+  plannedMilestoneCount,
   citationSummary,
 }: PaperSummaryProps) {
   return (
@@ -112,23 +112,23 @@ export default function PaperSummary({
       </a>
 
       <a
-        href="#notes"
+        href="#milestones"
         className="rounded-lg border border-oxford-stone bg-white p-4 transition hover:border-oxford-blue"
       >
         <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-          Notes
+          Milestones
         </div>
 
         <div className="mt-2 font-serif text-2xl font-semibold text-oxford-blue">
-          {noteCount}
+          {milestoneCount}
         </div>
 
         <div className="mt-1 text-sm text-oxford-ash">
-          {latestNoteDate
-            ? `Latest ${formatDate(
-                latestNoteDate
-              )}`
-            : 'No notes yet'}
+          {milestoneCount === 0
+            ? 'No milestones yet'
+            : plannedMilestoneCount === 1
+              ? '1 planned'
+              : `${plannedMilestoneCount} planned`}
         </div>
       </a>
 
