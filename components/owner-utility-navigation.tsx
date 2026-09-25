@@ -108,11 +108,7 @@ export default function OwnerUtilityNavigation({
                 ? 'page'
                 : undefined
             }
-            className={
-              isActive('/account')
-                ? 'rounded-md border border-oxford-blue bg-oxford-blue px-3 py-1.5 text-sm font-medium text-white'
-                : 'rounded-md border border-oxford-blue bg-transparent px-3 py-1.5 text-sm font-medium text-oxford-blue transition hover:bg-white'
-            }
+            className="rounded-md border border-oxford-blue bg-transparent px-3 py-1.5 text-sm font-medium text-oxford-blue transition hover:bg-white"
           >
             {accountLabel}
           </Link>
