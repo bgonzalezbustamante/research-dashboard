@@ -13,8 +13,10 @@
 
 `website administration`
 
-- Added Website to the bottom Owner utilities navigation and ordered the links as Authors, Access, Website; moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
-- Styled the bottom Sign out control as an Oxford-blue action while leaving Authors, Access, and Website unchanged.
+- Added Website to the bottom Owner utilities navigation and moved Sign out from the header into the same bottom utility area to free header space while keeping it available to all authenticated users.
+- Added Teaching after Conferences in the main authenticated navigation.
+- Moved the signed-in account-name button from the header to the bottom utility area and styled it as an Oxford-blue outline control next to the filled Oxford-blue Sign out button.
+- Reorganised bottom utilities into two rows for Owners: Authors and Website first; Access, Account, and Sign out second. Non-owner accounts retain only their applicable account/sign-out utilities.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Kept only website-specific paper controls in Website management: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
@@ -50,6 +52,19 @@
 - Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
 
+
+`teaching portfolio`
+
+- Added a Dashboard Teaching module for maintaining courses and teaching activities as a structured Teaching Portfolio.
+- Added canonical course/activity fields for name, university/institution, summary, start year, optional end year or Still teaching state, level (Undergraduate/Master/PhD), cumulative times taught, and cumulative students across cohorts.
+- Added Private/Public Website visibility, an optional stable public slug, and an optional validated course image filename.
+- Standardised Teaching Portfolio static assets under `academic-website/public/teaching/<filename>`, avoiding a slug dependency because teaching cards do not require detail pages.
+- Added many-to-many-style Teaching Portfolio activity assignments with each Teaching-classified activity label restricted to one portfolio item to prevent double-counting within teaching analytics.
+- Restricted Teaching Portfolio assignments to non-Break activity labels whose major activity is explicitly Teaching, and prevented linked labels from being reclassified until unlinked.
+- Added private Dashboard aggregates for tracked teaching hours and session counts derived from linked activity labels.
+- Added `list_public_teaching()` as an anonymous-safe academic-website card contract exposing only optional slug, name, institution, summary, period/current state, level, times taught, cumulative students, and course image filename.
+- Kept Teaching activity-label relationships, tracked hours/session counts, owner metadata, and internal IDs out of the public contract.
+
 `conferences`
 
 - Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.
@@ -77,8 +92,8 @@
 - Kept RLS on `paper_public_metadata` and limited direct table access to authenticated Owner reads/updates through existing ownership helpers.
 - Kept anonymous access behind explicit RPC `EXECUTE` grants rather than anonymous table access, consistent with the October 30 Supabase Data API behaviour.
 - Preserved unique lowercase public slugs and automatic Private metadata creation for newly created papers.
-- Kept publication/project images as static assets owned by the separate academic website repository rather than introducing Supabase Storage; the Dashboard stores only validated filenames and never stores deployment-specific asset URLs.
-- Restricted the anonymous application function surface to the deliberate public publication and aggregate analytics RPCs.
+- Kept publication/project/teaching images as static assets owned by the separate academic website repository rather than introducing Supabase Storage; the Dashboard stores only validated filenames and never stores deployment-specific asset URLs.
+- Restricted the anonymous application function surface to deliberate public publication, project, conference, teaching, and aggregate analytics RPCs.
 
 ### Release status
 
