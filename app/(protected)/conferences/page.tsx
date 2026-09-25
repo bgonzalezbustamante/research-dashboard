@@ -33,7 +33,10 @@ type ConferencePresentation = {
   end_date: string
   presentation_title: string | null
   authors: string[]
-  presentation_type: string | null
+  presentation_type:
+    | 'Conference paper'
+    | 'Keynote'
+    | 'Workshop'
   url: string | null
   notes: string | null
 }
