@@ -27,6 +27,7 @@
 - Made Started an automatic derived date based on the earliest Activity-labelled work session linked to the paper; papers without a labelled work session display no start date.
 - Changed the Papers list default ordering to Started most recently, using the same derived start date, and replaced the Next milestone table column with Started.
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
+- Replaced free-text Publication index with a controlled optional category: WoS-SSCI, Scopus, WoS-ESCI, Book chapter, SciELO/Latindex, Working paper, or Preprint.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 - Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
