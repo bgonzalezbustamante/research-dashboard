@@ -48,9 +48,16 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'Teaching Portfolio',
+        items: [
+          'Added a Teaching module for courses and teaching activities with period, level, institution, cumulative teaching/student counts, summaries and optional public course images.',
+          'Linked Teaching-classified Hours labels to individual courses for private tracked-hour/session totals, while exposing only explicitly Public teaching-card data to the academic website.',
+        ],
+      },
+      {
         title: 'Public data and analytics',
         items: [
-          'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication/project assets resolved by the academic website.',
+          'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication, project and teaching assets resolved by the academic website.',
           'Added aggregate public work analytics for Activity over time, yearly average net working time and coffees per working day while keeping raw work records private.',
         ],
       },
