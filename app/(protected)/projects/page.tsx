@@ -1994,8 +1994,9 @@ export default async function ProjectsPage({
                                       </span>
 
                                       <span className="ml-2 text-xs text-oxford-ash">
-                                        {formatPresentationDate(
-                                          presentation.presentation_date
+                                        {formatPresentationDateRange(
+                                          presentation.start_date,
+                                          presentation.end_date
                                         )}
                                       </span>
 
