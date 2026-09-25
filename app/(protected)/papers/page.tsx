@@ -138,16 +138,16 @@ const archiveOptions = [
 
 const sortOptions = [
   {
+    value: 'published-desc',
+    label: 'Published most recently',
+  },
+  {
     value: 'started-desc',
     label: 'Started most recently',
   },
   {
     value: 'updated-desc',
     label: 'Recently updated',
-  },
-  {
-    value: 'title-asc',
-    label: 'Short title A–Z',
   },
 ]
 
@@ -636,7 +636,7 @@ export default async function PapersPage({
         params.sort
     )
       ? params.sort!
-      : 'started-desc'
+      : 'published-desc'
 
   const requestedPage =
     Number.parseInt(
@@ -929,47 +929,90 @@ export default async function PapersPage({
       }
     )
 
+  const compareStartedDescending = (
+    a: PaperRow,
+    b: PaperRow
+  ) => {
+    const aStarted =
+      startedDateByPaper.get(
+        a.id
+      )
+
+    const bStarted =
+      startedDateByPaper.get(
+        b.id
+      )
+
+    if (
+      aStarted &&
+      bStarted
+    ) {
+      const startedDifference =
+        bStarted.localeCompare(
+          aStarted
+        )
+
+      if (
+        startedDifference !== 0
+      ) {
+        return startedDifference
+      }
+    } else if (aStarted) {
+      return -1
+    } else if (bStarted) {
+      return 1
+    }
+
+    return a.short_title.localeCompare(
+      b.short_title
+    )
+  }
+
   filteredPapers = [
     ...filteredPapers,
   ].sort((a, b) => {
     switch (sort) {
-      case 'title-asc':
-        return a.short_title.localeCompare(
-          b.short_title
-        )
-
-      case 'started-desc': {
-        const aStarted =
-          startedDateByPaper.get(
-            a.id
-          )
-
-        const bStarted =
-          startedDateByPaper.get(
-            b.id
-          )
-
+      case 'published-desc': {
         if (
-          aStarted &&
-          bStarted
+          a.published_on &&
+          b.published_on
         ) {
-          return bStarted.localeCompare(
-            aStarted
+          const publicationDifference =
+            b.published_on.localeCompare(
+              a.published_on
+            )
+
+          if (
+            publicationDifference !== 0
+          ) {
+            return publicationDifference
+          }
+
+          return compareStartedDescending(
+            a,
+            b
           )
         }
 
-        if (aStarted) {
+        if (a.published_on) {
           return -1
         }
 
-        if (bStarted) {
+        if (b.published_on) {
           return 1
         }
 
-        return a.short_title.localeCompare(
-          b.short_title
+        return compareStartedDescending(
+          a,
+          b
         )
       }
+
+      case 'started-desc':
+        return compareStartedDescending(
+          a,
+          b
+        )
 
       case 'updated-desc':
         return b.updated_at.localeCompare(
@@ -1063,7 +1106,7 @@ export default async function PapersPage({
     }
 
     if (
-      sort !== 'started-desc'
+      sort !== 'published-desc'
     ) {
       pageParams.set(
         'sort',
