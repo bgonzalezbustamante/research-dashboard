@@ -129,38 +129,21 @@ export default async function ProtectedLayout({
                 }
               />
 
-              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                {isViewer && (
-                  <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
-                    Viewer
-                  </span>
-                )}
+              {(isViewer || isCoauthor) && (
+                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                  {isViewer && (
+                    <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
+                      Viewer
+                    </span>
+                  )}
 
-                {isCoauthor && (
-                  <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-                    Coauthor
-                  </span>
-                )}
-
-                <Link
-                  href="/account"
-                  className="rounded-md border border-oxford-blue bg-transparent px-2.5 py-1.5 text-xs font-medium text-oxford-blue transition hover:bg-oxford-shell"
-                >
-                  {fullName || 'Account'}
-                </Link>
-
-                <form
-                  action="/auth/signout"
-                  method="post"
-                >
-                  <button
-                    type="submit"
-                    className="rounded-md border border-oxford-blue bg-oxford-blue px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-oxford-blue-dark"
-                  >
-                    Sign out
-                  </button>
-                </form>
-              </div>
+                  {isCoauthor && (
+                    <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
+                      Coauthor
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -186,6 +169,9 @@ export default async function ProtectedLayout({
 
       <OwnerUtilityNavigation
         showOwnerLinks={isOwner}
+        accountLabel={
+          fullName || 'Account'
+        }
       />
 
       <SiteFooter />
