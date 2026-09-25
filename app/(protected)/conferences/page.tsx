@@ -292,7 +292,7 @@ export default async function ConferencesPage({
     <div id="conferences">
       <PageHeader
         title="Conferences"
-        description="Manage conference, workshop, seminar, and other academic presentations independently from paper workspaces."
+        description="Manage conference papers, keynotes, and workshops independently from paper workspaces."
       />
 
       {params.error && (
@@ -337,9 +337,9 @@ export default async function ConferencesPage({
             Public contract
           </div>
           <p className="mt-2 text-sm leading-6 text-oxford-ash">
-            Conference metadata and
-            ordered presentation
-            authors are public.
+            Conference date ranges,
+            presentation type, and
+            ordered authors are public.
             Notes and the optional
             linked paper remain
             Dashboard-only.
