@@ -44,9 +44,7 @@ export default async function EditPaperPage({
       abstract,
       status,
       revision_round,
-      target_venue,
       current_venue,
-      started_on,
       published_on
     `)
     .eq('id', id)
@@ -170,14 +168,9 @@ export default async function EditPaperPage({
             paper.status,
           revisionRound:
             paper.revision_round,
-          targetVenue:
-            paper.target_venue ??
-            '',
           currentVenue:
             paper.current_venue ??
             '',
-          startedOn:
-            paper.started_on ?? '',
           publishedOn:
             paper.published_on ??
             '',
