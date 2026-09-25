@@ -276,10 +276,10 @@ export async function updatePublicPaperMetadata(
     )
 
     if (error.code === '23505') {
-      websiteRedirect(
-        'error',
-        'That public slug is already in use.',
-        currentPage
+      paperWebsiteRedirect(
+        paperId,
+        'websiteError',
+        'That public slug is already in use.'
       )
     }
 
