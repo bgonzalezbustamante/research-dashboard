@@ -19,8 +19,9 @@
 - Removed Website from the bottom utility navigation and retired the standalone Website page as an editing surface; /website now redirects to Papers.
 - Simplified publication visibility to Private or Public; Private records are unavailable anonymously, while Public records appear in the public listing and support stable slug lookup.
 - Moved website-specific paper controls into each Paper workspace: visibility, stable public slug, Featured state, Publication index, preferred Citation, and Key highlight presentation fields.
-- Reorganised each Paper workspace as Overview → Submission and revision history → Notes → Citations → Associated projects → Conference presentations → Website, keeping Website at the bottom.
-- Deprecated Milestones from the active Paper UI and removed Next milestone from Paper summaries, list columns, and sort options while retaining the legacy data structure for compatibility.
+- Reorganised each Paper workspace as Overview → Submission and revision history → Milestones → Citations → Associated projects → Conference presentations → Website, keeping Website at the bottom.
+- Restored Milestones to the active Paper workspace in the position previously occupied by standalone Notes, with planned/completed/cancelled statuses, target/completion dates, and milestone-specific notes; standalone Paper Notes are now deprecated from the active UI while their underlying data structures remain intact.
+- Kept Milestones out of Papers list sorting and table columns; the top Paper summary now reports total milestones and the number still planned.
 - Replaced the top Next milestone summary card with the number of associated conference presentations.
 - Added a read-only Associated projects section above Conference presentations in each Paper workspace.
 - Deprecated Target journal or venue from the active Paper UI; Current journal or venue remains the canonical venue and continues to feed the public publication contract.
