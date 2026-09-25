@@ -129,8 +129,11 @@ export default async function ProtectedLayout({
                 }
               />
 
-              <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
+              {(isViewer || isCoauthor) && (
+                <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
+              )}
 
+              {(isViewer || isCoauthor) && (
               <div className="flex items-center gap-2">
                 {isViewer && (
                   <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
@@ -143,8 +146,8 @@ export default async function ProtectedLayout({
                     Coauthor
                   </span>
                 )}
-
               </div>
+              )}
             </div>
           </div>
         </div>
