@@ -46,7 +46,7 @@
 - Added Private/Public project visibility with a stable public slug and Featured state; projects remain Private by default.
 - Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
 - Added many-to-many project-paper associations without changing canonical paper metadata.
-- Added many-to-many project-conference-presentation associations using the existing conference records rather than duplicating presentation metadata.
+- Added many-to-many project-conference-presentation associations using the existing conference records rather than duplicating presentation metadata; public project presentation objects now also carry conference start/end dates.
 - Added project-to-activity-label assignments for Dashboard-only hour tracking, with each activity label restricted to one project to prevent double-counting.
 - Added tracked project hours derived from assigned activity labels without exposing the label assignments or work-session detail publicly.
 - Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional funder note, canonical project URL, start/end years, Featured state, Public paper slugs, and public-safe associated conference-presentation metadata.
@@ -71,11 +71,13 @@
 
 - Moved conference presentations out of individual Paper workspaces into a dedicated Dashboard Conferences module.
 - Preserved the existing conference fields and added a required short event name alongside the full conference/event name; both names are public, while ordered presentation-specific authors can differ from the linked paper.
+- Replaced the single conference date in the Dashboard with required start/end dates, backfilling existing records as same-day ranges and preserving `presentation_date` temporarily as a deprecated public alias for `start_date`.
+- Restricted Presentation type to exactly `Conference paper`, `Keynote`, or `Workshop` in both the UI and database.
 - Made the paper association optional and Dashboard-only; conference records can exist without a linked paper.
 - Migrated the existing conference presentation in place and changed paper deletion behaviour to clear the optional link rather than delete the conference record.
 - Added Owner editing and Viewer read-only access; paper-scoped Coauthors no longer edit conference records through Paper workspaces.
 - Added a read-only linked-presentations section to each Paper workspace and an authenticated `list_paper_conference_presentations(paper_id)` contract so anyone who can view that paper can see its linked presentation metadata without receiving conference edit rights or access to private conference notes.
-- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
+- Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, start/end dates, constrained presentation type, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
 
 `release notes`
 

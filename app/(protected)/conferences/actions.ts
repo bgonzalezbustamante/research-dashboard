@@ -6,6 +6,13 @@ import { redirect } from 'next/navigation'
 import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
+const allowedPresentationTypes =
+  new Set([
+    'Conference paper',
+    'Keynote',
+    'Workshop',
+  ])
+
 function getRequiredText(
   formData: FormData,
   name: string
@@ -146,6 +153,52 @@ function validateConferenceFields(
     }
   }
 
+  const startDate =
+    getOptionalDate(
+      formData,
+      'start_date'
+    )
+
+  const endDate =
+    getOptionalDate(
+      formData,
+      'end_date'
+    )
+
+  if (!startDate || !endDate) {
+    return {
+      ok: false as const,
+      error:
+        'Conference start and end dates are required.',
+    }
+  }
+
+  if (endDate < startDate) {
+    return {
+      ok: false as const,
+      error:
+        'Conference end date cannot be earlier than the start date.',
+    }
+  }
+
+  const presentationType =
+    getRequiredText(
+      formData,
+      'presentation_type'
+    )
+
+  if (
+    !allowedPresentationTypes.has(
+      presentationType
+    )
+  ) {
+    return {
+      ok: false as const,
+      error:
+        'Presentation type must be Conference paper, Keynote, or Workshop.',
+    }
+  }
+
   const url =
     getOptionalText(
       formData,
@@ -177,11 +230,8 @@ function validateConferenceFields(
         formData,
         'location'
       ),
-    presentationDate:
-      getOptionalDate(
-        formData,
-        'presentation_date'
-      ),
+    startDate,
+    endDate,
     presentationTitle:
       getOptionalText(
         formData,
@@ -189,11 +239,7 @@ function validateConferenceFields(
       ),
     authors:
       parseAuthors(formData),
-    presentationType:
-      getOptionalText(
-        formData,
-        'presentation_type'
-      ),
+    presentationType,
     url,
     notes:
       getOptionalText(
@@ -242,8 +288,10 @@ export async function createConferencePresentation(
         fields.eventShortName,
       location:
         fields.location,
-      presentation_date:
-        fields.presentationDate,
+      start_date:
+        fields.startDate,
+      end_date:
+        fields.endDate,
       presentation_title:
         fields.presentationTitle,
       authors:
@@ -329,8 +377,10 @@ export async function updateConferencePresentation(
         fields.eventShortName,
       location:
         fields.location,
-      presentation_date:
-        fields.presentationDate,
+      start_date:
+        fields.startDate,
+      end_date:
+        fields.endDate,
       presentation_title:
         fields.presentationTitle,
       authors:

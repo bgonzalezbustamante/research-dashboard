@@ -31,7 +31,8 @@ type LinkedConferencePresentation = {
   event_name: string
   event_short_name: string
   location: string | null
-  presentation_date: string | null
+  start_date: string
+  end_date: string
   presentation_title: string | null
   authors: string[]
   presentation_type: string | null
@@ -82,6 +83,23 @@ function formatDisplayDate(
       )
     )
   )
+}
+
+function formatDisplayDateRange(
+  startDate: string,
+  endDate: string
+) {
+  if (startDate === endDate) {
+    return formatDisplayDate(
+      startDate
+    )
+  }
+
+  return `${formatDisplayDate(
+    startDate
+  )} – ${formatDisplayDate(
+    endDate
+  )}`
 }
 
 function getAmsterdamDate() {
@@ -899,8 +917,9 @@ export default async function PaperPage({
 
                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-oxford-ash">
                       <span>
-                        {formatDisplayDate(
-                          presentation.presentation_date
+                        {formatDisplayDateRange(
+                          presentation.start_date,
+                          presentation.end_date
                         )}
                       </span>
 

@@ -76,7 +76,8 @@ type ConferencePresentationRow = {
   event_name: string
   event_short_name: string
   location: string | null
-  presentation_date: string | null
+  start_date: string
+  end_date: string
   presentation_title: string | null
   authors: string[]
   presentation_type: string | null
@@ -142,12 +143,8 @@ function formatDuration(
 }
 
 function formatPresentationDate(
-  value: string | null
+  value: string
 ) {
-  if (!value) {
-    return 'Undated'
-  }
-
   const [year, month, day] =
     value
       .slice(0, 10)
@@ -170,6 +167,23 @@ function formatPresentationDate(
       )
     )
   )
+}
+
+function formatPresentationDateRange(
+  startDate: string,
+  endDate: string
+) {
+  if (startDate === endDate) {
+    return formatPresentationDate(
+      startDate
+    )
+  }
+
+  return `${formatPresentationDate(
+    startDate
+  )} – ${formatPresentationDate(
+    endDate
+  )}`
 }
 
 function statusClass(
@@ -330,7 +344,8 @@ export default async function ProjectsPage({
         event_name,
         event_short_name,
         location,
-        presentation_date,
+        start_date,
+        end_date,
         presentation_title,
         authors,
         presentation_type,
@@ -341,10 +356,9 @@ export default async function ProjectsPage({
         access.ownerId
       )
       .order(
-        'presentation_date',
+        'start_date',
         {
           ascending: false,
-          nullsFirst: false,
         }
       )
       .order(
@@ -982,8 +996,9 @@ export default async function ProjectsPage({
                           </span>
 
                           <span className="ml-2 text-xs text-oxford-ash">
-                            {formatPresentationDate(
-                              presentation.presentation_date
+                            {formatPresentationDateRange(
+                              presentation.start_date,
+                              presentation.end_date
                             )}
                           </span>
 
@@ -1187,23 +1202,11 @@ export default async function ProjectsPage({
                   )
                   .sort((a, b) => {
                     if (
-                      a.presentation_date !==
-                      b.presentation_date
+                      a.start_date !==
+                      b.start_date
                     ) {
-                      if (
-                        !a.presentation_date
-                      ) {
-                        return 1
-                      }
-
-                      if (
-                        !b.presentation_date
-                      ) {
-                        return -1
-                      }
-
-                      return b.presentation_date.localeCompare(
-                        a.presentation_date
+                      return b.start_date.localeCompare(
+                        a.start_date
                       )
                     }
 
@@ -1441,8 +1444,9 @@ export default async function ProjectsPage({
                                     </div>
 
                                     <div className="text-xs text-oxford-ash">
-                                      {formatPresentationDate(
-                                        presentation.presentation_date
+                                      {formatPresentationDateRange(
+                                        presentation.start_date,
+                                        presentation.end_date
                                       )}
                                       {presentation.presentation_title && (
                                         <>
@@ -1990,8 +1994,9 @@ export default async function ProjectsPage({
                                       </span>
 
                                       <span className="ml-2 text-xs text-oxford-ash">
-                                        {formatPresentationDate(
-                                          presentation.presentation_date
+                                        {formatPresentationDateRange(
+                                          presentation.start_date,
+                                          presentation.end_date
                                         )}
                                       </span>
 
