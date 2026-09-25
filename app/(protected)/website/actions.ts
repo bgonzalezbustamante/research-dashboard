@@ -11,6 +11,17 @@ const allowedVisibilities = new Set([
   'public',
 ])
 
+const allowedPublicationIndexes =
+  new Set([
+    'WoS-SSCI',
+    'Scopus',
+    'WoS-ESCI',
+    'Book chapter',
+    'SciELO/Latindex',
+    'Working paper',
+    'Preprint',
+  ])
+
 const slugPattern =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
@@ -121,6 +132,25 @@ export async function updatePublicPaperMetadata(
       paperId,
       'websiteError',
       'Public papers require a slug.'
+    )
+  }
+
+  const publicationIndex =
+    getOptionalText(
+      formData,
+      'publication_index'
+    )
+
+  if (
+    publicationIndex &&
+    !allowedPublicationIndexes.has(
+      publicationIndex
+    )
+  ) {
+    paperWebsiteRedirect(
+      paperId,
+      'websiteError',
+      'Invalid publication index category.'
     )
   }
 
@@ -251,10 +281,7 @@ export async function updatePublicPaperMetadata(
         formData.get('featured') ===
         'on',
       publication_index:
-        getOptionalText(
-          formData,
-          'publication_index'
-        ),
+        publicationIndex,
       citation,
       highlight_text:
         highlightText,
