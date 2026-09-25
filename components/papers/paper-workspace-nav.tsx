@@ -13,6 +13,11 @@ const items = [
     countKey: null,
   },
   {
+    href: '#website',
+    label: 'Website',
+    countKey: null,
+  },
+  {
     href: '#milestones',
     label: 'Milestones',
     countKey: 'milestoneCount',
