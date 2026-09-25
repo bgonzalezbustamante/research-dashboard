@@ -6,11 +6,20 @@ create table public.teaching_portfolio (
     references public.profiles(id)
     on delete cascade,
   name text not null
-    check (char_length(btrim(name)) > 0),
+    check (
+      char_length(btrim(name))
+        between 1 and 300
+    ),
   institution text not null
-    check (char_length(btrim(institution)) > 0),
+    check (
+      char_length(btrim(institution))
+        between 1 and 300
+    ),
   summary text not null
-    check (char_length(btrim(summary)) > 0),
+    check (
+      char_length(btrim(summary))
+        between 1 and 4000
+    ),
   start_year integer not null
     check (start_year between 1900 and 2100),
   end_year integer,
@@ -390,6 +399,44 @@ before insert or update
 on public.teaching_activity_labels
 for each row
 execute function private.validate_teaching_activity_label_link();
+
+create or replace function private.guard_linked_teaching_label_classification()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if exists (
+    select 1
+    from public.teaching_activity_labels tal
+    where tal.activity_label_id = old.id
+  )
+  and (
+    coalesce(
+      new.is_break,
+      false
+    )
+    or new.major_activity is distinct from 'teaching'
+  ) then
+    raise exception
+      'Unlink this activity label from its Teaching Portfolio item before changing its major activity'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$;
+
+revoke all
+  on function private.guard_linked_teaching_label_classification()
+  from public, anon, authenticated;
+
+create trigger guard_linked_teaching_label_classification
+before update of is_break, major_activity
+on public.activity_labels
+for each row
+execute function private.guard_linked_teaching_label_classification();
 
 create policy "Dashboard members can view teaching activity labels"
   on public.teaching_activity_labels
