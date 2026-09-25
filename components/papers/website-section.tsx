@@ -34,7 +34,7 @@ export default function WebsiteSection({
   saved?: boolean
   action: (
     formData: FormData
-  ) => Promise<never>
+  ) => Promise<void>
 }) {
   return (
     <section
