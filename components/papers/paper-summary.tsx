@@ -1,9 +1,3 @@
-type NextMilestone = {
-  title: string
-  targetDate: string | null
-  overdue: boolean
-} | null
-
 type LatestHistory = {
   label: string
   date: string
@@ -16,7 +10,7 @@ type CitationSummary = {
 } | null
 
 type PaperSummaryProps = {
-  nextMilestone: NextMilestone
+  conferenceCount: number
   latestHistory: LatestHistory
   noteCount: number
   latestNoteDate: string | null
@@ -54,7 +48,7 @@ function formatDate(
 }
 
 export default function PaperSummary({
-  nextMilestone,
+  conferenceCount,
   latestHistory,
   noteCount,
   latestNoteDate,
@@ -66,41 +60,22 @@ export default function PaperSummary({
       className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       <a
-        href="#milestones"
+        href="#conferences"
         className="rounded-lg border border-oxford-stone bg-white p-4 transition hover:border-oxford-blue"
       >
         <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-          Next milestone
+          Conference presentations
         </div>
 
-        {nextMilestone ? (
-          <>
-            <div className="mt-2 font-medium text-oxford-charcoal">
-              {nextMilestone.title}
-            </div>
+        <div className="mt-2 font-serif text-2xl font-semibold text-oxford-blue">
+          {conferenceCount}
+        </div>
 
-            <div
-              className={`mt-1 text-sm ${
-                nextMilestone.overdue
-                  ? 'font-medium text-red-700'
-                  : 'text-oxford-ash'
-              }`}
-            >
-              {nextMilestone.targetDate
-                ? formatDate(
-                    nextMilestone.targetDate
-                  )
-                : 'No target date'}
-
-              {nextMilestone.overdue &&
-                ' · Overdue'}
-            </div>
-          </>
-        ) : (
-          <div className="mt-2 text-sm text-oxford-ash">
-            No planned milestone
-          </div>
-        )}
+        <div className="mt-1 text-sm text-oxford-ash">
+          {conferenceCount === 1
+            ? 'Associated presentation'
+            : 'Associated presentations'}
+        </div>
       </a>
 
       <a

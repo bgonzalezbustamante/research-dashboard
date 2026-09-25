@@ -10,9 +10,7 @@ type PaperFormValues = {
   abstract?: string
   status?: string
   revisionRound?: number | null
-  targetVenue?: string
   currentVenue?: string
-  startedOn?: string
   publishedOn?: string
   overleafUrl?: string
   dataverseUrl?: string
@@ -235,25 +233,6 @@ export default function PaperForm({
 
           <div>
             <label
-              htmlFor="target_venue"
-              className={labelClass}
-            >
-              Target journal or venue
-            </label>
-
-            <input
-              id="target_venue"
-              name="target_venue"
-              type="text"
-              defaultValue={
-                initialValues.targetVenue ?? ''
-              }
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label
               htmlFor="current_venue"
               className={labelClass}
             >
@@ -272,22 +251,13 @@ export default function PaperForm({
           </div>
 
           <div>
-            <label
-              htmlFor="started_on"
-              className={labelClass}
-            >
+            <div className={labelClass}>
               Started
-            </label>
+            </div>
 
-            <input
-              id="started_on"
-              name="started_on"
-              type="date"
-              defaultValue={
-                initialValues.startedOn ?? ''
-              }
-              className={inputClass}
-            />
+            <p className="rounded-md border border-oxford-stone bg-oxford-off-white px-3 py-2 text-sm text-oxford-ash">
+              Calculated automatically from the first Activity-labelled work session linked to this paper.
+            </p>
           </div>
 
           <div>

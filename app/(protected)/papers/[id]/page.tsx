@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 
 import CitationsSection from '@/components/papers/citations-section'
 import HistorySection from '@/components/papers/history-section'
-import MilestonesSection from '@/components/papers/milestones-section'
 import NotesSection from '@/components/papers/notes-section'
 import PaperSummary from '@/components/papers/paper-summary'
 import PaperWorkspaceNav from '@/components/papers/paper-workspace-nav'
@@ -35,6 +34,38 @@ type PaperStatus =
   | 'standby'
   | 'deprecated'
 
+type PaperWorkSession = {
+  id: string
+  activity_label_id: string | null
+  start_time: string
+  end_time: string
+  daily_logs:
+    | {
+        log_date: string
+      }
+    | {
+        log_date: string
+      }[]
+    | null
+}
+
+type AssociatedProject = {
+  id: string
+  short_title: string
+  title: string
+  funder: string
+  status: string
+  url: string | null
+}
+
+type AssociatedProjectLink = {
+  project_id: string
+  projects:
+    | AssociatedProject
+    | AssociatedProject[]
+    | null
+}
+
 type LinkedConferencePresentation = {
   id: string
   event_name: string
@@ -53,7 +84,6 @@ type PaperPageProps = {
     id: string
   }>
   searchParams: Promise<{
-    milestoneError?: string
     historyError?: string
     noteError?: string
     citationError?: string
@@ -111,30 +141,6 @@ function formatDisplayDateRange(
   )} – ${formatDisplayDate(
     endDate
   )}`
-}
-
-function getAmsterdamDate() {
-  const parts =
-    new Intl.DateTimeFormat(
-      'en-GB',
-      {
-        timeZone:
-          'Europe/Amsterdam',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }
-    ).formatToParts(new Date())
-
-  const values =
-    Object.fromEntries(
-      parts.map((part) => [
-        part.type,
-        part.value,
-      ])
-    )
-
-  return `${values.year}-${values.month}-${values.day}`
 }
 
 function getHistoryLabel(
@@ -204,7 +210,6 @@ export default async function PaperPage({
   const { id } = await params
 
   const {
-    milestoneError,
     historyError,
     noteError,
     citationError,
@@ -230,9 +235,7 @@ export default async function PaperPage({
       abstract,
       status,
       revision_round,
-      target_venue,
       current_venue,
-      started_on,
       published_on,
       archived_at
     `)
@@ -252,12 +255,12 @@ export default async function PaperPage({
   const [
     authorResult,
     linksResult,
-    milestonesResult,
     historyResult,
     notesResult,
     citationsResult,
     workSessionsResult,
     conferencePresentationsResult,
+    projectsResult,
     publicMetadataResult,
   ] = await Promise.all([
     supabase
@@ -286,18 +289,6 @@ export default async function PaperPage({
       .order('sort_order', {
         ascending: true,
       }),
-
-    supabase
-      .from('paper_milestones')
-      .select(`
-        id,
-        title,
-        target_date,
-        completed_on,
-        status,
-        notes
-      `)
-      .eq('paper_id', id),
 
     supabase
       .from('paper_history')
@@ -363,8 +354,12 @@ export default async function PaperPage({
       .from('work_sessions')
       .select(`
         id,
+        activity_label_id,
         start_time,
-        end_time
+        end_time,
+        daily_logs (
+          log_date
+        )
       `)
       .eq('paper_id', id),
 
@@ -374,6 +369,21 @@ export default async function PaperPage({
         p_paper_id: id,
       }
     ),
+
+    supabase
+      .from('project_papers')
+      .select(`
+        project_id,
+        projects (
+          id,
+          short_title,
+          title,
+          funder,
+          status,
+          url
+        )
+      `)
+      .eq('paper_id', id),
 
     supabase
       .from(
@@ -403,12 +413,6 @@ export default async function PaperPage({
   if (linksResult.error) {
     throw new Error(
       `Could not load links: ${linksResult.error.message}`
-    )
-  }
-
-  if (milestonesResult.error) {
-    throw new Error(
-      `Could not load milestones: ${milestonesResult.error.message}`
     )
   }
 
@@ -444,6 +448,12 @@ export default async function PaperPage({
     )
   }
 
+  if (projectsResult.error) {
+    throw new Error(
+      `Could not load associated projects: ${projectsResult.error.message}`
+    )
+  }
+
   if (publicMetadataResult.error) {
     throw new Error(
       `Could not load paper Website settings: ${publicMetadataResult.error.message}`
@@ -456,9 +466,6 @@ export default async function PaperPage({
   const links =
     linksResult.data ?? []
 
-  const milestones =
-    milestonesResult.data ?? []
-
   const historyEvents =
     historyResult.data ?? []
 
@@ -469,11 +476,31 @@ export default async function PaperPage({
     citationsResult.data ?? []
 
   const workSessions =
-    workSessionsResult.data ?? []
+    (workSessionsResult.data ??
+      []) as PaperWorkSession[]
 
   const conferencePresentations =
     (conferencePresentationsResult.data ??
       []) as LinkedConferencePresentation[]
+
+  const associatedProjects =
+    ((projectsResult.data ??
+      []) as AssociatedProjectLink[])
+      .map((row) =>
+        Array.isArray(row.projects)
+          ? row.projects[0]
+          : row.projects
+      )
+      .filter(
+        (project): project is AssociatedProject =>
+          project !== null &&
+          project !== undefined
+      )
+      .sort((a, b) =>
+        a.short_title.localeCompare(
+          b.short_title
+        )
+      )
 
   const publicMetadata =
     (publicMetadataResult.data ?? {
@@ -498,6 +525,36 @@ export default async function PaperPage({
         ),
       0
     )
+
+  const automaticStartedDate =
+    workSessions.reduce<
+      string | null
+    >((earliest, session) => {
+      if (!session.activity_label_id) {
+        return earliest
+      }
+
+      const dailyLog =
+        Array.isArray(
+          session.daily_logs
+        )
+          ? session.daily_logs[0]
+          : session.daily_logs
+
+      const logDate =
+        dailyLog?.log_date
+
+      if (!logDate) {
+        return earliest
+      }
+
+      return (
+        earliest === null ||
+        logDate < earliest
+      )
+        ? logDate
+        : earliest
+    }, null)
 
   const normalizedNotes =
     notes.map((note) => {
@@ -526,43 +583,6 @@ export default async function PaperPage({
           'You',
       }
     })
-
-  const today =
-    getAmsterdamDate()
-
-  const plannedMilestones =
-    milestones
-      .filter(
-        (milestone) =>
-          milestone.status ===
-          'planned'
-      )
-      .sort((a, b) => {
-        if (
-          a.target_date &&
-          b.target_date
-        ) {
-          return a.target_date.localeCompare(
-            b.target_date
-          )
-        }
-
-        if (a.target_date) {
-          return -1
-        }
-
-        if (b.target_date) {
-          return 1
-        }
-
-        return a.title.localeCompare(
-          b.title
-        )
-      })
-
-  const nextMilestone =
-    plannedMilestones[0] ??
-    null
 
   const latestHistory =
     historyEvents.length > 0
@@ -707,9 +727,6 @@ export default async function PaperPage({
       )}
 
       <PaperWorkspaceNav
-        milestoneCount={
-          milestones.length
-        }
         historyCount={
           historyEvents.length
         }
@@ -719,26 +736,20 @@ export default async function PaperPage({
         citationCount={
           citationSnapshots.length
         }
+        projectCount={
+          associatedProjects.length
+        }
+        conferenceCount={
+          conferencePresentations.length
+        }
         totalMinutes={
           totalPaperMinutes
         }
       />
 
       <PaperSummary
-        nextMilestone={
-          nextMilestone
-            ? {
-                title:
-                  nextMilestone.title,
-                targetDate:
-                  nextMilestone.target_date,
-                overdue:
-                  nextMilestone.target_date !==
-                    null &&
-                  nextMilestone.target_date <
-                    today,
-              }
-            : null
+        conferenceCount={
+          conferencePresentations.length
         }
         latestHistory={
           latestHistory
@@ -844,19 +855,6 @@ export default async function PaperPage({
             <dl className="mt-4 space-y-4 text-sm">
               <div>
                 <dt className="font-medium text-oxford-charcoal">
-                  Target venue
-                </dt>
-
-                <dd className="mt-1 text-oxford-ash">
-                  {
-                    paper.target_venue ??
-                    '—'
-                  }
-                </dd>
-              </div>
-
-              <div>
-                <dt className="font-medium text-oxford-charcoal">
                   Current venue
                 </dt>
 
@@ -874,10 +872,9 @@ export default async function PaperPage({
                 </dt>
 
                 <dd className="mt-1 text-oxford-ash">
-                  {
-                    paper.started_on ??
-                    '—'
-                  }
+                  {formatDisplayDate(
+                    automaticStartedDate
+                  )}
                 </dd>
               </div>
 
@@ -887,10 +884,9 @@ export default async function PaperPage({
                 </dt>
 
                 <dd className="mt-1 text-oxford-ash">
-                  {
-                    paper.published_on ??
-                    '—'
-                  }
+                  {formatDisplayDate(
+                    paper.published_on
+                  )}
                 </dd>
               </div>
             </dl>
@@ -928,39 +924,132 @@ export default async function PaperPage({
         </div>
       </section>
 
-      <WebsiteSection
-        paperId={paper.id}
-        metadata={publicMetadata}
-        canEdit={
-          access.canEditDashboard
+      <HistorySection
+        paperId={
+          paper.id
         }
-        error={websiteError}
-        saved={
-          websiteSaved === '1'
+        events={
+          historyEvents
         }
-        action={
-          updatePublicPaperMetadata
+        error={
+          historyError
         }
       />
 
-      {conferencePresentations.length >
-        0 && (
-        <section
-          id="conferences"
-          className="mt-6 scroll-mt-6"
-        >
-          <Card>
-            <h2 className="font-serif text-xl font-semibold text-oxford-blue">
-              Conference presentations
-            </h2>
+      <NotesSection
+        paperId={
+          paper.id
+        }
+        notes={
+          normalizedNotes
+        }
+        error={
+          noteError
+        }
+      />
 
-            <p className="mt-2 text-sm leading-6 text-oxford-ash">
-              Read-only presentations
-              linked to this paper.
-              Conference editing remains
-              in the Conferences module.
+      <CitationsSection
+        paperId={
+          paper.id
+        }
+        snapshots={
+          citationSnapshots
+        }
+        error={
+          citationError
+        }
+      />
+
+      <section
+        id="projects"
+        className="mt-8 scroll-mt-6"
+      >
+        <Card>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+                Associated projects
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-oxford-ash">
+                Projects linked to this paper. Project associations are managed in the Projects module.
+              </p>
+            </div>
+
+            {access.hasDashboardAccess && (
+              <ButtonLink
+                href="/projects"
+                variant="secondary"
+              >
+                Projects
+              </ButtonLink>
+            )}
+          </div>
+
+          {associatedProjects.length > 0 ? (
+            <div className="mt-5 divide-y divide-oxford-stone">
+              {associatedProjects.map(
+                (project) => (
+                  <div
+                    key={project.id}
+                    className="py-4 first:pt-0 last:pb-0"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-medium text-oxford-charcoal">
+                        {project.short_title}
+                      </h3>
+
+                      <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium capitalize text-oxford-ash">
+                        {project.status}
+                      </span>
+                    </div>
+
+                    <p className="mt-1 text-sm text-oxford-charcoal">
+                      {project.title}
+                    </p>
+
+                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-oxford-ash">
+                      <span>
+                        {project.funder}
+                      </span>
+
+                      {project.url && (
+                        <a
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-oxford-blue hover:underline"
+                        >
+                          Project website
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
+            <p className="mt-5 text-sm text-oxford-ash">
+              No associated projects.
             </p>
+          )}
+        </Card>
+      </section>
 
+      <section
+        id="conferences"
+        className="mt-6 scroll-mt-6"
+      >
+        <Card>
+          <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+            Conference presentations
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-oxford-ash">
+            Read-only presentations linked to this paper. Conference editing remains in the Conferences module.
+          </p>
+
+          {conferencePresentations.length > 0 ? (
             <div className="mt-5 divide-y divide-oxford-stone">
               {conferencePresentations.map(
                 (presentation) => (
@@ -1042,57 +1131,29 @@ export default async function PaperPage({
                 )
               )}
             </div>
-          </Card>
-        </section>
-      )}
+          ) : (
+            <p className="mt-5 text-sm text-oxford-ash">
+              No associated conference presentations.
+            </p>
+          )}
+        </Card>
+      </section>
 
-      <MilestonesSection
-        paperId={
-          paper.id
+      <WebsiteSection
+        paperId={paper.id}
+        metadata={publicMetadata}
+        canEdit={
+          access.canEditDashboard
         }
-        milestones={
-          milestones
+        error={websiteError}
+        saved={
+          websiteSaved === '1'
         }
-        error={
-          milestoneError
+        action={
+          updatePublicPaperMetadata
         }
       />
 
-      <HistorySection
-        paperId={
-          paper.id
-        }
-        events={
-          historyEvents
-        }
-        error={
-          historyError
-        }
-      />
-
-      <NotesSection
-        paperId={
-          paper.id
-        }
-        notes={
-          normalizedNotes
-        }
-        error={
-          noteError
-        }
-      />
-
-      <CitationsSection
-        paperId={
-          paper.id
-        }
-        snapshots={
-          citationSnapshots
-        }
-        error={
-          citationError
-        }
-      />
     </div>
   )
 }
