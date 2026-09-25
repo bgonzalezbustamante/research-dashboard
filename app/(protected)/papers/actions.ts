@@ -277,17 +277,9 @@ function getPaperPayload(
         formData,
         'abstract'
       ),
-      targetVenue: getOptionalText(
-        formData,
-        'target_venue'
-      ),
       currentVenue: getOptionalText(
         formData,
         'current_venue'
-      ),
-      startedOn: getOptionalDate(
-        formData,
-        'started_on'
       ),
       publishedOn: getOptionalDate(
         formData,
@@ -354,12 +346,10 @@ export async function createPaper(
         'revise-round'
           ? payload.revisionRound
           : null,
-      p_target_venue:
-        payload.targetVenue,
+      p_target_venue: null,
       p_current_venue:
         payload.currentVenue,
-      p_started_on:
-        payload.startedOn,
+      p_started_on: null,
       p_published_on:
         payload.publishedOn,
       p_authors:
@@ -441,12 +431,10 @@ export async function updatePaper(
         'revise-round'
           ? payload.revisionRound
           : null,
-      p_target_venue:
-        payload.targetVenue,
+      p_target_venue: null,
       p_current_venue:
         payload.currentVenue,
-      p_started_on:
-        payload.startedOn,
+      p_started_on: null,
       p_published_on:
         payload.publishedOn,
       p_authors:
