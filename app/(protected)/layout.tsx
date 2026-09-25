@@ -129,8 +129,11 @@ export default async function ProtectedLayout({
                 }
               />
 
-              <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
+              {(isViewer || isCoauthor) && (
+                <div className="hidden h-8 w-px bg-oxford-stone sm:block" />
+              )}
 
+              {(isViewer || isCoauthor) && (
               <div className="flex items-center gap-2">
                 {isViewer && (
                   <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
@@ -143,15 +146,8 @@ export default async function ProtectedLayout({
                     Coauthor
                   </span>
                 )}
-
-                <Link
-                  href="/account"
-                  className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal transition hover:border-oxford-blue hover:text-oxford-blue"
-                >
-                  {fullName || 'Account'}
-                </Link>
-
               </div>
+              )}
             </div>
           </div>
         </div>
@@ -177,6 +173,9 @@ export default async function ProtectedLayout({
 
       <OwnerUtilityNavigation
         showOwnerLinks={isOwner}
+        accountLabel={
+          fullName || 'Account'
+        }
       />
 
       <SiteFooter />
