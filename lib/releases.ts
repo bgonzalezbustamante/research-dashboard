@@ -42,7 +42,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Conferences',
         items: [
-          'Added a standalone Conferences module with full and short event names, presentation-specific ordered authors, date, location, type and optional URL; conference notes remain private.',
+          'Added a standalone Conferences module with full and short event names, presentation-specific ordered authors, conference date ranges, location, constrained presentation types (Conference paper, Keynote, Workshop) and optional URL; conference notes remain private.',
           'Kept the optional paper relationship internal while showing linked presentations read-only inside the relevant Paper workspace; editing remains in Conferences.',
           'Added an anonymous-safe conference listing that excludes notes, owner metadata and the private paper relationship.',
         ],
