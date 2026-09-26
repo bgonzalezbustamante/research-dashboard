@@ -120,6 +120,14 @@ export default function PaperForm({
                 Published
               </option>
 
+              <option value="reframing">
+                Reframing
+              </option>
+
+              <option value="vor-typesetting">
+                VOR typesetting
+              </option>
+
               <option value="standby">
                 Standby
               </option>

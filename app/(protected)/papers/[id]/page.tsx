@@ -31,6 +31,8 @@ type PaperStatus =
   | 'under-review'
   | 'revise-round'
   | 'published'
+  | 'reframing'
+  | 'vor-typesetting'
   | 'standby'
   | 'deprecated'
 

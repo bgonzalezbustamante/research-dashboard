@@ -3,6 +3,8 @@ type PaperStatus =
   | 'under-review'
   | 'revise-round'
   | 'published'
+  | 'reframing'
+  | 'vor-typesetting'
   | 'standby'
   | 'deprecated'
 
@@ -36,6 +38,16 @@ const statusStyles: Record<
     label: 'Published',
     className:
       'bg-green-50 text-green-900 border-green-200',
+  },
+  reframing: {
+    label: 'Reframing',
+    className:
+      'bg-violet-50 text-violet-900 border-violet-200',
+  },
+  'vor-typesetting': {
+    label: 'VOR typesetting',
+    className:
+      'bg-cyan-50 text-cyan-900 border-cyan-200',
   },
   standby: {
     label: 'Standby',
