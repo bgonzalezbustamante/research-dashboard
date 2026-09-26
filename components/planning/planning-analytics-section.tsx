@@ -20,6 +20,8 @@ type AnalyticsAllocation = {
     BlockedType | null
   committed_days: number
   flowsavvy_added: boolean
+  flowsavvy_count: number
+  flowsavvy_total: number
   paper_id: string | null
   paper_short_title:
     string | null
@@ -53,6 +55,7 @@ type PeriodStats = {
   blockedDays: number
   allocationCount: number
   flowsavvyCount: number
+  flowsavvyTotal: number
 }
 
 const MINUTES_PER_PLANNED_DAY =
@@ -244,10 +247,20 @@ function getPeriodStats(
       allocations.length,
 
     flowsavvyCount:
-      allocations.filter(
-        (allocation) =>
-          allocation.flowsavvy_added
-      ).length,
+      allocations.reduce(
+        (total, allocation) =>
+          total +
+          allocation.flowsavvy_count,
+        0
+      ),
+
+    flowsavvyTotal:
+      allocations.reduce(
+        (total, allocation) =>
+          total +
+          allocation.flowsavvy_total,
+        0
+      ),
   }
 }
 
@@ -667,7 +680,7 @@ export default function PlanningAnalyticsSection({
                           }
                           /
                           {
-                            stats.allocationCount
+                            stats.flowsavvyTotal
                           }
                         </strong>
                       </span>
