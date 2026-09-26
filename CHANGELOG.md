@@ -31,6 +31,7 @@
 - Removed manual display ordering and ordered the public publication contract by publication date, newest first, with undated papers following dated publications.
 - Replaced free-text Publication index with a controlled optional category: WoS-SSCI, Scopus, WoS-ESCI, Book chapter, SciELO/Latindex, Working paper, or Preprint.
 - Expanded the Paper workflow status vocabulary to Writing, Under review, Revise round, Published, Reframing, VOR typesetting, Standby, and Deprecated; the two new statuses are supported consistently by forms, filters, badges, Dashboard rendering, RPC validation, and the database constraint.
+- Added Project and SI File to Paper Research links for owners and coauthors. Both are exposed as nullable `project_url` and `si_file_url` fields in the public paper list/detail RPCs, while Overleaf remains private and absent from all anonymous publication contracts.
 - Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 - Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
