@@ -13,6 +13,9 @@ type Milestone = {
   id: string
   title: string
   target_date: string | null
+  committed_days: number | null
+  flowsavvy_added: boolean
+  flowsavvy_added_at: string | null
   completed_on: string | null
   status: string
   notes: string | null
@@ -311,6 +314,56 @@ export default function MilestonesSection({
 
             <div>
               <label
+                htmlFor="milestone_committed_days"
+                className={labelClass}
+              >
+                Committed days
+              </label>
+
+              <select
+                id="milestone_committed_days"
+                name="committed_days"
+                defaultValue=""
+                className={inputClass}
+              >
+                <option value="">
+                  No planning allocation
+                </option>
+                <option value="5">
+                  5 days
+                </option>
+                <option value="10">
+                  10 days
+                </option>
+                <option value="15">
+                  15 days
+                </option>
+              </select>
+
+              <p className="mt-1 text-xs text-oxford-ash">
+                A capacity-bearing
+                milestone appears
+                automatically in the
+                half-month containing
+                its target date.
+              </p>
+            </div>
+
+            <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
+              <input
+                type="checkbox"
+                name="flowsavvy_added"
+                className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+              />
+
+              <span>
+                Already added to
+                FlowSavvy/Calendar
+              </span>
+            </label>
+
+            <div>
+              <label
                 htmlFor="milestone_status"
                 className={
                   labelClass
@@ -464,6 +517,20 @@ export default function MilestonesSection({
                               milestone.target_date
                             )}
                           </span>
+
+                          {milestone.committed_days !==
+                            null && (
+                            <span>
+                              Planning:{' '}
+                              {
+                                milestone.committed_days
+                              }
+                              d ·{' '}
+                              {milestone.flowsavvy_added
+                                ? 'FlowSavvy added'
+                                : 'FlowSavvy not added'}
+                            </span>
+                          )}
 
                           {milestone.status ===
                             'completed' && (
@@ -661,6 +728,38 @@ export default function MilestonesSection({
 
                           <div>
                             <label
+                              htmlFor={`milestone-days-${milestone.id}`}
+                              className={labelClass}
+                            >
+                              Committed days
+                            </label>
+
+                            <select
+                              id={`milestone-days-${milestone.id}`}
+                              name="committed_days"
+                              defaultValue={
+                                milestone.committed_days ??
+                                ''
+                              }
+                              className={inputClass}
+                            >
+                              <option value="">
+                                No planning allocation
+                              </option>
+                              <option value="5">
+                                5 days
+                              </option>
+                              <option value="10">
+                                10 days
+                              </option>
+                              <option value="15">
+                                15 days
+                              </option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label
                               htmlFor={`milestone-status-${milestone.id}`}
                               className={
                                 labelClass
@@ -716,6 +815,25 @@ export default function MilestonesSection({
                               }
                             />
                           </div>
+
+                          <label className="md:col-span-2 flex items-start gap-3 text-sm text-oxford-charcoal">
+                            <input
+                              type="checkbox"
+                              name="flowsavvy_added"
+                              defaultChecked={
+                                milestone.flowsavvy_added
+                              }
+                              className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+                            />
+
+                            <span>
+                              Added to
+                              FlowSavvy/Calendar
+                              <span className="block text-xs text-oxford-ash">
+                                Changing the target date or committed days resets this state.
+                              </span>
+                            </span>
+                          </label>
 
                           <div className="md:col-span-2">
                             <label
