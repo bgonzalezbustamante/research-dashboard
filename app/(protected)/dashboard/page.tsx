@@ -88,6 +88,20 @@ type DashboardPageProps = {
 const MINUTES_PER_PLANNED_DAY =
   8 * 60
 
+const PAPER_ATTENTION_STATUS_PRIORITY: Record<
+  PaperStatus,
+  number
+> = {
+  'revise-round': 0,
+  reframing: 1,
+  writing: 2,
+  'vor-typesetting': 3,
+  'under-review': 4,
+  published: 5,
+  standby: 5,
+  deprecated: 5,
+}
+
 function getAmsterdamDate() {
   const parts =
     new Intl.DateTimeFormat(
@@ -869,9 +883,6 @@ export default async function DashboardPage({
   const weekGrossMinutes =
     weekSummary.grossMinutes
 
-  const weekBreakMinutes =
-    weekSummary.breakMinutes
-
   const weekNetMinutes =
     weekSummary.netMinutes
 
@@ -1059,9 +1070,17 @@ export default async function DashboardPage({
           aMilestone?.target_date &&
           bMilestone?.target_date
         ) {
-          return aMilestone.target_date.localeCompare(
-            bMilestone.target_date
-          )
+          const milestoneComparison =
+            aMilestone.target_date.localeCompare(
+              bMilestone.target_date
+            )
+
+          if (
+            milestoneComparison !==
+            0
+          ) {
+            return milestoneComparison
+          }
         }
 
         if (
@@ -1077,28 +1096,14 @@ export default async function DashboardPage({
         }
 
         const aPriority =
-          a.status ===
-            'revise-round'
-            ? 0
-            : a.status ===
-                'writing'
-              ? 1
-              : a.status ===
-                  'under-review'
-                ? 2
-                : 3
+          PAPER_ATTENTION_STATUS_PRIORITY[
+            a.status
+          ]
 
         const bPriority =
-          b.status ===
-            'revise-round'
-            ? 0
-            : b.status ===
-                'writing'
-              ? 1
-              : b.status ===
-                  'under-review'
-                ? 2
-                : 3
+          PAPER_ATTENTION_STATUS_PRIORITY[
+            b.status
+          ]
 
         if (
           aPriority !==
@@ -1116,7 +1121,7 @@ export default async function DashboardPage({
       })
       .slice(
         0,
-        5
+        10
       )
 
   const planningPeriodLabel =
@@ -1275,6 +1280,15 @@ export default async function DashboardPage({
                 >
                   {formatDuration(
                     weekGrossMinutes
+                  )}
+                </div>
+
+                <div
+                  className={`mt-1 text-xs ${workloadPresentation.detailClass}`}
+                >
+                  Net{' '}
+                  {formatDuration(
+                    weekNetMinutes
                   )}
                 </div>
               </div>
@@ -1520,96 +1534,7 @@ export default async function DashboardPage({
           </div>
         </section>
 
-        <section className="rounded-lg border border-oxford-stone bg-white p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-                Working hours
-              </div>
-
-              <h2 className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
-                This week
-              </h2>
-            </div>
-
-            <span className="text-xs text-oxford-ash">
-              {formatDate(
-                weekStart
-              )}{' '}
-              –{' '}
-              {formatDate(
-                weekEnd
-              )}
-            </span>
-          </div>
-
-          <div className="mt-5 grid grid-cols-3 gap-3">
-            <div className="rounded-lg border border-oxford-stone bg-oxford-shell px-3 py-3">
-              <div className="text-xs uppercase tracking-wide text-oxford-ash">
-                Gross
-              </div>
-
-              <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                {formatDuration(
-                  weekGrossMinutes
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3">
-              <div className="text-xs uppercase tracking-wide text-amber-800">
-                Break
-              </div>
-
-              <div className="mt-1 font-serif text-lg font-semibold text-amber-900">
-                {formatDuration(
-                  weekBreakMinutes
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-3">
-              <div className="text-xs uppercase tracking-wide text-green-800">
-                Net
-              </div>
-
-              <div className="mt-1 font-serif text-lg font-semibold text-green-900">
-                {formatDuration(
-                  weekNetMinutes
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-oxford-ash">
-            <span>
-              {
-                weekSummary.workingDays
-              }{' '}
-              working{' '}
-              {weekSummary.workingDays ===
-              1
-                ? 'day'
-                : 'days'}
-            </span>
-
-            <span>
-              {weekCoffees}{' '}
-              coffees
-            </span>
-          </div>
-
-          <div className="mt-4">
-            <ButtonLink
-              href={`/hours?date=${today}&period=week`}
-              variant="secondary"
-            >
-              Open working hours
-            </ButtonLink>
-          </div>
-        </section>
-
-        <section className="rounded-lg border border-oxford-stone bg-white p-5">
+        <section className="rounded-lg border border-oxford-stone bg-white p-5 xl:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
@@ -1637,68 +1562,106 @@ export default async function DashboardPage({
               display.
             </p>
           ) : (
-            <div className="mt-5 divide-y divide-oxford-stone">
-              {papersForAttention.map(
-                (paper) => {
-                  const milestone =
-                    nextMilestoneByPaper.get(
-                      paper.id
-                    )
+            <div className="mt-5 grid gap-x-8 xl:grid-cols-2">
+              {[
+                papersForAttention.slice(
+                  0,
+                  5
+                ),
+                papersForAttention.slice(
+                  5,
+                  10
+                ),
+              ].map(
+                (
+                  column,
+                  columnIndex
+                ) => (
+                  <div
+                    key={
+                      columnIndex
+                    }
+                    className="divide-y divide-oxford-stone"
+                  >
+                    {column.map(
+                      (
+                        paper,
+                        paperIndex
+                      ) => {
+                        const milestone =
+                          nextMilestoneByPaper.get(
+                            paper.id
+                          )
 
-                  return (
-                    <Link
-                      key={
-                        paper.id
-                      }
-                      href={`/papers/${paper.id}`}
-                      className="flex items-start justify-between gap-4 py-3 first:pt-0 last:pb-0 hover:text-oxford-blue"
-                    >
-                      <div className="min-w-0">
-                        <div className="truncate font-medium text-oxford-blue">
-                          {
-                            paper.short_title
-                          }
-                        </div>
+                        const priority =
+                          columnIndex *
+                            5 +
+                          paperIndex +
+                          1
 
-                        {milestone ? (
-                          <div className="mt-1 text-xs text-oxford-ash">
-                            {
-                              milestone.title
+                        return (
+                          <Link
+                            key={
+                              paper.id
                             }
-                            {' · '}
-                            {formatDate(
-                              milestone.target_date
-                            )}
-                          </div>
-                        ) : (
-                          <div className="mt-1 text-xs text-oxford-ash">
-                            No planned
-                            milestone
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="shrink-0">
-                        <StatusBadge
-                          status={
-                            paper.status
-                          }
-                        />
-
-                        {paper.status ===
-                          'revise-round' &&
-                          paper.revision_round && (
-                            <div className="mt-1 text-right text-xs text-oxford-ash">
-                              Round{' '}
+                            href={`/papers/${paper.id}`}
+                            className="flex items-start gap-3 py-3 first:pt-0 last:pb-0 hover:text-oxford-blue"
+                          >
+                            <div className="w-5 shrink-0 pt-0.5 text-right text-xs font-medium tabular-nums text-oxford-ash">
                               {
-                                paper.revision_round
+                                priority
                               }
                             </div>
-                          )}
-                      </div>
-                    </Link>
-                  )
-                }
+
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate font-medium text-oxford-blue">
+                                {
+                                  paper.short_title
+                                }
+                              </div>
+
+                              {milestone ? (
+                                <div className="mt-1 text-xs text-oxford-ash">
+                                  {
+                                    milestone.title
+                                  }
+                                  {' · '}
+                                  {formatDate(
+                                    milestone.target_date
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="mt-1 text-xs text-oxford-ash">
+                                  No planned
+                                  milestone
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="shrink-0">
+                              <StatusBadge
+                                status={
+                                  paper.status
+                                }
+                              />
+
+                              {paper.status ===
+                                'revise-round' &&
+                                paper.revision_round && (
+                                  <div className="mt-1 text-right text-xs text-oxford-ash">
+                                    Round{' '}
+                                    {
+                                      paper.revision_round
+                                    }
+                                  </div>
+                                )}
+                            </div>
+                          </Link>
+                        )
+                      }
+                    )}
+                  </div>
+                )
               )}
             </div>
           )}
