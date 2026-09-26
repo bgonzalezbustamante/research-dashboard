@@ -6,6 +6,12 @@ import PlanningWorkspace from '@/components/planning/planning-workspace'
 import StandbyPapersCard from '@/components/planning/standby-papers-card'
 import PageHeader from '@/components/page-header'
 import ButtonLink from '@/components/ui/button-link'
+import {
+  aggregateMilestonesByPaperAndPeriod,
+  getPlanningPeriodEnd,
+  getPlanningPeriodStartsForYear,
+  type PlanningMilestone,
+} from '@/lib/planning/milestone-planning'
 import { createClient } from '@/lib/supabase/server'
 
 type PlanningPageProps = {
@@ -27,13 +33,18 @@ type AllocationType =
   | 'paper'
   | 'blocked'
 
+type AllocationSource =
+  | 'milestone'
+  | 'blocked'
+  | 'legacy'
+
 type BlockedType =
   | 'teaching'
   | 'conference'
   | 'holiday'
   | 'administrative'
 
-type PlanningPeriodRow = {
+type StoredPlanningPeriodRow = {
   id: string
   period_start: string
   period_end: string
@@ -41,17 +52,21 @@ type PlanningPeriodRow = {
 
 type PlanningAllocationView = {
   id: string
-  planning_period_id: string
+  period_start: string
   allocation_type: AllocationType
+  source: AllocationSource
   blocked_type: BlockedType | null
   committed_days: number
   flowsavvy_added: boolean
   flowsavvy_added_at: string | null
+  flowsavvy_count: number
+  flowsavvy_total: number
   notes: string | null
   paper_id: string | null
   paper_short_title: string | null
   paper_title: string | null
   paper_archived: boolean
+  milestones: PlanningMilestone[]
 }
 
 type WorkSessionRow = {
@@ -140,32 +155,6 @@ function getCurrentPeriodStart() {
     0,
     8
   )}${day <= 15 ? '01' : '16'}`
-}
-
-function getPeriodEnd(
-  periodStart: string
-) {
-  const [year, month, day] =
-    periodStart
-      .split('-')
-      .map(Number)
-
-  if (day === 1) {
-    return `${periodStart.slice(
-      0,
-      8
-    )}15`
-  }
-
-  return new Date(
-    Date.UTC(
-      year,
-      month,
-      0
-    )
-  )
-    .toISOString()
-    .slice(0, 10)
 }
 
 function getPreviousPeriod(
@@ -298,7 +287,7 @@ export default async function PlanningPage({
       : currentPeriodStart
 
   const selectedPeriodEnd =
-    getPeriodEnd(
+    getPlanningPeriodEnd(
       selectedPeriodStart
     )
 
@@ -313,7 +302,12 @@ export default async function PlanningPage({
     )
 
   const selectedYear =
-    selectedPeriodStart.slice(0, 4)
+    Number(
+      selectedPeriodStart.slice(
+        0,
+        4
+      )
+    )
 
   const yearStart =
     `${selectedYear}-01-01`
@@ -328,6 +322,7 @@ export default async function PlanningPage({
     periodsResult,
     papersResult,
     dailyLogsResult,
+    milestonesResult,
   ] = await Promise.all([
     supabase
       .from('planning_periods')
@@ -387,6 +382,45 @@ export default async function PlanningPage({
           ascending: true,
         }
       ),
+
+    supabase
+      .from('paper_milestones')
+      .select(`
+        id,
+        paper_id,
+        title,
+        target_date,
+        committed_days,
+        flowsavvy_added,
+        flowsavvy_added_at,
+        papers (
+          short_title,
+          title,
+          archived_at
+        )
+      `)
+      .eq(
+        'status',
+        'planned'
+      )
+      .not(
+        'committed_days',
+        'is',
+        null
+      )
+      .not(
+        'target_date',
+        'is',
+        null
+      )
+      .gte(
+        'target_date',
+        yearStart
+      )
+      .lte(
+        'target_date',
+        yearEnd
+      ),
   ])
 
   if (periodsResult.error) {
@@ -407,16 +441,67 @@ export default async function PlanningPage({
     )
   }
 
-  const periods =
+  if (milestonesResult.error) {
+    throw new Error(
+      `Could not load milestone-backed planning: ${milestonesResult.error.message}`
+    )
+  }
+
+  const storedPeriods =
     (periodsResult.data ??
-      []) as PlanningPeriodRow[]
+      []) as StoredPlanningPeriodRow[]
 
   const papers =
     (papersResult.data ??
       []) as PaperOption[]
 
-  const periodIds =
-    periods.map(
+  const storedPeriodByStart =
+    new Map(
+      storedPeriods.map(
+        (period) => [
+          period.period_start,
+          period,
+        ]
+      )
+    )
+
+  const periodStartById =
+    new Map(
+      storedPeriods.map(
+        (period) => [
+          period.id,
+          period.period_start,
+        ]
+      )
+    )
+
+  const periods =
+    getPlanningPeriodStartsForYear(
+      selectedYear
+    ).map(
+      (periodStart) => {
+        const stored =
+          storedPeriodByStart.get(
+            periodStart
+          )
+
+        return {
+          id:
+            stored?.id ??
+            `virtual:${periodStart}`,
+          period_start:
+            periodStart,
+          period_end:
+            stored?.period_end ??
+            getPlanningPeriodEnd(
+              periodStart
+            ),
+        }
+      }
+    )
+
+  const storedPeriodIds =
+    storedPeriods.map(
       (period) => period.id
     )
 
@@ -425,10 +510,13 @@ export default async function PlanningPage({
       dailyLogsResult.data ?? []
     ).map((log) => log.id)
 
-  let allocationRows:
+  let manualAllocations:
     PlanningAllocationView[] = []
 
-  if (periodIds.length > 0) {
+  if (
+    storedPeriodIds.length >
+    0
+  ) {
     const { data, error } =
       await supabase
         .from(
@@ -454,7 +542,7 @@ export default async function PlanningPage({
         `)
         .in(
           'planning_period_id',
-          periodIds
+          storedPeriodIds
         )
         .order(
           'sort_order',
@@ -471,9 +559,18 @@ export default async function PlanningPage({
       )
     }
 
-    allocationRows =
-      (data ?? []).map(
+    manualAllocations =
+      (data ?? []).flatMap(
         (allocation) => {
+          const periodStart =
+            periodStartById.get(
+              allocation.planning_period_id
+            )
+
+          if (!periodStart) {
+            return []
+          }
+
           const paper =
             Array.isArray(
               allocation.papers
@@ -481,12 +578,17 @@ export default async function PlanningPage({
               ? allocation.papers[0]
               : allocation.papers
 
-          return {
+          return [{
             id: allocation.id,
-            planning_period_id:
-              allocation.planning_period_id,
+            period_start:
+              periodStart,
             allocation_type:
               allocation.allocation_type as AllocationType,
+            source:
+              allocation.allocation_type ===
+                'paper'
+                ? 'legacy'
+                : 'blocked',
             blocked_type:
               allocation.blocked_type as BlockedType | null,
             committed_days:
@@ -495,6 +597,11 @@ export default async function PlanningPage({
               allocation.flowsavvy_added,
             flowsavvy_added_at:
               allocation.flowsavvy_added_at,
+            flowsavvy_count:
+              allocation.flowsavvy_added
+                ? 1
+                : 0,
+            flowsavvy_total: 1,
             notes: allocation.notes,
             paper_id:
               allocation.paper_id,
@@ -506,10 +613,89 @@ export default async function PlanningPage({
               Boolean(
                 paper?.archived_at
               ),
-          }
+            milestones: [],
+          }]
         }
       )
   }
+
+  const milestoneRows:
+    PlanningMilestone[] =
+    (milestonesResult.data ??
+      []).flatMap(
+      (milestone) => {
+        const paper =
+          Array.isArray(
+            milestone.papers
+          )
+            ? milestone.papers[0]
+            : milestone.papers
+
+        if (
+          !milestone.target_date ||
+          !milestone.committed_days ||
+          !paper
+        ) {
+          return []
+        }
+
+        return [{
+          id: milestone.id,
+          paper_id:
+            milestone.paper_id,
+          title:
+            milestone.title,
+          target_date:
+            milestone.target_date,
+          committed_days:
+            milestone.committed_days,
+          flowsavvy_added:
+            milestone.flowsavvy_added,
+          flowsavvy_added_at:
+            milestone.flowsavvy_added_at,
+          paper_short_title:
+            paper.short_title,
+          paper_title:
+            paper.title,
+          paper_archived:
+            Boolean(
+              paper.archived_at
+            ),
+        }]
+      }
+    )
+
+  const milestoneAllocations =
+    aggregateMilestonesByPaperAndPeriod(
+      milestoneRows
+    )
+
+  const milestoneKeys =
+    new Set(
+      milestoneAllocations.map(
+        (allocation) =>
+          `${allocation.period_start}:${allocation.paper_id}`
+      )
+    )
+
+  const effectiveManualAllocations =
+    manualAllocations.filter(
+      (allocation) =>
+        !(
+          allocation.source ===
+            'legacy' &&
+          allocation.paper_id &&
+          milestoneKeys.has(
+            `${allocation.period_start}:${allocation.paper_id}`
+          )
+        )
+    )
+
+  const combinedAllocations:
+    PlanningAllocationView[] = [
+      ...effectiveManualAllocations,
+      ...milestoneAllocations,
+    ]
 
   let workSessions:
     WorkSessionRow[] = []
@@ -545,17 +731,46 @@ export default async function PlanningPage({
     >()
 
   for (const allocation of
-    allocationRows) {
+    combinedAllocations) {
     const existing =
       allocationsByPeriod.get(
-        allocation.planning_period_id
+        allocation.period_start
       ) ?? []
 
     existing.push(allocation)
 
     allocationsByPeriod.set(
-      allocation.planning_period_id,
+      allocation.period_start,
       existing
+    )
+  }
+
+  for (const allocations of
+    allocationsByPeriod.values()) {
+    allocations.sort(
+      (a, b) => {
+        if (
+          a.allocation_type !==
+          b.allocation_type
+        ) {
+          return a.allocation_type ===
+            'paper'
+            ? -1
+            : 1
+        }
+
+        return (
+          (
+            a.paper_short_title ??
+            a.blocked_type ??
+            ''
+          ).localeCompare(
+            b.paper_short_title ??
+            b.blocked_type ??
+            ''
+          )
+        )
+      }
     )
   }
 
@@ -569,7 +784,7 @@ export default async function PlanningPage({
       allocations:
         (
           allocationsByPeriod.get(
-            period.id
+            period.period_start
           ) ?? []
         ).map((allocation) => ({
           id: allocation.id,
@@ -581,6 +796,10 @@ export default async function PlanningPage({
             allocation.committed_days,
           flowsavvy_added:
             allocation.flowsavvy_added,
+          flowsavvy_count:
+            allocation.flowsavvy_count,
+          flowsavvy_total:
+            allocation.flowsavvy_total,
           paper_id:
             allocation.paper_id,
           paper_short_title:
@@ -588,43 +807,10 @@ export default async function PlanningPage({
         })),
     }))
 
-  const selectedPlanningPeriod =
-    periods.find(
-      (period) =>
-        period.period_start ===
-        selectedPeriodStart
-    )
-
   const selectedAllocations =
-    selectedPlanningPeriod
-      ? allocationsByPeriod.get(
-          selectedPlanningPeriod.id
-        ) ?? []
-      : []
-
-  const allocatedPaperIds =
-    new Set(
-      selectedAllocations
-        .filter(
-          (allocation) =>
-            allocation.allocation_type ===
-              'paper' &&
-            allocation.paper_id !== null
-        )
-        .map(
-          (allocation) =>
-            allocation.paper_id as string
-        )
-    )
-
-  const availablePapers =
-    papers.filter(
-      (paper) =>
-        paper.archived_at === null &&
-        !allocatedPaperIds.has(
-          paper.id
-        )
-    )
+    allocationsByPeriod.get(
+      selectedPeriodStart
+    ) ?? []
 
   const standbyPapers =
     papers
@@ -691,32 +877,6 @@ export default async function PlanningPage({
           )
       )
 
-  const workspaceAllocations =
-    selectedAllocations.map(
-      (allocation) => ({
-        id: allocation.id,
-        allocation_type:
-          allocation.allocation_type,
-        blocked_type:
-          allocation.blocked_type,
-        committed_days:
-          allocation.committed_days,
-        flowsavvy_added:
-          allocation.flowsavvy_added,
-        flowsavvy_added_at:
-          allocation.flowsavvy_added_at,
-        notes: allocation.notes,
-        paper_id:
-          allocation.paper_id,
-        paper_short_title:
-          allocation.paper_short_title,
-        paper_title:
-          allocation.paper_title,
-        paper_archived:
-          allocation.paper_archived,
-      })
-    )
-
   const periodLabel =
     formatPeriodLabel(
       selectedPeriodStart,
@@ -731,7 +891,7 @@ export default async function PlanningPage({
     <div>
       <PageHeader
         title="Biweekly Planning"
-        description="Allocate research capacity across papers and blocked commitments in half-month planning periods."
+        description="Research capacity is derived from capacity-bearing Paper Milestones; add Blocked Time manually for other commitments."
       />
 
       <div className="mb-6 grid gap-6 lg:grid-cols-2 lg:items-stretch">
@@ -785,7 +945,7 @@ export default async function PlanningPage({
 
         <PlanningPeriodLoad
           allocations={
-            workspaceAllocations
+            selectedAllocations
           }
         />
       </div>
@@ -802,10 +962,7 @@ export default async function PlanningPage({
           selectedPeriodEnd
         }
         allocations={
-          workspaceAllocations
-        }
-        availablePapers={
-          availablePapers
+          selectedAllocations
         }
         error={params.error}
       />
