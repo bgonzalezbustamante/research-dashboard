@@ -59,6 +59,13 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'Dashboard priorities',
+        items: [
+          'Expanded Papers requiring attention to a numbered top 10 across two columns, keeping planned milestone dates first and refining status priority to Revise round, Reframing, Writing, VOR typesetting, Under review, then other statuses.',
+          'Simplified the upper Dashboard by removing the redundant Working Hours card and showing net weekly time directly beneath Gross workload in Weekly signals.',
+        ],
+      },
+      {
         title: 'Public data and analytics',
         items: [
           'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication, project and teaching assets resolved by the academic website.',
