@@ -11,6 +11,8 @@ type PaperStatus =
   | 'under-review'
   | 'revise-round'
   | 'published'
+  | 'reframing'
+  | 'vor-typesetting'
   | 'standby'
   | 'deprecated'
 
@@ -110,6 +112,14 @@ const statusOptions = [
   {
     value: 'published',
     label: 'Published',
+  },
+  {
+    value: 'reframing',
+    label: 'Reframing',
+  },
+  {
+    value: 'vor-typesetting',
+    label: 'VOR typesetting',
   },
   {
     value: 'standby',
