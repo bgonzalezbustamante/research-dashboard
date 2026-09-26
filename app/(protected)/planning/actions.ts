@@ -8,10 +8,6 @@ import { createClient } from '@/lib/supabase/server'
 type ServerSupabaseClient =
   Awaited<ReturnType<typeof createClient>>
 
-type AllocationType =
-  | 'paper'
-  | 'blocked'
-
 type BlockedType =
   | 'teaching'
   | 'conference'
@@ -255,25 +251,6 @@ function getCheckbox(
     value === 'on' ||
     value === 'true'
   )
-}
-
-function getAllocationType(
-  formData: FormData
-): AllocationType | null {
-  const value =
-    getRequiredText(
-      formData,
-      'allocation_type'
-    )
-
-  if (
-    value === 'paper' ||
-    value === 'blocked'
-  ) {
-    return value
-  }
-
-  return null
 }
 
 function getBlockedType(
