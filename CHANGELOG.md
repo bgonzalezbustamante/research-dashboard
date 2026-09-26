@@ -91,6 +91,15 @@
 - Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, start/end dates, constrained presentation type, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
 - Added Conferences pagination with 10 presentations per page while retaining full-dataset KPI counts and the existing upcoming-first ordering.
 
+`dashboard priorities and weekly signals`
+
+- Kept the earliest dated planned milestone as the strongest criterion for Papers requiring attention.
+- Refined the status tie-breaker to Revise round → Reframing → Writing → VOR typesetting → Under review → all remaining statuses, with Recently updated used after equal priority.
+- Applied the status tie-breaker when two papers share the same planned milestone date rather than relying implicitly on the source query order.
+- Expanded Papers requiring attention from five to ten papers, displayed as an explicitly numbered 1–10 priority list in two columns of five across the full Dashboard width.
+- Removed the redundant Working Hours card from the upper Dashboard because Weekly signals already summarises weekly workload.
+- Added compact net weekly workload beneath Gross workload in Weekly signals while retaining the gross-workload range indicator.
+
 `release notes`
 
 - Added pagination to the public Release Notes page with 3 releases per page.
