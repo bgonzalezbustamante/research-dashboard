@@ -29,6 +29,7 @@ export const releases: ReleaseNote[] = [
           'Integrated Public paper curation directly into each Paper workspace, with stable slugs, Featured state, Publication index, preferred citation and Key highlights while reusing canonical Paper metadata.',
           'Reorganised Paper workspaces around submission/revision history, milestones, citations, associated projects and conference presentations; restored Milestones, deprecated standalone Notes and Target venue from the active UI, and moved Website settings to the bottom.',
           'Automated Paper Started dates from the earliest Activity-labelled linked work session; Papers now default to Published most recently, with unpublished papers following by Started date.',
+          'Expanded Paper workflow statuses with Reframing and VOR typesetting for manuscripts that need substantive repositioning or final version-of-record production.',
           'Retired the standalone Website editing page, consolidated bottom utilities, and kept anonymous-safe publication list/detail contracts ordered by publication date.',
           'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
         ],
