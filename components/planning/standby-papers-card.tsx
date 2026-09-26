@@ -21,9 +21,10 @@ export default function StandbyPapersCard({
       </h2>
 
       <p className="mt-1 text-sm text-oxford-ash">
-        Open a standby paper before
-        deciding whether to allocate
-        capacity to it in this period.
+        Open a standby paper to add
+        or revise a capacity-bearing
+        milestone when it should
+        return to active planning.
       </p>
 
       {papers.length === 0 ? (
