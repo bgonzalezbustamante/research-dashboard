@@ -14,6 +14,8 @@ type CoauthorTitleEditorProps = {
   overleafUrl: string
   dataverseUrl: string
   githubUrl: string
+  projectUrl: string
+  siFileUrl: string
   preprintUrl: string
   publicationUrl: string
   error?: string
@@ -36,6 +38,8 @@ export default function CoauthorTitleEditor({
   overleafUrl,
   dataverseUrl,
   githubUrl,
+  projectUrl,
+  siFileUrl,
   preprintUrl,
   publicationUrl,
   error,
@@ -250,6 +254,38 @@ export default function CoauthorTitleEditor({
                   name="dataverse_url"
                   type="url"
                   defaultValue={dataverseUrl}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="coauthor-project-url"
+                  className={labelClass}
+                >
+                  Project
+                </label>
+                <input
+                  id="coauthor-project-url"
+                  name="project_url"
+                  type="url"
+                  defaultValue={projectUrl}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="coauthor-si-file-url"
+                  className={labelClass}
+                >
+                  SI File
+                </label>
+                <input
+                  id="coauthor-si-file-url"
+                  name="si_file_url"
+                  type="url"
+                  defaultValue={siFileUrl}
                   className={inputClass}
                 />
               </div>

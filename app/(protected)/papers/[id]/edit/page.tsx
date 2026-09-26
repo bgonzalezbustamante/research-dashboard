@@ -180,6 +180,10 @@ export default async function EditPaperPage({
             getLink('dataverse'),
           githubUrl:
             getLink('github'),
+          projectUrl:
+            getLink('project'),
+          siFileUrl:
+            getLink('si-file'),
           preprintUrl:
             getLink('preprint'),
           publicationUrl,

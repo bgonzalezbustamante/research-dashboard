@@ -151,6 +151,16 @@ function parseLinks(formData: FormData) {
       label: 'GitHub',
     },
     {
+      field: 'project_url',
+      link_type: 'project',
+      label: 'Project',
+    },
+    {
+      field: 'si_file_url',
+      link_type: 'si-file',
+      label: 'SI File',
+    },
+    {
       field: 'preprint_url',
       link_type: 'preprint',
       label: 'Preprint',

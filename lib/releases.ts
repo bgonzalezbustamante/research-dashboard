@@ -30,6 +30,7 @@ export const releases: ReleaseNote[] = [
           'Reorganised Paper workspaces around submission/revision history, milestones, citations, associated projects and conference presentations; restored Milestones, deprecated standalone Notes and Target venue from the active UI, and moved Website settings to the bottom.',
           'Automated Paper Started dates from the earliest Activity-labelled linked work session; Papers now default to Published most recently, with unpublished papers following by Started date.',
           'Expanded Paper workflow statuses with Reframing and VOR typesetting for manuscripts that need substantive repositioning or final version-of-record production.',
+          'Expanded Paper research links with public Project and SI File URLs while keeping Overleaf private to the Dashboard.',
           'Retired the standalone Website editing page, consolidated bottom utilities, and kept anonymous-safe publication list/detail contracts ordered by publication date.',
           'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
         ],

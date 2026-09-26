@@ -15,6 +15,8 @@ type PaperFormValues = {
   overleafUrl?: string
   dataverseUrl?: string
   githubUrl?: string
+  projectUrl?: string
+  siFileUrl?: string
   preprintUrl?: string
   publicationUrl?: string
 }
@@ -353,6 +355,44 @@ export default function PaperForm({
               type="url"
               defaultValue={
                 initialValues.dataverseUrl ?? ''
+              }
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="project_url"
+              className={labelClass}
+            >
+              Project
+            </label>
+
+            <input
+              id="project_url"
+              name="project_url"
+              type="url"
+              defaultValue={
+                initialValues.projectUrl ?? ''
+              }
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="si_file_url"
+              className={labelClass}
+            >
+              SI File
+            </label>
+
+            <input
+              id="si_file_url"
+              name="si_file_url"
+              type="url"
+              defaultValue={
+                initialValues.siFileUrl ?? ''
               }
               className={inputClass}
             />

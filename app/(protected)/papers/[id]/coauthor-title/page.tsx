@@ -189,6 +189,12 @@ export default async function CoauthorTitlePage({
         githubUrl={
           links.get('github') ?? ''
         }
+        projectUrl={
+          links.get('project') ?? ''
+        }
+        siFileUrl={
+          links.get('si-file') ?? ''
+        }
         preprintUrl={
           links.get('preprint') ?? ''
         }
