@@ -705,7 +705,7 @@ export default function PlanningWorkspace({
                                     variant="secondary"
                                   >
                                     {milestone.flowsavvy_added
-                                      ? '✓ Added'
+                                      ? 'Mark not added'
                                       : 'Mark added'}
                                   </Button>
                                 </form>
