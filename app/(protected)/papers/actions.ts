@@ -9,6 +9,8 @@ const allowedStatuses = new Set([
   'under-review',
   'revise-round',
   'published',
+  'reframing',
+  'vor-typesetting',
   'standby',
   'deprecated',
 ])
