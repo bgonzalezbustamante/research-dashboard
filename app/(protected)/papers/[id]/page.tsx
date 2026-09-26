@@ -318,6 +318,9 @@ export default async function PaperPage({
         id,
         title,
         target_date,
+        committed_days,
+        flowsavvy_added,
+        flowsavvy_added_at,
         completed_on,
         status,
         notes

@@ -59,10 +59,18 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'Milestone-backed Planning',
+        items: [
+          'Made capacity-bearing Paper Milestones the source for new research planning: optional 5/10/15-day commitments appear automatically in the half-month containing their target date and aggregate by paper.',
+          'Kept Blocked Time manual in Planning, preserved earlier manual paper allocations as legacy records, and prevented new manual paper allocations so research capacity has one clear source of truth.',
+          'Added per-milestone FlowSavvy/Calendar tracking in Papers and Planning, with aggregate Added/Partial/Not added status and automatic reset when a milestone date or committed capacity changes.',
+        ],
+      },
+      {
         title: 'Dashboard priorities',
         items: [
           'Expanded Papers requiring attention to a numbered top 10 across two columns, keeping planned milestone dates first and refining status priority to Revise round, Reframing, Writing, VOR typesetting, Under review, then other statuses.',
-          'Simplified the upper Dashboard by removing the redundant Working Hours card and showing net weekly time directly beneath Gross workload in Weekly signals.',
+          'Simplified the upper Dashboard by removing the redundant Working Hours card and showing net weekly time beside the Gross workload total in Weekly signals.',
         ],
       },
       {

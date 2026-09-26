@@ -91,6 +91,19 @@
 - Added `list_public_conference_presentations()` as an anonymous-safe academic-website contract exposing full and short event names, start/end dates, constrained presentation type, event metadata, and ordered presentation authors while keeping notes, owner, and linked-paper identifiers private.
 - Added Conferences pagination with 10 presentations per page while retaining full-dataset KPI counts and the existing upcoming-first ordering.
 
+`milestone-backed planning`
+
+- Made capacity-bearing Paper Milestones the canonical source for new research planning commitments.
+- Added optional 5-, 10-, or 15-day committed capacity to milestones; capacity-bearing milestones require a target date and map automatically to the half-month containing that date.
+- Added milestone-level FlowSavvy/Calendar state and timestamp tracking, editable from Papers and surfaced directly in Planning.
+- Reset a milestone's FlowSavvy/Calendar state automatically when its target date or committed days change, requiring the revised commitment to be reconfirmed in the calendar.
+- Aggregated multiple capacity-bearing milestones for the same paper and half-month into one Planning paper card while retaining the individual milestones and their FlowSavvy states underneath.
+- Changed Planning so new manual allocations can be created only for Blocked Time (Teaching, Conference, Holiday, or Administrative); new manual paper allocations are also rejected at the database layer.
+- Preserved existing manual paper allocations as Legacy manual records for continuity; when a paper has milestone-backed capacity in the same half-month, the milestone-derived commitment takes precedence for capacity and analytics to prevent double-counting.
+- Extended selected-period, monthly, annual, planned-versus-actual, and main Dashboard planning calculations to use milestone-backed research capacity consistently.
+- Kept manual Blocked Time independent of Paper Milestones and unchanged as a Planning input.
+- Updated Standby-paper guidance so returning a paper to active planning is done by creating or revising a capacity-bearing milestone.
+
 `dashboard priorities and weekly signals`
 
 - Kept the earliest dated planned milestone as the strongest criterion for Papers requiring attention.
@@ -98,7 +111,7 @@
 - Applied the status tie-breaker when two papers share the same planned milestone date rather than relying implicitly on the source query order.
 - Expanded Papers requiring attention from five to ten papers, displayed as an explicitly numbered 1–10 priority list in two columns of five across the full Dashboard width.
 - Removed the redundant Working Hours card from the upper Dashboard because Weekly signals already summarises weekly workload.
-- Added compact net weekly workload beneath Gross workload in Weekly signals while retaining the gross-workload range indicator.
+- Added compact net weekly workload beside the Gross workload total in Weekly signals while retaining the gross-workload range indicator.
 
 `release notes`
 

@@ -76,6 +76,44 @@ function getStatus(
     : null
 }
 
+function getCommittedDays(
+  formData: FormData
+) {
+  const value = getOptionalText(
+    formData,
+    'committed_days'
+  )
+
+  if (!value) {
+    return null
+  }
+
+  const parsed =
+    Number.parseInt(
+      value,
+      10
+    )
+
+  return [5, 10, 15].includes(
+    parsed
+  )
+    ? parsed
+    : null
+}
+
+function getCheckbox(
+  formData: FormData,
+  name: string
+) {
+  const value =
+    formData.get(name)
+
+  return (
+    value === 'on' ||
+    value === 'true'
+  )
+}
+
 function getAmsterdamDate() {
   const parts =
     new Intl.DateTimeFormat(
@@ -176,6 +214,34 @@ export async function createMilestone(
     )
   }
 
+  const targetDate =
+    getOptionalDate(
+      formData,
+      'target_date'
+    )
+
+  const committedDays =
+    getCommittedDays(
+      formData
+    )
+
+  if (
+    committedDays !== null &&
+    !targetDate
+  ) {
+    redirectWithError(
+      paperId,
+      'A milestone with committed days needs a target date.'
+    )
+  }
+
+  const flowsavvyAdded =
+    committedDays !== null &&
+    getCheckbox(
+      formData,
+      'flowsavvy_added'
+    )
+
   const completedOn =
     status === 'completed'
       ? getOptionalDate(
@@ -192,10 +258,16 @@ export async function createMilestone(
     .insert({
       paper_id: paperId,
       title,
-      target_date: getOptionalDate(
-        formData,
-        'target_date'
-      ),
+      target_date:
+        targetDate,
+      committed_days:
+        committedDays,
+      flowsavvy_added:
+        flowsavvyAdded,
+      flowsavvy_added_at:
+        flowsavvyAdded
+          ? new Date().toISOString()
+          : null,
       completed_on: completedOn,
       status,
       notes: getOptionalText(
@@ -223,6 +295,8 @@ export async function createMilestone(
   )
 
   revalidatePath('/papers')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   redirectToMilestones(
     paperId
@@ -274,6 +348,79 @@ export async function updateMilestone(
     )
   }
 
+  const targetDate =
+    getOptionalDate(
+      formData,
+      'target_date'
+    )
+
+  const committedDays =
+    getCommittedDays(
+      formData
+    )
+
+  if (
+    committedDays !== null &&
+    !targetDate
+  ) {
+    redirectWithError(
+      paperId,
+      'A milestone with committed days needs a target date.'
+    )
+  }
+
+  const {
+    data: existing,
+    error: existingError,
+  } = await supabase
+    .from('paper_milestones')
+    .select(`
+      id,
+      target_date,
+      committed_days,
+      flowsavvy_added,
+      flowsavvy_added_at
+    `)
+    .eq('id', milestoneId)
+    .eq('paper_id', paperId)
+    .maybeSingle()
+
+  if (
+    existingError ||
+    !existing
+  ) {
+    redirectWithError(
+      paperId,
+      'The milestone could not be loaded.'
+    )
+  }
+
+  const capacityChanged =
+    existing.target_date !==
+      targetDate ||
+    existing.committed_days !==
+      committedDays
+
+  const requestedFlowSavvy =
+    committedDays !== null &&
+    getCheckbox(
+      formData,
+      'flowsavvy_added'
+    )
+
+  const flowsavvyAdded =
+    capacityChanged
+      ? false
+      : requestedFlowSavvy
+
+  const flowsavvyAddedAt =
+    flowsavvyAdded
+      ? existing.flowsavvy_added
+        ? existing.flowsavvy_added_at ??
+          new Date().toISOString()
+        : new Date().toISOString()
+      : null
+
   const completedOn =
     status === 'completed'
       ? getOptionalDate(
@@ -289,10 +436,14 @@ export async function updateMilestone(
     .from('paper_milestones')
     .update({
       title,
-      target_date: getOptionalDate(
-        formData,
-        'target_date'
-      ),
+      target_date:
+        targetDate,
+      committed_days:
+        committedDays,
+      flowsavvy_added:
+        flowsavvyAdded,
+      flowsavvy_added_at:
+        flowsavvyAddedAt,
       completed_on: completedOn,
       status,
       notes: getOptionalText(
@@ -322,6 +473,8 @@ export async function updateMilestone(
   )
 
   revalidatePath('/papers')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   redirectToMilestones(
     paperId
@@ -385,6 +538,8 @@ async function changeMilestoneStatus(
   )
 
   revalidatePath('/papers')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   redirectToMilestones(
     paperId
@@ -415,6 +570,104 @@ export async function reopenMilestone(
   await changeMilestoneStatus(
     formData,
     'planned'
+  )
+}
+
+export async function setMilestoneFlowSavvy(
+  formData: FormData
+) {
+  const supabase =
+    await requireAuth()
+
+  const paperId =
+    getRequiredText(
+      formData,
+      'paper_id'
+    )
+
+  const milestoneId =
+    getRequiredText(
+      formData,
+      'milestone_id'
+    )
+
+  const periodStart =
+    getOptionalText(
+      formData,
+      'period_start'
+    )
+
+  const flowsavvyAdded =
+    getCheckbox(
+      formData,
+      'flowsavvy_added'
+    )
+
+  if (!paperId || !milestoneId) {
+    redirect('/planning')
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('paper_milestones')
+    .update({
+      flowsavvy_added:
+        flowsavvyAdded,
+      flowsavvy_added_at:
+        flowsavvyAdded
+          ? new Date().toISOString()
+          : null,
+    })
+    .eq('id', milestoneId)
+    .eq('paper_id', paperId)
+    .not(
+      'committed_days',
+      'is',
+      null
+    )
+    .select('id')
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error(
+      'Milestone FlowSavvy update failed:',
+      error
+    )
+
+    if (periodStart) {
+      redirect(
+        `/planning?period=${encodeURIComponent(
+          periodStart
+        )}&error=${encodeURIComponent(
+          'The milestone FlowSavvy/Calendar state could not be updated.'
+        )}#allocations`
+      )
+    }
+
+    redirectWithError(
+      paperId,
+      'The milestone FlowSavvy/Calendar state could not be updated.'
+    )
+  }
+
+  revalidatePath(
+    `/papers/${paperId}`
+  )
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
+
+  if (periodStart) {
+    redirect(
+      `/planning?period=${encodeURIComponent(
+        periodStart
+      )}#allocations`
+    )
+  }
+
+  redirectToMilestones(
+    paperId
   )
 }
 
@@ -468,6 +721,8 @@ export async function deleteMilestone(
   )
 
   revalidatePath('/papers')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   redirectToMilestones(
     paperId

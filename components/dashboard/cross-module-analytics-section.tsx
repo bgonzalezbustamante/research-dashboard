@@ -64,6 +64,13 @@ type PlanningAllocationRow = {
     | 'paper'
     | 'blocked'
   committed_days: number
+  paper_id: string | null
+}
+
+type PlanningMilestoneRow = {
+  paper_id: string
+  target_date: string
+  committed_days: number
 }
 
 type CitationSnapshotRow = {
@@ -315,6 +322,7 @@ export default async function CrossModuleAnalyticsSection({
     planningPeriodsResult,
     citationSnapshotsResult,
     cumulativeSessionsResult,
+    planningMilestonesResult,
   ] = await Promise.all([
     supabase
       .from('daily_logs')
@@ -382,6 +390,36 @@ export default async function CrossModuleAnalyticsSection({
         'is',
         null
       ),
+
+    supabase
+      .from('paper_milestones')
+      .select(`
+        paper_id,
+        target_date,
+        committed_days
+      `)
+      .eq(
+        'status',
+        'planned'
+      )
+      .not(
+        'committed_days',
+        'is',
+        null
+      )
+      .not(
+        'target_date',
+        'is',
+        null
+      )
+      .gte(
+        'target_date',
+        yearStart
+      )
+      .lte(
+        'target_date',
+        yearEnd
+      ),
   ])
 
   if (dailyLogsResult.error) {
@@ -408,6 +446,12 @@ export default async function CrossModuleAnalyticsSection({
     )
   }
 
+  if (planningMilestonesResult.error) {
+    throw new Error(
+      `Could not load milestone-backed planning analytics: ${planningMilestonesResult.error.message}`
+    )
+  }
+
   const dailyLogs =
     (dailyLogsResult.data ?? []) as DailyLogRow[]
 
@@ -419,6 +463,10 @@ export default async function CrossModuleAnalyticsSection({
 
   const cumulativeSessions =
     (cumulativeSessionsResult.data ?? []) as CumulativeWorkSessionRow[]
+
+  const planningMilestones =
+    (planningMilestonesResult.data ??
+      []) as PlanningMilestoneRow[]
 
   const dailyLogIds =
     dailyLogs.map(
@@ -523,7 +571,8 @@ export default async function CrossModuleAnalyticsSection({
       .select(`
         planning_period_id,
         allocation_type,
-        committed_days
+        committed_days,
+        paper_id
       `)
       .in(
         'planning_period_id',
@@ -610,6 +659,46 @@ export default async function CrossModuleAnalyticsSection({
       })
     )
 
+  const milestonePlanningKeys =
+    new Set<string>()
+
+  for (const milestone of
+    planningMilestones) {
+    const day =
+      Number(
+        milestone.target_date.slice(
+          8,
+          10
+        )
+      )
+
+    const periodStart =
+      `${milestone.target_date.slice(
+        0,
+        8
+      )}${day <= 15 ? '01' : '16'}`
+
+    milestonePlanningKeys.add(
+      `${periodStart}:${milestone.paper_id}`
+    )
+
+    const month =
+      Number(
+        milestone.target_date.slice(
+          5,
+          7
+        )
+      )
+
+    const stats =
+      monthlyStats[month - 1]
+
+    if (stats) {
+      stats.researchDays +=
+        milestone.committed_days
+    }
+  }
+
   for (const allocation of
     planningAllocations) {
     const periodStart =
@@ -637,6 +726,15 @@ export default async function CrossModuleAnalyticsSection({
       allocation.allocation_type ===
       'paper'
     ) {
+      if (
+        allocation.paper_id &&
+        milestonePlanningKeys.has(
+          `${periodStart}:${allocation.paper_id}`
+        )
+      ) {
+        continue
+      }
+
       stats.researchDays +=
         allocation.committed_days
     } else {

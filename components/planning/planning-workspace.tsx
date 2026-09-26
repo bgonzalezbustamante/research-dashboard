@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 
 import {
   createPlanningAllocation,
   deletePlanningAllocation,
 } from '@/app/(protected)/planning/actions'
 import { updatePlanningAllocationWithPeriod } from '@/app/(protected)/planning/update-allocation-action'
+import { setMilestoneFlowSavvy } from '@/app/(protected)/papers/milestone-actions'
 
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
@@ -16,38 +16,49 @@ type AllocationType =
   | 'paper'
   | 'blocked'
 
+type AllocationSource =
+  | 'milestone'
+  | 'blocked'
+  | 'legacy'
+
 type BlockedType =
   | 'teaching'
   | 'conference'
   | 'holiday'
   | 'administrative'
 
-type PaperOption = {
+type PlanningMilestone = {
   id: string
-  short_title: string
+  paper_id: string
   title: string
-  archived_at: string | null
+  target_date: string
+  committed_days: number
+  flowsavvy_added: boolean
+  flowsavvy_added_at: string | null
 }
 
 type PlanningAllocation = {
   id: string
   allocation_type: AllocationType
+  source: AllocationSource
   blocked_type: BlockedType | null
   committed_days: number
   flowsavvy_added: boolean
   flowsavvy_added_at: string | null
+  flowsavvy_count: number
+  flowsavvy_total: number
   notes: string | null
   paper_id: string | null
   paper_short_title: string | null
   paper_title: string | null
   paper_archived: boolean
+  milestones: PlanningMilestone[]
 }
 
 type PlanningWorkspaceProps = {
   periodStart: string
   periodEnd: string
   allocations: PlanningAllocation[]
-  availablePapers: PaperOption[]
   error?: string
 }
 
@@ -96,6 +107,33 @@ function formatTimestamp(
   ).format(new Date(value))
 }
 
+function formatDate(
+  value: string
+) {
+  const [year, month, day] =
+    value
+      .slice(0, 10)
+      .split('-')
+      .map(Number)
+
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }
+  ).format(
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day
+      )
+    )
+  )
+}
+
 function getBlockedLabel(
   value: BlockedType | null
 ) {
@@ -110,11 +148,11 @@ function getBlockedLabel(
 function getAllocationPresentation(
   days: number
 ) {
-  if (days === 5) {
+  if (days <= 5) {
     return 'border-green-200 bg-green-50 text-green-800'
   }
 
-  if (days === 10) {
+  if (days <= 10) {
     return 'border-yellow-200 bg-yellow-50 text-yellow-800'
   }
 
@@ -232,11 +270,37 @@ function getPeriodOptions(
   return options
 }
 
+function getFlowSavvyLabel(
+  allocation: PlanningAllocation
+) {
+  if (
+    allocation.flowsavvy_total <= 1
+  ) {
+    return allocation.flowsavvy_added
+      ? 'Added'
+      : 'Not added'
+  }
+
+  if (
+    allocation.flowsavvy_count ===
+    allocation.flowsavvy_total
+  ) {
+    return 'Added'
+  }
+
+  if (
+    allocation.flowsavvy_count === 0
+  ) {
+    return 'Not added'
+  }
+
+  return 'Partial'
+}
+
 export default function PlanningWorkspace({
   periodStart,
   periodEnd,
   allocations,
-  availablePapers,
   error,
 }: PlanningWorkspaceProps) {
   const usedBlockedTypes =
@@ -244,7 +308,7 @@ export default function PlanningWorkspace({
       allocations
         .filter(
           (allocation) =>
-            allocation.allocation_type ===
+            allocation.source ===
             'blocked'
         )
         .map(
@@ -267,34 +331,6 @@ export default function PlanningWorkspace({
         )
     )
 
-  const defaultType: AllocationType =
-    availablePapers.length > 0
-      ? 'paper'
-      : 'blocked'
-
-  const [
-    allocationType,
-    setAllocationType,
-  ] = useState<AllocationType>(
-    defaultType
-  )
-
-  const effectiveType:
-    AllocationType =
-    allocationType === 'paper' &&
-    availablePapers.length === 0
-      ? 'blocked'
-      : allocationType ===
-            'blocked' &&
-          availableBlockedOptions.length ===
-            0
-        ? 'paper'
-        : allocationType
-
-  const canAdd =
-    availablePapers.length > 0 ||
-    availableBlockedOptions.length > 0
-
   const periodOptions =
     getPeriodOptions(periodStart)
 
@@ -312,19 +348,20 @@ export default function PlanningWorkspace({
       <div className="grid gap-6 lg:grid-cols-[minmax(280px,0.7fr)_minmax(0,2fr)]">
         <Card>
           <h2 className="font-serif text-lg font-semibold text-oxford-blue">
-            Add allocation
+            Add blocked time
           </h2>
 
           <p className="mt-1 text-sm leading-5 text-oxford-ash">
-            Allocate capacity to a
-            paper or block time for
-            another commitment.
+            Paper capacity comes from
+            planned milestones.
+            Add non-research
+            commitments here.
           </p>
 
-          {!canAdd ? (
+          {availableBlockedOptions.length ===
+          0 ? (
             <div className="mt-4 rounded-md border border-oxford-stone bg-oxford-shell px-3 py-3 text-sm leading-6 text-oxford-ash">
-              All available papers
-              and blocked-time
+              All blocked-time
               categories are already
               allocated in this
               period.
@@ -344,112 +381,38 @@ export default function PlanningWorkspace({
 
               <div>
                 <label
-                  htmlFor="allocation-type"
+                  htmlFor="blocked-type"
                   className={labelClass}
                 >
-                  Allocation type
+                  Blocked time
                 </label>
 
                 <select
-                  id="allocation-type"
-                  name="allocation_type"
-                  value={effectiveType}
-                  onChange={(event) =>
-                    setAllocationType(
-                      event.target
-                        .value as AllocationType
-                    )
-                  }
+                  id="blocked-type"
+                  name="blocked_type"
+                  required
+                  defaultValue=""
                   className={inputClass}
                 >
-                  {availablePapers.length >
-                    0 && (
-                    <option value="paper">
-                      Paper
-                    </option>
-                  )}
+                  <option
+                    value=""
+                    disabled
+                  >
+                    Select category
+                  </option>
 
-                  {availableBlockedOptions.length >
-                    0 && (
-                    <option value="blocked">
-                      Blocked time
-                    </option>
+                  {availableBlockedOptions.map(
+                    (option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </option>
+                    )
                   )}
                 </select>
               </div>
-
-              {effectiveType ===
-              'paper' ? (
-                <div>
-                  <label
-                    htmlFor="planning-paper"
-                    className={labelClass}
-                  >
-                    Paper
-                  </label>
-
-                  <select
-                    id="planning-paper"
-                    name="paper_id"
-                    required
-                    defaultValue=""
-                    className={inputClass}
-                  >
-                    <option
-                      value=""
-                      disabled
-                    >
-                      Select paper
-                    </option>
-
-                    {availablePapers.map(
-                      (paper) => (
-                        <option
-                          key={paper.id}
-                          value={paper.id}
-                        >
-                          {paper.short_title}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-              ) : (
-                <div>
-                  <label
-                    htmlFor="blocked-type"
-                    className={labelClass}
-                  >
-                    Blocked time
-                  </label>
-
-                  <select
-                    id="blocked-type"
-                    name="blocked_type"
-                    required
-                    defaultValue=""
-                    className={inputClass}
-                  >
-                    <option
-                      value=""
-                      disabled
-                    >
-                      Select category
-                    </option>
-
-                    {availableBlockedOptions.map(
-                      (option) => (
-                        <option
-                          key={option.value}
-                          value={option.value}
-                        >
-                          {option.label}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-              )}
 
               <div>
                 <label
@@ -491,12 +454,7 @@ export default function PlanningWorkspace({
                   id="planning-notes"
                   name="notes"
                   rows={3}
-                  placeholder={
-                    effectiveType ===
-                    'paper'
-                      ? 'Optional planning note'
-                      : 'e.g. APSA Annual Meeting'
-                  }
+                  placeholder="e.g. APSA Annual Meeting"
                   className={inputClass}
                 />
               </div>
@@ -518,7 +476,7 @@ export default function PlanningWorkspace({
                 type="submit"
                 variant="primary"
               >
-                Add allocation
+                Add blocked time
               </Button>
             </form>
           )}
@@ -530,14 +488,15 @@ export default function PlanningWorkspace({
               <Card>
                 <div className="py-7 text-center">
                   <h2 className="font-serif text-lg font-semibold text-oxford-blue">
-                    No allocations yet
+                    No commitments yet
                   </h2>
 
                   <p className="mt-1 text-sm text-oxford-ash">
-                    Add a paper or
-                    blocked time to
-                    start planning
-                    this half-month.
+                    Add capacity-bearing
+                    milestones in Papers
+                    or blocked time here
+                    to populate this
+                    half-month.
                   </p>
                 </div>
               </Card>
@@ -545,8 +504,16 @@ export default function PlanningWorkspace({
           ) : (
             allocations.map(
               (allocation) => {
+                const isMilestone =
+                  allocation.source ===
+                  'milestone'
+
+                const isLegacy =
+                  allocation.source ===
+                  'legacy'
+
                 const isBlocked =
-                  allocation.allocation_type ===
+                  allocation.source ===
                   'blocked'
 
                 const title =
@@ -589,12 +556,16 @@ export default function PlanningWorkspace({
                             className={
                               isBlocked
                                 ? 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700'
-                                : 'rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900'
+                                : isMilestone
+                                  ? 'rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900'
+                                  : 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800'
                             }
                           >
                             {isBlocked
                               ? 'Blocked'
-                              : 'Paper'}
+                              : isMilestone
+                                ? 'Milestone-backed'
+                                : 'Legacy manual'}
                           </span>
                         </div>
 
@@ -620,180 +591,166 @@ export default function PlanningWorkspace({
                         </span>
                       )}
 
-                    <div className="mt-3">
-                      {allocation.flowsavvy_added ? (
-                        <div className="text-sm text-green-800">
-                          <div className="font-medium">
-                            ☑ Added to
-                            FlowSavvy/Calendar
-                          </div>
+                    <div className="mt-3 text-sm">
+                      <div
+                        className={
+                          allocation.flowsavvy_count ===
+                          allocation.flowsavvy_total
+                            ? 'font-medium text-green-800'
+                            : allocation.flowsavvy_count >
+                                0
+                              ? 'font-medium text-amber-800'
+                              : 'text-oxford-ash'
+                        }
+                      >
+                        FlowSavvy/Calendar:{' '}
+                        {getFlowSavvyLabel(
+                          allocation
+                        )}
+                        {allocation.flowsavvy_total >
+                          1 && (
+                          <>
+                            {' '}
+                            (
+                            {
+                              allocation.flowsavvy_count
+                            }
+                            /
+                            {
+                              allocation.flowsavvy_total
+                            }
+                            )
+                          </>
+                        )}
+                      </div>
 
-                          {allocation.flowsavvy_added_at && (
-                            <div className="mt-0.5 text-xs text-oxford-ash">
-                              {formatTimestamp(
-                                allocation.flowsavvy_added_at
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-sm text-oxford-ash">
-                          ☐ Not added to
-                          FlowSavvy/Calendar
-                        </div>
-                      )}
+                      {!isMilestone &&
+                        allocation.flowsavvy_added_at && (
+                          <div className="mt-0.5 text-xs text-oxford-ash">
+                            {formatTimestamp(
+                              allocation.flowsavvy_added_at
+                            )}
+                          </div>
+                        )}
                     </div>
 
-                    {allocation.notes && (
-                      <p className="mt-3 whitespace-pre-line text-sm leading-5 text-oxford-charcoal">
-                        {allocation.notes}
-                      </p>
+                    {isMilestone && (
+                      <div className="mt-4 space-y-3 border-t border-oxford-stone pt-3">
+                        {allocation.milestones.map(
+                          (milestone) => (
+                            <div
+                              key={
+                                milestone.id
+                              }
+                              className="rounded-md bg-oxford-shell px-3 py-2.5"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-sm text-oxford-charcoal">
+                                    {
+                                      milestone.title
+                                    }
+                                  </div>
+
+                                  <div className="mt-1 text-xs text-oxford-ash">
+                                    {formatDate(
+                                      milestone.target_date
+                                    )}{' '}
+                                    ·{' '}
+                                    {
+                                      milestone.committed_days
+                                    }
+                                    d
+                                  </div>
+                                </div>
+
+                                <form
+                                  action={
+                                    setMilestoneFlowSavvy
+                                  }
+                                >
+                                  <input
+                                    type="hidden"
+                                    name="paper_id"
+                                    value={
+                                      milestone.paper_id
+                                    }
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="milestone_id"
+                                    value={
+                                      milestone.id
+                                    }
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="period_start"
+                                    value={
+                                      periodStart
+                                    }
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="flowsavvy_added"
+                                    value={
+                                      milestone.flowsavvy_added
+                                        ? 'false'
+                                        : 'true'
+                                    }
+                                  />
+
+                                  <Button
+                                    type="submit"
+                                    variant="secondary"
+                                  >
+                                    {milestone.flowsavvy_added
+                                      ? 'Mark not added'
+                                      : 'Mark added'}
+                                  </Button>
+                                </form>
+                              </div>
+                            </div>
+                          )
+                        )}
+
+                        <Link
+                          href={`/papers/${allocation.paper_id}#milestones`}
+                          className="inline-flex text-sm font-medium text-oxford-blue hover:underline"
+                        >
+                          Edit milestones
+                        </Link>
+                      </div>
                     )}
 
-                    <div className="mt-3 border-t border-oxford-stone pt-3">
-                      <div className="flex flex-wrap gap-x-4 gap-y-2">
-                        <details>
-                          <summary className="cursor-pointer text-sm font-medium text-oxford-blue hover:underline">
-                            Edit
-                          </summary>
+                    {!isMilestone &&
+                      allocation.notes && (
+                        <p className="mt-3 whitespace-pre-line text-sm leading-5 text-oxford-charcoal">
+                          {allocation.notes}
+                        </p>
+                      )}
 
-                          <form
-                            action={
-                              updatePlanningAllocationWithPeriod
-                            }
-                            className="mt-3 space-y-3"
-                          >
-                            <input
-                              type="hidden"
-                              name="period_start"
-                              value={periodStart}
-                            />
+                    {!isMilestone && (
+                      <div className="mt-3 border-t border-oxford-stone pt-3">
+                        {isLegacy && (
+                          <p className="mb-3 text-xs leading-5 text-amber-800">
+                            Preserved from the
+                            previous manual paper
+                            planning workflow.
+                          </p>
+                        )}
 
-                            <input
-                              type="hidden"
-                              name="allocation_id"
-                              value={allocation.id}
-                            />
-
-                            <div>
-                              <label
-                                htmlFor={`planning-period-${allocation.id}`}
-                                className={labelClass}
-                              >
-                                Period
-                              </label>
-
-                              <select
-                                id={`planning-period-${allocation.id}`}
-                                name="target_period_start"
-                                defaultValue={periodStart}
-                                className={inputClass}
-                              >
-                                {periodOptions.map(
-                                  (option) => (
-                                    <option
-                                      key={option.value}
-                                      value={option.value}
-                                    >
-                                      {option.label}
-                                    </option>
-                                  )
-                                )}
-                              </select>
-                            </div>
-
-                            <div>
-                              <label
-                                htmlFor={`planning-days-${allocation.id}`}
-                                className={labelClass}
-                              >
-                                Committed days
-                              </label>
-
-                              <select
-                                id={`planning-days-${allocation.id}`}
-                                name="committed_days"
-                                defaultValue={String(
-                                  allocation.committed_days
-                                )}
-                                className={inputClass}
-                              >
-                                <option value="5">
-                                  5 days
-                                </option>
-
-                                <option value="10">
-                                  10 days
-                                </option>
-
-                                <option value="15">
-                                  15 days
-                                </option>
-                              </select>
-                            </div>
-
-                            <div>
-                              <label
-                                htmlFor={`planning-notes-${allocation.id}`}
-                                className={labelClass}
-                              >
-                                Notes
-                              </label>
-
-                              <textarea
-                                id={`planning-notes-${allocation.id}`}
-                                name="notes"
-                                rows={3}
-                                defaultValue={
-                                  allocation.notes ?? ''
-                                }
-                                className={inputClass}
-                              />
-                            </div>
-
-                            <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
-                              <input
-                                type="checkbox"
-                                name="flowsavvy_added"
-                                defaultChecked={
-                                  allocation.flowsavvy_added
-                                }
-                                className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
-                              />
-
-                              <span>
-                                Added to
-                                FlowSavvy/Calendar
-                              </span>
-                            </label>
-
-                            <Button
-                              type="submit"
-                              variant="primary"
-                            >
-                              Save allocation
-                            </Button>
-                          </form>
-                        </details>
-
-                        <details>
-                          <summary className="cursor-pointer text-sm font-medium text-red-700 hover:underline">
-                            Delete
-                          </summary>
-
-                          <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
-                            <p className="text-xs leading-5 text-red-800">
-                              Remove this
-                              allocation from the
-                              selected planning
-                              period.
-                            </p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          <details>
+                            <summary className="cursor-pointer text-sm font-medium text-oxford-blue hover:underline">
+                              Edit
+                            </summary>
 
                             <form
                               action={
-                                deletePlanningAllocation
+                                updatePlanningAllocationWithPeriod
                               }
-                              className="mt-3"
+                              className="mt-3 space-y-3"
                             >
                               <input
                                 type="hidden"
@@ -804,20 +761,157 @@ export default function PlanningWorkspace({
                               <input
                                 type="hidden"
                                 name="allocation_id"
-                                value={allocation.id}
+                                value={
+                                  allocation.id
+                                }
                               />
+
+                              <div>
+                                <label
+                                  htmlFor={`planning-period-${allocation.id}`}
+                                  className={labelClass}
+                                >
+                                  Period
+                                </label>
+
+                                <select
+                                  id={`planning-period-${allocation.id}`}
+                                  name="target_period_start"
+                                  defaultValue={periodStart}
+                                  className={inputClass}
+                                >
+                                  {periodOptions.map(
+                                    (option) => (
+                                      <option
+                                        key={option.value}
+                                        value={option.value}
+                                      >
+                                        {option.label}
+                                      </option>
+                                    )
+                                  )}
+                                </select>
+                              </div>
+
+                              <div>
+                                <label
+                                  htmlFor={`planning-days-${allocation.id}`}
+                                  className={labelClass}
+                                >
+                                  Committed days
+                                </label>
+
+                                <select
+                                  id={`planning-days-${allocation.id}`}
+                                  name="committed_days"
+                                  defaultValue={String(
+                                    allocation.committed_days
+                                  )}
+                                  className={inputClass}
+                                >
+                                  <option value="5">
+                                    5 days
+                                  </option>
+
+                                  <option value="10">
+                                    10 days
+                                  </option>
+
+                                  <option value="15">
+                                    15 days
+                                  </option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label
+                                  htmlFor={`planning-notes-${allocation.id}`}
+                                  className={labelClass}
+                                >
+                                  Notes
+                                </label>
+
+                                <textarea
+                                  id={`planning-notes-${allocation.id}`}
+                                  name="notes"
+                                  rows={3}
+                                  defaultValue={
+                                    allocation.notes ?? ''
+                                  }
+                                  className={inputClass}
+                                />
+                              </div>
+
+                              <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
+                                <input
+                                  type="checkbox"
+                                  name="flowsavvy_added"
+                                  defaultChecked={
+                                    allocation.flowsavvy_added
+                                  }
+                                  className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+                                />
+
+                                <span>
+                                  Added to
+                                  FlowSavvy/Calendar
+                                </span>
+                              </label>
 
                               <Button
                                 type="submit"
-                                variant="danger"
+                                variant="primary"
                               >
-                                Confirm delete
+                                Save allocation
                               </Button>
                             </form>
-                          </div>
-                        </details>
+                          </details>
+
+                          <details>
+                            <summary className="cursor-pointer text-sm font-medium text-red-700 hover:underline">
+                              Delete
+                            </summary>
+
+                            <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+                              <p className="text-xs leading-5 text-red-800">
+                                Remove this
+                                allocation from the
+                                selected planning
+                                period.
+                              </p>
+
+                              <form
+                                action={
+                                  deletePlanningAllocation
+                                }
+                                className="mt-3"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="period_start"
+                                  value={periodStart}
+                                />
+
+                                <input
+                                  type="hidden"
+                                  name="allocation_id"
+                                  value={
+                                    allocation.id
+                                  }
+                                />
+
+                                <Button
+                                  type="submit"
+                                  variant="danger"
+                                >
+                                  Confirm delete
+                                </Button>
+                              </form>
+                            </div>
+                          </details>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </Card>
                 )
               }
@@ -828,11 +922,14 @@ export default function PlanningWorkspace({
 
       <p className="mt-4 text-xs text-oxford-ash">
         Planning period: {periodStart}{' '}
-        to {periodEnd}. Paper work and
-        blocked commitments both
-        consume planning capacity.
-        Detailed scheduling remains in
-        FlowSavvy/Calendar.
+        to {periodEnd}. Research
+        capacity is derived from
+        planned milestones with
+        committed days; Blocked Time
+        is managed here. Legacy manual
+        paper allocations remain
+        available for historical
+        continuity.
       </p>
     </section>
   )

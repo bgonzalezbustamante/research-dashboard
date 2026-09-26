@@ -8,10 +8,6 @@ import { createClient } from '@/lib/supabase/server'
 type ServerSupabaseClient =
   Awaited<ReturnType<typeof createClient>>
 
-type AllocationType =
-  | 'paper'
-  | 'blocked'
-
 type BlockedType =
   | 'teaching'
   | 'conference'
@@ -257,25 +253,6 @@ function getCheckbox(
   )
 }
 
-function getAllocationType(
-  formData: FormData
-): AllocationType | null {
-  const value =
-    getRequiredText(
-      formData,
-      'allocation_type'
-    )
-
-  if (
-    value === 'paper' ||
-    value === 'blocked'
-  ) {
-    return value
-  }
-
-  return null
-}
-
 function getBlockedType(
   formData: FormData
 ): BlockedType | null {
@@ -475,13 +452,13 @@ export async function createPlanningAllocation(
       formData
     )
 
-  const allocationType =
-    getAllocationType(
+  const committedDays =
+    getCommittedDays(
       formData
     )
 
-  const committedDays =
-    getCommittedDays(
+  const blockedType =
+    getBlockedType(
       formData
     )
 
@@ -497,10 +474,10 @@ export async function createPlanningAllocation(
       'flowsavvy_added'
     )
 
-  if (!allocationType) {
+  if (!blockedType) {
     redirectPlanningError(
       periodStart,
-      'Allocation type is required.'
+      'Blocked-time category is required.'
     )
   }
 
@@ -512,72 +489,6 @@ export async function createPlanningAllocation(
       periodStart,
       'Committed days must be 5, 10, or 15.'
     )
-  }
-
-  let paperId:
-    string | null = null
-
-  let blockedType:
-    BlockedType | null = null
-
-  if (
-    allocationType ===
-    'paper'
-  ) {
-    paperId =
-      getRequiredText(
-        formData,
-        'paper_id'
-      )
-
-    if (!paperId) {
-      redirectPlanningError(
-        periodStart,
-        'Paper is required.'
-      )
-    }
-
-    const {
-      data: paper,
-      error: paperError,
-    } = await supabase
-      .from('papers')
-      .select('id')
-      .eq(
-        'id',
-        paperId
-      )
-      .eq(
-        'owner_id',
-        userId
-      )
-      .is(
-        'archived_at',
-        null
-      )
-      .maybeSingle()
-
-    if (
-      paperError ||
-      !paper
-    ) {
-      redirectPlanningError(
-        periodStart,
-        'The selected paper is not available for planning.'
-      )
-    }
-  } else {
-    blockedType =
-      getBlockedType(
-        formData
-      )
-
-    if (!blockedType) {
-      redirectPlanningError(
-        periodStart,
-        'Blocked-time category is required.'
-      )
-    }
   }
 
   const periodResult =
@@ -608,9 +519,9 @@ export async function createPlanningAllocation(
       planning_period_id:
         periodResult.id,
       allocation_type:
-        allocationType,
+        'blocked',
       paper_id:
-        paperId,
+        null,
       blocked_type:
         blockedType,
       committed_days:
@@ -635,16 +546,6 @@ export async function createPlanningAllocation(
       error?.code ===
       '23505'
     ) {
-      if (
-        allocationType ===
-        'paper'
-      ) {
-        redirectPlanningError(
-          periodStart,
-          'This paper is already allocated in the selected period. Edit the existing allocation instead.'
-        )
-      }
-
       redirectPlanningError(
         periodStart,
         'This blocked-time category is already allocated in the selected period. Edit the existing allocation instead.'
@@ -659,6 +560,10 @@ export async function createPlanningAllocation(
 
   revalidatePath(
     '/planning'
+  )
+
+  revalidatePath(
+    '/dashboard'
   )
 
   redirectToPlanning(

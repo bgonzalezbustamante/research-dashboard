@@ -41,6 +41,8 @@ type MilestoneRow = {
   paper_id: string
   title: string
   target_date: string | null
+  committed_days: number | null
+  flowsavvy_added: boolean
 }
 
 type DailyLogRow = {
@@ -749,7 +751,9 @@ export default async function DashboardPage({
       .select(`
         paper_id,
         title,
-        target_date
+        target_date,
+        committed_days,
+        flowsavvy_added
       `)
       .in(
         'paper_id',
@@ -917,8 +921,54 @@ export default async function DashboardPage({
         6
     ).length
 
-  const researchDays =
-    planningAllocations
+  const currentPlanningMilestones =
+    milestones.filter(
+      (milestone) =>
+        milestone.target_date !==
+          null &&
+        milestone.committed_days !==
+          null &&
+        milestone.target_date >=
+          planningPeriodStart &&
+        milestone.target_date <=
+          planningPeriodEnd
+    )
+
+  const milestonePaperIds =
+    new Set(
+      currentPlanningMilestones.map(
+        (milestone) =>
+          milestone.paper_id
+      )
+    )
+
+  const effectivePlanningAllocations =
+    planningAllocations.filter(
+      (allocation) =>
+        !(
+          allocation.allocation_type ===
+            'paper' &&
+          allocation.paper_id !==
+            null &&
+          milestonePaperIds.has(
+            allocation.paper_id
+          )
+        )
+    )
+
+  const milestoneResearchDays =
+    currentPlanningMilestones.reduce(
+      (total, milestone) =>
+        total +
+        (
+          milestone.committed_days ??
+          0
+        ),
+      0
+    )
+
+  const legacyResearchDays =
+    effectivePlanningAllocations
       .filter(
         (allocation) =>
           allocation.allocation_type ===
@@ -934,8 +984,12 @@ export default async function DashboardPage({
         0
       )
 
+  const researchDays =
+    milestoneResearchDays +
+    legacyResearchDays
+
   const blockedDays =
-    planningAllocations
+    effectivePlanningAllocations
       .filter(
         (allocation) =>
           allocation.allocation_type ===
@@ -968,10 +1022,18 @@ export default async function DashboardPage({
     MINUTES_PER_PLANNED_DAY
 
   const flowsavvyCount =
-    planningAllocations.filter(
+    currentPlanningMilestones.filter(
+      (milestone) =>
+        milestone.flowsavvy_added
+    ).length +
+    effectivePlanningAllocations.filter(
       (allocation) =>
         allocation.flowsavvy_added
     ).length
+
+  const flowsavvyTotal =
+    currentPlanningMilestones.length +
+    effectivePlanningAllocations.length
 
   const researchGapMinutes =
     periodPaperMinutes -
@@ -1281,15 +1343,14 @@ export default async function DashboardPage({
                   {formatDuration(
                     weekGrossMinutes
                   )}
-                </div>
-
-                <div
-                  className={`mt-1 text-xs ${workloadPresentation.detailClass}`}
-                >
-                  Net{' '}
-                  {formatDuration(
-                    weekNetMinutes
-                  )}
+                  <span
+                    className={`ml-2 font-sans text-xs font-normal ${workloadPresentation.detailClass}`}
+                  >
+                    Net{' '}
+                    {formatDuration(
+                      weekNetMinutes
+                    )}
+                  </span>
                 </div>
               </div>
 
@@ -1422,7 +1483,7 @@ export default async function DashboardPage({
                 }
                 /
                 {
-                  planningAllocations.length
+                  flowsavvyTotal
                 }
               </div>
             </div>
