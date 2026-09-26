@@ -6,6 +6,8 @@ type PlanningAllocation = {
   allocation_type: AllocationType
   committed_days: number
   flowsavvy_added: boolean
+  flowsavvy_count: number
+  flowsavvy_total: number
 }
 
 type PlanningPeriodLoadProps = {
@@ -100,10 +102,20 @@ export default function PlanningPeriodLoad({
     ).length
 
   const calendarCount =
-    allocations.filter(
-      (allocation) =>
-        allocation.flowsavvy_added
-    ).length
+    allocations.reduce(
+      (total, allocation) =>
+        total +
+        allocation.flowsavvy_count,
+      0
+    )
+
+  const calendarTotal =
+    allocations.reduce(
+      (total, allocation) =>
+        total +
+        allocation.flowsavvy_total,
+      0
+    )
 
   const load =
     getLoadPresentation(totalDays)
@@ -165,7 +177,7 @@ export default function PlanningPeriodLoad({
               className={`mt-1 font-medium ${load.text}`}
             >
               {calendarCount}/
-              {allocations.length}{' '}
+              {calendarTotal}{' '}
               added
             </div>
           </div>
@@ -201,8 +213,9 @@ export default function PlanningPeriodLoad({
       <p
         className={`mt-2 text-xs ${load.secondary}`}
       >
-        Paper allocations and blocked
-        time both count towards the
+        Milestone-backed research,
+        legacy paper allocations, and
+        blocked time count towards the
         15-day planning reference.
       </p>
     </section>
