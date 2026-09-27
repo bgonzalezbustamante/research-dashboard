@@ -12,6 +12,7 @@ type PaperFormValues = {
   revisionRound?: number | null
   currentVenue?: string
   publishedOn?: string
+  language?: string
   overleafUrl?: string
   dataverseUrl?: string
   githubUrl?: string
@@ -240,6 +241,35 @@ export default function PaperForm({
           </div>
 
           <div />
+
+          <div>
+            <label
+              htmlFor="language"
+              className={labelClass}
+            >
+              Language
+            </label>
+
+            <select
+              id="language"
+              name="language"
+              defaultValue={
+                initialValues.language ?? ''
+              }
+              className={inputClass}
+            >
+              <option value="">
+                Not specified
+              </option>
+              <option value="English">English</option>
+              <option value="Spanish">Spanish</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Dutch">Dutch</option>
+              <option value="German">German</option>
+              <option value="French">French</option>
+              <option value="Italian">Italian</option>
+            </select>
+          </div>
 
           <div>
             <label
