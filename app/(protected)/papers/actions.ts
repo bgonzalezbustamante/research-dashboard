@@ -15,6 +15,16 @@ const allowedStatuses = new Set([
   'deprecated',
 ])
 
+const allowedLanguages = new Set([
+  'English',
+  'Spanish',
+  'Portuguese',
+  'Dutch',
+  'German',
+  'French',
+  'Italian',
+])
+
 function getRequiredText(
   formData: FormData,
   name: string
@@ -264,6 +274,21 @@ function getPaperPayload(
     }
   }
 
+  const language =
+    getOptionalText(
+      formData,
+      'language'
+    )
+
+  if (
+    language &&
+    !allowedLanguages.has(language)
+  ) {
+    return {
+      error: 'Invalid paper language.',
+    }
+  }
+
   let links
 
   try {
@@ -297,6 +322,7 @@ function getPaperPayload(
         formData,
         'published_on'
       ),
+      language,
     },
   }
 }
@@ -385,6 +411,23 @@ export async function createPaper(
     )
   }
 
+  const {
+    error: languageError,
+  } = await supabase
+    .from('papers')
+    .update({
+      language:
+        payload.language,
+    })
+    .eq('id', paperId)
+
+  if (languageError) {
+    console.error(
+      'Paper language update failed:',
+      languageError
+    )
+  }
+
   revalidatePath('/papers')
 
   redirect(
@@ -468,6 +511,27 @@ export async function updatePaper(
 
     redirect(
       `/papers/${paperId}/edit?error=The paper could not be updated. Please check the form and try again.`
+    )
+  }
+
+  const {
+    error: languageError,
+  } = await supabase
+    .from('papers')
+    .update({
+      language:
+        payload.language,
+    })
+    .eq('id', paperId)
+
+  if (languageError) {
+    console.error(
+      'Paper language update failed:',
+      languageError
+    )
+
+    redirect(
+      `/papers/${paperId}/edit?error=The paper language could not be updated.`
     )
   }
 
