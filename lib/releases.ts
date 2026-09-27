@@ -31,6 +31,7 @@ export const releases: ReleaseNote[] = [
           'Automated Paper Started dates from the earliest Activity-labelled linked work session; Papers now default to Published most recently, with unpublished papers following by Started date.',
           'Expanded Paper workflow statuses with Reframing and VOR typesetting for manuscripts that need substantive repositioning or final version-of-record production.',
           'Expanded Paper research links with public Project and SI File URLs while keeping Overleaf private to the Dashboard.',
+          'Added a controlled Paper language field (English, Spanish, Portuguese, Dutch, German, French or Italian) and exposed it through the public academic-site contract.',
           'Retired the standalone Website editing page, consolidated bottom utilities, and kept anonymous-safe publication list/detail contracts ordered by publication date.',
           'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
         ],
