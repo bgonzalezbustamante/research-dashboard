@@ -45,7 +45,8 @@ export default async function EditPaperPage({
       status,
       revision_round,
       current_venue,
-      published_on
+      published_on,
+      language
     `)
     .eq('id', id)
     .maybeSingle()
@@ -174,6 +175,8 @@ export default async function EditPaperPage({
           publishedOn:
             paper.published_on ??
             '',
+          language:
+            paper.language ?? '',
           overleafUrl:
             getLink('overleaf'),
           dataverseUrl:
