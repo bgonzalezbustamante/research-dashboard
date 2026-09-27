@@ -32,7 +32,8 @@
 - Replaced free-text Publication index with a controlled optional category: WoS-SSCI, Scopus, WoS-ESCI, Book chapter, SciELO/Latindex, Working paper, or Preprint.
 - Expanded the Paper workflow status vocabulary to Writing, Under review, Revise round, Published, Reframing, VOR typesetting, Standby, and Deprecated; the two new statuses are supported consistently by forms, filters, badges, Dashboard rendering, RPC validation, and the database constraint.
 - Added Project and SI File to Paper Research links for owners and coauthors. Both are exposed as nullable `project_url` and `si_file_url` fields in the public paper list/detail RPCs, while Overleaf remains private and absent from all anonymous publication contracts.
-- Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, and approved research links instead of maintaining duplicate public summary or venue fields.
+- Reused canonical Paper workspace metadata for title, authors, abstract, current venue, publication date, language, and approved research links instead of maintaining duplicate public summary or venue fields.
+- Added an optional constrained Paper language field with English, Spanish, Portuguese, Dutch, German, French, and Italian; existing papers remain unspecified until populated.
 - Kept a simple public-contract preview and a direct link back to each normal paper workspace.
 - Added Website pagination with 10 papers per page while preserving the current page after saving public settings.
 - Added an optional Key highlight editor for publication detail pages with short highlight text, a static image filename, required accessible alt text when an image is configured, and an optional caption/source line; corrected the filename input so local asset names such as `diff_lm_retweets.png` are accepted without browser URL validation.
@@ -44,7 +45,7 @@
 - Simplified visibility from Private/Public/Unlisted to Private/Public.
 - Renamed the optional public category field to Publication index.
 - Removed public summary, public venue, and display-order fields from the presentation table.
-- Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract and current venue and to return only explicitly Public papers.
+- Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract, current venue, and language and to return only explicitly Public papers.
 - Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
 - Extended `get_public_paper(slug)` with nullable preferred Citation and Key highlight detail fields while leaving `list_public_papers()` unchanged.
 - Returned only the Key highlight filename rather than a deployment-specific URL so the academic website can resolve the asset from its own `public` directory.

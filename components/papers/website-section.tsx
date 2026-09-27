@@ -53,7 +53,8 @@ export default function WebsiteSection({
               this paper. Canonical
               title, authors, abstract,
               venue, publication date,
-              and research links remain
+              language, and research
+              links remain
               managed elsewhere in the
               Paper workspace.
             </p>

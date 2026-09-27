@@ -239,6 +239,7 @@ export default async function PaperPage({
       revision_round,
       current_venue,
       published_on,
+      language,
       archived_at
     `)
     .eq('id', id)
@@ -831,6 +832,16 @@ export default async function PaperPage({
                     paper.current_venue ??
                     '—'
                   }
+                </dd>
+              </div>
+
+              <div>
+                <dt className="font-medium text-oxford-charcoal">
+                  Language
+                </dt>
+
+                <dd className="mt-1 text-oxford-ash">
+                  {paper.language ?? '—'}
                 </dd>
               </div>
 
