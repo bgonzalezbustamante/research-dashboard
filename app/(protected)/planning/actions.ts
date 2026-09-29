@@ -696,6 +696,102 @@ export async function updatePlanningAllocation(
     '/planning'
   )
 
+  revalidatePath(
+    '/dashboard'
+  )
+
+  redirectToPlanning(
+    periodStart
+  )
+}
+
+export async function setPlanningAllocationFlowSavvy(
+  formData: FormData
+) {
+  const {
+    supabase,
+    userId,
+  } = await requireAuth()
+
+  const periodStart =
+    getReturnPeriod(
+      formData
+    )
+
+  const allocationId =
+    getRequiredText(
+      formData,
+      'allocation_id'
+    )
+
+  const flowsavvyAdded =
+    getCheckbox(
+      formData,
+      'flowsavvy_added'
+    )
+
+  if (!allocationId) {
+    redirectPlanningError(
+      periodStart,
+      'Planning allocation is missing.'
+    )
+  }
+
+  const {
+    data: period,
+    error: periodError,
+  } = await supabase
+    .from('planning_periods')
+    .select('id')
+    .eq('owner_id', userId)
+    .eq(
+      'period_start',
+      periodStart
+    )
+    .maybeSingle()
+
+  if (
+    periodError ||
+    !period
+  ) {
+    redirectPlanningError(
+      periodStart,
+      'The planning period could not be loaded.'
+    )
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('planning_allocations')
+    .update({
+      flowsavvy_added:
+        flowsavvyAdded,
+    })
+    .eq('id', allocationId)
+    .eq(
+      'planning_period_id',
+      period.id
+    )
+    .select('id')
+    .maybeSingle()
+
+  if (error || !data) {
+    console.error(
+      'Planning FlowSavvy update failed:',
+      error
+    )
+
+    redirectPlanningError(
+      periodStart,
+      'The FlowSavvy/Calendar state could not be updated.'
+    )
+  }
+
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
+
   redirectToPlanning(
     periodStart
   )
@@ -791,6 +887,10 @@ export async function deletePlanningAllocation(
 
   revalidatePath(
     '/planning'
+  )
+
+  revalidatePath(
+    '/dashboard'
   )
 
   redirectToPlanning(

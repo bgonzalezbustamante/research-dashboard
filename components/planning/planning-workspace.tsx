@@ -5,6 +5,7 @@ import Link from 'next/link'
 import {
   createPlanningAllocation,
   deletePlanningAllocation,
+  setPlanningAllocationFlowSavvy,
 } from '@/app/(protected)/planning/actions'
 import { updatePlanningAllocationWithPeriod } from '@/app/(protected)/planning/update-allocation-action'
 import { setMilestoneFlowSavvy } from '@/app/(protected)/papers/milestone-actions'
@@ -270,31 +271,41 @@ function getPeriodOptions(
   return options
 }
 
-function getFlowSavvyLabel(
+function getFlowSavvyPresentation(
   allocation: PlanningAllocation
 ) {
-  if (
-    allocation.flowsavvy_total <= 1
-  ) {
-    return allocation.flowsavvy_added
-      ? 'Added'
-      : 'Not added'
-  }
-
   if (
     allocation.flowsavvy_count ===
     allocation.flowsavvy_total
   ) {
-    return 'Added'
+    return {
+      icon: '☑',
+      label:
+        'Added to FlowSavvy/Calendar',
+      className:
+        'font-medium text-green-800',
+    }
   }
 
   if (
     allocation.flowsavvy_count === 0
   ) {
-    return 'Not added'
+    return {
+      icon: '☐',
+      label:
+        'Not added to FlowSavvy/Calendar',
+      className:
+        'text-oxford-ash',
+    }
   }
 
-  return 'Partial'
+  return {
+    icon: '◐',
+    label:
+      'Partially added to FlowSavvy/Calendar',
+    className:
+      'font-medium text-amber-800',
+  }
 }
 
 export default function PlanningWorkspace({
@@ -530,6 +541,11 @@ export default function PlanningWorkspace({
                     : allocation.paper_title ??
                       'Paper unavailable'
 
+                const flowSavvy =
+                  getFlowSavvyPresentation(
+                    allocation
+                  )
+
                 return (
                   <Card
                     key={allocation.id}
@@ -594,19 +610,20 @@ export default function PlanningWorkspace({
                     <div className="mt-3 text-sm">
                       <div
                         className={
-                          allocation.flowsavvy_count ===
-                          allocation.flowsavvy_total
-                            ? 'font-medium text-green-800'
-                            : allocation.flowsavvy_count >
-                                0
-                              ? 'font-medium text-amber-800'
-                              : 'text-oxford-ash'
+                          flowSavvy.className
                         }
                       >
-                        FlowSavvy/Calendar:{' '}
-                        {getFlowSavvyLabel(
-                          allocation
-                        )}
+                        <span
+                          aria-hidden="true"
+                          className="mr-1.5"
+                        >
+                          {
+                            flowSavvy.icon
+                          }
+                        </span>
+                        {
+                          flowSavvy.label
+                        }
                         {allocation.flowsavvy_total >
                           1 && (
                           <>
@@ -633,6 +650,46 @@ export default function PlanningWorkspace({
                           </div>
                         )}
                     </div>
+
+                    {!isMilestone && (
+                      <form
+                        action={
+                          setPlanningAllocationFlowSavvy
+                        }
+                        className="mt-3"
+                      >
+                        <input
+                          type="hidden"
+                          name="period_start"
+                          value={periodStart}
+                        />
+                        <input
+                          type="hidden"
+                          name="allocation_id"
+                          value={
+                            allocation.id
+                          }
+                        />
+                        <input
+                          type="hidden"
+                          name="flowsavvy_added"
+                          value={
+                            allocation.flowsavvy_added
+                              ? 'false'
+                              : 'true'
+                          }
+                        />
+
+                        <Button
+                          type="submit"
+                          variant="secondary"
+                        >
+                          {allocation.flowsavvy_added
+                            ? 'Mark not added'
+                            : 'Mark added'}
+                        </Button>
+                      </form>
+                    )}
 
                     {isMilestone && (
                       <div className="mt-4 space-y-3 border-t border-oxford-stone pt-3">
@@ -661,6 +718,26 @@ export default function PlanningWorkspace({
                                       milestone.committed_days
                                     }
                                     d
+                                  </div>
+
+                                  <div
+                                    className={
+                                      milestone.flowsavvy_added
+                                        ? 'mt-1 text-xs font-medium text-green-800'
+                                        : 'mt-1 text-xs text-oxford-ash'
+                                    }
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      className="mr-1"
+                                    >
+                                      {milestone.flowsavvy_added
+                                        ? '☑'
+                                        : '☐'}
+                                    </span>
+                                    {milestone.flowsavvy_added
+                                      ? 'Added to FlowSavvy/Calendar'
+                                      : 'Not added to FlowSavvy/Calendar'}
                                   </div>
                                 </div>
 
