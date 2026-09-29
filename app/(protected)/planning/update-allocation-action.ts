@@ -465,5 +465,6 @@ export async function updatePlanningAllocationWithPeriod(
   }
 
   revalidatePath('/planning')
+  revalidatePath('/dashboard')
   redirectToPlanning(targetPeriodStart)
 }
