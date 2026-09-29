@@ -32,6 +32,7 @@ export const releases: ReleaseNote[] = [
           'Expanded Paper workflow statuses with Reframing and VOR typesetting for manuscripts that need substantive repositioning or final version-of-record production.',
           'Expanded Paper research links with public Project and SI File URLs while keeping Overleaf private to the Dashboard.',
           'Added a controlled Paper language field (English, Spanish, Portuguese, Dutch, German, French or Italian) and exposed it through the public academic-site contract.',
+          'Extended Public paper list/detail contracts with the latest stored Google Scholar citation count and snapshot date only, while keeping citation history and the citation table private.',
           'Retired the standalone Website editing page, consolidated bottom utilities, and kept anonymous-safe publication list/detail contracts ordered by publication date.',
           'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
         ],
@@ -65,6 +66,7 @@ export const releases: ReleaseNote[] = [
           'Made capacity-bearing Paper Milestones the source for new research planning: optional 5/10/15-day commitments appear automatically in the half-month containing their target date and aggregate by paper.',
           'Kept Blocked Time manual in Planning, preserved earlier manual paper allocations as legacy records, and prevented new manual paper allocations so research capacity has one clear source of truth.',
           'Added per-milestone FlowSavvy/Calendar tracking in Papers and Planning, with aggregate Added/Partial/Not added status and automatic reset when a milestone date or committed capacity changes.',
+          'Restored compact FlowSavvy status icons in Planning and standardised direct Mark added / Mark not added actions across milestone-backed research and Blocked Time.',
         ],
       },
       {
@@ -72,6 +74,7 @@ export const releases: ReleaseNote[] = [
         items: [
           'Expanded Papers requiring attention to a numbered top 10 across two columns, keeping planned milestone dates first and refining status priority to Revise round, Reframing, Writing, VOR typesetting, Under review, then other statuses.',
           'Simplified the upper Dashboard by removing the redundant Working Hours card and showing net weekly time beside the Gross workload total in Weekly signals.',
+          'Replaced Current research allocation with an Overdue milestones card while retaining the Current planning period card unchanged.',
         ],
       },
       {
