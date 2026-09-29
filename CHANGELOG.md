@@ -46,6 +46,8 @@
 - Renamed the optional public category field to Publication index.
 - Removed public summary, public venue, and display-order fields from the presentation table.
 - Updated `list_public_papers()` and `get_public_paper(slug)` to expose canonical abstract, current venue, and language and to return only explicitly Public papers.
+- Extended both Public paper RPCs with nullable `google_scholar_citations` and `google_scholar_citations_captured_on`, derived only from the latest stored snapshot whose source normalises to Google Scholar.
+- Kept citation history private: the anonymous contract exposes no citation snapshot IDs, source field, historical snapshots, internal paper IDs, or non-Google-Scholar citation data, and `citation_snapshots` remains unavailable to `anon` directly.
 - Continued to expose only ordered author names and whitelisted DOI/publication, preprint, GitHub, and Dataverse links.
 - Extended `get_public_paper(slug)` with nullable preferred Citation and Key highlight detail fields while leaving `list_public_papers()` unchanged.
 - Returned only the Key highlight filename rather than a deployment-specific URL so the academic website can resolve the asset from its own `public` directory.
@@ -104,6 +106,8 @@
 - Extended selected-period, monthly, annual, planned-versus-actual, and main Dashboard planning calculations to use milestone-backed research capacity consistently.
 - Kept manual Blocked Time independent of Paper Milestones and unchanged as a Planning input.
 - Updated Standby-paper guidance so returning a paper to active planning is done by creating or revising a capacity-bearing milestone.
+- Restored the compact FlowSavvy/Calendar task indicators used by the earlier Planning UI: ☑ Added, ☐ Not added, and a partial state for aggregated milestone-backed paper commitments.
+- Standardised FlowSavvy/Calendar actions across milestone-backed research and manual Blocked Time so both can be marked added or not added directly from their Planning cards.
 
 `dashboard priorities and weekly signals`
 
@@ -113,6 +117,7 @@
 - Expanded Papers requiring attention from five to ten papers, displayed as an explicitly numbered 1–10 priority list in two columns of five across the full Dashboard width.
 - Removed the redundant Working Hours card from the upper Dashboard because Weekly signals already summarises weekly workload.
 - Added compact net weekly workload beside the Gross workload total in Weekly signals while retaining the gross-workload range indicator.
+- Replaced the separate Current research allocation card with an Overdue milestones card that counts planned milestones whose target dates are before today and identifies the oldest overdue commitment; the Current planning period card remains unchanged.
 
 `release notes`
 
