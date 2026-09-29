@@ -696,6 +696,10 @@ export async function updatePlanningAllocation(
     '/planning'
   )
 
+  revalidatePath(
+    '/dashboard'
+  )
+
   redirectToPlanning(
     periodStart
   )
@@ -883,6 +887,10 @@ export async function deletePlanningAllocation(
 
   revalidatePath(
     '/planning'
+  )
+
+  revalidatePath(
+    '/dashboard'
   )
 
   redirectToPlanning(
