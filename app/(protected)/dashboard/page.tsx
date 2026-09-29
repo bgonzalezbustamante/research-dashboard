@@ -195,23 +195,6 @@ function getIsBreak(
   )
 }
 
-function formatSignedDuration(
-  minutes: number
-) {
-  if (minutes === 0) {
-    return '0h'
-  }
-
-  const sign =
-    minutes > 0
-      ? '+'
-      : '−'
-
-  return `${sign}${formatDuration(
-    Math.abs(minutes)
-  )}`
-}
-
 function formatDate(
   value: string | null
 ) {
@@ -276,70 +259,6 @@ function formatPlanningPeriod(
     )
 
   return `${startDay}–${endDay} ${monthLabel}`
-}
-
-function getGapPresentation(
-  plannedMinutes: number,
-  actualMinutes: number
-) {
-  if (
-    plannedMinutes === 0 &&
-    actualMinutes === 0
-  ) {
-    return {
-      label:
-        'No research allocation',
-      className:
-        'border-oxford-stone bg-oxford-shell text-oxford-ash',
-    }
-  }
-
-  if (
-    plannedMinutes === 0
-  ) {
-    return {
-      label:
-        'Unplanned research',
-      className:
-        'border-amber-200 bg-amber-50 text-amber-800',
-    }
-  }
-
-  const gap =
-    actualMinutes -
-    plannedMinutes
-
-  const tolerance =
-    plannedMinutes *
-    0.1
-
-  if (
-    Math.abs(gap) <=
-    tolerance
-  ) {
-    return {
-      label:
-        'On plan',
-      className:
-        'border-green-200 bg-green-50 text-green-800',
-    }
-  }
-
-  if (gap < 0) {
-    return {
-      label:
-        'Below plan',
-      className:
-        'border-sky-200 bg-sky-50 text-sky-900',
-    }
-  }
-
-  return {
-    label:
-      'Above plan',
-    className:
-      'border-orange-200 bg-orange-50 text-orange-800',
-  }
 }
 
 function getPlanningTone(
@@ -877,13 +796,6 @@ export default async function DashboardPage({
       monthEnd
     )
 
-  const planningSummary =
-    summarisePeriod(
-      analyticsLogs,
-      planningPeriodStart,
-      planningPeriodEnd
-    )
-
   const weekGrossMinutes =
     weekSummary.grossMinutes
 
@@ -895,9 +807,6 @@ export default async function DashboardPage({
 
   const monthBreakMinutes =
     monthSummary.breakMinutes
-
-  const periodPaperMinutes =
-    planningSummary.paperMinutes
 
   const weekDailyLogs =
     dailyLogs.filter(
@@ -1035,15 +944,52 @@ export default async function DashboardPage({
     currentPlanningMilestones.length +
     effectivePlanningAllocations.length
 
-  const researchGapMinutes =
-    periodPaperMinutes -
-    researchPlannedMinutes
+  const overdueMilestones =
+    milestones
+      .filter(
+        (milestone) =>
+          milestone.target_date !==
+            null &&
+          milestone.target_date <
+            today
+      )
+      .sort(
+        (a, b) =>
+          (
+            a.target_date ??
+            ''
+          ).localeCompare(
+            b.target_date ??
+            ''
+          )
+      )
 
-  const gapPresentation =
-    getGapPresentation(
-      researchPlannedMinutes,
-      periodPaperMinutes
-    )
+  const oldestOverdueMilestone =
+    overdueMilestones[0] ??
+    null
+
+  const oldestOverdueDays =
+    oldestOverdueMilestone?.target_date
+      ? Math.max(
+          1,
+          Math.round(
+            (
+              parseDate(
+                today
+              ).getTime() -
+              parseDate(
+                oldestOverdueMilestone.target_date
+              ).getTime()
+            ) /
+              (
+                24 *
+                60 *
+                60 *
+                1000
+              )
+          )
+        )
+      : null
 
   const planningTone =
     getPlanningTone(
@@ -1519,78 +1465,75 @@ export default async function DashboardPage({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-                Planned vs actual
+                Milestones
               </div>
 
               <h2 className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
-                Current research
-                allocation
+                Overdue milestones
               </h2>
             </div>
 
             <span
-              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${gapPresentation.className}`}
-            >
-              {
-                gapPresentation.label
+              className={
+                overdueMilestones.length >
+                0
+                  ? 'rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-800'
+                  : 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
               }
+            >
+              {overdueMilestones.length >
+              0
+                ? 'Needs attention'
+                : 'Clear'}
             </span>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-oxford-stone bg-oxford-shell px-3 py-3">
-              <div className="text-xs uppercase tracking-wide text-oxford-ash">
-                Planned
-              </div>
-
-              <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                {formatDuration(
-                  researchPlannedMinutes
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-oxford-stone bg-oxford-shell px-3 py-3">
-              <div className="text-xs uppercase tracking-wide text-oxford-ash">
-                Recorded
-              </div>
-
-              <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                {formatDuration(
-                  periodPaperMinutes
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-oxford-stone bg-oxford-shell px-3 py-3">
-              <div className="text-xs uppercase tracking-wide text-oxford-ash">
-                Gap
-              </div>
-
-              <div className="mt-1 font-serif text-lg font-semibold text-oxford-blue">
-                {formatSignedDuration(
-                  researchGapMinutes
-                )}
-              </div>
-            </div>
+          <div className="mt-5 font-serif text-4xl font-semibold text-oxford-blue">
+            {
+              overdueMilestones.length
+            }
           </div>
 
-          <p className="mt-4 text-xs leading-5 text-oxford-ash">
-            Planned research uses
-            8 hours per committed
-            day. Recorded effort
-            includes only work
-            sessions explicitly
-            linked to papers in the
-            current half-month.
+          {oldestOverdueMilestone &&
+          oldestOverdueDays !== null ? (
+            <p className="mt-3 text-sm leading-6 text-oxford-charcoal">
+              Oldest:{' '}
+              <span className="font-medium">
+                {
+                  oldestOverdueMilestone.title
+                }
+              </span>
+              {' · '}
+              {oldestOverdueDays}{' '}
+              {oldestOverdueDays === 1
+                ? 'day'
+                : 'days'}{' '}
+              overdue ·{' '}
+              {formatDate(
+                oldestOverdueMilestone.target_date
+              )}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-oxford-ash">
+              No planned milestones
+              are overdue.
+            </p>
+          )}
+
+          <p className="mt-3 text-xs leading-5 text-oxford-ash">
+            Counts planned milestones
+            with target dates before
+            today. Completed and
+            cancelled milestones are
+            excluded.
           </p>
 
           <div className="mt-4">
             <ButtonLink
-              href={`/planning?period=${planningPeriodStart}#planning-analytics`}
+              href="/papers"
               variant="secondary"
             >
-              View comparison
+              Review papers
             </ButtonLink>
           </div>
         </section>
