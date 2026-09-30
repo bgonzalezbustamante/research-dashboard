@@ -40,9 +40,9 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Projects',
         items: [
-          'Added Projects with titles, abstract, funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
+          'Added Projects with titles, abstract, optional Role, funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
           'Linked projects to papers, existing conference presentations, and Dashboard-only activity labels so public project pages can reuse publication/presentation metadata while project hours remain private.',
-          'Added anonymous-safe project list/detail contracts that expose only Public project data, slugs of associated Public papers, and public-safe metadata for associated conference presentations.',
+          'Added anonymous-safe project list/detail contracts that expose only Public project data, including the optional Role, slugs of associated Public papers, and public-safe metadata for associated conference presentations.',
         ],
       },
       {
@@ -66,7 +66,7 @@ export const releases: ReleaseNote[] = [
           'Made capacity-bearing Paper Milestones the source for new research planning: optional 5/10/15-day commitments appear automatically in the half-month containing their target date and aggregate by paper.',
           'Kept Blocked Time manual in Planning, preserved earlier manual paper allocations as legacy records, and prevented new manual paper allocations so research capacity has one clear source of truth.',
           'Added per-milestone FlowSavvy/Calendar tracking in Papers and Planning, with aggregate Added/Partial/Not added status and automatic reset when a milestone date or committed capacity changes.',
-          'Restored compact FlowSavvy status icons in Planning and standardised direct Mark added / Mark not added actions across milestone-backed research and Blocked Time.',
+          'Restored compact FlowSavvy status icons in Planning and standardised small colour-coded Mark added / Mark not added actions across milestone-backed research and Blocked Time.',
         ],
       },
       {
@@ -74,7 +74,7 @@ export const releases: ReleaseNote[] = [
         items: [
           'Expanded Papers requiring attention to a numbered top 10 across two columns, keeping planned milestone dates first and refining status priority to Revise round, Reframing, Writing, VOR typesetting, Under review, then other statuses.',
           'Simplified the upper Dashboard by removing the redundant Working Hours card and showing net weekly time beside the Gross workload total in Weekly signals.',
-          'Replaced Current research allocation with an Overdue milestones card while retaining the Current planning period card unchanged.',
+          'Replaced Current research allocation with an Overdue milestones card while retaining the Current planning period card unchanged; its action now opens the paper containing the oldest overdue milestone.',
         ],
       },
       {
