@@ -37,6 +37,7 @@ type ProjectRow = {
   short_title: string
   title: string
   abstract: string
+  role: string | null
   funder: string
   funder_note: string | null
   url: string | null
@@ -266,6 +267,7 @@ export default async function ProjectsPage({
         short_title,
         title,
         abstract,
+        role,
         funder,
         funder_note,
         url,
@@ -626,8 +628,8 @@ export default async function ProjectsPage({
             Projects are Private by
             default. Public projects
             expose only canonical
-            project content, funder
-            note, canonical URL,
+            project content, role,
+            funder note, canonical URL,
             start/end years,
             Featured state, static asset
             filenames, and the slugs of
@@ -721,6 +723,29 @@ export default async function ProjectsPage({
                   required
                   className={inputClass}
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="new-project-role"
+                  className={labelClass}
+                >
+                  Role
+                </label>
+
+                <input
+                  id="new-project-role"
+                  name="role"
+                  maxLength={200}
+                  placeholder="e.g. Principal Investigator"
+                  className={inputClass}
+                />
+
+                <p className="mt-1 text-xs text-oxford-ash">
+                  Optional. Public projects
+                  expose this role to the
+                  academic website.
+                </p>
               </div>
 
               <div className="md:col-span-2">
@@ -1307,6 +1332,17 @@ export default async function ProjectsPage({
                         }
                       </p>
 
+                      {project.role && (
+                        <p className="mt-2 text-sm text-oxford-ash">
+                          Role:{' '}
+                          <span className="text-oxford-charcoal">
+                            {
+                              project.role
+                            }
+                          </span>
+                        </p>
+                      )}
+
                       {(project.start_year ||
                         project.end_year) && (
                         <p className="mt-2 text-sm text-oxford-ash">
@@ -1581,6 +1617,37 @@ export default async function ProjectsPage({
                                 inputClass
                               }
                             />
+                          </div>
+
+                          <div className="md:col-span-2">
+                            <label
+                              htmlFor={`role-${project.id}`}
+                              className={
+                                labelClass
+                              }
+                            >
+                              Role
+                            </label>
+
+                            <input
+                              id={`role-${project.id}`}
+                              name="role"
+                              maxLength={200}
+                              defaultValue={
+                                project.role ??
+                                ''
+                              }
+                              placeholder="e.g. Principal Investigator"
+                              className={
+                                inputClass
+                              }
+                            />
+
+                            <p className="mt-1 text-xs text-oxford-ash">
+                              Optional and
+                              public for
+                              Public projects.
+                            </p>
                           </div>
 
                           <div className="md:col-span-2">

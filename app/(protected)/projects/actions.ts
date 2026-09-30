@@ -129,6 +129,7 @@ type ValidProjectFields = {
   shortTitle: string
   title: string
   abstract: string
+  role: string | null
   funder: string
   funderNote: string | null
   url: string | null
@@ -172,6 +173,12 @@ function validateProjectFields(
     getRequiredText(
       formData,
       'abstract'
+    )
+
+  const role =
+    getOptionalText(
+      formData,
+      'role'
     )
 
   const funder =
@@ -248,6 +255,17 @@ function validateProjectFields(
       ok: false,
       error:
         'Short title, long title, abstract, and funder are required.',
+    }
+  }
+
+  if (
+    role &&
+    role.length > 200
+  ) {
+    return {
+      ok: false,
+      error:
+        'Project role must be 200 characters or fewer.',
     }
   }
 
@@ -400,6 +418,7 @@ function validateProjectFields(
     shortTitle,
     title,
     abstract,
+    role,
     funder,
     funderNote,
     url,
@@ -491,6 +510,8 @@ export async function createProject(
         fields.title,
       p_abstract:
         fields.abstract,
+      p_role:
+        fields.role,
       p_funder:
         fields.funder,
       p_funder_note:
@@ -595,6 +616,8 @@ export async function updateProject(
         fields.title,
       p_abstract:
         fields.abstract,
+      p_role:
+        fields.role,
       p_funder:
         fields.funder,
       p_funder_note:
