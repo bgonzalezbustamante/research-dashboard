@@ -920,8 +920,9 @@ export default async function TeachingPage({
             <p>
               Public: name,
               institution, summary,
-              period, current status,
-              one or more levels, times taught,
+              optional role, period,
+              current status, one or
+              more levels, times taught,
               cumulative students,
               optional slug, and course
               image filename.
