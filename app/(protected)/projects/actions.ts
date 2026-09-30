@@ -13,6 +13,13 @@ const allowedStatuses = new Set([
   'completed',
 ])
 
+const allowedProjectRoles = new Set([
+  'Principal Investigator',
+  'Research Associate',
+  'Consultancy Chief',
+  'Consultant',
+])
+
 const allowedVisibilities = new Set([
   'private',
   'public',
@@ -260,12 +267,14 @@ function validateProjectFields(
 
   if (
     role &&
-    role.length > 200
+    !allowedProjectRoles.has(
+      role
+    )
   ) {
     return {
       ok: false,
       error:
-        'Project role must be 200 characters or fewer.',
+        'Select a valid project role.',
     }
   }
 
