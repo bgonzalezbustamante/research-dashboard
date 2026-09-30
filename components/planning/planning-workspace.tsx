@@ -682,7 +682,12 @@ export default function PlanningWorkspace({
 
                         <Button
                           type="submit"
-                          variant="secondary"
+                          size="compact"
+                          variant={
+                            allocation.flowsavvy_added
+                              ? 'warning'
+                              : 'success'
+                          }
                         >
                           {allocation.flowsavvy_added
                             ? 'Mark not added'
@@ -779,7 +784,12 @@ export default function PlanningWorkspace({
 
                                   <Button
                                     type="submit"
-                                    variant="secondary"
+                                    size="compact"
+                                    variant={
+                                      milestone.flowsavvy_added
+                                        ? 'warning'
+                                        : 'success'
+                                    }
                                   >
                                     {milestone.flowsavvy_added
                                       ? 'Mark not added'
