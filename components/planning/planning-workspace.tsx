@@ -725,25 +725,6 @@ export default function PlanningWorkspace({
                                     d
                                   </div>
 
-                                  <div
-                                    className={
-                                      milestone.flowsavvy_added
-                                        ? 'mt-1 text-xs font-medium text-green-800'
-                                        : 'mt-1 text-xs text-oxford-ash'
-                                    }
-                                  >
-                                    <span
-                                      aria-hidden="true"
-                                      className="mr-1"
-                                    >
-                                      {milestone.flowsavvy_added
-                                        ? '☑'
-                                        : '☐'}
-                                    </span>
-                                    {milestone.flowsavvy_added
-                                      ? 'Added to FlowSavvy/Calendar'
-                                      : 'Not added to FlowSavvy/Calendar'}
-                                  </div>
                                 </div>
 
                                 <form
