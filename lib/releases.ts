@@ -56,7 +56,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Teaching Portfolio',
         items: [
-          'Added a Teaching module for courses and teaching activities with period, one or more academic levels, institution, cumulative teaching/student counts, summaries, optional public course images, and a controlled Role (Course convenor, Lecturer, Tutor, Thesis supervisor or Examiner).',
+          'Added a Teaching module for courses and teaching activities with period, one or more academic levels, institution, cumulative teaching/student counts, summaries, optional public course images, and a controlled Role (Course Convenor, Lecturer, Tutor, Thesis Supervisor or Examiner).',
           'Linked Teaching-classified Hours labels to individual courses for private tracked-hour/session totals, while exposing only explicitly Public teaching-card data, including the optional controlled Role, to the academic website.',
         ],
       },
