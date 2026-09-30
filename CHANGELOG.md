@@ -57,6 +57,7 @@
 `projects`
 
 - Added a new Dashboard Projects module with short title, long title, abstract, optional project Role, funder, optional public funder note, optional canonical project URL, optional start/end years, and Active/Completed status.
+- Constrained Project Role to Principal Investigator, Research Associate, Consultancy Chief, or Consultant in both the Dashboard UI and database, while leaving existing unpopulated roles as Not specified.
 - Added Private/Public project visibility with a stable public slug and Featured state; projects remain Private by default.
 - Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
 - Added many-to-many project-paper associations without changing canonical paper metadata.
@@ -72,12 +73,13 @@
 
 - Added a Dashboard Teaching module for maintaining courses and teaching activities as a structured Teaching Portfolio.
 - Added canonical course/activity fields for name, university/institution, summary, start year, optional end year or Still teaching state, one or more levels (Undergraduate/Master/PhD), cumulative times taught, and cumulative students across cohorts.
+- Added an optional controlled Teaching Role with Course convenor, Lecturer, Tutor, Thesis supervisor, and Examiner; existing Teaching items remain Not specified until populated.
 - Added Private/Public Website visibility, an optional stable public slug, and an optional validated course image filename.
 - Standardised Teaching Portfolio static assets under `academic-website/public/teaching/<filename>`, avoiding a slug dependency because teaching cards do not require detail pages.
 - Added many-to-many-style Teaching Portfolio activity assignments with each Teaching-classified activity label restricted to one portfolio item to prevent double-counting within teaching analytics.
 - Restricted Teaching Portfolio assignments to non-Break activity labels whose major activity is explicitly Teaching, and prevented linked labels from being reclassified until unlinked.
 - Added private Dashboard aggregates for tracked teaching hours and session counts derived from linked activity labels.
-- Added `list_public_teaching()` as an anonymous-safe academic-website card contract exposing only optional slug, name, institution, summary, period/current state, levels, times taught, cumulative students, and course image filename.
+- Added `list_public_teaching()` as an anonymous-safe academic-website card contract exposing only optional slug, name, institution, summary, optional controlled role, period/current state, levels, times taught, cumulative students, and course image filename.
 - Kept Teaching activity-label relationships, tracked hours/session counts, owner metadata, and internal IDs out of the public contract.
 - Expanded Teaching Portfolio level from a single value to a multi-select array so a course can be classified across combinations such as Master and PhD while preserving existing records.
 
@@ -109,6 +111,7 @@
 - Restored the compact FlowSavvy/Calendar task indicators used by the earlier Planning UI: ☑ Added, ☐ Not added, and a partial state for aggregated milestone-backed paper commitments.
 - Standardised FlowSavvy/Calendar actions across milestone-backed research and manual Blocked Time so both can be marked added or not added directly from their Planning cards.
 - Compacted those FlowSavvy actions and differentiated them visually: green for Mark added and amber for Mark not added.
+- Removed the repeated per-milestone Added/Not added FlowSavvy status line inside milestone-backed cards; the card-level aggregate status remains, while each milestone keeps its individual Mark added / Mark not added action.
 
 `dashboard priorities and weekly signals`
 
@@ -145,6 +148,7 @@
 - Preserved unique lowercase public slugs and automatic Private metadata creation for newly created papers.
 - Kept publication/project/teaching images as static assets owned by the separate academic website repository rather than introducing Supabase Storage; the Dashboard stores only validated filenames and never stores deployment-specific asset URLs.
 - Restricted the anonymous application function surface to deliberate public publication, project, conference, teaching, and aggregate analytics RPCs.
+- Updated transitive development dependency `brace-expansion` from 1.1.18 to 1.1.21 and from 5.0.9 to 5.0.12 via `npm audit fix` to resolve the newly reported denial-of-service advisories; `npm audit`, lint, and the production build all pass.
 
 ### Release status
 
