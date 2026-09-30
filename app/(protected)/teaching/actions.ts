@@ -14,6 +14,14 @@ const allowedLevels = new Set([
   'phd',
 ])
 
+const allowedTeachingRoles = new Set([
+  'Course convenor',
+  'Lecturer',
+  'Tutor',
+  'Thesis supervisor',
+  'Examiner',
+])
+
 const allowedVisibilities = new Set([
   'private',
   'public',
@@ -134,6 +142,7 @@ type ValidTeachingFields = {
   name: string
   institution: string
   summary: string
+  role: string | null
   startYear: number
   endYear: number | null
   isCurrent: boolean
@@ -174,6 +183,12 @@ function validateTeachingFields(
     getRequiredText(
       formData,
       'summary'
+    )
+
+  const role =
+    getOptionalText(
+      formData,
+      'role'
     )
 
   const startYear =
@@ -274,6 +289,19 @@ function validateTeachingFields(
       ok: false,
       error:
         'Course summary must be 4,000 characters or fewer.',
+    }
+  }
+
+  if (
+    role &&
+    !allowedTeachingRoles.has(
+      role
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        'Select a valid teaching role.',
     }
   }
 
@@ -413,6 +441,7 @@ function validateTeachingFields(
     name,
     institution,
     summary,
+    role,
     startYear,
     endYear,
     isCurrent,
@@ -493,6 +522,8 @@ export async function createTeachingItem(
         fields.institution,
       p_summary:
         fields.summary,
+      p_role:
+        fields.role,
       p_start_year:
         fields.startYear,
       p_end_year:
@@ -586,6 +617,8 @@ export async function updateTeachingItem(
           fields.institution,
         p_summary:
           fields.summary,
+        p_role:
+          fields.role,
         p_start_year:
           fields.startYear,
         p_end_year:
