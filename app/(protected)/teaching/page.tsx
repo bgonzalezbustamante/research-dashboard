@@ -27,10 +27,10 @@ type TeachingLevel =
   | 'phd'
 
 type TeachingRole =
-  | 'Course convenor'
+  | 'Course Convenor'
   | 'Lecturer'
   | 'Tutor'
-  | 'Thesis supervisor'
+  | 'Thesis Supervisor'
   | 'Examiner'
 
 type TeachingVisibility =
@@ -96,10 +96,10 @@ const levelLabels: Record<
 }
 
 const teachingRoleOptions: TeachingRole[] = [
-  'Course convenor',
+  'Course Convenor',
   'Lecturer',
   'Tutor',
-  'Thesis supervisor',
+  'Thesis Supervisor',
   'Examiner',
 ]
 
