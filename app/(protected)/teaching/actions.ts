@@ -15,10 +15,10 @@ const allowedLevels = new Set([
 ])
 
 const allowedTeachingRoles = new Set([
-  'Course convenor',
+  'Course Convenor',
   'Lecturer',
   'Tutor',
-  'Thesis supervisor',
+  'Thesis Supervisor',
   'Examiner',
 ])
 
