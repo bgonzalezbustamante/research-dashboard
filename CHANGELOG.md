@@ -73,7 +73,7 @@
 
 - Added a Dashboard Teaching module for maintaining courses and teaching activities as a structured Teaching Portfolio.
 - Added canonical course/activity fields for name, university/institution, summary, start year, optional end year or Still teaching state, one or more levels (Undergraduate/Master/PhD), cumulative times taught, and cumulative students across cohorts.
-- Added an optional controlled Teaching Role with Course convenor, Lecturer, Tutor, Thesis supervisor, and Examiner; existing Teaching items remain Not specified until populated.
+- Added an optional controlled Teaching Role with Course Convenor, Lecturer, Tutor, Thesis Supervisor, and Examiner; existing Teaching items remain Not specified until populated.
 - Added Private/Public Website visibility, an optional stable public slug, and an optional validated course image filename.
 - Standardised Teaching Portfolio static assets under `academic-website/public/teaching/<filename>`, avoiding a slug dependency because teaching cards do not require detail pages.
 - Added many-to-many-style Teaching Portfolio activity assignments with each Teaching-classified activity label restricted to one portfolio item to prevent double-counting within teaching analytics.
