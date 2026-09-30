@@ -56,14 +56,14 @@
 
 `projects`
 
-- Added a new Dashboard Projects module with short title, long title, abstract, funder, optional public funder note, optional canonical project URL, optional start/end years, and Active/Completed status.
+- Added a new Dashboard Projects module with short title, long title, abstract, optional project Role, funder, optional public funder note, optional canonical project URL, optional start/end years, and Active/Completed status.
 - Added Private/Public project visibility with a stable public slug and Featured state; projects remain Private by default.
 - Added optional project and funder image filenames resolved by the academic website from `/projects/<slug>/<filename>` and `/funders/<filename>`.
 - Added many-to-many project-paper associations without changing canonical paper metadata.
 - Added many-to-many project-conference-presentation associations using the existing conference records rather than duplicating presentation metadata; public project presentation objects now also carry conference start/end dates.
 - Added project-to-activity-label assignments for Dashboard-only hour tracking, with each activity label restricted to one project to prevent double-counting.
 - Added tracked project hours derived from assigned activity labels without exposing the label assignments or work-session detail publicly.
-- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional funder note, canonical project URL, start/end years, Featured state, Public paper slugs, and public-safe associated conference-presentation metadata.
+- Added `list_public_projects()` and `get_public_project(slug)` as explicit anonymous-safe project contracts, including the optional project Role, funder note, canonical project URL, start/end years, Featured state, Public paper slugs, and public-safe associated conference-presentation metadata.
 - Limited public project publication associations to slugs of papers that are themselves explicitly Public; Private papers never appear in the public project contract.
 
 
@@ -108,6 +108,7 @@
 - Updated Standby-paper guidance so returning a paper to active planning is done by creating or revising a capacity-bearing milestone.
 - Restored the compact FlowSavvy/Calendar task indicators used by the earlier Planning UI: ☑ Added, ☐ Not added, and a partial state for aggregated milestone-backed paper commitments.
 - Standardised FlowSavvy/Calendar actions across milestone-backed research and manual Blocked Time so both can be marked added or not added directly from their Planning cards.
+- Compacted those FlowSavvy actions and differentiated them visually: green for Mark added and amber for Mark not added.
 
 `dashboard priorities and weekly signals`
 
@@ -118,6 +119,7 @@
 - Removed the redundant Working Hours card from the upper Dashboard because Weekly signals already summarises weekly workload.
 - Added compact net weekly workload beside the Gross workload total in Weekly signals while retaining the gross-workload range indicator.
 - Replaced the separate Current research allocation card with an Overdue milestones card that counts planned milestones whose target dates are before today and identifies the oldest overdue commitment; the Current planning period card remains unchanged.
+- Made the Overdue milestones action contextual by linking directly to the paper containing the oldest overdue milestone and hiding the action when there are no overdue milestones.
 
 `release notes`
 
