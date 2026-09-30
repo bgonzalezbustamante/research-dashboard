@@ -26,6 +26,13 @@ type TeachingLevel =
   | 'master'
   | 'phd'
 
+type TeachingRole =
+  | 'Course Convenor'
+  | 'Lecturer'
+  | 'Tutor'
+  | 'Thesis Supervisor'
+  | 'Examiner'
+
 type TeachingVisibility =
   | 'private'
   | 'public'
@@ -36,6 +43,7 @@ type TeachingRow = {
   name: string
   institution: string
   summary: string
+  role: TeachingRole | null
   start_year: number
   end_year: number | null
   is_current: boolean
@@ -86,6 +94,14 @@ const levelLabels: Record<
   master: 'Master',
   phd: 'PhD',
 }
+
+const teachingRoleOptions: TeachingRole[] = [
+  'Course Convenor',
+  'Lecturer',
+  'Tutor',
+  'Thesis Supervisor',
+  'Examiner',
+]
 
 function formatDuration(
   value: number
@@ -189,6 +205,7 @@ export default async function TeachingPage({
         name,
         institution,
         summary,
+        role,
         start_year,
         end_year,
         is_current,
@@ -512,6 +529,42 @@ export default async function TeachingPage({
                   maxLength={300}
                   className={inputClass}
                 />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="new-teaching-role"
+                  className={labelClass}
+                >
+                  Role
+                </label>
+
+                <select
+                  id="new-teaching-role"
+                  name="role"
+                  defaultValue=""
+                  className={inputClass}
+                >
+                  <option value="">
+                    Not specified
+                  </option>
+                  {teachingRoleOptions.map(
+                    (role) => (
+                      <option
+                        key={role}
+                        value={role}
+                      >
+                        {role}
+                      </option>
+                    )
+                  )}
+                </select>
+
+                <p className="mt-1 text-xs text-oxford-ash">
+                  Optional. Public teaching
+                  items expose this role to
+                  the academic website.
+                </p>
               </div>
 
               <div>
@@ -867,8 +920,9 @@ export default async function TeachingPage({
             <p>
               Public: name,
               institution, summary,
-              period, current status,
-              one or more levels, times taught,
+              optional role, period,
+              current status, one or
+              more levels, times taught,
               cumulative students,
               optional slug, and course
               image filename.
@@ -1028,6 +1082,15 @@ export default async function TeachingPage({
                         <p className="mt-1 text-sm font-medium text-oxford-charcoal">
                           {item.institution}
                         </p>
+
+                        {item.role && (
+                          <p className="mt-1 text-sm text-oxford-ash">
+                            Role:{' '}
+                            <span className="text-oxford-charcoal">
+                              {item.role}
+                            </span>
+                          </p>
+                        )}
 
                         <p className="mt-1 text-sm text-oxford-ash">
                           {formatPeriod(
@@ -1230,6 +1293,49 @@ export default async function TeachingPage({
                                 inputClass
                               }
                             />
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor={
+                                'teaching-role-' +
+                                item.id
+                              }
+                              className={
+                                labelClass
+                              }
+                            >
+                              Role
+                            </label>
+
+                            <select
+                              id={
+                                'teaching-role-' +
+                                item.id
+                              }
+                              name="role"
+                              defaultValue={
+                                item.role ??
+                                ''
+                              }
+                              className={
+                                inputClass
+                              }
+                            >
+                              <option value="">
+                                Not specified
+                              </option>
+                              {teachingRoleOptions.map(
+                                (role) => (
+                                  <option
+                                    key={role}
+                                    value={role}
+                                  >
+                                    {role}
+                                  </option>
+                                )
+                              )}
+                            </select>
                           </div>
 
                           <div>

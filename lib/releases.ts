@@ -40,7 +40,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Projects',
         items: [
-          'Added Projects with titles, abstract, optional Role, funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
+          'Added Projects with titles, abstract, controlled Role (Principal Investigator, Research Associate, Consultancy Chief or Consultant), funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
           'Linked projects to papers, existing conference presentations, and Dashboard-only activity labels so public project pages can reuse publication/presentation metadata while project hours remain private.',
           'Added anonymous-safe project list/detail contracts that expose only Public project data, including the optional Role, slugs of associated Public papers, and public-safe metadata for associated conference presentations.',
         ],
@@ -56,8 +56,8 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Teaching Portfolio',
         items: [
-          'Added a Teaching module for courses and teaching activities with period, one or more academic levels, institution, cumulative teaching/student counts, summaries and optional public course images.',
-          'Linked Teaching-classified Hours labels to individual courses for private tracked-hour/session totals, while exposing only explicitly Public teaching-card data to the academic website.',
+          'Added a Teaching module for courses and teaching activities with period, one or more academic levels, institution, cumulative teaching/student counts, summaries, optional public course images, and a controlled Role (Course Convenor, Lecturer, Tutor, Thesis Supervisor or Examiner).',
+          'Linked Teaching-classified Hours labels to individual courses for private tracked-hour/session totals, while exposing only explicitly Public teaching-card data, including the optional controlled Role, to the academic website.',
         ],
       },
       {
@@ -66,7 +66,7 @@ export const releases: ReleaseNote[] = [
           'Made capacity-bearing Paper Milestones the source for new research planning: optional 5/10/15-day commitments appear automatically in the half-month containing their target date and aggregate by paper.',
           'Kept Blocked Time manual in Planning, preserved earlier manual paper allocations as legacy records, and prevented new manual paper allocations so research capacity has one clear source of truth.',
           'Added per-milestone FlowSavvy/Calendar tracking in Papers and Planning, with aggregate Added/Partial/Not added status and automatic reset when a milestone date or committed capacity changes.',
-          'Restored compact FlowSavvy status icons in Planning and standardised small colour-coded Mark added / Mark not added actions across milestone-backed research and Blocked Time.',
+          'Restored compact FlowSavvy status icons in Planning and standardised small colour-coded Mark added / Mark not added actions across milestone-backed research and Blocked Time, without repeating the same status text on each milestone row.',
         ],
       },
       {
@@ -82,6 +82,12 @@ export const releases: ReleaseNote[] = [
         items: [
           'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication, project and teaching assets resolved by the academic website.',
           'Added aggregate public work analytics for Activity over time, yearly average net working time and coffees per working day while keeping raw work records private.',
+        ],
+      },
+      {
+        title: 'Security and maintenance',
+        items: [
+          'Updated transitive development dependency brace-expansion from 1.1.18 to 1.1.21 and from 5.0.9 to 5.0.12 via npm audit fix; npm audit, lint and the production build all pass.',
         ],
       },
     ],

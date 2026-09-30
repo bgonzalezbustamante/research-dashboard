@@ -114,6 +114,13 @@ const inputClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
+const projectRoleOptions = [
+  'Principal Investigator',
+  'Research Associate',
+  'Consultancy Chief',
+  'Consultant',
+] as const
+
 function formatDuration(
   value: number
 ) {
@@ -733,13 +740,26 @@ export default async function ProjectsPage({
                   Role
                 </label>
 
-                <input
+                <select
                   id="new-project-role"
                   name="role"
-                  maxLength={200}
-                  placeholder="e.g. Principal Investigator"
+                  defaultValue=""
                   className={inputClass}
-                />
+                >
+                  <option value="">
+                    Not specified
+                  </option>
+                  {projectRoleOptions.map(
+                    (role) => (
+                      <option
+                        key={role}
+                        value={role}
+                      >
+                        {role}
+                      </option>
+                    )
+                  )}
+                </select>
 
                 <p className="mt-1 text-xs text-oxford-ash">
                   Optional. Public projects
@@ -1629,19 +1649,31 @@ export default async function ProjectsPage({
                               Role
                             </label>
 
-                            <input
+                            <select
                               id={`role-${project.id}`}
                               name="role"
-                              maxLength={200}
                               defaultValue={
                                 project.role ??
                                 ''
                               }
-                              placeholder="e.g. Principal Investigator"
                               className={
                                 inputClass
                               }
-                            />
+                            >
+                              <option value="">
+                                Not specified
+                              </option>
+                              {projectRoleOptions.map(
+                                (role) => (
+                                  <option
+                                    key={role}
+                                    value={role}
+                                  >
+                                    {role}
+                                  </option>
+                                )
+                              )}
+                            </select>
 
                             <p className="mt-1 text-xs text-oxford-ash">
                               Optional and
