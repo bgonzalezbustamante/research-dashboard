@@ -27,16 +27,16 @@ alter table public.teaching_portfolio
   check (
     role is null
     or role in (
-      'Course convenor',
+      'Course Convenor',
       'Lecturer',
       'Tutor',
-      'Thesis supervisor',
+      'Thesis Supervisor',
       'Examiner'
     )
   );
 
 comment on column public.teaching_portfolio.role is
-  'Controlled teaching role: Course convenor, Lecturer, Tutor, Thesis supervisor, or Examiner.';
+  'Controlled teaching role: Course Convenor, Lecturer, Tutor, Thesis Supervisor, or Examiner.';
 
 drop function if exists public.create_teaching_with_details(
   text,
