@@ -991,6 +991,15 @@ export default async function DashboardPage({
         )
       : null
 
+  const oldestOverduePaper =
+    oldestOverdueMilestone
+      ? activePapers.find(
+          (paper) =>
+            paper.id ===
+            oldestOverdueMilestone.paper_id
+        ) ?? null
+      : null
+
   const planningTone =
     getPlanningTone(
       totalPlannedDays
@@ -1528,14 +1537,19 @@ export default async function DashboardPage({
             excluded.
           </p>
 
-          <div className="mt-4">
-            <ButtonLink
-              href="/papers"
-              variant="secondary"
-            >
-              Review papers
-            </ButtonLink>
-          </div>
+          {oldestOverduePaper && (
+            <div className="mt-4">
+              <ButtonLink
+                href={`/papers/${oldestOverduePaper.id}`}
+                variant="secondary"
+              >
+                Open{' '}
+                {
+                  oldestOverduePaper.short_title
+                }
+              </ButtonLink>
+            </div>
+          )}
         </section>
 
         <section className="rounded-lg border border-oxford-stone bg-white p-5 xl:col-span-2">
