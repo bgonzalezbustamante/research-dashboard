@@ -149,6 +149,8 @@
 - Added a permanent GitHub verification workflow for pull requests and `main` that runs `npm ci`, lint, the Academic API contract check, and the production build on Node 24.
 - Added `ARCHITECTURE.md` to document the administrative system-of-record model, anonymous read-only boundary, Public RPC v1 versioning rules, and downstream-consumer relationship.
 - Added Academic API to the shared public footer beside Release notes and allowed exactly `/api` through the public authentication boundary without opening future `/api/*` technical routes.
+- Refined the public footer so the linked author name appears above the release/API row and removed the separate Empiria Lab developer attribution; widened the introductory copy on Release notes and Academic API to the full public content width.
+- Linked every visible Public RPC v1 version reference on the Academic API page to Release notes, simplified capitalisation in explanatory prose, and added a contact note for prospective API consumers.
 - Documented Academic Website and Academic CV Studio as downstream consumers without making either repository a Research Dashboard dependency.
 
 `author directory`
