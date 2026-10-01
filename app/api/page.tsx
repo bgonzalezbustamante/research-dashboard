@@ -143,13 +143,8 @@ export default function AcademicApiPage() {
               Academic API
             </h1>
             <p className="mt-4 text-base leading-7 text-oxford-ash">
-              <Link
-                href="/release-notes"
-                className="font-medium text-oxford-blue underline-offset-4 hover:underline"
-              >
-                {contract.version}
-              </Link>{' '}
-              documents the current public
+              {contract.version} documents
+              the current public
               interface. Research Dashboard
               is the
               canonical administrative
@@ -164,12 +159,9 @@ export default function AcademicApiPage() {
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link
-                href="/release-notes"
-                className="rounded-full border border-oxford-sky-blue bg-oxford-cool-grey px-3 py-1 text-xs font-medium text-oxford-blue transition hover:bg-oxford-shell"
-              >
+              <span className="rounded-full border border-oxford-sky-blue bg-oxford-cool-grey px-3 py-1 text-xs font-medium text-oxford-blue">
                 {contract.version}
-              </Link>
+              </span>
               <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-medium text-green-800">
                 {contract.status}
               </span>
@@ -245,15 +237,16 @@ export default function AcademicApiPage() {
                   Versioned interface
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-oxford-ash">
+                  {contract.version} is the
+                  current stable public
+                  contract within{' '}
                   <Link
                     href="/release-notes"
                     className="font-medium text-oxford-blue underline-offset-4 hover:underline"
                   >
-                    {contract.version}
-                  </Link>{' '}
-                  is the current stable
-                  public contract within
-                  Distant Forge. Contract
+                    Distant Forge
+                  </Link>
+                  . Contract
                   changes are recorded in
                   Research Dashboard release
                   documentation and
@@ -269,17 +262,16 @@ export default function AcademicApiPage() {
               How consumers connect
             </h2>
             <p className="mt-3 text-sm leading-6 text-oxford-ash">
-              The machine interface remains
-              the Supabase RPC layer. A
-              separate REST façade is not
-              required at present because
-              the Data API already provides
-              HTTP access to these curated
-              functions. Public applications
-              configure the project URL and
-              publishable key, then call the
-              documented functions through
-              the Supabase client.
+              The Academic API is read-only.
+              Applications such as the
+              Academic Website and Academic
+              CV Studio connect to Supabase
+              using the project URL and a
+              publishable key, then call only
+              the public functions documented
+              below. They do not receive
+              direct access to Research
+              Dashboard tables.
             </p>
 
             <div className="mt-5 overflow-x-auto rounded-lg border border-oxford-stone bg-oxford-charcoal p-4 text-sm text-white">
@@ -316,9 +308,21 @@ export default function AcademicApiPage() {
             </p>
           </section>
 
+          <div className="mt-8">
+            <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
+              Browse the API
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-oxford-ash">
+              Use the labels below to jump
+              directly to the corresponding
+              documentation sections further
+              down this page.
+            </p>
+          </div>
+
           <nav
             aria-label="Academic API resources"
-            className="mt-8 flex flex-wrap gap-2"
+            className="mt-4 flex flex-wrap gap-2"
           >
             {contract.resources.map(
               (resource) => (
@@ -599,13 +603,8 @@ export default function AcademicApiPage() {
                 These values are enforced by
                 the Research Dashboard
                 database and form part of{' '}
-                <Link
-                  href="/release-notes"
-                  className="font-medium text-oxford-blue underline-offset-4 hover:underline"
-                >
-                  {contract.version}
-                </Link>
-                . Consumers should not invent
+                {contract.version}. Consumers
+                should not invent
                 additional values.
               </p>
             </div>
