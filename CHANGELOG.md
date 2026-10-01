@@ -150,6 +150,7 @@
 - Added `ARCHITECTURE.md` to document the administrative system-of-record model, anonymous read-only boundary, Public RPC v1 versioning rules, and downstream-consumer relationship.
 - Added Academic API to the shared public footer beside Release notes and allowed exactly `/api` through the public authentication boundary without opening future `/api/*` technical routes.
 - Refined the public footer so the release/version remains on the first line and the linked author name plus Academic API appear on the second; removed the separate Empiria Lab developer attribution and widened the introductory copy on Release notes and Academic API to the full public content width.
+- Added reciprocal public-header navigation between Release notes and Academic API so either documentation surface can be reached directly from the other.
 - Kept Public RPC v1 as plain interface text, linked Distant Forge references to Release notes, simplified explanatory prose, clarified how consumers connect, added jump-label guidance for the resource sections, and added a contact note for prospective API consumers.
 - Documented Academic Website and Academic CV Studio as downstream consumers without making either repository a Research Dashboard dependency.
 
