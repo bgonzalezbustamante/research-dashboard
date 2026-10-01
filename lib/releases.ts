@@ -91,6 +91,7 @@ export const releases: ReleaseNote[] = [
           'Centralised public field lists, privacy exclusions and controlled vocabularies in a contract manifest used by the API page, and added a repository check that compares it with current Supabase migration definitions.',
           'Added permanent pull-request/main verification on Node 24 covering lint, the Academic API contract check and the production build.',
           'Documented Academic Website and Academic CV Studio as read-only downstream consumers and linked Academic API from the shared public footer alongside Release notes.',
+          'Refined the public information layout with author-first footer attribution, full-width introductions, linked API version references and contact guidance for prospective API consumers.',
         ],
       },
       {
