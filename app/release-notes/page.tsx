@@ -94,7 +94,7 @@ export default async function ReleaseNotesPage({
 
       <main className="flex-1 px-6 py-10">
         <div className="mx-auto w-full max-w-5xl">
-          <div className="max-w-3xl">
+          <div>
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
               Release notes
             </p>
