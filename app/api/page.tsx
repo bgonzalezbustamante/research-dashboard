@@ -135,17 +135,23 @@ export default function AcademicApiPage() {
 
       <main className="flex-1 px-6 py-10">
         <div className="mx-auto w-full max-w-5xl">
-          <section className="max-w-4xl">
+          <section>
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
-              Research Dashboard · Public data interface
+              Research Dashboard · public data interface
             </p>
             <h1 className="mt-2 font-serif text-4xl font-semibold text-oxford-blue">
               Academic API
             </h1>
             <p className="mt-4 text-base leading-7 text-oxford-ash">
-              {contract.version} documents
-              the current public interface.
-              Research Dashboard is the
+              <Link
+                href="/release-notes"
+                className="font-medium text-oxford-blue underline-offset-4 hover:underline"
+              >
+                {contract.version}
+              </Link>{' '}
+              documents the current public
+              interface. Research Dashboard
+              is the
               canonical administrative
               source for the academic
               metadata documented here.
@@ -158,9 +164,12 @@ export default function AcademicApiPage() {
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <span className="rounded-full border border-oxford-sky-blue bg-oxford-cool-grey px-3 py-1 text-xs font-medium text-oxford-blue">
+              <Link
+                href="/release-notes"
+                className="rounded-full border border-oxford-sky-blue bg-oxford-cool-grey px-3 py-1 text-xs font-medium text-oxford-blue transition hover:bg-oxford-shell"
+              >
                 {contract.version}
-              </span>
+              </Link>
               <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-medium text-green-800">
                 {contract.status}
               </span>
@@ -219,9 +228,9 @@ export default function AcademicApiPage() {
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-oxford-ash">
                   Papers, projects and
-                  Teaching Portfolio items
+                  teaching portfolio items
                   apply their explicit
-                  Public visibility rules.
+                  public visibility rules.
                   Conferences expose the
                   documented presentation
                   shape for all stored
@@ -236,12 +245,18 @@ export default function AcademicApiPage() {
                   Versioned interface
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-oxford-ash">
-                  {contract.version} is the
-                  current stable public
-                  contract within Distant
-                  Forge. Contract changes are
-                  recorded in Dashboard
-                  release documentation and
+                  <Link
+                    href="/release-notes"
+                    className="font-medium text-oxford-blue underline-offset-4 hover:underline"
+                  >
+                    {contract.version}
+                  </Link>{' '}
+                  is the current stable
+                  public contract within
+                  Distant Forge. Contract
+                  changes are recorded in
+                  Research Dashboard release
+                  documentation and
                   validated against the
                   migration history.
                 </p>
@@ -253,11 +268,14 @@ export default function AcademicApiPage() {
             <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
               How consumers connect
             </h2>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-oxford-ash">
+            <p className="mt-3 text-sm leading-6 text-oxford-ash">
               The machine interface remains
-              Supabase RPC; this page does
-              not introduce a parallel REST
-              façade. Public applications
+              the Supabase RPC layer. A
+              separate REST façade is not
+              required at present because
+              the Data API already provides
+              HTTP access to these curated
+              functions. Public applications
               configure the project URL and
               publishable key, then call the
               documented functions through
@@ -280,6 +298,22 @@ export default function AcademicApiPage() {
                 {contract.access.architecture}
               </p>
             </div>
+
+            <p className="mt-4 text-sm leading-6 text-oxford-ash">
+              If you would like to use the
+              Academic API in another
+              application or research
+              workflow, please contact{' '}
+              <a
+                href="https://bgonzalezbustamante.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-oxford-blue underline-offset-4 hover:underline"
+              >
+                Dr. Bastián González-Bustamante
+              </a>
+              .
+            </p>
           </section>
 
           <nav
@@ -399,8 +433,7 @@ export default function AcademicApiPage() {
 
                             <div className="mt-5">
                               <h3 className="text-sm font-semibold text-oxford-charcoal">
-                                Public return
-                                fields
+                                Return fields
                               </h3>
                               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 {operation.fields.map(
@@ -564,9 +597,15 @@ export default function AcademicApiPage() {
               </h2>
               <p className="mt-3 text-sm leading-6 text-oxford-ash">
                 These values are enforced by
-                the Dashboard database and
-                form part of Public RPC v1.
-                Consumers should not invent
+                the Research Dashboard
+                database and form part of{' '}
+                <Link
+                  href="/release-notes"
+                  className="font-medium text-oxford-blue underline-offset-4 hover:underline"
+                >
+                  {contract.version}
+                </Link>
+                . Consumers should not invent
                 additional values.
               </p>
             </div>
@@ -629,7 +668,7 @@ export default function AcademicApiPage() {
                           consumer.rpcs
                             .length
                         }{' '}
-                        documented Public RPC
+                        documented public RPC
                         {consumer.rpcs
                           .length === 1
                           ? ''
@@ -682,7 +721,8 @@ export default function AcademicApiPage() {
                     access-control and raw
                     activity data remain
                     behind the authenticated
-                    Dashboard boundary.
+                    Research Dashboard
+                    boundary.
                   </span>
                 </li>
                 <li className="flex gap-3">
