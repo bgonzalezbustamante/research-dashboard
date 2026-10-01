@@ -24,7 +24,8 @@ function isPublicPath(
   return (
     pathname.startsWith('/login') ||
     pathname.startsWith('/auth') ||
-    pathname === '/release-notes'
+    pathname === '/release-notes' ||
+    pathname === '/api'
   )
 }
 

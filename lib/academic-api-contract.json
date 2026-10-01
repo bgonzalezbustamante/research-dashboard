@@ -1,0 +1,472 @@
+{
+  "name": "Academic API",
+  "version": "Public RPC v1",
+  "status": "Active",
+  "access": {
+    "mode": "Read-only",
+    "transport": "Supabase Data API / RPC",
+    "credential": "Publishable key",
+    "architecture": "Research Dashboard / Supabase → curated anonymous-safe RPCs → downstream consumers"
+  },
+  "consumers": [
+    {
+      "name": "Academic Website",
+      "url": "https://github.com/bgonzalezbustamante/academic-website",
+      "rpcs": [
+        "list_public_papers",
+        "get_public_paper",
+        "list_public_projects",
+        "get_public_project",
+        "list_public_conference_presentations",
+        "list_public_teaching",
+        "get_public_work_analytics"
+      ]
+    },
+    {
+      "name": "Academic CV Studio",
+      "url": "https://github.com/bgonzalezbustamante/academic-cv-studio",
+      "rpcs": [
+        "list_public_papers",
+        "get_public_paper",
+        "list_public_projects",
+        "get_public_project",
+        "list_public_conference_presentations",
+        "list_public_teaching"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "publications",
+      "title": "Publications",
+      "summary": "Public bibliographic, presentation and research-resource metadata for papers explicitly marked public.",
+      "notExposed": [
+        "Internal paper and owner IDs",
+        "Workflow status, revision round, milestones, submissions and revision history",
+        "Notes, work sessions and activity-label relationships",
+        "Overleaf links",
+        "Citation snapshot IDs, citation history and non-Google-Scholar citation sources",
+        "Author emails, affiliations and ORCIDs"
+      ],
+      "forbiddenFields": [
+        "id",
+        "paper_id",
+        "owner_id",
+        "status",
+        "revision_round",
+        "notes",
+        "overleaf_url",
+        "citation_snapshot_id",
+        "citation_snapshot_ids",
+        "citation_source",
+        "citation_history",
+        "source",
+        "created_at",
+        "updated_at",
+        "archived_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_papers",
+          "signature": "list_public_papers()",
+          "kind": "Listing",
+          "purpose": "Lists papers whose public metadata is explicitly marked public and has a public slug.",
+          "parameters": [],
+          "fields": [
+            {"name": "slug", "type": "text"},
+            {"name": "title", "type": "text"},
+            {"name": "authors", "type": "text[]"},
+            {"name": "abstract", "type": "text"},
+            {"name": "venue", "type": "text"},
+            {"name": "publication_date", "type": "date"},
+            {"name": "doi_url", "type": "text"},
+            {"name": "publication_url", "type": "text"},
+            {"name": "preprint_url", "type": "text"},
+            {"name": "github_url", "type": "text"},
+            {"name": "dataset_url", "type": "text"},
+            {"name": "featured", "type": "boolean"},
+            {"name": "publication_index", "type": "text"},
+            {"name": "language", "type": "text"},
+            {"name": "google_scholar_citations", "type": "integer"},
+            {"name": "google_scholar_citations_captured_on", "type": "date"},
+            {"name": "project_url", "type": "text"},
+            {"name": "si_file_url", "type": "text"}
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Google Scholar fields contain only the latest stored Google Scholar snapshot; both are null when no Google Scholar snapshot exists.",
+            "Citation and Key highlight presentation fields are deliberately omitted from the listing."
+          ]
+        },
+        {
+          "name": "get_public_paper",
+          "signature": "get_public_paper(text)",
+          "kind": "Detail",
+          "purpose": "Returns one explicitly public paper by its stable public slug.",
+          "parameters": [
+            {"name": "p_slug", "type": "text"}
+          ],
+          "fields": [
+            {"name": "slug", "type": "text"},
+            {"name": "title", "type": "text"},
+            {"name": "authors", "type": "text[]"},
+            {"name": "abstract", "type": "text"},
+            {"name": "venue", "type": "text"},
+            {"name": "publication_date", "type": "date"},
+            {"name": "doi_url", "type": "text"},
+            {"name": "publication_url", "type": "text"},
+            {"name": "preprint_url", "type": "text"},
+            {"name": "github_url", "type": "text"},
+            {"name": "dataset_url", "type": "text"},
+            {"name": "featured", "type": "boolean"},
+            {"name": "publication_index", "type": "text"},
+            {"name": "language", "type": "text"},
+            {"name": "google_scholar_citations", "type": "integer"},
+            {"name": "google_scholar_citations_captured_on", "type": "date"},
+            {"name": "citation", "type": "text"},
+            {"name": "highlight_text", "type": "text"},
+            {"name": "highlight_image_filename", "type": "text"},
+            {"name": "highlight_image_alt", "type": "text"},
+            {"name": "highlight_image_caption", "type": "text"},
+            {"name": "project_url", "type": "text"},
+            {"name": "si_file_url", "type": "text"}
+          ],
+          "detailOnly": [
+            "citation",
+            "highlight_text",
+            "highlight_image_filename",
+            "highlight_image_alt",
+            "highlight_image_caption"
+          ],
+          "listingOnly": [],
+          "notes": [
+            "Unknown or private slugs return no row.",
+            "Key highlight asset fields are filenames/metadata only; downstream applications resolve their own static assets."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "title": "Projects",
+      "summary": "Curated project metadata and associated outputs for projects explicitly marked public.",
+      "notExposed": [
+        "Internal project and owner IDs",
+        "Activity-label assignments and tracked project hours",
+        "Private paper IDs or private paper associations",
+        "Internal association-row IDs"
+      ],
+      "forbiddenFields": [
+        "id",
+        "project_id",
+        "owner_id",
+        "paper_id",
+        "activity_label_id",
+        "activity_label_ids",
+        "tracked_minutes",
+        "tracked_hours",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_projects",
+          "signature": "list_public_projects()",
+          "kind": "Listing",
+          "purpose": "Lists explicitly public projects and their already-public associated outputs.",
+          "parameters": [],
+          "fields": [
+            {"name": "slug", "type": "text"},
+            {"name": "short_title", "type": "text"},
+            {"name": "title", "type": "text"},
+            {"name": "abstract", "type": "text"},
+            {"name": "role", "type": "text"},
+            {"name": "funder", "type": "text"},
+            {"name": "funder_note", "type": "text"},
+            {"name": "url", "type": "text"},
+            {"name": "start_year", "type": "integer"},
+            {"name": "end_year", "type": "integer"},
+            {"name": "status", "type": "text"},
+            {"name": "featured", "type": "boolean"},
+            {"name": "project_image_filename", "type": "text"},
+            {"name": "funder_image_filename", "type": "text"},
+            {"name": "publication_slugs", "type": "text[]"},
+            {"name": "conference_presentations", "type": "jsonb"}
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "publication_slugs contains only papers that are themselves explicitly public.",
+            "conference_presentations[] contains event_name, event_short_name, location, presentation_date, start_date, end_date, presentation_title, authors, presentation_type and url."
+          ]
+        },
+        {
+          "name": "get_public_project",
+          "signature": "get_public_project(text)",
+          "kind": "Detail",
+          "purpose": "Returns one explicitly public project by its stable public slug.",
+          "parameters": [
+            {"name": "p_slug", "type": "text"}
+          ],
+          "fields": [
+            {"name": "slug", "type": "text"},
+            {"name": "short_title", "type": "text"},
+            {"name": "title", "type": "text"},
+            {"name": "abstract", "type": "text"},
+            {"name": "role", "type": "text"},
+            {"name": "funder", "type": "text"},
+            {"name": "funder_note", "type": "text"},
+            {"name": "url", "type": "text"},
+            {"name": "start_year", "type": "integer"},
+            {"name": "end_year", "type": "integer"},
+            {"name": "status", "type": "text"},
+            {"name": "featured", "type": "boolean"},
+            {"name": "project_image_filename", "type": "text"},
+            {"name": "funder_image_filename", "type": "text"},
+            {"name": "publication_slugs", "type": "text[]"},
+            {"name": "conference_presentations", "type": "jsonb"}
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "The current project detail shape is intentionally the same as the project listing shape.",
+            "Unknown or private slugs return no row."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conferences",
+      "title": "Conferences",
+      "summary": "Public presentation metadata for conference records. The current RPC has no per-record visibility flag: every stored conference presentation is included in this curated field-level contract.",
+      "notExposed": [
+        "Internal presentation and owner IDs",
+        "Private notes",
+        "Internal paper IDs and the optional dashboard paper relationship"
+      ],
+      "forbiddenFields": [
+        "id",
+        "owner_id",
+        "paper_id",
+        "notes",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_conference_presentations",
+          "signature": "list_public_conference_presentations()",
+          "kind": "Listing",
+          "purpose": "Lists conference presentation records in descending conference-start-date order.",
+          "parameters": [],
+          "fields": [
+            {"name": "event_name", "type": "text"},
+            {"name": "event_short_name", "type": "text"},
+            {"name": "location", "type": "text"},
+            {"name": "presentation_date", "type": "date"},
+            {"name": "start_date", "type": "date"},
+            {"name": "end_date", "type": "date"},
+            {"name": "presentation_title", "type": "text"},
+            {"name": "authors", "type": "text[]"},
+            {"name": "presentation_type", "type": "text"},
+            {"name": "url", "type": "text"}
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "presentation_date is a deprecated compatibility alias of start_date.",
+            "No public conference detail RPC currently exists."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "teaching",
+      "title": "Teaching",
+      "summary": "Public teaching portfolio metadata for items explicitly marked public.",
+      "notExposed": [
+        "Internal teaching and owner IDs",
+        "Activity-label relationships",
+        "Tracked teaching hours and session counts",
+        "Internal activity/work-session records"
+      ],
+      "forbiddenFields": [
+        "id",
+        "teaching_id",
+        "owner_id",
+        "activity_label_id",
+        "activity_label_ids",
+        "tracked_minutes",
+        "tracked_hours",
+        "session_count",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_teaching",
+          "signature": "list_public_teaching()",
+          "kind": "Listing",
+          "purpose": "Lists explicitly public teaching portfolio items for public cards and CV use.",
+          "parameters": [],
+          "fields": [
+            {"name": "slug", "type": "text"},
+            {"name": "name", "type": "text"},
+            {"name": "institution", "type": "text"},
+            {"name": "summary", "type": "text"},
+            {"name": "role", "type": "text"},
+            {"name": "start_year", "type": "integer"},
+            {"name": "end_year", "type": "integer"},
+            {"name": "is_current", "type": "boolean"},
+            {"name": "levels", "type": "text[]"},
+            {"name": "times_taught", "type": "integer"},
+            {"name": "student_count", "type": "integer"},
+            {"name": "course_image_filename", "type": "text"}
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "slug is optional for public Teaching items; no public teaching detail RPC currently exists."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "work-analytics",
+      "title": "Work analytics",
+      "summary": "A deliberately aggregated yearly work summary that supports public activity visualisation without exposing raw work records.",
+      "notExposed": [
+        "Daily-log and work-session IDs",
+        "Session start/end times",
+        "Activity labels, locations and linked papers",
+        "Daily coffee counts",
+        "Owner metadata"
+      ],
+      "forbiddenFields": [
+        "id",
+        "owner_id",
+        "paper_id",
+        "activity_label_id",
+        "start_time",
+        "end_time",
+        "coffee_count",
+        "location"
+      ],
+      "operations": [
+        {
+          "name": "get_public_work_analytics",
+          "signature": "get_public_work_analytics(year)",
+          "kind": "Aggregate",
+          "purpose": "Returns one calendar year of daily net working minutes plus two annual working-day averages.",
+          "parameters": [
+            {"name": "p_year", "type": "integer", "note": "2000 through the current calendar year"}
+          ],
+          "fields": [
+            {"name": "year", "type": "integer"},
+            {"name": "average_net_minutes_per_working_day", "type": "integer"},
+            {"name": "average_coffees_per_working_day", "type": "numeric"},
+            {"name": "days", "type": "jsonb[]"}
+          ],
+          "jsonKeys": [
+            "year",
+            "average_net_minutes_per_working_day",
+            "average_coffees_per_working_day",
+            "days",
+            "date",
+            "net_minutes"
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Each days[] item contains only date and net_minutes.",
+            "A working day is a daily log with at least one work session.",
+            "The function rejects years before 2000 and years after the current calendar year."
+          ]
+        }
+      ]
+    }
+  ],
+  "controlledVocabularies": [
+    {
+      "id": "publication-index",
+      "label": "Publication index",
+      "constraint": "paper_public_metadata_publication_index_check",
+      "values": [
+        "WoS-SSCI",
+        "Scopus",
+        "WoS-ESCI",
+        "Book chapter",
+        "SciELO/Latindex",
+        "Working paper",
+        "Preprint"
+      ]
+    },
+    {
+      "id": "paper-language",
+      "label": "Paper language",
+      "constraint": "papers_language_check",
+      "values": [
+        "English",
+        "Spanish",
+        "Portuguese",
+        "Dutch",
+        "German",
+        "French",
+        "Italian"
+      ]
+    },
+    {
+      "id": "project-role",
+      "label": "Project role",
+      "constraint": "projects_role_check",
+      "values": [
+        "Principal Investigator",
+        "Research Associate",
+        "Consultancy Chief",
+        "Consultant"
+      ]
+    },
+    {
+      "id": "project-status",
+      "label": "Project status",
+      "constraint": "projects_status_check",
+      "values": [
+        "active",
+        "completed"
+      ]
+    },
+    {
+      "id": "conference-presentation-type",
+      "label": "Conference presentation type",
+      "constraint": "conference_presentations_type_check",
+      "values": [
+        "Conference paper",
+        "Keynote",
+        "Workshop"
+      ]
+    },
+    {
+      "id": "teaching-role",
+      "label": "Teaching role",
+      "constraint": "teaching_portfolio_role_check",
+      "values": [
+        "Course Convenor",
+        "Lecturer",
+        "Tutor",
+        "Thesis Supervisor",
+        "Examiner"
+      ]
+    },
+    {
+      "id": "teaching-level",
+      "label": "Teaching level",
+      "constraint": "teaching_portfolio_levels_check",
+      "values": [
+        "undergraduate",
+        "master",
+        "phd"
+      ]
+    }
+  ]
+}

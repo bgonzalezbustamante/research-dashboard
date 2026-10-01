@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since beta.5',
     summary:
-      'Distant Forge adds the public-website administration and data boundary while keeping private research-management data isolated.',
+      'Distant Forge adds public-website administration and a documented Academic API boundary while keeping private research-management data isolated.',
     sections: [
       {
         title: 'Website and publications',
@@ -82,6 +82,17 @@ export const releases: ReleaseNote[] = [
         items: [
           'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication, project and teaching assets resolved by the academic website.',
           'Added aggregate public work analytics for Activity over time, yearly average net working time and coffees per working day while keeping raw work records private.',
+        ],
+      },
+      {
+        title: 'Academic API',
+        items: [
+          'Added a public /api documentation page for Academic API — Public RPC v1, covering the actual publication, project, conference, teaching and work-analytics RPC surface without replacing Supabase with a parallel REST service.',
+          'Centralised public field lists, privacy exclusions and controlled vocabularies in a contract manifest used by the API page, with static migration checks and optional live validation of payload shapes, nested conference data and the anonymous table-access boundary.',
+          'Added permanent pull-request/main verification on Node 24 covering lint, the Academic API contract check and the production build.',
+          'Documented Academic Website and Academic CV Studio as read-only downstream consumers and linked Academic API from the shared public footer alongside Release notes.',
+          'Refined the public information layout with release/version first in the footer, author and Academic API links on the second line, full-width introductions, linked Distant Forge references, clearer connection/navigation guidance and contact information for prospective API consumers.',
+          'Added reciprocal header navigation between Release notes and Academic API for direct movement between the two public documentation surfaces.',
         ],
       },
       {

@@ -15,7 +15,7 @@ export default function SiteFooter() {
           </Link>
         </p>
 
-        <p>
+        <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
           <a
             href="https://bgonzalezbustamante.com/"
             target="_blank"
@@ -24,15 +24,17 @@ export default function SiteFooter() {
           >
             Dr. Bastián González-Bustamante
           </a>
-          , developed by{' '}
-          <a
-            href="https://empirialab.cl/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-oxford-blue hover:underline"
+
+          <span aria-hidden="true">
+            ·
+          </span>
+
+          <Link
+            href="/api"
+            className="font-medium text-oxford-blue underline-offset-4 hover:underline"
           >
-            Empiria Lab
-          </a>
+            Academic API
+          </Link>
         </p>
       </div>
     </footer>

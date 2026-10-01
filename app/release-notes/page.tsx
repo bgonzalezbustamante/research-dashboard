@@ -83,18 +83,29 @@ export default async function ReleaseNotesPage({
             </span>
           </Link>
 
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium text-oxford-blue underline-offset-4 hover:underline"
+          <nav
+            aria-label="Public information"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium"
           >
-            Back to dashboard
-          </Link>
+            <Link
+              href="/api"
+              className="text-oxford-blue underline-offset-4 hover:underline"
+            >
+              Academic API
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-oxford-blue underline-offset-4 hover:underline"
+            >
+              Back to dashboard
+            </Link>
+          </nav>
         </div>
       </header>
 
       <main className="flex-1 px-6 py-10">
         <div className="mx-auto w-full max-w-5xl">
-          <div className="max-w-3xl">
+          <div>
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
               Release notes
             </p>
