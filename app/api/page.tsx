@@ -137,7 +137,7 @@ export default function AcademicApiPage() {
         <div className="mx-auto w-full max-w-5xl">
           <section>
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
-              Research Dashboard · public data interface
+              Public Data Interface
             </p>
             <h1 className="mt-2 font-serif text-4xl font-semibold text-oxford-blue">
               Academic API

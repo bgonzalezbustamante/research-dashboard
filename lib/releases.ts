@@ -21,84 +21,49 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since beta.5',
     summary:
-      'Distant Forge adds public-website administration and a documented Academic API boundary while keeping private research-management data isolated.',
+      'Distant Forge makes Research Dashboard the administrative source behind the public academic website and CV tooling, while strengthening paper workflows, structured academic records, planning, and the public/private data boundary.',
     sections: [
       {
-        title: 'Website and publications',
+        title: 'Papers and public website',
         items: [
-          'Integrated Public paper curation directly into each Paper workspace, with stable slugs, Featured state, Publication index, preferred citation and Key highlights while reusing canonical Paper metadata.',
-          'Reorganised Paper workspaces around submission/revision history, milestones, citations, associated projects and conference presentations; restored Milestones, deprecated standalone Notes and Target venue from the active UI, and moved Website settings to the bottom.',
-          'Automated Paper Started dates from the earliest Activity-labelled linked work session; Papers now default to Published most recently, with unpublished papers following by Started date.',
-          'Expanded Paper workflow statuses with Reframing and VOR typesetting for manuscripts that need substantive repositioning or final version-of-record production.',
-          'Expanded Paper research links with public Project and SI File URLs while keeping Overleaf private to the Dashboard.',
-          'Added a controlled Paper language field (English, Spanish, Portuguese, Dutch, German, French or Italian) and exposed it through the public academic-site contract.',
-          'Extended Public paper list/detail contracts with the latest stored Google Scholar citation count and snapshot date only, while keeping citation history and the citation table private.',
-          'Retired the standalone Website editing page, consolidated bottom utilities, and kept anonymous-safe publication list/detail contracts ordered by publication date.',
-          'Added publication-detail presentation fields for an optional preferred citation and Key highlights, including local static images with accessible alt text and optional captions.',
+          'Moved public-website controls into each Paper workspace and retired the separate Website editing area.',
+          'Added clearer publication metadata and public resources, including controlled publication index and language, Project and SI File links, preferred citations, Key highlights, and the latest stored Google Scholar citation snapshot.',
+          'Reworked Paper workspaces around submissions, milestones, citations, projects and conference presentations, with new Reframing and VOR typesetting workflow states.',
+          'Derived paper start dates from recorded research activity and simplified paper ordering around publication date, start date and recent updates.',
         ],
       },
       {
-        title: 'Projects',
+        title: 'Projects, conferences and teaching',
         items: [
-          'Added Projects with titles, abstract, controlled Role (Principal Investigator, Research Associate, Consultancy Chief or Consultant), funder and optional public funder note, project URL, start/end years, Active/Completed status, Public visibility, Featured state and static project/funder images.',
-          'Linked projects to papers, existing conference presentations, and Dashboard-only activity labels so public project pages can reuse publication/presentation metadata while project hours remain private.',
-          'Added anonymous-safe project list/detail contracts that expose only Public project data, including the optional Role, slugs of associated Public papers, and public-safe metadata for associated conference presentations.',
+          'Added structured Projects with roles, funding information, dates, status, public visibility, linked publications and conference presentations, plus private project-hour tracking.',
+          'Moved conference presentations into a dedicated Conferences area with date ranges, short event names, presentation-specific authors and the controlled types Conference paper, Keynote and Workshop.',
+          'Added a Teaching Portfolio with academic levels, controlled teaching roles, cumulative teaching/student counts, public visibility and private activity tracking.',
         ],
       },
       {
-        title: 'Conferences',
+        title: 'Planning and dashboard',
         items: [
-          'Added a standalone paginated Conferences module with full and short event names, presentation-specific ordered authors, conference date ranges, location, constrained presentation types (Conference paper, Keynote, Workshop) and optional URL; conference notes remain private.',
-          'Kept the optional paper relationship internal while showing linked presentations read-only inside the relevant Paper workspace; editing remains in Conferences.',
-          'Added an anonymous-safe conference listing that excludes notes, owner metadata and the private paper relationship.',
+          'Made dated Paper milestones the source for new research-capacity planning, while keeping teaching, conference, holiday and administrative blocked time as manual planning items.',
+          'Added FlowSavvy/Calendar tracking to milestone-backed research and blocked time, with compact actions for keeping calendar state up to date.',
+          'Expanded Papers requiring attention to a top ten and added an Overdue milestones card that links directly to the oldest overdue paper.',
+          'Simplified weekly workload reporting by removing redundant dashboard cards and showing net weekly time alongside gross workload.',
         ],
       },
       {
-        title: 'Teaching Portfolio',
+        title: 'Academic API and public data',
         items: [
-          'Added a Teaching module for courses and teaching activities with period, one or more academic levels, institution, cumulative teaching/student counts, summaries, optional public course images, and a controlled Role (Course Convenor, Lecturer, Tutor, Thesis Supervisor or Examiner).',
-          'Linked Teaching-classified Hours labels to individual courses for private tracked-hour/session totals, while exposing only explicitly Public teaching-card data, including the optional controlled Role, to the academic website.',
+          'Added the public Academic API page at /api to explain the read-only academic data available to downstream applications.',
+          'Documented Academic Website and Academic CV Studio as consumers while keeping private workflow, ownership and activity data unavailable to anonymous users.',
+          'Added public work analytics for Activity over time, average net working time and average coffees per working day without exposing raw work sessions.',
+          'Added automated compatibility checks so public fields, controlled values and privacy boundaries cannot drift silently.',
         ],
       },
       {
-        title: 'Milestone-backed Planning',
+        title: 'Reliability and maintenance',
         items: [
-          'Made capacity-bearing Paper Milestones the source for new research planning: optional 5/10/15-day commitments appear automatically in the half-month containing their target date and aggregate by paper.',
-          'Kept Blocked Time manual in Planning, preserved earlier manual paper allocations as legacy records, and prevented new manual paper allocations so research capacity has one clear source of truth.',
-          'Added per-milestone FlowSavvy/Calendar tracking in Papers and Planning, with aggregate Added/Partial/Not added status and automatic reset when a milestone date or committed capacity changes.',
-          'Restored compact FlowSavvy status icons in Planning and standardised small colour-coded Mark added / Mark not added actions across milestone-backed research and Blocked Time, without repeating the same status text on each milestone row.',
-        ],
-      },
-      {
-        title: 'Dashboard priorities',
-        items: [
-          'Expanded Papers requiring attention to a numbered top 10 across two columns, keeping planned milestone dates first and refining status priority to Revise round, Reframing, Writing, VOR typesetting, Under review, then other statuses.',
-          'Simplified the upper Dashboard by removing the redundant Working Hours card and showing net weekly time beside the Gross workload total in Weekly signals.',
-          'Replaced Current research allocation with an Overdue milestones card while retaining the Current planning period card unchanged; its action now opens the paper containing the oldest overdue milestone.',
-        ],
-      },
-      {
-        title: 'Public data and analytics',
-        items: [
-          'Kept anonymous website access behind narrowly scoped RPCs rather than direct table access, with static publication, project and teaching assets resolved by the academic website.',
-          'Added aggregate public work analytics for Activity over time, yearly average net working time and coffees per working day while keeping raw work records private.',
-        ],
-      },
-      {
-        title: 'Academic API',
-        items: [
-          'Added a public /api documentation page for Academic API — Public RPC v1, covering the actual publication, project, conference, teaching and work-analytics RPC surface without replacing Supabase with a parallel REST service.',
-          'Centralised public field lists, privacy exclusions and controlled vocabularies in a contract manifest used by the API page, with static migration checks and optional live validation of payload shapes, nested conference data and the anonymous table-access boundary.',
-          'Added permanent pull-request/main verification on Node 24 covering lint, the Academic API contract check and the production build.',
-          'Documented Academic Website and Academic CV Studio as read-only downstream consumers and linked Academic API from the shared public footer alongside Release notes.',
-          'Refined the public information layout with release/version first in the footer, author and Academic API links on the second line, full-width introductions, linked Distant Forge references, clearer connection/navigation guidance and contact information for prospective API consumers.',
-          'Added reciprocal header navigation between Release notes and Academic API for direct movement between the two public documentation surfaces.',
-        ],
-      },
-      {
-        title: 'Security and maintenance',
-        items: [
-          'Updated transitive development dependency brace-expansion from 1.1.18 to 1.1.21 and from 5.0.9 to 5.0.12 via npm audit fix; npm audit, lint and the production build all pass.',
+          'Improved linking between Dashboard accounts and bibliographic authors so existing and future author relationships stay in sync.',
+          'Added permanent pull-request and main-branch verification covering lint, public API compatibility and the production build.',
+          'Updated vulnerable development dependencies reported by npm audit and confirmed the audit, lint and production build are clean.',
         ],
       },
     ],

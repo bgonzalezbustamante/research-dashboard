@@ -1,59 +1,30 @@
 # Research Dashboard
 
-**v0.1.0-beta.5 "Red Raven"**
+**v1.0.0-rc.1 "Distant Forge" — in development**
 
-A personal research-management dashboard for tracking papers, projects, conferences, teaching, working hours, biweekly capacity planning, collaborative paper workflows, and cross-module research analytics. Administrative data are authenticated; selected public metadata are exposed through curated read-only Supabase RPCs.
+A personal research-management dashboard for papers, projects, conferences, teaching, working hours, research planning, collaboration, and cross-module analytics. Research Dashboard is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
 **Production:** [dashboard.bgonzalezbustamante.com](https://dashboard.bgonzalezbustamante.com)  
 **Academic API:** [dashboard.bgonzalezbustamante.com/api](https://dashboard.bgonzalezbustamante.com/api)
 
 ## Features
 
-- Paper workflow, milestones, revision history, notes, citations, and paper-scoped coauthor access
-- Dashboard-level Projects, Conferences, and Teaching Portfolio modules
-- Curated anonymous-safe public academic-data contracts for downstream applications
-- Public **Academic API — Public RPC v1** documentation at `/api`
-- Dashboard-wide read-only Viewer access for administrative or support users
-- Collaborative paper editing with owner-controlled permissions
-- Owner-visible audit history for invitations and access changes
-- Markdown and LaTeX-style math notation in long-form research text
-- Manual working-hour logging with annual activity analytics
-- Biweekly milestone-backed research and blocked-time capacity planning
-- Planned-versus-actual research effort
-- Executive and annual cross-module analytics
+- Paper workflow, milestones, revision history, citations, research links, and paper-scoped coauthor access
+- Structured Projects, Conferences, and Teaching Portfolio modules
+- Manual working-hour logging with yearly research and workload analytics
+- Milestone-backed biweekly research-capacity planning and blocked-time planning
+- Dashboard-wide read-only Viewer access and paper-specific collaboration permissions
 - Google Scholar citation snapshots and citation-yield indicators
+- Curated read-only public academic metadata for the Academic Website, Academic CV Studio, and other approved consumers
+- Public **Academic API — Public RPC v1** documentation at `/api`
 
-## Academic API
+## Public data interface
 
-Research Dashboard is the canonical administrative source for the structured academic metadata exposed to public consumers.
+Research Dashboard remains the administrative system of record. Public consumers do not query Dashboard tables directly; they use the curated anonymous-safe Supabase RPC layer with a publishable key.
 
-The current architecture is:
+The human-readable contract is documented at [Academic API](https://dashboard.bgonzalezbustamante.com/api). The exact public field lists and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
 
-```text
-Research Dashboard / Supabase
-          │
-          │ curated anonymous-safe RPCs
-          ▼
-Downstream public consumers
-```
-
-The machine interface remains the Supabase RPC layer; `/api` is the human-readable documentation surface. Anonymous consumers use a publishable key and have no direct table access.
-
-Public RPC v1 currently documents:
-
-- `list_public_papers()`
-- `get_public_paper(text)`
-- `list_public_projects()`
-- `get_public_project(text)`
-- `list_public_conference_presentations()`
-- `list_public_teaching()`
-- `get_public_work_analytics(year)`
-
-Known consumers are the [Academic Website](https://github.com/bgonzalezbustamante/academic-website) and [Academic CV Studio](https://github.com/bgonzalezbustamante/academic-cv-studio). Neither is a dependency of Research Dashboard.
-
-Prospective consumers should contact [Dr. Bastián González-Bustamante](https://bgonzalezbustamante.com/) before integrating the Academic API into another application or research workflow.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the public/private boundary and versioning model.
+For the technical public/private boundary, versioning rules, and integration model, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Stack
 
@@ -75,7 +46,7 @@ npm run check:public-api
 npm run build
 ```
 
-The API contract check is network-free by default: it verifies the Academic API manifest against the latest Supabase migration definitions and controlled-value constraints. With the public Supabase environment variables exported, production payloads can also be checked explicitly:
+The public API check is network-free by default and validates the contract manifest against the current Supabase migration definitions. With the public Supabase environment variables exported, the live public boundary can also be checked explicitly:
 
 ```bash
 npm run check:public-api -- --live
