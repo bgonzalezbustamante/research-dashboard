@@ -75,13 +75,13 @@ Resource-specific boundaries are documented on `/api` and encoded in the API con
 
 ### Publications
 
-Only papers explicitly marked Public with a public slug appear in the list/detail contracts. Public bibliographic and selected research-resource metadata may be exposed. Internal workflow state, milestones, revision/submission history, notes, Overleaf links, raw citation history, internal IDs, and private author metadata remain unavailable.
+Only papers explicitly marked public with a public slug appear in the list/detail contracts. Public bibliographic and selected research-resource metadata may be exposed. Internal workflow state, milestones, revision/submission history, notes, Overleaf links, raw citation history, internal IDs, and private author metadata remain unavailable.
 
 Only the latest stored Google Scholar citation snapshot is exposed, as a count and capture date. Snapshot IDs, historical snapshots, citation source metadata, and other citation sources remain private.
 
 ### Projects
 
-Only explicitly Public projects appear in the project list/detail contracts. Associated publications are represented only by slugs of papers that are themselves Public. Activity-label relationships, tracked project hours, owner/internal IDs, and private paper associations remain unavailable.
+Only explicitly public projects appear in the project list/detail contracts. Associated publications are represented only by slugs of papers that are themselves public. Activity-label relationships, tracked project hours, owner/internal IDs, and private paper associations remain unavailable.
 
 ### Conference presentations
 
@@ -89,7 +89,7 @@ The current conference RPC has no per-record visibility flag: it returns the cur
 
 ### Teaching Portfolio
 
-Only Teaching Portfolio items marked Public are returned. Public portfolio fields include the controlled Teaching Role, academic levels, period/current state, cumulative teaching/student counts, and optional image filename. Activity labels, tracked hours, session counts, owner metadata, and internal IDs remain private.
+Only teaching portfolio items marked public are returned. Public portfolio fields include the controlled Teaching Role, academic levels, period/current state, cumulative teaching/student counts, and optional image filename. Activity labels, tracked hours, session counts, owner metadata, and internal IDs remain private.
 
 ### Work analytics
 
@@ -119,6 +119,8 @@ Current downstream consumers include:
 - [Academic CV Studio](https://github.com/bgonzalezbustamante/academic-cv-studio)
 
 These repositories consume the public interface but are not runtime dependencies of Research Dashboard.
+
+Prospective consumers should contact [Dr. Bastián González-Bustamante](https://bgonzalezbustamante.com/) before adding another application or research workflow to the public interface.
 
 ## Versioning
 
