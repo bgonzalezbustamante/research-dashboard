@@ -137,12 +137,14 @@ export default function AcademicApiPage() {
         <div className="mx-auto w-full max-w-5xl">
           <section className="max-w-4xl">
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
-              Academic API
+              Research Dashboard · Public data interface
             </p>
             <h1 className="mt-2 font-serif text-4xl font-semibold text-oxford-blue">
-              Public academic data contracts
+              Academic API
             </h1>
             <p className="mt-4 text-base leading-7 text-oxford-ash">
+              {contract.version} documents
+              the current public interface.
               Research Dashboard is the
               canonical administrative
               source for the academic
