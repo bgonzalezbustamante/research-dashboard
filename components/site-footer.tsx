@@ -6,12 +6,23 @@ export default function SiteFooter() {
   return (
     <footer className="border-t border-oxford-stone bg-white px-6 py-4">
       <div className="space-y-1 text-center text-sm text-oxford-ash">
-        <p>
+        <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
           <Link
             href="/release-notes"
             className="font-medium text-oxford-blue underline-offset-4 hover:underline"
           >
             Research Dashboard - {currentRelease.version} &quot;{currentRelease.codename}&quot;
+          </Link>
+
+          <span aria-hidden="true">
+            ·
+          </span>
+
+          <Link
+            href="/api"
+            className="font-medium text-oxford-blue underline-offset-4 hover:underline"
+          >
+            Academic API
           </Link>
         </p>
 
