@@ -39,7 +39,7 @@
     {
       "id": "publications",
       "title": "Publications",
-      "summary": "Public bibliographic, presentation and research-resource metadata for papers explicitly marked Public.",
+      "summary": "Public bibliographic, presentation and research-resource metadata for papers explicitly marked public.",
       "notExposed": [
         "Internal paper and owner IDs",
         "Workflow status, revision round, milestones, submissions and revision history",
@@ -70,7 +70,7 @@
           "name": "list_public_papers",
           "signature": "list_public_papers()",
           "kind": "Listing",
-          "purpose": "Lists papers whose public metadata is explicitly marked Public and has a public slug.",
+          "purpose": "Lists papers whose public metadata is explicitly marked public and has a public slug.",
           "parameters": [],
           "fields": [
             {"name": "slug", "type": "text"},
@@ -103,7 +103,7 @@
           "name": "get_public_paper",
           "signature": "get_public_paper(text)",
           "kind": "Detail",
-          "purpose": "Returns one explicitly Public paper by its stable public slug.",
+          "purpose": "Returns one explicitly public paper by its stable public slug.",
           "parameters": [
             {"name": "p_slug", "type": "text"}
           ],
@@ -141,7 +141,7 @@
           ],
           "listingOnly": [],
           "notes": [
-            "Unknown or Private slugs return no row.",
+            "Unknown or private slugs return no row.",
             "Key highlight asset fields are filenames/metadata only; downstream applications resolve their own static assets."
           ]
         }
@@ -150,7 +150,7 @@
     {
       "id": "projects",
       "title": "Projects",
-      "summary": "Curated project metadata and associated outputs for projects explicitly marked Public.",
+      "summary": "Curated project metadata and associated outputs for projects explicitly marked public.",
       "notExposed": [
         "Internal project and owner IDs",
         "Activity-label assignments and tracked project hours",
@@ -174,7 +174,7 @@
           "name": "list_public_projects",
           "signature": "list_public_projects()",
           "kind": "Listing",
-          "purpose": "Lists explicitly Public projects and their already-public associated outputs.",
+          "purpose": "Lists explicitly public projects and their already-public associated outputs.",
           "parameters": [],
           "fields": [
             {"name": "slug", "type": "text"},
@@ -197,7 +197,7 @@
           "detailOnly": [],
           "listingOnly": [],
           "notes": [
-            "publication_slugs contains only papers that are themselves explicitly Public.",
+            "publication_slugs contains only papers that are themselves explicitly public.",
             "conference_presentations[] contains event_name, event_short_name, location, presentation_date, start_date, end_date, presentation_title, authors, presentation_type and url."
           ]
         },
@@ -205,7 +205,7 @@
           "name": "get_public_project",
           "signature": "get_public_project(text)",
           "kind": "Detail",
-          "purpose": "Returns one explicitly Public project by its stable public slug.",
+          "purpose": "Returns one explicitly public project by its stable public slug.",
           "parameters": [
             {"name": "p_slug", "type": "text"}
           ],
@@ -231,7 +231,7 @@
           "listingOnly": [],
           "notes": [
             "The current project detail shape is intentionally the same as the project listing shape.",
-            "Unknown or Private slugs return no row."
+            "Unknown or private slugs return no row."
           ]
         }
       ]
@@ -243,7 +243,7 @@
       "notExposed": [
         "Internal presentation and owner IDs",
         "Private notes",
-        "Internal paper IDs and the optional Dashboard paper relationship"
+        "Internal paper IDs and the optional dashboard paper relationship"
       ],
       "forbiddenFields": [
         "id",
@@ -284,7 +284,7 @@
     {
       "id": "teaching",
       "title": "Teaching",
-      "summary": "Public Teaching Portfolio metadata for items explicitly marked Public.",
+      "summary": "Public teaching portfolio metadata for items explicitly marked public.",
       "notExposed": [
         "Internal teaching and owner IDs",
         "Activity-label relationships",
@@ -308,7 +308,7 @@
           "name": "list_public_teaching",
           "signature": "list_public_teaching()",
           "kind": "Listing",
-          "purpose": "Lists explicitly Public Teaching Portfolio items for public cards and CV use.",
+          "purpose": "Lists explicitly public teaching portfolio items for public cards and CV use.",
           "parameters": [],
           "fields": [
             {"name": "slug", "type": "text"},
