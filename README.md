@@ -43,11 +43,10 @@ Normal validation:
 ```bash
 npm run lint
 npm run check:public-api
-npm run check:public-api:live
 npm run build
 ```
 
-The public API check is network-free by default and validates the contract manifest against the current Supabase migration definitions. The live check reads the normal local Supabase values from `.env.local` and validates the deployed anonymous boundary:
+The public API check is network-free by default and validates the contract manifest against the current Supabase migration definitions. Before releases or public-contract changes, run the live boundary check as well; it reads the normal local Supabase values from `.env.local`:
 
 ```bash
 npm run check:public-api:live
