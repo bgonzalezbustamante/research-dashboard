@@ -475,8 +475,23 @@ async function liveCheck(contract) {
     )
   }
 
+  const missingPaper = await call(
+    'get_public_paper',
+    { p_slug: '__academic-api-contract-missing__' }
+  )
+
+  if (!Array.isArray(missingPaper) || missingPaper.length !== 0) {
+    fail(
+      'get_public_paper(text) must return no row for an unknown/non-public slug.'
+    )
+  }
+
   const projects =
     (await call('list_public_projects')) ?? []
+
+  const conferenceFields = fieldNames(
+    byName.get('list_public_conference_presentations')
+  )
 
   for (const project of projects) {
     assertExactKeys(
@@ -484,6 +499,14 @@ async function liveCheck(contract) {
       fieldNames(byName.get('list_public_projects')),
       'Public project listing row'
     )
+
+    for (const presentation of project.conference_presentations ?? []) {
+      assertExactKeys(
+        presentation,
+        conferenceFields,
+        'Public project conference presentation'
+      )
+    }
   }
 
   if (projects.length > 0) {
@@ -502,6 +525,25 @@ async function liveCheck(contract) {
       detail,
       fieldNames(byName.get('get_public_project')),
       'Public project detail row'
+    )
+
+    for (const presentation of detail.conference_presentations ?? []) {
+      assertExactKeys(
+        presentation,
+        conferenceFields,
+        'Public project detail conference presentation'
+      )
+    }
+  }
+
+  const missingProject = await call(
+    'get_public_project',
+    { p_slug: '__academic-api-contract-missing__' }
+  )
+
+  if (!Array.isArray(missingProject) || missingProject.length !== 0) {
+    fail(
+      'get_public_project(text) must return no row for an unknown/non-public slug.'
     )
   }
 
@@ -621,7 +663,35 @@ async function liveCheck(contract) {
     }
   }
 
+  const privateTables = [
+    'papers',
+    'paper_public_metadata',
+    'citation_snapshots',
+    'projects',
+    'project_public_metadata',
+    'conference_presentations',
+    'teaching_portfolio',
+    'teaching_public_metadata',
+    'daily_logs',
+    'work_sessions',
+  ]
+
+  for (const table of privateTables) {
+    const result = await supabase
+      .from(table)
+      .select('*')
+      .limit(1)
+
+    if (!result.error) {
+      fail(
+        'Anonymous direct table access unexpectedly succeeded for: ' +
+          table
+      )
+    }
+  }
+
   console.log('✓ Live Public RPC v1 payload validation')
+  console.log('✓ Anonymous direct table access remains blocked')
 }
 
 async function main() {
