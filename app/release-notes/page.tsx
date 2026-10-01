@@ -83,12 +83,23 @@ export default async function ReleaseNotesPage({
             </span>
           </Link>
 
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium text-oxford-blue underline-offset-4 hover:underline"
+          <nav
+            aria-label="Public information"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium"
           >
-            Back to dashboard
-          </Link>
+            <Link
+              href="/api"
+              className="text-oxford-blue underline-offset-4 hover:underline"
+            >
+              Academic API
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-oxford-blue underline-offset-4 hover:underline"
+            >
+              Back to dashboard
+            </Link>
+          </nav>
         </div>
       </header>
 
