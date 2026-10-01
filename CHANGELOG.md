@@ -146,6 +146,7 @@
 - Kept the machine architecture unchanged: public consumers use the Supabase Data API/RPC layer with a publishable key; no `/api/v1/*` REST façade or direct anonymous table access was added.
 - Added `lib/academic-api-contract.json` as the canonical repository manifest for public field lists, controlled vocabularies, consumers, and privacy exclusions used by the `/api` page.
 - Added `npm run check:public-api` to compare the manifest with the latest Supabase migration definitions for RPC return shapes and database-controlled vocabularies; an optional `--live` mode validates production RPC payload keys and constrained values when public Supabase environment variables are available.
+- Added a permanent GitHub verification workflow for pull requests and `main` that runs `npm ci`, lint, the Academic API contract check, and the production build on Node 24.
 - Added `ARCHITECTURE.md` to document the administrative system-of-record model, anonymous read-only boundary, Public RPC v1 versioning rules, and downstream-consumer relationship.
 - Added Academic API to the shared public footer beside Release notes and allowed exactly `/api` through the public authentication boundary without opening future `/api/*` technical routes.
 - Documented Academic Website and Academic CV Studio as downstream consumers without making either repository a Research Dashboard dependency.
