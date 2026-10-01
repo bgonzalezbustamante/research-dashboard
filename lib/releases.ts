@@ -92,6 +92,7 @@ export const releases: ReleaseNote[] = [
           'Added permanent pull-request/main verification on Node 24 covering lint, the Academic API contract check and the production build.',
           'Documented Academic Website and Academic CV Studio as read-only downstream consumers and linked Academic API from the shared public footer alongside Release notes.',
           'Refined the public information layout with release/version first in the footer, author and Academic API links on the second line, full-width introductions, linked Distant Forge references, clearer connection/navigation guidance and contact information for prospective API consumers.',
+          'Added reciprocal header navigation between Release notes and Academic API for direct movement between the two public documentation surfaces.',
         ],
       },
       {
