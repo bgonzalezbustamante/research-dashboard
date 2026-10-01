@@ -8,6 +8,7 @@
 - Added a separate public presentation layer for papers while keeping internal research workflow and collaboration data private.
 - Integrated paper-specific public website settings directly into each Paper workspace rather than maintaining a separate Website editing module.
 - Added narrowly scoped anonymous Supabase RPC contracts for curated publications and aggregate work analytics.
+- Added a public Academic API documentation surface at `/api`, establishing the existing curated Supabase interface as `Public RPC v1` without introducing a parallel REST API.
 
 ### Code changes
 
@@ -135,6 +136,19 @@
 - Exposed only daily net working minutes for reproducing Activity over time, yearly average net working minutes per working day, and yearly average coffees per working day.
 - Kept raw session start/end times, activity labels, locations, linked papers, break records, and daily coffee counts private.
 - Reused the Dashboard definition of a working day: a daily log with at least one work session.
+
+`academic API`
+
+- Added the public `/api` page as a native Research Dashboard component using the same Oxford-branded public layout family as Release notes.
+- Named the interface **Academic API** and established the current anonymous-safe surface as **Public RPC v1**.
+- Documented the actual current RPC surface from the Dashboard/Supabase implementation: `list_public_papers()`, `get_public_paper(text)`, `list_public_projects()`, `get_public_project(text)`, `list_public_conference_presentations()`, `list_public_teaching()`, and `get_public_work_analytics(year)`.
+- Documented each operation's purpose, parameters, return fields, listing/detail distinction, controlled vocabularies, known consumers, and resource-specific Not exposed boundary.
+- Kept the machine architecture unchanged: public consumers use the Supabase Data API/RPC layer with a publishable key; no `/api/v1/*` REST façade or direct anonymous table access was added.
+- Added `lib/academic-api-contract.json` as the canonical repository manifest for public field lists, controlled vocabularies, consumers, and privacy exclusions used by the `/api` page.
+- Added `npm run check:public-api` to compare the manifest with the latest Supabase migration definitions for RPC return shapes and database-controlled vocabularies; an optional `--live` mode validates production RPC payload keys and constrained values when public Supabase environment variables are available.
+- Added `ARCHITECTURE.md` to document the administrative system-of-record model, anonymous read-only boundary, Public RPC v1 versioning rules, and downstream-consumer relationship.
+- Added Academic API to the shared public footer beside Release notes and allowed exactly `/api` through the public authentication boundary without opening future `/api/*` technical routes.
+- Documented Academic Website and Academic CV Studio as downstream consumers without making either repository a Research Dashboard dependency.
 
 `author directory`
 
