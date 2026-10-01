@@ -156,7 +156,7 @@ export default function AcademicApiPage() {
               source for the academic
               metadata documented here.
               Downstream applications do
-              not query Dashboard tables
+              not query Research Dashboard tables
               directly: they use a
               deliberately curated,
               anonymous-safe Supabase RPC
@@ -218,7 +218,7 @@ export default function AcademicApiPage() {
                   below. Anonymous consumers
                   have no direct SELECT
                   access to the underlying
-                  Dashboard tables.
+                  Research Dashboard tables.
                 </p>
               </div>
 
