@@ -154,7 +154,7 @@
       "notExposed": [
         "Internal project and owner IDs",
         "Activity-label assignments and tracked project hours",
-        "Private paper IDs or Private paper associations",
+        "Private paper IDs or private paper associations",
         "Internal association-row IDs"
       ],
       "forbiddenFields": [
