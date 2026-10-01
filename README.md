@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.1 "Distant Forge" — in development**
+**v1.0.0-rc.1 "Distant Forge"**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, working hours, research planning, collaboration, and cross-module analytics. Research Dashboard is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
@@ -46,10 +46,10 @@ npm run check:public-api
 npm run build
 ```
 
-The public API check is network-free by default and validates the contract manifest against the current Supabase migration definitions. With the public Supabase environment variables exported, the live public boundary can also be checked explicitly:
+The public API check is network-free by default and validates the contract manifest against the current Supabase migration definitions. Before releases or public-contract changes, run the live boundary check as well; it reads the normal local Supabase values from `.env.local`:
 
 ```bash
-npm run check:public-api -- --live
+npm run check:public-api:live
 ```
 
 Local environment values and private application data must not be committed to the repository. Never use a Supabase secret/service-role credential in a public consumer.
