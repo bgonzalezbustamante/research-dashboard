@@ -130,11 +130,7 @@ function latestConstraintBlock(corpus, constraintName) {
   )
 
   if (start < 0) {
-    fail(
-      'No migration definition found for constraint ' +
-        constraintName +
-        '.'
-    )
+    return null
   }
 
   const tail = corpus.slice(start)
@@ -145,6 +141,60 @@ function latestConstraintBlock(corpus, constraintName) {
   }
 
   return tail.slice(0, end + 1)
+}
+
+function latestCreateTableBlock(corpus, tableName) {
+  const start = lastMatchIndex(
+    corpus,
+    new RegExp(
+      'create\\s+table(?:\\s+if\\s+not\\s+exists)?\\s+public\\.' +
+        tableName +
+        '\\s*\\(',
+      'gi'
+    )
+  )
+
+  if (start < 0) {
+    fail(
+      'No migration CREATE TABLE found for public.' +
+        tableName +
+        '.'
+    )
+  }
+
+  const tail = corpus.slice(start)
+  const end = tail.indexOf('\n);')
+
+  if (end < 0) {
+    fail(
+      'Could not parse CREATE TABLE block for public.' +
+        tableName +
+        '.'
+    )
+  }
+
+  return tail.slice(0, end + 3)
+}
+
+function vocabularyMigrationBlock(corpus, vocabulary) {
+  const namedConstraint = latestConstraintBlock(
+    corpus,
+    vocabulary.constraint
+  )
+
+  if (namedConstraint) {
+    return namedConstraint
+  }
+
+  if (vocabulary.id === 'project-status') {
+    return latestCreateTableBlock(corpus, 'projects')
+  }
+
+  fail(
+    'No migration definition found for constraint ' +
+      vocabulary.constraint +
+      '.'
+  )
 }
 
 function quotedValues(block) {
@@ -314,9 +364,9 @@ function assertMigrations(contract, operations, corpus) {
   }
 
   for (const vocabulary of contract.controlledVocabularies) {
-    const block = latestConstraintBlock(
+    const block = vocabularyMigrationBlock(
       corpus,
-      vocabulary.constraint
+      vocabulary
     )
     const actualValues = quotedValues(block)
 
