@@ -51,6 +51,8 @@ Public RPC v1 currently documents:
 
 Known consumers are the [Academic Website](https://github.com/bgonzalezbustamante/academic-website) and [Academic CV Studio](https://github.com/bgonzalezbustamante/academic-cv-studio). Neither is a dependency of Research Dashboard.
 
+Prospective consumers should contact [Dr. Bastián González-Bustamante](https://bgonzalezbustamante.com/) before integrating the Academic API into another application or research workflow.
+
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the public/private boundary and versioning model.
 
 ## Stack
