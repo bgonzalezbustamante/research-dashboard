@@ -120,7 +120,16 @@ Current downstream consumers include:
 
 These repositories consume the public interface but are not runtime dependencies of Research Dashboard.
 
-Prospective consumers should contact [Dr. Bastián González-Bustamante](https://bgonzalezbustamante.com/) before adding another application or research workflow to the public interface.
+
+## Documentation responsibilities
+
+To reduce documentation drift:
+
+- `/api` and `lib/academic-api-contract.json` define the public data contract and controlled values;
+- this file documents architecture, privacy boundaries, and versioning;
+- `CHANGELOG.md` records detailed implementation history;
+- Release Notes provide a short, non-technical summary of each release;
+- `README.md` provides project orientation and development commands.
 
 ## Versioning
 
