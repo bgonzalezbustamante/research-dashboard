@@ -17,8 +17,8 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.1',
     codename: 'Distant Forge',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
+    status: 'Release candidate',
+    releasedOn: '1 Oct 2026',
     comparison: 'Changes since beta.5',
     summary:
       'Distant Forge makes Research Dashboard the administrative source behind the public academic website and CV tooling, while strengthening paper workflows, structured academic records, planning, and the public/private data boundary.',
@@ -71,7 +71,7 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v0.1.0-beta.5',
     codename: 'Red Raven',
-    status: 'Current beta',
+    status: 'Previous beta',
     releasedOn: '24 Sep 2026',
     comparison: 'What changed since beta.4',
     summary:
