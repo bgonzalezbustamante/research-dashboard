@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.2 "Distant Forge" — in development**
+**v1.0.0-rc.2 "Steady Passage" — in development**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, working hours, research planning, collaboration, and cross-module analytics. Research Dashboard is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
@@ -54,4 +54,10 @@ npm run check:public-api:live
 
 Local environment values and private application data must not be committed to the repository. Never use a Supabase secret/service-role credential in a public consumer.
 
-Institutional branding assets remain subject to their respective rights.
+For an additional repository-history secret scan, run:
+
+```bash
+gitleaks git .
+```
+
+The full repository history was scanned before the rc.1 public pre-release with no leaks detected. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
