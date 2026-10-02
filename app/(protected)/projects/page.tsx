@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import {
   requireDashboardAccess,
@@ -20,6 +21,7 @@ type ProjectsPageProps = {
     created?: string
     saved?: string
     deleted?: string
+    page?: string
   }>
 }
 
@@ -113,6 +115,8 @@ const inputClass =
 
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
+
+const PROJECTS_PER_PAGE = 10
 
 const projectRoleOptions = [
   'Principal Investigator',
@@ -251,6 +255,12 @@ export default async function ProjectsPage({
 
   const params =
     await searchParams
+
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
 
   const supabase =
     await createClient()
@@ -596,6 +606,60 @@ export default async function ProjectsPage({
       b.short_title
     )
   })
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        sortedProjects.length /
+          PROJECTS_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    PROJECTS_PER_PAGE
+
+  const paginatedProjects =
+    sortedProjects.slice(
+      pageStart,
+      pageStart +
+        PROJECTS_PER_PAGE
+    )
+
+  const visibleStart =
+    sortedProjects.length === 0
+      ? 0
+      : pageStart + 1
+
+  const visibleEnd =
+    Math.min(
+      pageStart +
+        PROJECTS_PER_PAGE,
+      sortedProjects.length
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) =>
+    pageNumber > 1
+      ? '/projects?page=' +
+        pageNumber
+      : '/projects'
 
   const isOwner =
     access.canEdit
@@ -1151,7 +1215,37 @@ export default async function ProjectsPage({
         </Card>
       )}
 
-      <div className="mt-8 space-y-6">
+      {sortedProjects.length > 0 && (
+        <div className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-sm text-oxford-ash">
+            Showing{' '}
+            <strong className="font-medium text-oxford-charcoal">
+              {visibleStart ===
+              visibleEnd
+                ? visibleStart
+                : String(
+                    visibleStart
+                  ) +
+                  '–' +
+                  String(
+                    visibleEnd
+                  )}
+            </strong>{' '}
+            of{' '}
+            <strong className="font-medium text-oxford-charcoal">
+              {sortedProjects.length}
+            </strong>{' '}
+            projects
+          </span>
+
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+        </div>
+      )}
+
+      <div className="mt-5 space-y-6">
         {sortedProjects.length ===
         0 ? (
           <Card>
@@ -1161,7 +1255,7 @@ export default async function ProjectsPage({
             </p>
           </Card>
         ) : (
-          sortedProjects.map(
+          paginatedProjects.map(
             (project) => {
               const metadata =
                 metadataByProject.get(
@@ -2271,6 +2365,63 @@ export default async function ProjectsPage({
           )
         )}
       </div>
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Projects pagination"
+          className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+
+          <div className="flex flex-wrap gap-2">
+            {currentPage > 1 && (
+              <>
+                <ButtonLink
+                  href={getPageHref(1)}
+                  variant="secondary"
+                >
+                  First
+                </ButtonLink>
+
+                <ButtonLink
+                  href={getPageHref(
+                    currentPage - 1
+                  )}
+                  variant="secondary"
+                >
+                  Previous
+                </ButtonLink>
+              </>
+            )}
+
+            {currentPage <
+              totalPages && (
+              <>
+                <ButtonLink
+                  href={getPageHref(
+                    currentPage + 1
+                  )}
+                  variant="secondary"
+                >
+                  Next
+                </ButtonLink>
+
+                <ButtonLink
+                  href={getPageHref(
+                    totalPages
+                  )}
+                  variant="secondary"
+                >
+                  Last
+                </ButtonLink>
+              </>
+            )}
+          </div>
+        </nav>
+      )}
     </div>
   )
 }
