@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## v1.0.0-rc.2 "Steady Passage" (in development)
+## v1.0.0-rc.2 "Rustic Peak" (in development)
 
 ### Summary
 
-- Started `v1.0.0-rc.2 "Steady Passage"` as the next release candidate in the 1.0.0 line.
+- Started `v1.0.0-rc.2 "Rustic Peak"` as the next release candidate in the 1.0.0 line.
 - Extended the Academic API work-analytics contract so each calendar day now exposes both net working minutes and coffee count.
 
 ### Code changes
@@ -23,7 +23,7 @@
 
 ### Release status
 
-- Steady Passage rc.2 is in development.
+- Rustic Peak rc.2 is in development.
 - Distant Forge rc.1 remains the current published pre-release.
 - Supabase leaked-password protection is deferred to a future hardening batch and is not part of rc.2.
 - Release date: TBC.
