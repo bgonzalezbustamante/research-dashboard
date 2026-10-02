@@ -591,7 +591,7 @@ async function liveCheck(contract) {
   for (const day of analytics.days ?? []) {
     assertExactKeys(
       day,
-      ['date', 'net_minutes'],
+      ['date', 'net_minutes', 'coffee_count'],
       'Public work analytics day'
     )
   }

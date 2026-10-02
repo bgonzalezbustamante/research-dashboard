@@ -1,0 +1,12 @@
+# Third-Party Notices
+
+Research Dashboard is distributed under the MIT License for the repository software and original documentation, except where third-party rights apply.
+
+Third-party names, logos, crests, trademarks, service marks, and institutional branding are not licensed under the MIT License merely because they are included in this repository. Their use remains subject to the rights, policies, and permissions of their respective owners.
+
+In particular:
+
+- `public/branding/oxford-logo.svg` is an institutional branding asset and is excluded from the repository's MIT licence grant.
+- Any future third-party institutional or organisational branding added to the repository should be treated on the same basis unless a separate licence or permission notice explicitly states otherwise.
+
+No trademark rights are granted by the repository's MIT License.

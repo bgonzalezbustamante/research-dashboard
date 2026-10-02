@@ -15,9 +15,34 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.2',
+    codename: 'Steady Passage',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.1',
+    summary:
+      'Steady Passage extends the public work-analytics interface and adds small security and licensing clarifications while the 1.0 release line continues to stabilise.',
+    sections: [
+      {
+        title: 'Academic API and public data',
+        items: [
+          'Added daily coffee counts alongside daily net working minutes in the public yearly work-analytics data.',
+          'Kept the underlying daily logs and work sessions private while preserving the existing yearly averages.',
+        ],
+      },
+      {
+        title: 'Security and licensing',
+        items: [
+          'Documented the clean full-history Gitleaks scan used as an additional release check.',
+          'Added a notice clarifying that third-party logos, trademarks and institutional branding are not covered by the repository MIT licence.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.1',
     codename: 'Distant Forge',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '1 Oct 2026',
     comparison: 'Changes since beta.5',
     summary:

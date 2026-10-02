@@ -93,7 +93,7 @@ Only teaching portfolio items marked public are returned. Public portfolio field
 
 ### Work analytics
 
-The public analytics RPC returns only yearly aggregate measures and daily net working minutes. Raw sessions, session start/end times, activity labels, locations, paper relationships, daily coffee counts, owner metadata, and internal identifiers remain private.
+The public analytics RPC returns yearly aggregate measures plus daily net working minutes and daily coffee counts. Raw sessions, session start/end times, activity labels, locations, paper relationships, owner metadata, and internal identifiers remain private.
 
 ## Controlled vocabularies
 
