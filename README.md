@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.2 "Steady Passage" — in development**
+**v1.0.0-rc.2 "Rustic Peak" — in development**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, working hours, research planning, collaboration, and cross-module analytics. Research Dashboard is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
