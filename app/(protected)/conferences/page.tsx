@@ -1228,28 +1228,48 @@ export default async function ConferencesPage({
             {totalPages}
           </span>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {currentPage > 1 && (
-              <ButtonLink
-                href={getPageHref(
-                  currentPage - 1
-                )}
-                variant="secondary"
-              >
-                Previous
-              </ButtonLink>
+              <>
+                <ButtonLink
+                  href={getPageHref(1)}
+                  variant="secondary"
+                >
+                  First
+                </ButtonLink>
+
+                <ButtonLink
+                  href={getPageHref(
+                    currentPage - 1
+                  )}
+                  variant="secondary"
+                >
+                  Previous
+                </ButtonLink>
+              </>
             )}
 
             {currentPage <
               totalPages && (
-              <ButtonLink
-                href={getPageHref(
-                  currentPage + 1
-                )}
-                variant="secondary"
-              >
-                Next
-              </ButtonLink>
+              <>
+                <ButtonLink
+                  href={getPageHref(
+                    currentPage + 1
+                  )}
+                  variant="secondary"
+                >
+                  Next
+                </ButtonLink>
+
+                <ButtonLink
+                  href={getPageHref(
+                    totalPages
+                  )}
+                  variant="secondary"
+                >
+                  Last
+                </ButtonLink>
+              </>
             )}
           </div>
         </nav>
