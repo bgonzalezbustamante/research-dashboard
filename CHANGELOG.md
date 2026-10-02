@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## v1.0.0-rc.2 "Distant Forge" (in development)
+## v1.0.0-rc.2 "Steady Passage" (in development)
 
 ### Summary
 
-- Started `v1.0.0-rc.2 "Distant Forge"` as the next release candidate in the 1.0.0 line.
+- Started `v1.0.0-rc.2 "Steady Passage"` as the next release candidate in the 1.0.0 line.
 - Extended the Academic API work-analytics contract so each calendar day now exposes both net working minutes and coffee count.
 
 ### Code changes
@@ -16,10 +16,16 @@
 - Updated the Academic API contract manifest, live payload checker, and architecture/privacy documentation to reflect the expanded public daily shape.
 - Kept raw `daily_logs` and `work_sessions` inaccessible to `anon`; only the curated aggregate RPC exposes the daily values.
 
+`security and licensing`
+
+- Documented the full-history Gitleaks release check: 443 commits and approximately 2.20 MB scanned with no leaks found.
+- Added a repository `NOTICE` clarifying that the MIT licence covers the repository software and original documentation but does not grant rights to third-party trademarks, logos, crests, or institutional branding; `public/branding/oxford-logo.svg` is explicitly identified as an institutional branding asset outside the MIT grant.
+
 ### Release status
 
-- Distant Forge rc.2 is in development.
+- Steady Passage rc.2 is in development.
 - Distant Forge rc.1 remains the current published pre-release.
+- Supabase leaked-password protection is deferred to a future hardening batch and is not part of rc.2.
 - Release date: TBC.
 
 ---
