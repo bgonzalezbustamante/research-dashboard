@@ -31,6 +31,13 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'List navigation',
+        items: [
+          'Added First and Last navigation to Papers and Conferences.',
+          'Added consistent 10-item pagination to Projects and Teaching.',
+        ],
+      },
+      {
         title: 'Security and licensing',
         items: [
           'Documented the clean full-history Gitleaks scan used as an additional release check.',
