@@ -16,12 +16,12 @@ export type ReleaseNote = {
 export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.2',
-    codename: 'Steady Passage',
+    codename: 'Rustic Peak',
     status: 'In development',
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.1',
     summary:
-      'Steady Passage extends the public work-analytics interface and adds small security and licensing clarifications while the 1.0 release line continues to stabilise.',
+      'Rustic Peak extends the public work-analytics interface and adds small security and licensing clarifications while the 1.0 release line continues to stabilise.',
     sections: [
       {
         title: 'Academic API and public data',
