@@ -335,12 +335,11 @@
     {
       "id": "work-analytics",
       "title": "Work analytics",
-      "summary": "A deliberately aggregated yearly work summary that supports public activity visualisation without exposing raw work records.",
+      "summary": "A deliberately aggregated yearly work summary that supports public work and coffee visualisation without exposing raw work records.",
       "notExposed": [
         "Daily-log and work-session IDs",
         "Session start/end times",
         "Activity labels, locations and linked papers",
-        "Daily coffee counts",
         "Owner metadata"
       ],
       "forbiddenFields": [
@@ -350,7 +349,6 @@
         "activity_label_id",
         "start_time",
         "end_time",
-        "coffee_count",
         "location"
       ],
       "operations": [
@@ -358,7 +356,7 @@
           "name": "get_public_work_analytics",
           "signature": "get_public_work_analytics(year)",
           "kind": "Aggregate",
-          "purpose": "Returns one calendar year of daily net working minutes plus two annual working-day averages.",
+          "purpose": "Returns one calendar year of daily net working minutes and coffee counts plus two annual working-day averages.",
           "parameters": [
             {"name": "p_year", "type": "integer", "note": "2000 through the current calendar year"}
           ],
@@ -374,12 +372,13 @@
             "average_coffees_per_working_day",
             "days",
             "date",
-            "net_minutes"
+            "net_minutes",
+            "coffee_count"
           ],
           "detailOnly": [],
           "listingOnly": [],
           "notes": [
-            "Each days[] item contains only date and net_minutes.",
+            "Each days[] item contains date, net_minutes and coffee_count; calendar days without a daily log return zero for both measures.",
             "A working day is a daily log with at least one work session.",
             "The function rejects years before 2000 and years after the current calendar year."
           ]
