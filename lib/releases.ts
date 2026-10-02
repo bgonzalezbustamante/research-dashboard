@@ -15,9 +15,27 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.2',
+    codename: 'Distant Forge',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.1',
+    summary:
+      'Distant Forge rc.2 extends the public work-analytics interface while keeping the underlying work records private.',
+    sections: [
+      {
+        title: 'Academic API and public data',
+        items: [
+          'Added daily coffee counts alongside daily net working minutes in the public yearly work-analytics data.',
+          'Kept the underlying daily logs and work sessions private while preserving the existing yearly averages.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.1',
     codename: 'Distant Forge',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '1 Oct 2026',
     comparison: 'Changes since beta.5',
     summary:
