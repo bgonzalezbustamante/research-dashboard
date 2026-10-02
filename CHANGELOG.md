@@ -16,6 +16,12 @@
 - Updated the Academic API contract manifest, live payload checker, and architecture/privacy documentation to reflect the expanded public daily shape.
 - Kept raw `daily_logs` and `work_sessions` inaccessible to `anon`; only the curated aggregate RPC exposes the daily values.
 
+`list pagination`
+
+- Added First and Last controls to the existing 10-item Papers and Conferences pagination, alongside Previous and Next.
+- Added 10-item pagination to Projects and Teaching while preserving their existing sort order and full-dataset counts.
+- Standardised all four list views on First, Previous, Next, and Last navigation with invalid or out-of-range page requests clamped to a valid page.
+
 `security and licensing`
 
 - Documented the full-history Gitleaks release check: 443 commits and approximately 2.20 MB scanned with no leaks found.

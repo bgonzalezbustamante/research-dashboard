@@ -1,5 +1,6 @@
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import {
   requireDashboardAccess,
@@ -18,6 +19,7 @@ type TeachingPageProps = {
     created?: string
     saved?: string
     deleted?: string
+    page?: string
   }>
 }
 
@@ -85,6 +87,8 @@ const inputClass =
 
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
+
+const TEACHING_PER_PAGE = 10
 
 const levelLabels: Record<
   TeachingLevel,
@@ -186,6 +190,12 @@ export default async function TeachingPage({
 
   const params =
     await searchParams
+
+  const requestedPage =
+    Number.parseInt(
+      params.page ?? '1',
+      10
+    )
 
   const supabase =
     await createClient()
@@ -438,6 +448,60 @@ export default async function TeachingPage({
       b.name
     )
   })
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        sortedTeaching.length /
+          TEACHING_PER_PAGE
+      )
+    )
+
+  const validRequestedPage =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? requestedPage
+      : 1
+
+  const currentPage =
+    Math.min(
+      validRequestedPage,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    TEACHING_PER_PAGE
+
+  const paginatedTeaching =
+    sortedTeaching.slice(
+      pageStart,
+      pageStart +
+        TEACHING_PER_PAGE
+    )
+
+  const visibleStart =
+    sortedTeaching.length === 0
+      ? 0
+      : pageStart + 1
+
+  const visibleEnd =
+    Math.min(
+      pageStart +
+        TEACHING_PER_PAGE,
+      sortedTeaching.length
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) =>
+    pageNumber > 1
+      ? '/teaching?page=' +
+        pageNumber
+      : '/teaching'
 
   const isOwner =
     access.canEdit
@@ -956,6 +1020,18 @@ export default async function TeachingPage({
             </h2>
 
             <p className="mt-1 text-sm text-oxford-ash">
+              Showing{' '}
+              {visibleStart ===
+              visibleEnd
+                ? visibleStart
+                : String(
+                    visibleStart
+                  ) +
+                  '–' +
+                  String(
+                    visibleEnd
+                  )}{' '}
+              of{' '}
               {sortedTeaching.length}{' '}
               {sortedTeaching.length ===
               1
@@ -975,7 +1051,7 @@ export default async function TeachingPage({
           </Card>
         ) : (
           <div className="space-y-5">
-            {sortedTeaching.map(
+            {paginatedTeaching.map(
               (item) => {
                 const metadata =
                   metadataByTeaching.get(
@@ -1798,6 +1874,63 @@ export default async function TeachingPage({
               }
             )}
           </div>
+        )}
+
+        {totalPages > 1 && (
+          <nav
+            aria-label="Teaching pagination"
+            className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="text-sm text-oxford-ash">
+              Page {currentPage} of{' '}
+              {totalPages}
+            </span>
+
+            <div className="flex flex-wrap gap-2">
+              {currentPage > 1 && (
+                <>
+                  <ButtonLink
+                    href={getPageHref(1)}
+                    variant="secondary"
+                  >
+                    First
+                  </ButtonLink>
+
+                  <ButtonLink
+                    href={getPageHref(
+                      currentPage - 1
+                    )}
+                    variant="secondary"
+                  >
+                    Previous
+                  </ButtonLink>
+                </>
+              )}
+
+              {currentPage <
+                totalPages && (
+                <>
+                  <ButtonLink
+                    href={getPageHref(
+                      currentPage + 1
+                    )}
+                    variant="secondary"
+                  >
+                    Next
+                  </ButtonLink>
+
+                  <ButtonLink
+                    href={getPageHref(
+                      totalPages
+                    )}
+                    variant="secondary"
+                  >
+                    Last
+                  </ButtonLink>
+                </>
+              )}
+            </div>
+          </nav>
         )}
       </section>
     </div>
