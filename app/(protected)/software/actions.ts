@@ -621,6 +621,8 @@ export async function updateSoftware(
           fields.documentationUrl,
         p_start_year:
           fields.startYear,
+        p_end_year:
+          fields.endYear,
         p_featured:
           fields.featured,
         p_public_visibility:
