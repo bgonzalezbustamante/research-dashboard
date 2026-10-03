@@ -40,6 +40,7 @@ export const releases: ReleaseNote[] = [
           'Conference trips include one travel day before and after; Teaching schedules repeat by selected month; Winter/Summer holidays, Administrative time, and Sick periods use exact inclusive dates.',
           'Kept overlapping dated commitments additive and flag them visibly, while preserving older manual allocations as Legacy records.',
           'Fixed Teaching Portfolio saves when adding active Planning months and committed teaching days.',
+          'Fixed Conference attendance/trip edits and refined the Planning and attendance panel heading.',
         ],
       },
       {
