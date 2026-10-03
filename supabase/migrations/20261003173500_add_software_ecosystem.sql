@@ -54,7 +54,9 @@ alter table public.software_items
       'Developer tool',
       'Other'
     )
-  ),
+  );
+
+alter table public.software_items
   add constraint software_items_development_stage_check
   check (
     development_stage in (
@@ -65,7 +67,9 @@ alter table public.software_items
       'Maintenance',
       'Archived'
     )
-  ),
+  );
+
+alter table public.software_items
   add constraint software_items_status_check
   check (
     status in (
@@ -74,7 +78,9 @@ alter table public.software_items
       'completed',
       'archived'
     )
-  ),
+  );
+
+alter table public.software_items
   add constraint software_items_repository_visibility_check
   check (
     repository_visibility in (
