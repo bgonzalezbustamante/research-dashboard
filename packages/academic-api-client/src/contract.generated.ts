@@ -92,6 +92,8 @@ export const RPC_FIELDS = {
     "presentation_date",
     "start_date",
     "end_date",
+    "personal_attendance",
+    "involves_trip",
     "presentation_title",
     "authors",
     "presentation_type",
@@ -116,6 +118,12 @@ export const RPC_FIELDS = {
     "average_net_minutes_per_working_day",
     "average_coffees_per_working_day",
     "days"
+  ],
+  "list_public_availability": [
+    "type",
+    "start_date",
+    "end_date",
+    "label"
   ]
 } as const
 
@@ -131,6 +139,9 @@ export const RPC_PARAMETERS = {
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
   "get_public_work_analytics": [
+    "p_year"
+  ],
+  "list_public_availability": [
     "p_year"
   ]
 } as const
@@ -180,6 +191,12 @@ export const CONTROLLED_VOCABULARIES = {
     "undergraduate",
     "master",
     "phd"
+  ],
+  "availability-type": [
+    "winter_holiday",
+    "summer_holiday",
+    "trip",
+    "unavailable"
   ]
 } as const
 
