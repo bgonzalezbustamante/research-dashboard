@@ -7,12 +7,14 @@ import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 const allowedCategories = new Set([
-  'Web application',
+  'Application',
+  'Website',
+  'Utility',
+  'Reusable component',
   'Package/library',
   'API/service',
   'Data product',
   'Template',
-  'Developer tool',
   'Other',
 ])
 
@@ -22,7 +24,6 @@ const allowedDevelopmentStages = new Set([
   'Release candidate',
   'Stable',
   'Maintenance',
-  'Archived',
 ])
 
 const allowedStatuses = new Set([
@@ -141,6 +142,7 @@ type ValidSoftwareFields = {
   productionUrl: string | null
   documentationUrl: string | null
   startYear: number | null
+  endYear: number | null
   featured: boolean
   publicVisibility: string
 }
@@ -227,6 +229,12 @@ function validateSoftwareFields(
     getOptionalYear(
       formData,
       'start_year'
+    )
+
+  const endYear =
+    getOptionalYear(
+      formData,
+      'end_year'
     )
 
   const publicVisibility =
@@ -391,6 +399,35 @@ function validateSoftwareFields(
     }
   }
 
+  if (
+    endYear !== null &&
+    (
+      !Number.isInteger(
+        endYear
+      ) ||
+      endYear < 1000 ||
+      endYear > 9999
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        'End year must use four digits.',
+    }
+  }
+
+  if (
+    startYear !== null &&
+    endYear !== null &&
+    endYear < startYear
+  ) {
+    return {
+      ok: false,
+      error:
+        'End year cannot be earlier than start year.',
+    }
+  }
+
   return {
     ok: true,
     name,
@@ -405,6 +442,7 @@ function validateSoftwareFields(
     productionUrl,
     documentationUrl,
     startYear,
+    endYear,
     featured:
       formData.get(
         'featured'
@@ -486,6 +524,8 @@ export async function createSoftware(
         fields.documentationUrl,
       p_start_year:
         fields.startYear,
+      p_end_year:
+        fields.endYear,
       p_featured:
         fields.featured,
       p_public_visibility:
