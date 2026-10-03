@@ -90,13 +90,20 @@ export const WORK_ANALYTICS_DAY_FIELDS = ${JSON.stringify(workAnalyticsDayFields
 export type AcademicApiRpcName = keyof typeof RPC_FIELDS
 `
 
+function normaliseLineEndings(value) {
+  return value.replace(/\r\n/g, '\n')
+}
+
 if (process.argv.includes('--check')) {
   const current =
     fs.existsSync(outputPath)
       ? fs.readFileSync(outputPath, 'utf8')
       : ''
 
-  if (current !== generated) {
+  if (
+    normaliseLineEndings(current) !==
+    normaliseLineEndings(generated)
+  ) {
     console.error(
       'Academic API client contract metadata is stale. Run npm run generate:academic-api-client and commit the result.'
     )
