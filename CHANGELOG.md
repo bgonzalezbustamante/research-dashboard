@@ -19,7 +19,7 @@
 `academic API reference client`
 
 - Added an isolated `packages/academic-api-client/` reference implementation for external-consumer use, without routing authenticated Dashboard pages through the public interface.
-- Added canonical TypeScript resource types and a transport-agnostic client covering all eight Public RPC v1 operations; the package has no runtime dependency on Supabase and can accept a normal public client exposing `rpc()`.
+- Added canonical TypeScript resource types and a transport-agnostic client covering all nine Public RPC v1 operations; the package has no runtime dependency on Supabase and can accept a normal public client exposing `rpc()`.
 - Added generated client contract metadata derived from `lib/academic-api-contract.json` for RPC field names, parameter names, controlled vocabularies, and work-analytics day keys, with a stale-generation check to avoid maintaining those definitions independently.
 - Added dependency-free strict runtime validators with field-level diagnostics for exact payload shapes, required/nullable fields, primitive types, valid ISO dates, HTTP(S) URLs, non-negative numeric values, controlled vocabularies, array uniqueness, project/conference/teaching invariants, and Google Scholar snapshot pairing.
 - Adapted the strict `weekly-penguin-timeline` work-analytics validation: requested-year equality, valid/unique dates, non-negative integer daily minutes/coffee counts, and complete 365/366-day calendar coverage.
@@ -29,6 +29,8 @@
 - Added `list_public_availability(year)` as an anonymous-safe Public RPC v1 resource for conference trips, Winter/Summer holidays, and generic unavailable periods; Administrative commitments and sickness reasons/notes remain private.
 - Extended the public conference contract with `personal_attendance` and `involves_trip`; trip status requires personal attendance and project-embedded conference summaries use the same shape.
 - Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
+- Added `get_public_teaching_settings()` as a ninth Public RPC v1 operation exposing only the owner-level `teaching_season_active` boolean; the underlying RLS-protected Teaching settings table remains unavailable anonymously.
+- Extended the reference client, runtime validation, live privacy checks, generated metadata, and API documentation for the Teaching season contract.
 
 `source-backed planning`
 
@@ -41,6 +43,10 @@
 - Updated the main Dashboard Planning load to use the same source-backed derivation as the Planning page.
 - Fixed Teaching Portfolio saves after the Planning expansion by restoring the authenticated runtime permission required by the `planning_months` uniqueness constraint.
 - Fixed Conference edits so Personal attendance and Involves trip are persisted, and adjusted the Planning and attendance panel heading so it no longer overlaps the card border.
+- Restored the stronger pre-source-backed FlowSavvy/Calendar status presentation, including medium-weight positive/partial states and the half-filled partial indicator.
+- Reorganised Planning commitments so the dated-event form is a narrow utility column, source-backed commitment cards receive the wider responsive area, and Automatic sources sits below as a compact reference strip.
+- Removed the redundant Monthly overview while preserving the existing Annual timeline unchanged.
+- Reorganised Teaching so Public teaching contract and the new Teaching season control sit at the top, with Add course or activity spanning the full width below.
 
 `list pagination`
 
