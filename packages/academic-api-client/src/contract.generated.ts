@@ -129,6 +129,7 @@ export const RPC_FIELDS = {
     "production_url",
     "documentation_url",
     "start_year",
+    "end_year",
     "featured"
   ],
   "get_public_software": [
@@ -144,6 +145,7 @@ export const RPC_FIELDS = {
     "production_url",
     "documentation_url",
     "start_year",
+    "end_year",
     "featured"
   ],
   "get_public_work_analytics": [
@@ -237,12 +239,14 @@ export const CONTROLLED_VOCABULARIES = {
     "unavailable"
   ],
   "software-category": [
-    "Web application",
+    "Application",
+    "Website",
+    "Utility",
+    "Reusable component",
     "Package/library",
     "API/service",
     "Data product",
     "Template",
-    "Developer tool",
     "Other"
   ],
   "software-development-stage": [
@@ -250,8 +254,7 @@ export const CONTROLLED_VOCABULARIES = {
     "Beta",
     "Release candidate",
     "Stable",
-    "Maintenance",
-    "Archived"
+    "Maintenance"
   ],
   "software-status": [
     "active",
