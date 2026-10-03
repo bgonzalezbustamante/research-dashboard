@@ -1,3 +1,5 @@
+import { getPlanningLoadPresentation } from '@/lib/planning/load-presentation'
+
 type AllocationType =
   | 'paper'
   | 'blocked'
@@ -12,68 +14,6 @@ type PlanningAllocation = {
 
 type PlanningPeriodLoadProps = {
   allocations: PlanningAllocation[]
-}
-
-function getLoadPresentation(
-  totalDays: number
-) {
-  if (totalDays === 0) {
-    return {
-      label: 'Open',
-      container:
-        'border-green-200 bg-green-50',
-      text: 'text-green-900',
-      secondary:
-        'text-green-800',
-      bar: 'bg-green-500',
-    }
-  }
-
-  if (totalDays <= 5) {
-    return {
-      label: 'Light commitment',
-      container:
-        'border-green-200 bg-green-50',
-      text: 'text-green-900',
-      secondary:
-        'text-green-800',
-      bar: 'bg-green-500',
-    }
-  }
-
-  if (totalDays <= 10) {
-    return {
-      label: 'Moderate commitment',
-      container:
-        'border-yellow-200 bg-yellow-50',
-      text: 'text-yellow-900',
-      secondary:
-        'text-yellow-800',
-      bar: 'bg-yellow-500',
-    }
-  }
-
-  if (totalDays <= 15) {
-    return {
-      label: 'Full commitment',
-      container:
-        'border-orange-200 bg-orange-50',
-      text: 'text-orange-900',
-      secondary:
-        'text-orange-800',
-      bar: 'bg-orange-500',
-    }
-  }
-
-  return {
-    label: 'Overcommitted',
-    container:
-      'border-orange-300 bg-orange-100',
-    text: 'text-orange-950',
-    secondary:
-      'text-orange-900',
-    bar: 'bg-orange-700',
-  }
 }
 
 export default function PlanningPeriodLoad({
@@ -118,7 +58,9 @@ export default function PlanningPeriodLoad({
     )
 
   const load =
-    getLoadPresentation(totalDays)
+    getPlanningLoadPresentation(
+      totalDays
+    )
 
   const loadPercentage =
     Math.min(
