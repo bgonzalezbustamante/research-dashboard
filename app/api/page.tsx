@@ -46,7 +46,8 @@ type ApiConsumer = {
 type ApiVocabulary = {
   id: string
   label: string
-  constraint: string
+  constraint?: string
+  sourceFunction?: string
   values: string[]
 }
 
