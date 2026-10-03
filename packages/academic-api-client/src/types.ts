@@ -124,6 +124,7 @@ export type PublicSoftwareItem = {
   production_url: string | null
   documentation_url: string | null
   start_year: number | null
+  end_year: number | null
   featured: boolean
 }
 
