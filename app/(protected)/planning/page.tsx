@@ -944,10 +944,12 @@ export default async function PlanningPage({
         return (
           (
             a.paper_short_title ??
+            a.label ??
             a.blocked_type ??
             ''
           ).localeCompare(
             b.paper_short_title ??
+            b.label ??
             b.blocked_type ??
             ''
           )
@@ -1073,7 +1075,7 @@ export default async function PlanningPage({
     <div>
       <PageHeader
         title="Biweekly Planning"
-        description="Research capacity is derived from capacity-bearing Paper Milestones; add Blocked Time manually for other commitments."
+        description="Research capacity is derived from Paper Milestones, conference attendance, Teaching Portfolio schedules, and dated blocked events."
       />
 
       <div className="mb-6 grid gap-6 lg:grid-cols-2 lg:items-stretch">
@@ -1145,6 +1147,9 @@ export default async function PlanningPage({
         }
         allocations={
           selectedAllocations
+        }
+        overlaps={
+          selectedOverlaps
         }
         error={params.error}
       />
