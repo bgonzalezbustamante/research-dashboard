@@ -645,11 +645,15 @@ export default async function ConferencesPage({
               </div>
 
               <fieldset className="md:col-span-2 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
-                <legend className="px-1 text-sm font-medium text-oxford-charcoal">
+                <legend className="sr-only">
                   Planning and attendance
                 </legend>
 
-                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                <div className="text-sm font-medium text-oxford-charcoal">
+                  Planning and attendance
+                </div>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
                     <input
                       type="checkbox"
@@ -1207,11 +1211,15 @@ export default async function ConferencesPage({
                             </div>
 
                             <fieldset className="md:col-span-2 rounded-lg border border-oxford-stone bg-white p-4">
-                              <legend className="px-1 text-sm font-medium text-oxford-charcoal">
+                              <legend className="sr-only">
                                 Planning and attendance
                               </legend>
 
-                              <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                              <div className="text-sm font-medium text-oxford-charcoal">
+                                Planning and attendance
+                              </div>
+
+                              <div className="mt-3 grid gap-3 sm:grid-cols-2">
                                 <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
                                   <input
                                     type="checkbox"
