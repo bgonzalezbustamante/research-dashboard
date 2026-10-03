@@ -282,7 +282,37 @@ export default function AcademicApiPage() {
               </pre>
             </div>
 
-            <div className="mt-5 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+                  Transport
+                </p>
+                <p className="mt-2 text-sm leading-6 text-oxford-charcoal">
+                  Supabase Data API / RPC
+                  with a publishable key.
+                  This remains the public
+                  machine interface.
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+                  Reference client
+                </p>
+                <p className="mt-2 text-sm leading-6 text-oxford-charcoal">
+                  Research Dashboard also
+                  maintains a portable
+                  TypeScript reference client
+                  with strict runtime
+                  validation. It sits above
+                  the RPC transport and does
+                  not change the Public RPC
+                  v1 surface.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
               <p className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
                 Architecture
               </p>
