@@ -45,7 +45,7 @@
 - Fixed Conference edits so Personal attendance and Involves trip are persisted, and adjusted the Planning and attendance panel heading so it no longer overlaps the card border.
 - Restored the stronger pre-source-backed FlowSavvy/Calendar status presentation, including medium-weight positive/partial states and the half-filled partial indicator.
 - Reorganised Planning commitments so the dated-event form is a narrow utility column, source-backed commitment cards receive the wider responsive area, and Automatic sources sits below as a compact reference strip.
-- Removed the redundant Monthly overview while preserving the existing Annual timeline unchanged.
+- Removed the redundant Monthly overview and replaced the Annual timeline table with a Google Calendar-inspired 12-month year view; every calendar date navigates to its corresponding 1–15 or 16–end Planning period, with whole-fortnight hover/focus and persistent selected-period highlighting.
 - Reorganised Teaching so Public teaching contract and the new Teaching season control sit at the top, with Add course or activity spanning the full width below.
 
 `list pagination`
