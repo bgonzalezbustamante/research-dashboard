@@ -39,6 +39,7 @@ export const releases: ReleaseNote[] = [
           'Made conference attendance, Teaching schedules, and exact dated blocked events automatic Planning sources alongside Paper Milestones.',
           'Conference trips include one travel day before and after; Teaching schedules repeat by selected month; Winter/Summer holidays, Administrative time, and Sick periods use exact inclusive dates.',
           'Kept overlapping dated commitments additive and flag them visibly, while preserving older manual allocations as Legacy records.',
+          'Fixed Teaching Portfolio saves when adding active Planning months and committed teaching days.',
         ],
       },
       {
