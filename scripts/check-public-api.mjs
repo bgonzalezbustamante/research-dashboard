@@ -225,6 +225,7 @@ function assertManifest(contract) {
     'get_public_project',
     'list_public_conference_presentations',
     'list_public_teaching',
+    'get_public_teaching_settings',
     'get_public_work_analytics',
     'list_public_availability',
   ]
