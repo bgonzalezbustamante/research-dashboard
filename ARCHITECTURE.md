@@ -100,7 +100,7 @@ The architecture therefore has three complementary checks:
 
 Work-analytics validation follows the strict rules first exercised in `weekly-penguin-timeline`: requested-year equality, real ISO calendar dates, unique daily rows, non-negative integer daily metrics, and complete 365/366-day coverage.
 
-Software validation enforces the controlled category, development-stage, status, and repository-visibility vocabularies, valid HTTP(S) URLs, and the privacy invariant that a Private repository cannot return a public `repository_url`. Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
+Software validation enforces the controlled category, development-stage, status, and repository-visibility vocabularies, valid HTTP(S) URLs, valid lifecycle years with `end_year >= start_year` when both exist, and the privacy invariant that a Private repository cannot return a public `repository_url`. Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
 
 These layers complement one another. The reference client does not replace `lib/academic-api-contract.json`, the producer-side migration checks, or the Supabase RPC transport.
 
@@ -141,7 +141,7 @@ Only teaching portfolio items marked public are returned. Public portfolio field
 
 ### Software Ecosystem
 
-Software Ecosystem is the canonical administrative registry for software, applications and reusable tools maintained through Research Dashboard. Operational metadata includes category, current version, development stage, status, repository visibility and URLs, start year, Featured state, and a separate public-exposure control.
+Software Ecosystem is the canonical administrative registry for software, applications and reusable tools maintained through Research Dashboard. Operational metadata includes category, current version, development stage, status, repository visibility and URLs, start/end year, Featured state, and a separate public-exposure control.
 
 `list_public_software()` and `get_public_software(slug)` return only profiles explicitly marked Public. Repository visibility is deliberately independent from profile exposure: a software profile may be Public while its repository remains Private. In that case the public contract reports `repository_visibility = private` but forces `repository_url = null`. Internal software/owner IDs, public-exposure metadata, timestamps, and private repository URLs remain unavailable anonymously.
 
