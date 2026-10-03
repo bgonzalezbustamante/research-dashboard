@@ -27,6 +27,7 @@
 - Updated `npm run check:public-api:live` so real anonymous RPC responses pass through the same reference-client validators before the existing direct-table privacy-boundary checks.
 - Updated `ARCHITECTURE.md` and `/api` to distinguish the Supabase Data API/RPC transport from the optional reference TypeScript client/runtime-validation layer.
 - Added `list_public_availability(year)` as an anonymous-safe Public RPC v1 resource for conference trips, Winter/Summer holidays, and generic unavailable periods; Administrative commitments and sickness reasons/notes remain private.
+- Updated public availability so multiple presentations at the same conference produce one trip range rather than duplicate identical ranges.
 - Extended the public conference contract with `personal_attendance` and `involves_trip`; trip status requires personal attendance and project-embedded conference summaries use the same shape.
 - Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
 - Added `get_public_teaching_settings()` as a ninth Public RPC v1 operation exposing only the owner-level `teaching_season_active` boolean; the underlying RLS-protected Teaching settings table remains unavailable anonymously.
@@ -48,6 +49,7 @@
 - Added exact dated Winter holiday, Summer holiday, Administrative, and Sick events as private Planning sources with inclusive date ranges.
 - Added per-source/per-period FlowSavvy/Calendar state for Conference, Teaching, and dated blocked events; changing a source schedule resets its Calendar state.
 - Kept exact dated overlaps additive and added an **Overlapping dated commitments** warning rather than silently deduplicating capacity.
+- Grouped multiple presentation records from the same conference event into one Planning attendance/trip commitment, while preserving additive overlap warnings for genuinely different dated commitments.
 - Updated the main Dashboard Planning load to use the same source-backed derivation as the Planning page.
 - Fixed Teaching Portfolio saves after the Planning expansion by restoring the authenticated runtime permission required by the `planning_months` uniqueness constraint.
 - Fixed Conference edits so Personal attendance and Involves trip are persisted, and adjusted the Planning and attendance panel heading so it no longer overlaps the card border.
