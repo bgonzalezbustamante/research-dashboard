@@ -1086,17 +1086,39 @@ function parsePublicSoftwareItem(
     value.start_year,
     `${path}.start_year`
   )
+  assertNullableInteger(
+    value.end_year,
+    `${path}.end_year`
+  )
+
+  for (const field of [
+    'start_year',
+    'end_year',
+  ] as const) {
+    const year = value[field]
+
+    if (
+      year !== null &&
+      (
+        year < 1000 ||
+        year > 9999
+      )
+    ) {
+      fail(
+        `${path}.${field}`,
+        'expected a year from 1000 through 9999'
+      )
+    }
+  }
 
   if (
     value.start_year !== null &&
-    (
-      value.start_year < 1000 ||
-      value.start_year > 9999
-    )
+    value.end_year !== null &&
+    value.end_year < value.start_year
   ) {
     fail(
-      `${path}.start_year`,
-      'expected a year from 1000 through 9999'
+      `${path}.end_year`,
+      'must be on or after start_year'
     )
   }
 
