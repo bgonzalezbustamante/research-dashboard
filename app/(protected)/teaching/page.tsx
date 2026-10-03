@@ -11,6 +11,7 @@ import {
   createTeachingItem,
   deleteTeachingItem,
   updateTeachingItem,
+  updateTeachingSeason,
 } from './actions'
 
 type TeachingPageProps = {
@@ -19,6 +20,7 @@ type TeachingPageProps = {
     created?: string
     saved?: string
     deleted?: string
+    season?: string
     page?: string
   }>
 }
@@ -82,6 +84,11 @@ type TeachingHoursRow = {
   teaching_id: string
   net_minutes: number | string
   session_count: number | string
+}
+
+type TeachingSettingsRow = {
+  owner_id: string
+  teaching_season_active: boolean
 }
 
 const inputClass =
@@ -223,6 +230,7 @@ export default async function TeachingPage({
     teachingLabelsResult,
     labelsResult,
     hoursResult,
+    settingsResult,
   ] = await Promise.all([
     supabase
       .from('teaching_portfolio')
@@ -299,6 +307,17 @@ export default async function TeachingPage({
     supabase.rpc(
       'get_teaching_hours'
     ),
+
+    supabase
+      .from('teaching_settings')
+      .select(
+        'owner_id, teaching_season_active'
+      )
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .maybeSingle(),
   ])
 
   for (const [
@@ -324,6 +343,10 @@ export default async function TeachingPage({
     [
       'Teaching tracked hours',
       hoursResult,
+    ],
+    [
+      'Teaching settings',
+      settingsResult,
     ],
   ] as const) {
     if (result.error) {
@@ -355,6 +378,16 @@ export default async function TeachingPage({
   const hoursRows =
     (hoursResult.data ??
       []) as TeachingHoursRow[]
+
+  const teachingSettings =
+    settingsResult.data as
+      | TeachingSettingsRow
+      | null
+
+  const teachingSeasonActive =
+    teachingSettings
+      ?.teaching_season_active ??
+    false
 
   const metadataByTeaching =
     new Map(
@@ -549,16 +582,151 @@ export default async function TeachingPage({
               : 'Teaching Portfolio item deleted.'}
         </div>
       )}
+      {params.season && (
+        <div className="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          {params.season === 'active'
+            ? 'Teaching season activated.'
+            : 'Teaching season deactivated.'}
+        </div>
+      )}
 
-      <div
-        className={
-          isOwner
-            ? 'grid gap-6 lg:grid-cols-2'
-            : 'grid gap-6'
-        }
-      >
+
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+            Public teaching contract
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-oxford-ash">
+            Public Teaching Portfolio
+            items are exposed through{' '}
+            <code>
+              list_public_teaching()
+            </code>
+            . The global Teaching
+            season state is exposed
+            separately through{' '}
+            <code>
+              get_public_teaching_settings()
+            </code>
+            .
+          </p>
+
+          <div className="mt-4 rounded-md border border-oxford-stone bg-oxford-off-white p-4 text-sm leading-6 text-oxford-charcoal">
+            <p>
+              Public: name,
+              institution, summary,
+              optional role, period,
+              current status, one or
+              more levels, times taught,
+              cumulative students,
+              optional slug, and course
+              image filename.
+            </p>
+
+            <p className="mt-2">
+              Private: Activity-label
+              relationships, tracked
+              hours, session counts,
+              owner metadata, and
+              internal IDs.
+            </p>
+
+            <p className="mt-2 text-xs text-oxford-ash">
+              Course images use{' '}
+              <code>
+                /teaching/&lt;filename&gt;
+              </code>{' '}
+              in the academic website
+              public directory.
+            </p>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+                Teaching season
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-oxford-ash">
+                Global public status for
+                whether Teaching season is
+                currently active.
+              </p>
+            </div>
+
+            <span
+              className={
+                teachingSeasonActive
+                  ? 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
+                  : 'rounded-full border border-gray-300 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700'
+              }
+            >
+              {teachingSeasonActive
+                ? 'Active'
+                : 'Inactive'}
+            </span>
+          </div>
+
+          <div className="mt-4 rounded-md border border-oxford-stone bg-oxford-off-white p-4 text-sm leading-6 text-oxford-charcoal">
+            <p>
+              External consumers can read{' '}
+              <code>
+                teaching_season_active
+              </code>{' '}
+              through{' '}
+              <code>
+                get_public_teaching_settings()
+              </code>
+              .
+            </p>
+
+            <p className="mt-2 text-xs text-oxford-ash">
+              This is a global status and
+              does not change individual
+              course visibility or Planning
+              months.
+            </p>
+          </div>
+
+          {isOwner && (
+            <form
+              action={
+                updateTeachingSeason
+              }
+              className="mt-4"
+            >
+              <input
+                type="hidden"
+                name="teaching_season_active"
+                value={
+                  teachingSeasonActive
+                    ? 'false'
+                    : 'true'
+                }
+              />
+
+              <Button
+                type="submit"
+                variant={
+                  teachingSeasonActive
+                    ? 'warning'
+                    : 'success'
+                }
+              >
+                {teachingSeasonActive
+                  ? 'Deactivate Teaching season'
+                  : 'Activate Teaching season'}
+              </Button>
+            </form>
+          )}
+        </Card>
+      </div>
+
         {isOwner && (
-          <Card>
+          <Card className="mt-6">
             <h2 className="font-serif text-xl font-semibold text-oxford-blue">
               Add course or activity
             </h2>
@@ -1043,54 +1211,6 @@ export default async function TeachingPage({
             </form>
           </Card>
         )}
-
-        <Card>
-          <h2 className="font-serif text-xl font-semibold text-oxford-blue">
-            Public teaching contract
-          </h2>
-
-          <p className="mt-2 text-sm leading-6 text-oxford-ash">
-            The academic website can
-            read explicitly Public
-            Teaching Portfolio items
-            through{' '}
-            <code>
-              list_public_teaching()
-            </code>
-            .
-          </p>
-
-          <div className="mt-4 rounded-md border border-oxford-stone bg-oxford-off-white p-4 text-sm leading-6 text-oxford-charcoal">
-            <p>
-              Public: name,
-              institution, summary,
-              optional role, period,
-              current status, one or
-              more levels, times taught,
-              cumulative students,
-              optional slug, and course
-              image filename.
-            </p>
-
-            <p className="mt-2">
-              Private: Activity-label
-              relationships, tracked
-              hours, session counts,
-              owner metadata, and
-              internal IDs.
-            </p>
-
-            <p className="mt-2 text-xs text-oxford-ash">
-              Course images use{' '}
-              <code>
-                /teaching/&lt;filename&gt;
-              </code>{' '}
-              in the academic website
-              public directory.
-            </p>
-          </div>
-        </Card>
-      </div>
 
       <section className="mt-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
