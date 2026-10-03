@@ -153,7 +153,7 @@ The public analytics RPC returns yearly aggregate measures plus daily net workin
 
 `list_public_availability(year)` is a narrow public projection for timeline consumers. It exposes only conference trips, Winter holidays, Summer holidays, and generic `unavailable` ranges. Conference trips use the same effective dates as Planning: one day before the conference through one day after it. Sick records are never labelled Sick publicly; they appear only as `unavailable` with the label `Unavailable`. Administrative commitments, notes, source IDs, owner metadata, and per-period Calendar state remain private.
 
-Repeated presentation records for the same conference event produce one public trip range. The availability RPC is deliberately separate from work analytics: availability describes scheduled/public-safe date states, while work analytics describes observed work and coffee data.
+Repeated presentation records for the same conference event produce one public trip range. If distinct source events nevertheless project to the same public type/date/label range, the public availability response returns that range only once. The availability RPC is deliberately separate from work analytics: availability describes scheduled/public-safe date states, while work analytics describes observed work and coffee data.
 
 ## Controlled vocabularies
 
