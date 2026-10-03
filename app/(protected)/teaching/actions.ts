@@ -162,7 +162,8 @@ function teachingRedirect(
     | 'error'
     | 'created'
     | 'saved'
-    | 'deleted',
+    | 'deleted'
+    | 'season',
   value: string
 ): never {
   redirect(
@@ -813,5 +814,59 @@ export async function deleteTeachingItem(
   teachingRedirect(
     'deleted',
     teachingId
+  )
+}
+
+
+export async function updateTeachingSeason(
+  formData: FormData
+) {
+  const access =
+    await requireDashboardOwner()
+
+  const teachingSeasonActive =
+    getRequiredText(
+      formData,
+      'teaching_season_active'
+    ) === 'true'
+
+  const supabase =
+    await createClient()
+
+  const { error } =
+    await supabase
+      .from('teaching_settings')
+      .upsert(
+        {
+          owner_id:
+            access.ownerId,
+          teaching_season_active:
+            teachingSeasonActive,
+        },
+        {
+          onConflict:
+            'owner_id',
+        }
+      )
+
+  if (error) {
+    console.error(
+      'Teaching season update failed:',
+      error
+    )
+
+    teachingRedirect(
+      'error',
+      'Teaching season could not be updated.'
+    )
+  }
+
+  revalidatePath('/teaching')
+
+  teachingRedirect(
+    'season',
+    teachingSeasonActive
+      ? 'active'
+      : 'inactive'
   )
 }
