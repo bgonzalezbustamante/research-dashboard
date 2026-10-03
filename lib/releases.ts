@@ -21,13 +21,14 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.1',
     summary:
-      'Rustic Peak extends the public work-analytics interface and adds small security and licensing clarifications while the 1.0 release line continues to stabilise.',
+      'Rustic Peak strengthens the public Academic API with daily work analytics, reusable response validation, clearer list navigation, and small security and licensing improvements while the 1.0 release line continues to stabilise.',
     sections: [
       {
         title: 'Academic API and public data',
         items: [
           'Added daily coffee counts alongside daily net working minutes in the public yearly work-analytics data.',
-          'Kept the underlying daily logs and work sessions private while preserving the existing yearly averages.',
+          'Added a portable TypeScript reference client with strict runtime checks so consumers can detect malformed or incompatible API responses explicitly.',
+          'Live API verification now uses the same response validators while keeping the underlying daily logs, work sessions and other private tables unavailable to anonymous users.',
         ],
       },
       {
