@@ -12,6 +12,15 @@ import {
   getPlanningPeriodStartsForYear,
   type PlanningMilestone,
 } from '@/lib/planning/milestone-planning'
+import {
+  deriveSourceBackedPlanning,
+  findPlanningOverlaps,
+  type BlockedEventPlanningSource,
+  type ConferencePlanningSource,
+  type PlanningSourceState,
+  type PlanningSourceType,
+  type TeachingPlanningSource,
+} from '@/lib/planning/source-backed-planning'
 import { createClient } from '@/lib/supabase/server'
 
 type PlanningPageProps = {
@@ -35,14 +44,20 @@ type AllocationType =
 
 type AllocationSource =
   | 'milestone'
-  | 'blocked'
   | 'legacy'
+  | 'legacy_blocked'
+  | 'conference'
+  | 'teaching'
+  | 'blocked_event'
 
 type BlockedType =
   | 'teaching'
   | 'conference'
   | 'holiday'
+  | 'winter_holiday'
+  | 'summer_holiday'
   | 'administrative'
+  | 'sick'
 
 type StoredPlanningPeriodRow = {
   id: string
@@ -67,6 +82,14 @@ type PlanningAllocationView = {
   paper_title: string | null
   paper_archived: boolean
   milestones: PlanningMilestone[]
+  source_type: PlanningSourceType | null
+  source_id: string | null
+  label: string | null
+  subtitle: string | null
+  source_href: string | null
+  range_start: string | null
+  range_end: string | null
+  dated_days: string[]
 }
 
 type WorkSessionRow = {
@@ -323,6 +346,10 @@ export default async function PlanningPage({
     papersResult,
     dailyLogsResult,
     milestonesResult,
+    conferencesResult,
+    teachingResult,
+    blockedEventsResult,
+    sourceStatesResult,
   ] = await Promise.all([
     supabase
       .from('planning_periods')
@@ -421,30 +448,126 @@ export default async function PlanningPage({
         'target_date',
         yearEnd
       ),
+
+    supabase
+      .from(
+        'conference_presentations'
+      )
+      .select(`
+        id,
+        event_name,
+        event_short_name,
+        start_date,
+        end_date,
+        personal_attendance,
+        involves_trip
+      `),
+
+    supabase
+      .from('teaching_portfolio')
+      .select(`
+        id,
+        name,
+        start_year,
+        end_year,
+        is_current,
+        planning_months,
+        committed_days_per_week
+      `),
+
+    supabase
+      .from(
+        'planning_blocked_events'
+      )
+      .select(`
+        id,
+        event_type,
+        start_date,
+        end_date,
+        notes
+      `)
+      .lte(
+        'start_date',
+        yearEnd
+      )
+      .gte(
+        'end_date',
+        yearStart
+      )
+      .order(
+        'start_date',
+        {
+          ascending: true,
+        }
+      ),
+
+    supabase
+      .from(
+        'planning_source_period_states'
+      )
+      .select(`
+        source_type,
+        source_id,
+        period_start,
+        flowsavvy_added,
+        flowsavvy_added_at
+      `)
+      .gte(
+        'period_start',
+        yearStart
+      )
+      .lte(
+        'period_start',
+        yearEnd
+      ),
   ])
 
-  if (periodsResult.error) {
-    throw new Error(
-      `Could not load planning periods: ${periodsResult.error.message}`
-    )
-  }
-
-  if (papersResult.error) {
-    throw new Error(
-      `Could not load papers: ${papersResult.error.message}`
-    )
-  }
-
-  if (dailyLogsResult.error) {
-    throw new Error(
-      `Could not load working-hour dates: ${dailyLogsResult.error.message}`
-    )
-  }
-
-  if (milestonesResult.error) {
-    throw new Error(
-      `Could not load milestone-backed planning: ${milestonesResult.error.message}`
-    )
+  for (const [
+    label,
+    result,
+  ] of [
+    [
+      'planning periods',
+      periodsResult,
+    ],
+    [
+      'papers',
+      papersResult,
+    ],
+    [
+      'working-hour dates',
+      dailyLogsResult,
+    ],
+    [
+      'milestone-backed planning',
+      milestonesResult,
+    ],
+    [
+      'conference planning',
+      conferencesResult,
+    ],
+    [
+      'Teaching planning',
+      teachingResult,
+    ],
+    [
+      'dated blocked events',
+      blockedEventsResult,
+    ],
+    [
+      'source-backed Calendar state',
+      sourceStatesResult,
+    ],
+  ] as const) {
+    if (result.error) {
+      throw new Error(
+        `Could not load ${
+          label
+        }: ${
+          result.error.message
+        }`
+      )
+    }
   }
 
   const storedPeriods =
@@ -588,7 +711,7 @@ export default async function PlanningPage({
               allocation.allocation_type ===
                 'paper'
                 ? 'legacy'
-                : 'blocked',
+                : 'legacy_blocked',
             blocked_type:
               allocation.blocked_type as BlockedType | null,
             committed_days:
@@ -614,6 +737,14 @@ export default async function PlanningPage({
                 paper?.archived_at
               ),
             milestones: [],
+            source_type: null,
+            source_id: null,
+            label: null,
+            subtitle: null,
+            source_href: null,
+            range_start: null,
+            range_end: null,
+            dated_days: [],
           }]
         }
       )
@@ -665,9 +796,53 @@ export default async function PlanningPage({
       }
     )
 
-  const milestoneAllocations =
+  const milestoneAllocations:
+    PlanningAllocationView[] =
     aggregateMilestonesByPaperAndPeriod(
       milestoneRows
+    ).map(
+      (allocation) => ({
+        ...allocation,
+        source_type: null,
+        source_id: null,
+        label: null,
+        subtitle: null,
+        source_href: null,
+        range_start: null,
+        range_end: null,
+        dated_days: [],
+      })
+    )
+
+  const sourceBackedAllocations =
+    deriveSourceBackedPlanning({
+      year:
+        selectedYear,
+      conferences:
+        (conferencesResult.data ??
+          []) as ConferencePlanningSource[],
+      teaching:
+        (teachingResult.data ??
+          []) as TeachingPlanningSource[],
+      blockedEvents:
+        (blockedEventsResult.data ??
+          []) as BlockedEventPlanningSource[],
+      states:
+        (sourceStatesResult.data ??
+          []) as PlanningSourceState[],
+    })
+
+  const sourceAllocations:
+    PlanningAllocationView[] =
+    sourceBackedAllocations.map(
+      (allocation) => ({
+        ...allocation,
+        paper_id: null,
+        paper_short_title: null,
+        paper_title: null,
+        paper_archived: false,
+        milestones: [],
+      })
     )
 
   const milestoneKeys =
@@ -695,7 +870,14 @@ export default async function PlanningPage({
     PlanningAllocationView[] = [
       ...effectiveManualAllocations,
       ...milestoneAllocations,
+      ...sourceAllocations,
     ]
+
+  const selectedOverlaps =
+    findPlanningOverlaps(
+      sourceBackedAllocations,
+      selectedPeriodStart
+    )
 
   let workSessions:
     WorkSessionRow[] = []
@@ -762,10 +944,12 @@ export default async function PlanningPage({
         return (
           (
             a.paper_short_title ??
+            a.label ??
             a.blocked_type ??
             ''
           ).localeCompare(
             b.paper_short_title ??
+            b.label ??
             b.blocked_type ??
             ''
           )
@@ -891,7 +1075,7 @@ export default async function PlanningPage({
     <div>
       <PageHeader
         title="Biweekly Planning"
-        description="Research capacity is derived from capacity-bearing Paper Milestones; add Blocked Time manually for other commitments."
+        description="Research capacity is derived from Paper Milestones, conference attendance, Teaching Portfolio schedules, and dated blocked events."
       />
 
       <div className="mb-6 grid gap-6 lg:grid-cols-2 lg:items-stretch">
@@ -963,6 +1147,9 @@ export default async function PlanningPage({
         }
         allocations={
           selectedAllocations
+        }
+        overlaps={
+          selectedOverlaps
         }
         error={params.error}
       />

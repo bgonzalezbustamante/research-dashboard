@@ -52,6 +52,8 @@ type TeachingRow = {
   levels: TeachingLevel[]
   times_taught: number
   student_count: number
+  planning_months: number[]
+  committed_days_per_week: number
   created_at: string
   updated_at: string
 }
@@ -106,6 +108,21 @@ const teachingRoleOptions: TeachingRole[] = [
   'Thesis Supervisor',
   'Examiner',
 ]
+
+const planningMonthOptions = [
+  [1, 'Jan'],
+  [2, 'Feb'],
+  [3, 'Mar'],
+  [4, 'Apr'],
+  [5, 'May'],
+  [6, 'Jun'],
+  [7, 'Jul'],
+  [8, 'Aug'],
+  [9, 'Sep'],
+  [10, 'Oct'],
+  [11, 'Nov'],
+  [12, 'Dec'],
+] as const
 
 function formatDuration(
   value: number
@@ -222,6 +239,8 @@ export default async function TeachingPage({
         levels,
         times_taught,
         student_count,
+        planning_months,
+        committed_days_per_week,
         created_at,
         updated_at
       `)
@@ -784,6 +803,67 @@ export default async function TeachingPage({
 
               <div className="border-t border-oxford-stone pt-5">
                 <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                  Planning
+                </h3>
+
+                <p className="mt-1 text-xs leading-5 text-oxford-ash">
+                  Active months repeat in every year covered by this Teaching Portfolio item. Planning converts 1 day/week to 2 committed days and 2 days/week to 4 committed days in each active half-month.
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="new-teaching-committed-days"
+                  className={labelClass}
+                >
+                  Committed days per week
+                </label>
+
+                <select
+                  id="new-teaching-committed-days"
+                  name="committed_days_per_week"
+                  defaultValue="0"
+                  className={inputClass}
+                >
+                  <option value="0">
+                    0 days
+                  </option>
+                  <option value="1">
+                    1 day
+                  </option>
+                  <option value="2">
+                    2 days
+                  </option>
+                </select>
+              </div>
+
+              <fieldset>
+                <legend className={labelClass}>
+                  Active teaching months
+                </legend>
+
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  {planningMonthOptions.map(
+                    ([month, label]) => (
+                      <label
+                        key={month}
+                        className="inline-flex items-center gap-2 rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal"
+                      >
+                        <input
+                          type="checkbox"
+                          name="planning_months"
+                          value={month}
+                          className="h-4 w-4 rounded border-oxford-stone"
+                        />
+                        {label}
+                      </label>
+                    )
+                  )}
+                </div>
+              </fieldset>
+
+              <div className="border-t border-oxford-stone pt-5">
+                <h3 className="font-serif text-lg font-semibold text-oxford-blue">
                   Website
                 </h3>
 
@@ -1167,6 +1247,29 @@ export default async function TeachingPage({
                             </span>
                           </p>
                         )}
+
+                        <p className="mt-1 text-sm text-oxford-ash">
+                          Planning:{' '}
+                          <span className="text-oxford-charcoal">
+                            {item.committed_days_per_week > 0 &&
+                            item.planning_months.length > 0
+                              ? item.committed_days_per_week +
+                                (item.committed_days_per_week === 1
+                                  ? ' day/week · '
+                                  : ' days/week · ') +
+                                item.planning_months
+                                  .map(
+                                    (month) =>
+                                      planningMonthOptions.find(
+                                        ([value]) =>
+                                          value === month
+                                      )?.[1] ??
+                                      String(month)
+                                  )
+                                  .join(', ')
+                              : 'Not scheduled'}
+                          </span>
+                        </p>
 
                         <p className="mt-1 text-sm text-oxford-ash">
                           {formatPeriod(
@@ -1634,6 +1737,92 @@ export default async function TeachingPage({
                               Still teaching
                             </label>
                           </div>
+
+                          <div className="border-t border-oxford-stone pt-5">
+                            <h4 className="font-serif text-lg font-semibold text-oxford-blue">
+                              Planning
+                            </h4>
+
+                            <p className="mt-1 text-xs leading-5 text-oxford-ash">
+                              Checked months repeat in every covered year. Changing this schedule resets the per-period FlowSavvy/Calendar state.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor={
+                                'teaching-committed-days-' +
+                                item.id
+                              }
+                              className={
+                                labelClass
+                              }
+                            >
+                              Committed days per week
+                            </label>
+
+                            <select
+                              id={
+                                'teaching-committed-days-' +
+                                item.id
+                              }
+                              name="committed_days_per_week"
+                              defaultValue={String(
+                                item.committed_days_per_week
+                              )}
+                              className={
+                                inputClass
+                              }
+                            >
+                              <option value="0">
+                                0 days
+                              </option>
+                              <option value="1">
+                                1 day
+                              </option>
+                              <option value="2">
+                                2 days
+                              </option>
+                            </select>
+                          </div>
+
+                          <fieldset>
+                            <legend
+                              className={
+                                labelClass
+                              }
+                            >
+                              Active teaching months
+                            </legend>
+
+                            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                              {planningMonthOptions.map(
+                                ([month, label]) => (
+                                  <label
+                                    key={
+                                      month
+                                    }
+                                    className="inline-flex items-center gap-2 rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      name="planning_months"
+                                      value={
+                                        month
+                                      }
+                                      defaultChecked={item.planning_months.includes(
+                                        month
+                                      )}
+                                      className="h-4 w-4 rounded border-oxford-stone"
+                                    />
+                                    {
+                                      label
+                                    }
+                                  </label>
+                                )
+                              )}
+                            </div>
+                          </fieldset>
 
                           <div className="grid gap-4 sm:grid-cols-2">
                             <div>

@@ -39,6 +39,8 @@ type ConferencePresentation = {
     | 'Conference paper'
     | 'Keynote'
     | 'Workshop'
+  personal_attendance: boolean
+  involves_trip: boolean
   url: string | null
   notes: string | null
 }
@@ -223,6 +225,8 @@ export default async function ConferencesPage({
         presentation_title,
         authors,
         presentation_type,
+        personal_attendance,
+        involves_trip,
         url,
         notes
       `)
@@ -405,10 +409,11 @@ export default async function ConferencesPage({
           </div>
           <p className="mt-2 text-sm leading-6 text-oxford-ash">
             Conference date ranges,
-            presentation type, and
-            ordered authors are public.
-            Notes and the optional
-            linked paper remain
+            presentation type,
+            personal attendance, trip
+            status, and ordered authors
+            are public. Notes and the
+            optional linked paper remain
             Dashboard-only.
           </p>
         </Card>
@@ -639,6 +644,48 @@ export default async function ConferencesPage({
                 />
               </div>
 
+              <fieldset className="md:col-span-2 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+                <legend className="px-1 text-sm font-medium text-oxford-charcoal">
+                  Planning and attendance
+                </legend>
+
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
+                    <input
+                      type="checkbox"
+                      name="personal_attendance"
+                      className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+                    />
+
+                    <span>
+                      <span className="font-medium">
+                        Personal attendance
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-oxford-ash">
+                        I attended or plan to attend this conference. Its exact conference dates will count in Planning.
+                      </span>
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
+                    <input
+                      type="checkbox"
+                      name="involves_trip"
+                      className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+                    />
+
+                    <span>
+                      <span className="font-medium">
+                        Involves trip
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-oxford-ash">
+                        Requires personal attendance. Planning adds one travel day before and one after the conference.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
               <div className="md:col-span-2">
                 <label
                   htmlFor="new-conference-notes"
@@ -756,6 +803,18 @@ export default async function ConferencesPage({
                         {upcoming && (
                           <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
                             Upcoming
+                          </span>
+                        )}
+
+                        {presentation.personal_attendance && (
+                          <span className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">
+                            Personal attendance
+                          </span>
+                        )}
+
+                        {presentation.involves_trip && (
+                          <span className="rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-800">
+                            Trip
                           </span>
                         )}
                       </div>
@@ -1146,6 +1205,54 @@ export default async function ConferencesPage({
                                 }
                               />
                             </div>
+
+                            <fieldset className="md:col-span-2 rounded-lg border border-oxford-stone bg-white p-4">
+                              <legend className="px-1 text-sm font-medium text-oxford-charcoal">
+                                Planning and attendance
+                              </legend>
+
+                              <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                                <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
+                                  <input
+                                    type="checkbox"
+                                    name="personal_attendance"
+                                    defaultChecked={
+                                      presentation.personal_attendance
+                                    }
+                                    className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+                                  />
+
+                                  <span>
+                                    <span className="font-medium">
+                                      Personal attendance
+                                    </span>
+                                    <span className="mt-1 block text-xs leading-5 text-oxford-ash">
+                                      Exact conference dates count automatically in Planning.
+                                    </span>
+                                  </span>
+                                </label>
+
+                                <label className="flex items-start gap-3 text-sm text-oxford-charcoal">
+                                  <input
+                                    type="checkbox"
+                                    name="involves_trip"
+                                    defaultChecked={
+                                      presentation.involves_trip
+                                    }
+                                    className="mt-0.5 h-4 w-4 rounded border-oxford-stone"
+                                  />
+
+                                  <span>
+                                    <span className="font-medium">
+                                      Involves trip
+                                    </span>
+                                    <span className="mt-1 block text-xs leading-5 text-oxford-ash">
+                                      Adds one travel day before and one after the conference.
+                                    </span>
+                                  </span>
+                                </label>
+                              </div>
+                            </fieldset>
 
                             <div className="md:col-span-2">
                               <label

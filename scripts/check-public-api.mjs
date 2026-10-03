@@ -177,6 +177,13 @@ function latestCreateTableBlock(corpus, tableName) {
 }
 
 function vocabularyMigrationBlock(corpus, vocabulary) {
+  if (vocabulary.sourceFunction) {
+    return latestFunctionBlock(
+      corpus,
+      vocabulary.sourceFunction
+    )
+  }
+
   const namedConstraint = latestConstraintBlock(
     corpus,
     vocabulary.constraint
@@ -219,6 +226,7 @@ function assertManifest(contract) {
     'list_public_conference_presentations',
     'list_public_teaching',
     'get_public_work_analytics',
+    'list_public_availability',
   ]
 
   const operations = contract.resources.flatMap((resource) =>
@@ -369,6 +377,28 @@ function assertMigrations(contract, operations, corpus) {
       vocabulary
     )
     const actualValues = quotedValues(block)
+
+    if (vocabulary.sourceFunction) {
+      const missingValues =
+        vocabulary.values.filter(
+          (value) =>
+            !block.includes(
+              "'" + value + "'"
+            )
+        )
+
+      if (missingValues.length > 0) {
+        fail(
+          vocabulary.label +
+            ' is missing values from ' +
+            vocabulary.sourceFunction +
+            '(). Missing: ' +
+            missingValues.join(', ')
+        )
+      }
+
+      continue
+    }
 
     if (!sameArray(actualValues, vocabulary.values)) {
       fail(
@@ -548,6 +578,11 @@ async function liveCheck() {
       year
     )
 
+  await api
+    .listPublicAvailability(
+      year
+    )
+
   const privateTables = [
     'papers',
     'paper_public_metadata',
@@ -559,6 +594,8 @@ async function liveCheck() {
     'teaching_public_metadata',
     'daily_logs',
     'work_sessions',
+    'planning_blocked_events',
+    'planning_source_period_states',
   ]
 
   for (

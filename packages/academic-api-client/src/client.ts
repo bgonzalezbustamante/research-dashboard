@@ -1,4 +1,5 @@
 import type {
+  PublicAvailabilityItem,
   PublicConferencePresentation,
   PublicPaper,
   PublicPaperDetail,
@@ -7,6 +8,7 @@ import type {
   PublicWorkAnalytics,
 } from './types.js'
 import {
+  parsePublicAvailabilityList,
   parsePublicConferenceList,
   parsePublicPaperDetailResponse,
   parsePublicPaperList,
@@ -89,6 +91,11 @@ export type AcademicApiClient = {
   listPublicTeaching(): Promise<
     PublicTeachingItem[]
   >
+  listPublicAvailability(
+    year: number
+  ): Promise<
+    PublicAvailabilityItem[]
+  >
   getPublicWorkAnalytics(
     year: number
   ): Promise<
@@ -167,6 +174,19 @@ export function createAcademicApiClient(
           transport,
           'list_public_teaching'
         )
+      )
+    },
+
+    async listPublicAvailability(
+      year
+    ) {
+      return parsePublicAvailabilityList(
+        await callRpc(
+          transport,
+          'list_public_availability',
+          { p_year: year }
+        ),
+        year
       )
     },
 

@@ -39,6 +39,19 @@ function getOptionalText(
     : null
 }
 
+function getCheckbox(
+  formData: FormData,
+  name: string
+) {
+  const value =
+    formData.get(name)
+
+  return (
+    value === 'on' ||
+    value === 'true'
+  )
+}
+
 function parseAuthors(
   formData: FormData
 ) {
@@ -205,6 +218,29 @@ function validateConferenceFields(
       'url'
     )
 
+  const personalAttendance =
+    getCheckbox(
+      formData,
+      'personal_attendance'
+    )
+
+  const involvesTrip =
+    getCheckbox(
+      formData,
+      'involves_trip'
+    )
+
+  if (
+    involvesTrip &&
+    !personalAttendance
+  ) {
+    return {
+      ok: false as const,
+      error:
+        'Trip status requires personal attendance.',
+    }
+  }
+
   if (
     url &&
     !isValidHttpUrl(url)
@@ -240,6 +276,8 @@ function validateConferenceFields(
     authors:
       parseAuthors(formData),
     presentationType,
+    personalAttendance,
+    involvesTrip,
     url,
     notes:
       getOptionalText(
@@ -298,6 +336,10 @@ export async function createConferencePresentation(
         fields.authors,
       presentation_type:
         fields.presentationType,
+      personal_attendance:
+        fields.personalAttendance,
+      involves_trip:
+        fields.involvesTrip,
       url:
         fields.url,
       notes:
@@ -320,6 +362,12 @@ export async function createConferencePresentation(
 
   revalidatePath(
     '/conferences'
+  )
+  revalidatePath(
+    '/planning'
+  )
+  revalidatePath(
+    '/dashboard'
   )
 
   conferencesRedirect(
@@ -414,6 +462,12 @@ export async function updateConferencePresentation(
   revalidatePath(
     '/conferences'
   )
+  revalidatePath(
+    '/planning'
+  )
+  revalidatePath(
+    '/dashboard'
+  )
 
   conferencesRedirect(
     'saved',
@@ -471,6 +525,12 @@ export async function deleteConferencePresentation(
 
   revalidatePath(
     '/conferences'
+  )
+  revalidatePath(
+    '/planning'
+  )
+  revalidatePath(
+    '/dashboard'
   )
 
   conferencesRedirect(

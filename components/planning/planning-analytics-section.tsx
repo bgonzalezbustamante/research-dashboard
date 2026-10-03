@@ -10,7 +10,10 @@ type BlockedType =
   | 'teaching'
   | 'conference'
   | 'holiday'
+  | 'winter_holiday'
+  | 'summer_holiday'
   | 'administrative'
+  | 'sick'
 
 type AnalyticsAllocation = {
   id: string
@@ -96,7 +99,16 @@ function getBlockedLabel(
 
     case 'holiday':
       return 'Holiday'
-    
+
+    case 'winter_holiday':
+      return 'Winter holiday'
+
+    case 'summer_holiday':
+      return 'Summer holiday'
+
+    case 'sick':
+      return 'Sick'
+
     case 'administrative':
       return 'Administrative'
 

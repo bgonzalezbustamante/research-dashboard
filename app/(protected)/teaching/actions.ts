@@ -104,6 +104,41 @@ function getOptionalYear(
   )
 }
 
+function getPlanningMonths(
+  formData: FormData
+) {
+  return [
+    ...new Set(
+      formData
+        .getAll(
+          'planning_months'
+        )
+        .filter(
+          (value):
+            value is string =>
+            typeof value ===
+            'string'
+        )
+        .map((value) =>
+          Number.parseInt(
+            value,
+            10
+          )
+        )
+        .filter(
+          (value) =>
+            Number.isInteger(
+              value
+            ) &&
+            value >= 1 &&
+            value <= 12
+        )
+    ),
+  ].sort(
+    (a, b) => a - b
+  )
+}
+
 function getUuidList(
   formData: FormData,
   name: string
@@ -149,6 +184,8 @@ type ValidTeachingFields = {
   levels: string[]
   timesTaught: number
   studentCount: number
+  planningMonths: number[]
+  committedDaysPerWeek: number
   visibility: string
   slug: string | null
   courseImageFilename: string | null
@@ -237,6 +274,17 @@ function validateTeachingFields(
     getInteger(
       formData,
       'student_count'
+    )
+
+  const planningMonths =
+    getPlanningMonths(
+      formData
+    )
+
+  const committedDaysPerWeek =
+    getInteger(
+      formData,
+      'committed_days_per_week'
     )
 
   const visibility =
@@ -401,6 +449,32 @@ function validateTeachingFields(
   }
 
   if (
+    !Number.isInteger(
+      committedDaysPerWeek
+    ) ||
+    ![0, 1, 2].includes(
+      committedDaysPerWeek
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        'Committed teaching days per week must be 0, 1, or 2.',
+    }
+  }
+
+  if (
+    committedDaysPerWeek > 0 &&
+    planningMonths.length === 0
+  ) {
+    return {
+      ok: false,
+      error:
+        'Select at least one active teaching month when committed days per week is greater than 0.',
+    }
+  }
+
+  if (
     !allowedVisibilities.has(
       visibility
     )
@@ -448,6 +522,8 @@ function validateTeachingFields(
     levels,
     timesTaught,
     studentCount,
+    planningMonths,
+    committedDaysPerWeek,
     visibility,
     slug,
     courseImageFilename,
@@ -536,6 +612,10 @@ export async function createTeachingItem(
         fields.timesTaught,
       p_student_count:
         fields.studentCount,
+      p_planning_months:
+        fields.planningMonths,
+      p_committed_days_per_week:
+        fields.committedDaysPerWeek,
       p_visibility:
         fields.visibility,
       p_slug:
@@ -563,6 +643,8 @@ export async function createTeachingItem(
   }
 
   revalidatePath('/teaching')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   teachingRedirect(
     'created',
@@ -631,6 +713,10 @@ export async function updateTeachingItem(
           fields.timesTaught,
         p_student_count:
           fields.studentCount,
+        p_planning_months:
+          fields.planningMonths,
+        p_committed_days_per_week:
+          fields.committedDaysPerWeek,
         p_visibility:
           fields.visibility,
         p_slug:
@@ -658,6 +744,8 @@ export async function updateTeachingItem(
   }
 
   revalidatePath('/teaching')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   teachingRedirect(
     'saved',
@@ -719,6 +807,8 @@ export async function deleteTeachingItem(
   }
 
   revalidatePath('/teaching')
+  revalidatePath('/planning')
+  revalidatePath('/dashboard')
 
   teachingRedirect(
     'deleted',

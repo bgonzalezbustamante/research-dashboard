@@ -8,6 +8,8 @@ import type {
   PaperLanguage,
   ProjectRole,
   ProjectStatus,
+  PublicAvailabilityItem,
+  PublicAvailabilityType,
   PublicConferencePresentation,
   PublicPaper,
   PublicPaperDetail,
@@ -632,6 +634,25 @@ export function parsePublicConferencePresentation(
     )
   }
 
+  assertBoolean(
+    value.personal_attendance,
+    `${path}.personal_attendance`
+  )
+  assertBoolean(
+    value.involves_trip,
+    `${path}.involves_trip`
+  )
+
+  if (
+    value.involves_trip &&
+    !value.personal_attendance
+  ) {
+    fail(
+      `${path}.involves_trip`,
+      'requires personal_attendance to be true'
+    )
+  }
+
   assertNullableString(
     value.presentation_title,
     `${path}.presentation_title`
@@ -981,6 +1002,142 @@ export function parsePublicTeachingList(
     'list_public_teaching response',
     parsePublicTeachingItem
   )
+}
+
+export function parsePublicAvailabilityList(
+  payload: unknown,
+  expectedYear: number
+): PublicAvailabilityItem[] {
+  const currentYear =
+    new Date().getUTCFullYear()
+
+  if (
+    !Number.isInteger(
+      expectedYear
+    ) ||
+    expectedYear < 2000 ||
+    expectedYear >
+      currentYear + 5
+  ) {
+    fail(
+      'list_public_availability argument p_year',
+      `expected an integer from 2000 through ${currentYear + 5}`
+    )
+  }
+
+  const rows =
+    parseArray(
+      payload,
+      'list_public_availability response',
+      (value, path) => {
+        assertRecord(
+          value,
+          path
+        )
+        assertExactKeys(
+          value,
+          RPC_FIELDS.list_public_availability,
+          path
+        )
+
+        assertControlledValue<PublicAvailabilityType>(
+          value.type,
+          CONTROLLED_VOCABULARIES[
+            'availability-type'
+          ],
+          `${path}.type`
+        )
+        assertIsoDate(
+          value.start_date,
+          `${path}.start_date`
+        )
+        assertIsoDate(
+          value.end_date,
+          `${path}.end_date`
+        )
+
+        const startDate =
+          value.start_date as string
+        const endDate =
+          value.end_date as string
+
+        assertString(
+          value.label,
+          `${path}.label`
+        )
+
+        if (
+          endDate <
+          startDate
+        ) {
+          fail(
+            `${path}.end_date`,
+            'must be on or after start_date'
+          )
+        }
+
+        for (const field of [
+          'start_date',
+          'end_date',
+        ] as const) {
+          if (
+            Number(
+              (
+                field ===
+                  'start_date'
+                  ? startDate
+                  : endDate
+              ).slice(
+                0,
+                4
+              )
+            ) !== expectedYear
+          ) {
+            fail(
+              `${path}.${field}`,
+              `falls outside requested year ${expectedYear}`
+            )
+          }
+        }
+
+        if (
+          value.type ===
+            'unavailable' &&
+          value.label !==
+            'Unavailable'
+        ) {
+          fail(
+            `${path}.label`,
+            'must be "Unavailable" for unavailable ranges'
+          )
+        }
+
+        return value as unknown as PublicAvailabilityItem
+      }
+    )
+
+  const seen =
+    new Set<string>()
+
+  for (const row of rows) {
+    const key = [
+      row.type,
+      row.start_date,
+      row.end_date,
+      row.label,
+    ].join('|')
+
+    if (seen.has(key)) {
+      fail(
+        'list_public_availability response',
+        `contains duplicate range ${key}`
+      )
+    }
+
+    seen.add(key)
+  }
+
+  return rows
 }
 
 function daysInYear(

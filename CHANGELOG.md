@@ -19,13 +19,26 @@
 `academic API reference client`
 
 - Added an isolated `packages/academic-api-client/` reference implementation for external-consumer use, without routing authenticated Dashboard pages through the public interface.
-- Added canonical TypeScript resource types and a transport-agnostic client covering all seven Public RPC v1 operations; the package has no runtime dependency on Supabase and can accept a normal public client exposing `rpc()`.
+- Added canonical TypeScript resource types and a transport-agnostic client covering all eight Public RPC v1 operations; the package has no runtime dependency on Supabase and can accept a normal public client exposing `rpc()`.
 - Added generated client contract metadata derived from `lib/academic-api-contract.json` for RPC field names, parameter names, controlled vocabularies, and work-analytics day keys, with a stale-generation check to avoid maintaining those definitions independently.
 - Added dependency-free strict runtime validators with field-level diagnostics for exact payload shapes, required/nullable fields, primitive types, valid ISO dates, HTTP(S) URLs, non-negative numeric values, controlled vocabularies, array uniqueness, project/conference/teaching invariants, and Google Scholar snapshot pairing.
 - Adapted the strict `weekly-penguin-timeline` work-analytics validation: requested-year equality, valid/unique dates, non-negative integer daily minutes/coffee counts, and complete 365/366-day calendar coverage.
 - Added `npm run check:academic-api-client` for generated-contract compatibility, TypeScript compilation, and regression tests; the permanent Verify workflow now runs it on pull requests and `main`.
 - Updated `npm run check:public-api:live` so real anonymous RPC responses pass through the same reference-client validators before the existing direct-table privacy-boundary checks.
 - Updated `ARCHITECTURE.md` and `/api` to distinguish the Supabase Data API/RPC transport from the optional reference TypeScript client/runtime-validation layer.
+- Added `list_public_availability(year)` as an anonymous-safe Public RPC v1 resource for conference trips, Winter/Summer holidays, and generic unavailable periods; Administrative commitments and sickness reasons/notes remain private.
+- Extended the public conference contract with `personal_attendance` and `involves_trip`; trip status requires personal attendance and project-embedded conference summaries use the same shape.
+- Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
+
+`source-backed planning`
+
+- Replaced new manual blocked-time authoring with source-backed Planning commitments while retaining historical manual allocations as Legacy records.
+- Conference records now include Personal attendance and Involves trip controls. Personally attended conferences contribute their exact inclusive event dates; trips add one calendar day before and after and split automatically across half-month Planning periods.
+- Teaching Portfolio items now carry recurring active-month checkboxes and 0/1/2 committed days per week, converted to 0/2/4 committed days in each active half-month for every covered year.
+- Added exact dated Winter holiday, Summer holiday, Administrative, and Sick events as private Planning sources with inclusive date ranges.
+- Added per-source/per-period FlowSavvy/Calendar state for Conference, Teaching, and dated blocked events; changing a source schedule resets its Calendar state.
+- Kept exact dated overlaps additive and added an **Overlapping dated commitments** warning rather than silently deduplicating capacity.
+- Updated the main Dashboard Planning load to use the same source-backed derivation as the Planning page.
 
 `list pagination`
 
