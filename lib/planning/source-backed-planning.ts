@@ -342,13 +342,9 @@ function allocationsFromDatedSource({
           source_href:
             sourceHref,
           range_start:
-            periodDates[0] ??
-            null,
+            startDate,
           range_end:
-            periodDates[
-              periodDates.length -
-                1
-            ] ?? null,
+            endDate,
           dated_days:
             periodDates,
         },
