@@ -661,6 +661,168 @@
       ]
     },
     {
+      "id": "software",
+      "title": "Software Ecosystem",
+      "summary": "Curated public profiles for software, applications and reusable tools explicitly marked for public exposure.",
+      "notExposed": [
+        "Internal software and owner IDs",
+        "Private/public exposure control itself; only exposed profiles are returned",
+        "Private repository URLs when repository_visibility is private",
+        "Internal created/updated timestamps"
+      ],
+      "forbiddenFields": [
+        "id",
+        "software_id",
+        "owner_id",
+        "visibility",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_software",
+          "signature": "list_public_software()",
+          "kind": "Listing",
+          "purpose": "Lists Software Ecosystem items explicitly marked for public exposure.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "name",
+              "type": "text"
+            },
+            {
+              "name": "short_description",
+              "type": "text"
+            },
+            {
+              "name": "category",
+              "type": "text"
+            },
+            {
+              "name": "current_version",
+              "type": "text"
+            },
+            {
+              "name": "development_stage",
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "repository_visibility",
+              "type": "text"
+            },
+            {
+              "name": "repository_url",
+              "type": "text"
+            },
+            {
+              "name": "production_url",
+              "type": "text"
+            },
+            {
+              "name": "documentation_url",
+              "type": "text"
+            },
+            {
+              "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "featured",
+              "type": "boolean"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Repository visibility is independent from public profile exposure.",
+            "repository_url is null whenever repository_visibility is private, even for an otherwise public software profile.",
+            "The listing is ordered by Featured state, status priority, start year, then name."
+          ]
+        },
+        {
+          "name": "get_public_software",
+          "signature": "get_public_software(text)",
+          "kind": "Detail",
+          "purpose": "Returns one explicitly public Software Ecosystem profile by its stable slug.",
+          "parameters": [
+            {
+              "name": "p_slug",
+              "type": "text"
+            }
+          ],
+          "fields": [
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "name",
+              "type": "text"
+            },
+            {
+              "name": "short_description",
+              "type": "text"
+            },
+            {
+              "name": "category",
+              "type": "text"
+            },
+            {
+              "name": "current_version",
+              "type": "text"
+            },
+            {
+              "name": "development_stage",
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "repository_visibility",
+              "type": "text"
+            },
+            {
+              "name": "repository_url",
+              "type": "text"
+            },
+            {
+              "name": "production_url",
+              "type": "text"
+            },
+            {
+              "name": "documentation_url",
+              "type": "text"
+            },
+            {
+              "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "featured",
+              "type": "boolean"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "The current software detail shape is intentionally the same as the software listing shape.",
+            "Unknown or non-public slugs return no row.",
+            "repository_url is null whenever repository_visibility is private."
+          ]
+        }
+      ]
+    },
+    {
       "id": "work-analytics",
       "title": "Work analytics",
       "summary": "A deliberately aggregated yearly work summary that supports public work and coffee visualisation without exposing raw work records.",
@@ -884,6 +1046,53 @@
         "summer_holiday",
         "trip",
         "unavailable"
+      ]
+    },
+    {
+      "id": "software-category",
+      "label": "Software category",
+      "constraint": "software_items_category_check",
+      "values": [
+        "Web application",
+        "Package/library",
+        "API/service",
+        "Data product",
+        "Template",
+        "Developer tool",
+        "Other"
+      ]
+    },
+    {
+      "id": "software-development-stage",
+      "label": "Software development stage",
+      "constraint": "software_items_development_stage_check",
+      "values": [
+        "Alpha",
+        "Beta",
+        "Release candidate",
+        "Stable",
+        "Maintenance",
+        "Archived"
+      ]
+    },
+    {
+      "id": "software-status",
+      "label": "Software status",
+      "constraint": "software_items_status_check",
+      "values": [
+        "active",
+        "paused",
+        "completed",
+        "archived"
+      ]
+    },
+    {
+      "id": "repository-visibility",
+      "label": "Repository visibility",
+      "constraint": "software_items_repository_visibility_check",
+      "values": [
+        "public",
+        "private"
       ]
     }
   ]
