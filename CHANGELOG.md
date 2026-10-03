@@ -27,6 +27,7 @@
 - Updated `npm run check:public-api:live` so real anonymous RPC responses pass through the same reference-client validators before the existing direct-table privacy-boundary checks.
 - Updated `ARCHITECTURE.md` and `/api` to distinguish the Supabase Data API/RPC transport from the optional reference TypeScript client/runtime-validation layer.
 - Added `list_public_availability(year)` as an anonymous-safe Public RPC v1 resource for conference trips, Winter/Summer holidays, and generic unavailable periods; Administrative commitments and sickness reasons/notes remain private.
+- Fixed `list_public_availability(year)` so multiple source records that project to the same public availability tuple are collapsed to one row; this prevents duplicate trip ranges when more than one presentation occurs during the same conference/trip.
 - Extended the public conference contract with `personal_attendance` and `involves_trip`; trip status requires personal attendance and project-embedded conference summaries use the same shape.
 - Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
 - Added `get_public_teaching_settings()` as a ninth Public RPC v1 operation exposing only the owner-level `teaching_season_active` boolean; the underlying RLS-protected Teaching settings table remains unavailable anonymously.
