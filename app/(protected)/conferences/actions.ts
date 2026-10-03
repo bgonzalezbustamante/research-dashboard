@@ -435,6 +435,10 @@ export async function updateConferencePresentation(
         fields.authors,
       presentation_type:
         fields.presentationType,
+      personal_attendance:
+        fields.personalAttendance,
+      involves_trip:
+        fields.involvesTrip,
       url:
         fields.url,
       notes:
