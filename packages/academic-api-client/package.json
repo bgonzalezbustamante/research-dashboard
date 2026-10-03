@@ -1,0 +1,7 @@
+{
+  "name": "@bgonzalezbustamante/academic-api-client",
+  "version": "0.0.0-private",
+  "private": true,
+  "type": "module",
+  "description": "Portable reference client and strict runtime validators for Research Dashboard Academic API Public RPC v1"
+}
