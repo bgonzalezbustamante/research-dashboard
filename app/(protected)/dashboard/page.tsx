@@ -4,6 +4,13 @@ import CrossModuleAnalyticsSection from '@/components/dashboard/cross-module-ana
 import PageHeader from '@/components/page-header'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
+import {
+  deriveSourceBackedPlanning,
+  type BlockedEventPlanningSource,
+  type ConferencePlanningSource,
+  type PlanningSourceState,
+  type TeachingPlanningSource,
+} from '@/lib/planning/source-backed-planning'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -505,6 +512,10 @@ export default async function DashboardPage({
     papersResult,
     dailyLogsResult,
     planningPeriodResult,
+    conferencesResult,
+    teachingResult,
+    blockedEventsResult,
+    sourceStatesResult,
   ] = await Promise.all([
     supabase
       .from('papers')
@@ -562,6 +573,72 @@ export default async function DashboardPage({
         planningPeriodStart
       )
       .maybeSingle(),
+
+    supabase
+      .from(
+        'conference_presentations'
+      )
+      .select(`
+        id,
+        event_name,
+        event_short_name,
+        start_date,
+        end_date,
+        personal_attendance,
+        involves_trip
+      `),
+
+    supabase
+      .from('teaching_portfolio')
+      .select(`
+        id,
+        name,
+        start_year,
+        end_year,
+        is_current,
+        planning_months,
+        committed_days_per_week
+      `),
+
+    supabase
+      .from(
+        'planning_blocked_events'
+      )
+      .select(`
+        id,
+        event_type,
+        start_date,
+        end_date,
+        notes
+      `)
+      .lte(
+        'start_date',
+        `${currentYear}-12-31`
+      )
+      .gte(
+        'end_date',
+        `${currentYear}-01-01`
+      ),
+
+    supabase
+      .from(
+        'planning_source_period_states'
+      )
+      .select(`
+        source_type,
+        source_id,
+        period_start,
+        flowsavvy_added,
+        flowsavvy_added_at
+      `)
+      .gte(
+        'period_start',
+        `${currentYear}-01-01`
+      )
+      .lte(
+        'period_start',
+        `${currentYear}-12-31`
+      ),
   ])
 
   if (
@@ -586,6 +663,34 @@ export default async function DashboardPage({
     throw new Error(
       `Could not load dashboard planning period: ${planningPeriodResult.error.message}`
     )
+  }
+
+  for (const [
+    label,
+    result,
+  ] of [
+    [
+      'conference planning',
+      conferencesResult,
+    ],
+    [
+      'Teaching planning',
+      teachingResult,
+    ],
+    [
+      'dated blocked events',
+      blockedEventsResult,
+    ],
+    [
+      'source-backed Calendar state',
+      sourceStatesResult,
+    ],
+  ] as const) {
+    if (result.error) {
+      throw new Error(
+        `Could not load dashboard ${label}: ${result.error.message}`
+      )
+    }
   }
 
   const papers =
@@ -830,6 +935,27 @@ export default async function DashboardPage({
         6
     ).length
 
+  const sourceBackedAllocations =
+    deriveSourceBackedPlanning({
+      year: currentYear,
+      conferences:
+        (conferencesResult.data ??
+          []) as ConferencePlanningSource[],
+      teaching:
+        (teachingResult.data ??
+          []) as TeachingPlanningSource[],
+      blockedEvents:
+        (blockedEventsResult.data ??
+          []) as BlockedEventPlanningSource[],
+      states:
+        (sourceStatesResult.data ??
+          []) as PlanningSourceState[],
+    }).filter(
+      (allocation) =>
+        allocation.period_start ===
+        planningPeriodStart
+    )
+
   const currentPlanningMilestones =
     milestones.filter(
       (milestone) =>
@@ -897,7 +1023,7 @@ export default async function DashboardPage({
     milestoneResearchDays +
     legacyResearchDays
 
-  const blockedDays =
+  const legacyBlockedDays =
     effectivePlanningAllocations
       .filter(
         (allocation) =>
@@ -913,6 +1039,18 @@ export default async function DashboardPage({
           allocation.committed_days,
         0
       )
+
+  const sourceBlockedDays =
+    sourceBackedAllocations.reduce(
+      (total, allocation) =>
+        total +
+        allocation.committed_days,
+      0
+    )
+
+  const blockedDays =
+    legacyBlockedDays +
+    sourceBlockedDays
 
   const totalPlannedDays =
     researchDays +
@@ -938,11 +1076,16 @@ export default async function DashboardPage({
     effectivePlanningAllocations.filter(
       (allocation) =>
         allocation.flowsavvy_added
+    ).length +
+    sourceBackedAllocations.filter(
+      (allocation) =>
+        allocation.flowsavvy_added
     ).length
 
   const flowsavvyTotal =
     currentPlanningMilestones.length +
-    effectivePlanningAllocations.length
+    effectivePlanningAllocations.length +
+    sourceBackedAllocations.length
 
   const overdueMilestones =
     milestones
