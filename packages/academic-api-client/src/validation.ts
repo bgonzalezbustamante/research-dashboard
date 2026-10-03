@@ -1055,14 +1055,20 @@ export function parsePublicAvailabilityList(
           value.end_date,
           `${path}.end_date`
         )
+
+        const startDate =
+          value.start_date as string
+        const endDate =
+          value.end_date as string
+
         assertString(
           value.label,
           `${path}.label`
         )
 
         if (
-          value.end_date <
-          value.start_date
+          endDate <
+          startDate
         ) {
           fail(
             `${path}.end_date`,
@@ -1076,7 +1082,12 @@ export function parsePublicAvailabilityList(
         ] as const) {
           if (
             Number(
-              value[field].slice(
+              (
+                field ===
+                  'start_date'
+                  ? startDate
+                  : endDate
+              ).slice(
                 0,
                 4
               )
