@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import PlanningYearCalendar from '@/components/planning/planning-year-calendar'
 import Card from '@/components/ui/card'
 
@@ -283,6 +285,29 @@ export default function PlanningAnalyticsSection({
     )
 
 
+  const periodLoads =
+    Object.fromEntries(
+      periods.map(
+        (period) => [
+          period.period_start,
+          getPeriodStats(
+            period
+          ).totalDays,
+        ]
+      )
+    )
+
+  const periodSuffix =
+    selectedPeriodStart.slice(
+      4
+    )
+
+  const previousYearPeriod =
+    `${selectedYear - 1}${periodSuffix}`
+
+  const nextYearPeriod =
+    `${selectedYear + 1}${periodSuffix}`
+
   const selectedPeriod =
     periodByStart.get(
       selectedPeriodStart
@@ -449,21 +474,47 @@ export default function PlanningAnalyticsSection({
 
       <div className="space-y-6">
         <Card>
-          <div>
-            <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-              Annual timeline
-            </h3>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+                Annual timeline
+              </h3>
 
-            <p className="mt-1 text-sm leading-6 text-oxford-ash">
-              Year view for{' '}
-              {selectedYear}. Click any
-              date to open its 1–15 or
-              16–end Planning period.
-              Hovering or focusing a
-              date highlights the whole
-              fortnight; the selected
-              fortnight remains marked.
-            </p>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-oxford-ash">
+                Click any date to open
+                its 1–15 or 16–end
+                Planning period.
+                Fortnight colours use
+                the same load thresholds
+                as Period load.
+              </p>
+            </div>
+
+            <nav
+              aria-label="Annual timeline year pagination"
+              className="flex items-center gap-1 rounded-lg border border-oxford-stone bg-oxford-off-white p-1"
+            >
+              <Link
+                href={`/planning?period=${previousYearPeriod}#planning-analytics`}
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-oxford-charcoal transition hover:bg-white hover:text-oxford-blue"
+              >
+                ← {selectedYear - 1}
+              </Link>
+
+              <span
+                aria-current="page"
+                className="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-oxford-blue shadow-sm"
+              >
+                {selectedYear}
+              </span>
+
+              <Link
+                href={`/planning?period=${nextYearPeriod}#planning-analytics`}
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-oxford-charcoal transition hover:bg-white hover:text-oxford-blue"
+              >
+                {selectedYear + 1} →
+              </Link>
+            </nav>
           </div>
 
           <div className="mt-5">
@@ -471,6 +522,9 @@ export default function PlanningAnalyticsSection({
               year={selectedYear}
               selectedPeriodStart={
                 selectedPeriodStart
+              }
+              periodLoads={
+                periodLoads
               }
             />
           </div>

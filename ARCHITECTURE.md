@@ -19,6 +19,8 @@ Conference and dated blocked-event commitments use inclusive calendar dates, inc
 
 Per-period FlowSavvy/Calendar state for Conference, Teaching and dated blocked-event sources is stored separately from the source records. Source scheduling changes reset that state. Historical manual Planning allocations remain available as legacy records for continuity but are no longer the authoring model for new blocked commitments.
 
+The Annual timeline is a derived navigation view over the same half-month periods. Its calendar colours reuse the Period load classification based on total committed days: Open = 0, Light = 1–5, Moderate = 6–10, Full = 11–15, and Overcommitted = 16+. Changing years preserves the selected month and half-month; individual calendar dates navigate to the corresponding fortnight.
+
 ## Public Academic API
 
 The public machine interface is intentionally narrower than the administrative data model.

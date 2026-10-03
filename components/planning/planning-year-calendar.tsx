@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { getPlanningLoadPresentation } from '@/lib/planning/load-presentation'
+
 const WEEKDAYS = [
   'M',
   'T',
@@ -16,6 +18,10 @@ const WEEKDAYS = [
 type PlanningYearCalendarProps = {
   year: number
   selectedPeriodStart: string
+  periodLoads: Record<
+    string,
+    number
+  >
 }
 
 function monthName(
@@ -105,6 +111,7 @@ function periodLabel(
 export default function PlanningYearCalendar({
   year,
   selectedPeriodStart,
+  periodLoads,
 }: PlanningYearCalendarProps) {
   const [
     hoveredPeriod,
@@ -114,8 +121,9 @@ export default function PlanningYearCalendar({
   >(null)
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      {Array.from(
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {Array.from(
         {
           length: 12,
         },
@@ -237,6 +245,12 @@ export default function PlanningYearCalendar({
                     const hovered =
                       period ===
                       hoveredPeriod
+                    const load =
+                      getPlanningLoadPresentation(
+                        periodLoads[
+                          period
+                        ] ?? 0
+                      )
 
                     return (
                       <Link
@@ -274,12 +288,13 @@ export default function PlanningYearCalendar({
                         }
                         className={
                           'flex aspect-square items-center justify-center rounded text-xs transition focus:outline-none focus:ring-2 focus:ring-oxford-blue focus:ring-offset-1 ' +
+                          load.calendar +
                           (
                             selected
-                              ? 'bg-oxford-cool-grey font-semibold text-oxford-blue ring-1 ring-inset ring-oxford-blue'
+                              ? ' font-semibold ring-2 ring-inset ring-oxford-blue'
                               : hovered
-                                ? 'bg-oxford-shell font-medium text-oxford-blue'
-                                : 'text-oxford-charcoal hover:bg-oxford-shell hover:text-oxford-blue'
+                                ? ' font-medium ring-1 ring-inset ring-oxford-blue'
+                                : ' hover:ring-1 hover:ring-inset hover:ring-oxford-stone'
                           )
                         }
                       >
@@ -292,7 +307,34 @@ export default function PlanningYearCalendar({
             </section>
           )
         }
-      )}
-    </div>
+        )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-oxford-stone pt-3 text-xs text-oxford-ash">
+        <span className="font-medium text-oxford-charcoal">
+          Period load
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm border border-green-200 bg-green-50" />
+          Open · 0d
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-green-100" />
+          Light · 1–5d
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-yellow-100" />
+          Moderate · 6–10d
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-orange-100" />
+          Full · 11–15d
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-orange-200" />
+          Overcommitted · 16+d
+        </span>
+      </div>
+    </>
   )
 }

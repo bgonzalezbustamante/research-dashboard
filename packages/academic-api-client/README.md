@@ -40,7 +40,9 @@ Payloads are validated without coercion. Unexpected keys, wrong primitive types,
 
 Work analytics intentionally follows the strict approach first proven in `weekly-penguin-timeline`: the requested year must match, dates must be real and unique, daily metrics must be non-negative integers, and the response must contain the complete 365/366-day calendar year.
 
-Teaching settings validate the singleton owner-level `teaching_season_active` boolean without exposing the settings table.\n\nPublic availability uses the same fail-closed philosophy: ranges must be real dates within the requested year, use a controlled type, have a valid start/end order, avoid duplicate identical ranges, and preserve the privacy rule that Sick records are exposed only as generic `unavailable` periods.
+Teaching settings validate the singleton owner-level `teaching_season_active` boolean without exposing the settings table.
+
+Public availability uses the same fail-closed philosophy: ranges must be real dates within the requested year, use a controlled type, have a valid start/end order, avoid duplicate identical ranges, and preserve the privacy rule that Sick records are exposed only as generic `unavailable` periods.
 
 ## Portability
 
