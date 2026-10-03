@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.1',
     summary:
-      'Rustic Peak strengthens the public Academic API with daily work analytics, reusable response validation, clearer list navigation, and small security and licensing improvements while the 1.0 release line continues to stabilise.',
+      'Rustic Peak strengthens Planning and the public Academic API with source-backed commitments, public availability data, reusable response validation, clearer list navigation, and security and licensing improvements while the 1.0 release line continues to stabilise.',
     sections: [
       {
         title: 'Academic API and public data',
@@ -29,6 +29,16 @@ export const releases: ReleaseNote[] = [
           'Added daily coffee counts alongside daily net working minutes in the public yearly work-analytics data.',
           'Added a portable TypeScript reference client with strict runtime checks so consumers can detect malformed or incompatible API responses explicitly.',
           'Live API verification now uses the same response validators while keeping the underlying daily logs, work sessions and other private tables unavailable to anonymous users.',
+          'Added public-safe availability ranges for trips, Winter and Summer holidays, and generic unavailable periods, while keeping sickness reasons and Administrative commitments private.',
+          'Conference data now indicates personal attendance and whether attendance involved a trip.',
+        ],
+      },
+      {
+        title: 'Planning and commitments',
+        items: [
+          'Made conference attendance, Teaching schedules, and exact dated blocked events automatic Planning sources alongside Paper Milestones.',
+          'Conference trips include one travel day before and after; Teaching schedules repeat by selected month; Winter/Summer holidays, Administrative time, and Sick periods use exact inclusive dates.',
+          'Kept overlapping dated commitments additive and flag them visibly, while preserving older manual allocations as Legacy records.',
         ],
       },
       {
