@@ -37,6 +37,7 @@
 
 - Documented the full-history Gitleaks release check: 443 commits and approximately 2.20 MB scanned with no leaks found.
 - Added a repository `NOTICE` clarifying that the MIT licence covers the repository software and original documentation but does not grant rights to third-party trademarks, logos, crests, or institutional branding; `public/branding/oxford-logo.svg` is explicitly identified as an institutional branding asset outside the MIT grant.
+- Recorded GHSA-vfj7-8cjw-p6xm / CVE-2026-93687 in the development-only ESLint/Next.js dependency chain: full `npm audit` reports 5 high-severity findings through `braces@3.0.3`, while `npm audit --omit=dev` reports 0 production vulnerabilities. The advisory currently has no patched `braces` release, so the unsafe `npm audit fix --force` downgrade is intentionally avoided; follow-up is tracked in GitHub issue #36 for patching as soon as an official compatible fix is available.
 
 ### Release status
 
