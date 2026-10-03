@@ -663,7 +663,7 @@
     {
       "id": "software",
       "title": "Software Ecosystem",
-      "summary": "Curated public profiles for software, applications and reusable tools explicitly marked for public exposure.",
+      "summary": "Curated public profiles for software, applications and reusable tools explicitly marked for public exposure, including lifecycle period metadata.",
       "notExposed": [
         "Internal software and owner IDs",
         "Private/public exposure control itself; only exposed profiles are returned",
@@ -732,6 +732,10 @@
             },
             {
               "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "end_year",
               "type": "integer"
             },
             {
@@ -805,6 +809,10 @@
             },
             {
               "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "end_year",
               "type": "integer"
             },
             {
@@ -1053,12 +1061,14 @@
       "label": "Software category",
       "constraint": "software_items_category_check",
       "values": [
-        "Web application",
+        "Application",
+        "Website",
+        "Utility",
+        "Reusable component",
         "Package/library",
         "API/service",
         "Data product",
         "Template",
-        "Developer tool",
         "Other"
       ]
     },
@@ -1071,8 +1081,7 @@
         "Beta",
         "Release candidate",
         "Stable",
-        "Maintenance",
-        "Archived"
+        "Maintenance"
       ]
     },
     {
