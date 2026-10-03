@@ -64,29 +64,6 @@ type PeriodStats = {
 const MINUTES_PER_PLANNED_DAY =
   8 * 60
 
-function formatDateValue(
-  date: Date
-) {
-  return date
-    .toISOString()
-    .slice(0, 10)
-}
-
-function getMonthEnd(
-  year: number,
-  month: number
-) {
-  return formatDateValue(
-    new Date(
-      Date.UTC(
-        year,
-        month,
-        0
-      )
-    )
-  )
-}
-
 function getBlockedLabel(
   value: BlockedType | null
 ) {
@@ -161,27 +138,6 @@ function formatSignedDuration(
   return `${sign}${formatDuration(
     Math.abs(minutes)
   )}`
-}
-
-function formatMonth(
-  year: number,
-  month: number
-) {
-  return new Intl.DateTimeFormat(
-    'en-GB',
-    {
-      month: 'long',
-      year: 'numeric',
-    }
-  ).format(
-    new Date(
-      Date.UTC(
-        year,
-        month - 1,
-        1
-      )
-    )
-  )
 }
 
 function formatMonthShort(
@@ -365,12 +321,13 @@ export default function PlanningAnalyticsSection({
   periods,
   actualPaperHours,
 }: PlanningAnalyticsSectionProps) {
-  const [
-    selectedYear,
-    selectedMonth,
-  ] = selectedPeriodStart
-    .split('-')
-    .map(Number)
+  const selectedYear =
+    Number(
+      selectedPeriodStart.slice(
+        0,
+        4
+      )
+    )
 
   const periodByStart =
     new Map(
@@ -382,51 +339,6 @@ export default function PlanningAnalyticsSection({
       )
     )
 
-  const firstHalfStart =
-    `${selectedPeriodStart.slice(
-      0,
-      7
-    )}-01`
-
-  const firstHalfEnd =
-    `${selectedPeriodStart.slice(
-      0,
-      7
-    )}-15`
-
-  const secondHalfStart =
-    `${selectedPeriodStart.slice(
-      0,
-      7
-    )}-16`
-
-  const secondHalfEnd =
-    getMonthEnd(
-      selectedYear,
-      selectedMonth
-    )
-
-  const monthlyPeriods = [
-    {
-      label: '1–15',
-      start:
-        firstHalfStart,
-      end:
-        firstHalfEnd,
-    },
-    {
-      label: `16–${Number(
-        secondHalfEnd.slice(
-          8,
-          10
-        )
-      )}`,
-      start:
-        secondHalfStart,
-      end:
-        secondHalfEnd,
-    },
-  ]
 
   const selectedPeriod =
     periodByStart.get(
@@ -587,164 +499,12 @@ export default function PlanningAnalyticsSection({
         </h2>
 
         <p className="mt-1 text-sm text-oxford-ash">
-          Review monthly capacity,
-          annual planning patterns,
+          Review annual planning patterns
           and recorded paper effort.
         </p>
       </div>
 
       <div className="space-y-6">
-        <Card>
-          <div>
-            <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-              Monthly overview
-            </h3>
-
-            <p className="mt-1 text-sm text-oxford-ash">
-              {formatMonth(
-                selectedYear,
-                selectedMonth
-              )}
-            </p>
-          </div>
-
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {monthlyPeriods.map(
-              (slot) => {
-                const period =
-                  periodByStart.get(
-                    slot.start
-                  )
-
-                const stats =
-                  getPeriodStats(
-                    period
-                  )
-
-                const allocations =
-                  period?.allocations ??
-                  []
-
-                const isSelected =
-                  slot.start ===
-                  selectedPeriodStart
-
-                return (
-                  <Link
-                    key={
-                      slot.start
-                    }
-                    href={`/planning?period=${slot.start}#allocations`}
-                    className={`rounded-lg border p-4 transition hover:border-oxford-blue ${getPeriodTone(
-                      stats.totalDays,
-                      isSelected
-                    )}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-                          {
-                            slot.label
-                          }
-                        </div>
-
-                        <div className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
-                          {
-                            stats.totalDays
-                          }{' '}
-                          planned days
-                        </div>
-                      </div>
-
-                      {isSelected && (
-                        <span className="rounded-full border border-oxford-blue/20 bg-white px-2 py-0.5 text-xs font-medium text-oxford-blue">
-                          Selected
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-oxford-charcoal">
-                      <span>
-                        Research{' '}
-                        <strong>
-                          {
-                            stats.paperDays
-                          }
-                          d
-                        </strong>
-                      </span>
-
-                      <span>
-                        Blocked{' '}
-                        <strong>
-                          {
-                            stats.blockedDays
-                          }
-                          d
-                        </strong>
-                      </span>
-
-                      <span>
-                        FlowSavvy{' '}
-                        <strong>
-                          {
-                            stats.flowsavvyCount
-                          }
-                          /
-                          {
-                            stats.flowsavvyTotal
-                          }
-                        </strong>
-                      </span>
-                    </div>
-
-                    {allocations.length >
-                    0 ? (
-                      <div className="mt-4 space-y-1.5 border-t border-black/10 pt-3 text-xs text-oxford-charcoal">
-                        {allocations.map(
-                          (
-                            allocation
-                          ) => (
-                            <div
-                              key={
-                                allocation.id
-                              }
-                              className="flex justify-between gap-3"
-                            >
-                              <span className="truncate">
-                                {allocation.allocation_type ===
-                                'paper'
-                                  ? allocation.paper_short_title ??
-                                    'Unknown paper'
-                                  : getBlockedLabel(
-                                      allocation.blocked_type
-                                    )}
-                              </span>
-
-                              <span className="shrink-0 font-medium">
-                                {
-                                  allocation.committed_days
-                                }
-                                d
-                              </span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    ) : (
-                      <p className="mt-4 border-t border-black/10 pt-3 text-xs text-oxford-ash">
-                        No allocations
-                        for this
-                        half-month.
-                      </p>
-                    )}
-                  </Link>
-                )
-              }
-            )}
-          </div>
-        </Card>
-
         <Card>
           <div>
             <h3 className="font-serif text-xl font-semibold text-oxford-blue">
