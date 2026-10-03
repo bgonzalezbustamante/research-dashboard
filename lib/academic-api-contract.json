@@ -957,6 +957,8 @@
           "notes": [
             "Returned ranges are clipped to the requested calendar year.",
             "Conference trips include one travel day before and one after the recorded conference dates.",
+            "Multiple presentation records with the same conference event name, short name, start date, and end date are treated as one conference trip range.",
+            "Identical public availability ranges are returned only once even when distinct source events imply the same dates and label.",
             "Sick records are exposed only as type unavailable with label Unavailable; the underlying reason and notes remain private.",
             "Administrative blocked events are deliberately omitted."
           ]

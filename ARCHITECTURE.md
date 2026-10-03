@@ -15,7 +15,7 @@ Biweekly Planning is a derived view rather than the canonical store for new comm
 - recurring Teaching Portfolio planning months and committed days per week;
 - exact dated blocked events for Winter holiday, Summer holiday, Administrative, and Sick periods.
 
-Conference and dated blocked-event commitments use inclusive calendar dates, including weekends, and split automatically across half-month Planning periods. Teaching converts 0/1/2 committed days per week to 0/2/4 committed days in every active half-month. Exact dated overlaps remain additive and are surfaced as overlapping commitments instead of being silently deduplicated.
+Conference and dated blocked-event commitments use inclusive calendar dates, including weekends, and split automatically across half-month Planning periods. Multiple presentation records for the same conference event (same event name, short name, start date, and end date) are grouped into one attendance/trip commitment so presenting more than once at one conference does not double-count capacity. Teaching converts 0/1/2 committed days per week to 0/2/4 committed days in every active half-month. Exact dated overlaps between genuinely distinct commitments remain additive and are surfaced as overlapping commitments instead of being silently deduplicated.
 
 Per-period FlowSavvy/Calendar state for Conference, Teaching and dated blocked-event sources is stored separately from the source records. Source scheduling changes reset that state. Historical manual Planning allocations remain available as legacy records for continuity but are no longer the authoring model for new blocked commitments.
 
@@ -153,7 +153,7 @@ The public analytics RPC returns yearly aggregate measures plus daily net workin
 
 `list_public_availability(year)` is a narrow public projection for timeline consumers. It exposes only conference trips, Winter holidays, Summer holidays, and generic `unavailable` ranges. Conference trips use the same effective dates as Planning: one day before the conference through one day after it. Sick records are never labelled Sick publicly; they appear only as `unavailable` with the label `Unavailable`. Administrative commitments, notes, source IDs, owner metadata, and per-period Calendar state remain private.
 
-The availability RPC is deliberately separate from work analytics: availability describes scheduled/public-safe date states, while work analytics describes observed work and coffee data.
+Repeated presentation records for the same conference event produce one public trip range. If distinct source events nevertheless project to the same public type/date/label range, the public availability response returns that range only once. The availability RPC is deliberately separate from work analytics: availability describes scheduled/public-safe date states, while work analytics describes observed work and coffee data.
 
 ## Controlled vocabularies
 

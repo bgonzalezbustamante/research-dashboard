@@ -84,6 +84,7 @@ type PlanningAllocationView = {
   milestones: PlanningMilestone[]
   source_type: PlanningSourceType | null
   source_id: string | null
+  source_ids: string[]
   label: string | null
   subtitle: string | null
   source_href: string | null
@@ -739,6 +740,7 @@ export default async function PlanningPage({
             milestones: [],
             source_type: null,
             source_id: null,
+            source_ids: [],
             label: null,
             subtitle: null,
             source_href: null,
@@ -805,6 +807,7 @@ export default async function PlanningPage({
         ...allocation,
         source_type: null,
         source_id: null,
+        source_ids: [],
         label: null,
         subtitle: null,
         source_href: null,
