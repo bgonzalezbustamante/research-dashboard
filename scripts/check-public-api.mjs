@@ -382,7 +382,9 @@ function assertMigrations(contract, operations, corpus) {
       const missingValues =
         vocabulary.values.filter(
           (value) =>
-            !actualValues.includes(value)
+            !block.includes(
+              "'" + value + "'"
+            )
         )
 
       if (missingValues.length > 0) {
