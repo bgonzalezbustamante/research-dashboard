@@ -42,7 +42,7 @@ Work analytics intentionally follows the strict approach first proven in `weekly
 
 Teaching settings validate the singleton owner-level `teaching_season_active` boolean without exposing the settings table.
 
-Software validation enforces controlled metadata values and the privacy invariant that `repository_url` must be null when `repository_visibility` is `private`, even when the software profile itself is public.
+Software validation enforces controlled metadata values, valid start/end lifecycle years, and the privacy invariant that `repository_url` must be null when `repository_visibility` is `private`, even when the software profile itself is public.
 
 Public availability uses the same fail-closed philosophy: ranges must be real dates within the requested year, use a controlled type, have a valid start/end order, avoid duplicate identical ranges, and preserve the privacy rule that Sick records are exposed only as generic `unavailable` periods.
 
