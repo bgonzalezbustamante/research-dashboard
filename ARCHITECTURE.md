@@ -6,6 +6,19 @@ Research Dashboard is the canonical administrative source for the structured aca
 
 Authenticated Dashboard modules may read and write the underlying Supabase tables according to the application permission model.
 
+### Source-backed Planning
+
+Biweekly Planning is a derived view rather than the canonical store for new commitments. Its authoritative sources are:
+
+- capacity-bearing planned Paper Milestones for research;
+- Conference records marked for personal attendance, with optional trip buffers;
+- recurring Teaching Portfolio planning months and committed days per week;
+- exact dated blocked events for Winter holiday, Summer holiday, Administrative, and Sick periods.
+
+Conference and dated blocked-event commitments use inclusive calendar dates, including weekends, and split automatically across half-month Planning periods. Teaching converts 0/1/2 committed days per week to 0/2/4 committed days in every active half-month. Exact dated overlaps remain additive and are surfaced as overlapping commitments instead of being silently deduplicated.
+
+Per-period FlowSavvy/Calendar state for Conference, Teaching and dated blocked-event sources is stored separately from the source records. Source scheduling changes reset that state. Historical manual Planning allocations remain available as legacy records for continuity but are no longer the authoring model for new blocked commitments.
+
 ## Public Academic API
 
 The public machine interface is intentionally narrower than the administrative data model.
@@ -39,6 +52,7 @@ The current anonymous-safe function surface is:
 - `list_public_conference_presentations()`
 - `list_public_teaching()`
 - `get_public_work_analytics(year)`
+- `list_public_availability(year)`
 
 The canonical field lists and controlled vocabularies used by the documentation live in:
 
@@ -81,6 +95,8 @@ The architecture therefore has three complementary checks:
 
 Work-analytics validation follows the strict rules first exercised in `weekly-penguin-timeline`: requested-year equality, real ISO calendar dates, unique daily rows, non-negative integer daily metrics, and complete 365/366-day coverage.
 
+Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
+
 These layers complement one another. The reference client does not replace `lib/academic-api-contract.json`, the producer-side migration checks, or the Supabase RPC transport.
 
 ## Privacy and access model
@@ -108,7 +124,9 @@ Only explicitly public projects appear in the project list/detail contracts. Ass
 
 ### Conference presentations
 
-The current conference RPC has no per-record visibility flag: it returns the curated public presentation shape for every stored conference presentation. Private notes, internal owner IDs, presentation IDs, and the optional internal paper relationship are excluded.
+The current conference RPC has no per-record visibility flag: it returns the curated public presentation shape for every stored conference presentation. Public fields now include `personal_attendance` and `involves_trip`, allowing consumers to distinguish records personally attended by the profile owner from presentations delivered only by collaborators. A trip may be true only when personal attendance is true.
+
+Private notes, internal owner IDs, presentation IDs, and the optional internal paper relationship are excluded.
 
 ### Teaching Portfolio
 
@@ -117,6 +135,12 @@ Only teaching portfolio items marked public are returned. Public portfolio field
 ### Work analytics
 
 The public analytics RPC returns yearly aggregate measures plus daily net working minutes and daily coffee counts. Raw sessions, session start/end times, activity labels, locations, paper relationships, owner metadata, and internal identifiers remain private.
+
+### Availability
+
+`list_public_availability(year)` is a narrow public projection for timeline consumers. It exposes only conference trips, Winter holidays, Summer holidays, and generic `unavailable` ranges. Conference trips use the same effective dates as Planning: one day before the conference through one day after it. Sick records are never labelled Sick publicly; they appear only as `unavailable` with the label `Unavailable`. Administrative commitments, notes, source IDs, owner metadata, and per-period Calendar state remain private.
+
+The availability RPC is deliberately separate from work analytics: availability describes scheduled/public-safe date states, while work analytics describes observed work and coffee data.
 
 ## Controlled vocabularies
 
@@ -131,6 +155,7 @@ Public RPC v1 currently constrains:
 - Conference presentation type
 - Teaching role
 - Teaching level
+- Public availability type
 
 The exact values are maintained in the database constraints and mirrored in `lib/academic-api-contract.json`; `npm run check:public-api` fails if they drift.
 
@@ -140,6 +165,7 @@ Current downstream consumers include:
 
 - [Academic Website](https://github.com/bgonzalezbustamante/academic-website)
 - [Academic CV Studio](https://github.com/bgonzalezbustamante/academic-cv-studio)
+- [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline)
 
 These repositories consume the public interface but are not runtime dependencies of Research Dashboard.
 
