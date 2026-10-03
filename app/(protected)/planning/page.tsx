@@ -12,6 +12,15 @@ import {
   getPlanningPeriodStartsForYear,
   type PlanningMilestone,
 } from '@/lib/planning/milestone-planning'
+import {
+  deriveSourceBackedPlanning,
+  findPlanningOverlaps,
+  type BlockedEventPlanningSource,
+  type ConferencePlanningSource,
+  type PlanningSourceState,
+  type PlanningSourceType,
+  type TeachingPlanningSource,
+} from '@/lib/planning/source-backed-planning'
 import { createClient } from '@/lib/supabase/server'
 
 type PlanningPageProps = {
@@ -35,14 +44,20 @@ type AllocationType =
 
 type AllocationSource =
   | 'milestone'
-  | 'blocked'
   | 'legacy'
+  | 'legacy_blocked'
+  | 'conference'
+  | 'teaching'
+  | 'blocked_event'
 
 type BlockedType =
   | 'teaching'
   | 'conference'
   | 'holiday'
+  | 'winter_holiday'
+  | 'summer_holiday'
   | 'administrative'
+  | 'sick'
 
 type StoredPlanningPeriodRow = {
   id: string
@@ -67,6 +82,14 @@ type PlanningAllocationView = {
   paper_title: string | null
   paper_archived: boolean
   milestones: PlanningMilestone[]
+  source_type: PlanningSourceType | null
+  source_id: string | null
+  label: string | null
+  subtitle: string | null
+  source_href: string | null
+  range_start: string | null
+  range_end: string | null
+  dated_days: string[]
 }
 
 type WorkSessionRow = {
