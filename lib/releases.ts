@@ -43,6 +43,7 @@ export const releases: ReleaseNote[] = [
         items: [
           'Documented the clean full-history Gitleaks scan used as an additional release check.',
           'Added a notice clarifying that third-party logos, trademarks and institutional branding are not covered by the repository MIT licence.',
+          'Confirmed production dependencies are clean while tracking an outstanding development-tooling security advisory for an upstream fix.',
         ],
       },
     ],
