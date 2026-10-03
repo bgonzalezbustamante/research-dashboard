@@ -35,51 +35,53 @@ create table public.software_items (
       or char_length(btrim(current_version))
         between 1 and 100
     ),
-  constraint software_items_category_check
-    check (
-      category in (
-        'Web application',
-        'Package/library',
-        'API/service',
-        'Data product',
-        'Template',
-        'Developer tool',
-        'Other'
-      )
-    ),
-  constraint software_items_development_stage_check
-    check (
-      development_stage in (
-        'Alpha',
-        'Beta',
-        'Release candidate',
-        'Stable',
-        'Maintenance',
-        'Archived'
-      )
-    ),
-  constraint software_items_status_check
-    check (
-      status in (
-        'active',
-        'paused',
-        'completed',
-        'archived'
-      )
-    ),
-  constraint software_items_repository_visibility_check
-    check (
-      repository_visibility in (
-        'public',
-        'private'
-      )
-    ),
   constraint software_items_start_year_range
     check (
       start_year is null
       or start_year between 1000 and 9999
     )
 );
+
+alter table public.software_items
+  add constraint software_items_category_check
+  check (
+    category in (
+      'Web application',
+      'Package/library',
+      'API/service',
+      'Data product',
+      'Template',
+      'Developer tool',
+      'Other'
+    )
+  ),
+  add constraint software_items_development_stage_check
+  check (
+    development_stage in (
+      'Alpha',
+      'Beta',
+      'Release candidate',
+      'Stable',
+      'Maintenance',
+      'Archived'
+    )
+  ),
+  add constraint software_items_status_check
+  check (
+    status in (
+      'active',
+      'paused',
+      'completed',
+      'archived'
+    )
+  ),
+  add constraint software_items_repository_visibility_check
+  check (
+    repository_visibility in (
+      'public',
+      'private'
+    )
+  );
 
 create unique index software_items_owner_name_key
   on public.software_items (
