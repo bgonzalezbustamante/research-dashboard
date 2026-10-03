@@ -95,11 +95,25 @@ export async function setPlanningSourceFlowSavvy(
       'source_type'
     )
 
-  const sourceId =
-    textValue(
-      formData,
-      'source_id'
-    )
+  const sourceIds =
+    [
+      ...new Set(
+        formData
+          .getAll(
+            'source_id'
+          )
+          .flatMap(
+            (value) =>
+              typeof value ===
+                'string' &&
+              value.trim()
+                ? [
+                    value.trim(),
+                  ]
+                : []
+          )
+      ),
+    ]
 
   const added =
     textValue(
@@ -122,7 +136,7 @@ export async function setPlanningSourceFlowSavvy(
     !sourceTypes.has(
       sourceType
     ) ||
-    !sourceId
+    sourceIds.length === 0
   ) {
     fail(
       periodStart,
@@ -133,29 +147,34 @@ export async function setPlanningSourceFlowSavvy(
   const supabase =
     await createClient()
 
+  const changedAt =
+    added
+      ? new Date()
+          .toISOString()
+      : null
+
   const { error } =
     await supabase
       .from(
         'planning_source_period_states'
       )
       .upsert(
-        {
-          owner_id:
-            access.ownerId,
-          source_type:
-            sourceType,
-          source_id:
-            sourceId,
-          period_start:
-            periodStart,
-          flowsavvy_added:
-            added,
-          flowsavvy_added_at:
-            added
-              ? new Date()
-                  .toISOString()
-              : null,
-        },
+        sourceIds.map(
+          (sourceId) => ({
+            owner_id:
+              access.ownerId,
+            source_type:
+              sourceType,
+            source_id:
+              sourceId,
+            period_start:
+              periodStart,
+            flowsavvy_added:
+              added,
+            flowsavvy_added_at:
+              changedAt,
+          })
+        ),
         {
           onConflict:
             'owner_id,source_type,source_id,period_start',
