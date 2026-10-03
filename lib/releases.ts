@@ -38,8 +38,8 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Software Ecosystem',
         items: [
-          'Added an Owner-only Software Ecosystem registry for applications, packages, APIs, data products, templates and developer tools.',
-          'Tracks versions, development stages, lifecycle status, repository visibility, production and documentation links, start year and Featured state.',
+          'Added an Owner-only Software Ecosystem registry for Applications, Websites, Utilities, Reusable components, Packages/libraries, APIs/services, Data products, Templates and other maintained software.',
+          'Tracks versions, development stages, lifecycle status, repository visibility, production and documentation links, start/end year and Featured state.',
           'Keeps repository visibility separate from public profile exposure, allowing public profiles for private repositories without exposing their repository URLs.',
         ],
       },
