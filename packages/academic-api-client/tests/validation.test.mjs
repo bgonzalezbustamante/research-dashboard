@@ -8,6 +8,7 @@ import {
   parsePublicPaperList,
   parsePublicProjectList,
   parsePublicTeachingList,
+  parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
 } from '../../../node_modules/.cache/academic-api-client/index.js'
 
@@ -130,6 +131,16 @@ test('accepts valid representative Public RPC resources', () => {
   assert.deepEqual(
     parsePublicTeachingList([teaching]),
     [teaching]
+  )
+  assert.deepEqual(
+    parsePublicTeachingSettingsResponse([
+      {
+        teaching_season_active: true,
+      },
+    ]),
+    {
+      teaching_season_active: true,
+    }
   )
   assert.deepEqual(
     parsePublicWorkAnalytics(
@@ -378,5 +389,25 @@ test('applies strict complete-year work analytics validation', () => {
         2025
       ),
     /requested year 2025/
+  )
+})
+
+
+test('validates the singleton Teaching settings contract', () => {
+  assert.throws(
+    () =>
+      parsePublicTeachingSettingsResponse([]),
+    /expected exactly one row/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicTeachingSettingsResponse([
+        {
+          teaching_season_active:
+            'yes',
+        },
+      ]),
+    /teaching_season_active/
   )
 })
