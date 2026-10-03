@@ -50,6 +50,7 @@ type SoftwareRow = {
   production_url: string | null
   documentation_url: string | null
   start_year: number | null
+  end_year: number | null
   created_at: string
   updated_at: string
 }
@@ -64,12 +65,14 @@ type SoftwareMetadataRow = {
 const SOFTWARE_PER_PAGE = 10
 
 const categories = [
-  'Web application',
+  'Application',
+  'Website',
+  'Utility',
+  'Reusable component',
   'Package/library',
   'API/service',
   'Data product',
   'Template',
-  'Developer tool',
   'Other',
 ] as const
 
@@ -79,7 +82,6 @@ const developmentStages = [
   'Release candidate',
   'Stable',
   'Maintenance',
-  'Archived',
 ] as const
 
 const statusOptions = [
@@ -237,7 +239,7 @@ function SoftwareFields({
           name="category"
           defaultValue={
             item?.category ??
-            'Web application'
+            'Application'
           }
           className={inputClass}
         >
@@ -449,6 +451,40 @@ function SoftwareFields({
         />
       </div>
 
+      <div>
+        <label
+          htmlFor={
+            prefix +
+            '-end-year'
+          }
+          className={labelClass}
+        >
+          End year
+        </label>
+
+        <input
+          id={
+            prefix +
+            '-end-year'
+          }
+          name="end_year"
+          type="number"
+          min={1000}
+          max={9999}
+          placeholder="Leave blank if ongoing"
+          defaultValue={
+            item?.end_year ?? ''
+          }
+          className={inputClass}
+        />
+
+        <p className="mt-1 text-xs text-oxford-ash">
+          Optional. Use when
+          development or maintenance
+          has definitively ended.
+        </p>
+      </div>
+
       <div className="md:col-span-2">
         <label
           htmlFor={
@@ -577,7 +613,7 @@ export default async function SoftwarePage({
     supabase
       .from('software_items')
       .select(
-        'id, owner_id, name, short_description, category, current_version, development_stage, status, repository_visibility, repository_url, production_url, documentation_url, start_year, created_at, updated_at'
+        'id, owner_id, name, short_description, category, current_version, development_stage, status, repository_visibility, repository_url, production_url, documentation_url, start_year, end_year, created_at, updated_at'
       ),
 
     supabase
@@ -932,12 +968,15 @@ export default async function SoftwarePage({
                           </span>
                         )}
 
-                        {item.start_year && (
+                        {(item.start_year ||
+                          item.end_year) && (
                           <span>
-                            Since{' '}
-                            {
-                              item.start_year
-                            }
+                            Period:{' '}
+                            <span className="font-medium text-oxford-charcoal">
+                              {item.start_year
+                                ? `${item.start_year}–${item.end_year ?? 'present'}`
+                                : `Through ${item.end_year}`}
+                            </span>
                           </span>
                         )}
 
