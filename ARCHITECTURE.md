@@ -151,7 +151,7 @@ The public analytics RPC returns yearly aggregate measures plus daily net workin
 
 ### Availability
 
-`list_public_availability(year)` is a narrow public projection for timeline consumers. It exposes only conference trips, Winter holidays, Summer holidays, and generic `unavailable` ranges. Conference trips use the same effective dates as Planning: one day before the conference through one day after it. Sick records are never labelled Sick publicly; they appear only as `unavailable` with the label `Unavailable`. Administrative commitments, notes, source IDs, owner metadata, and per-period Calendar state remain private.
+`list_public_availability(year)` is a narrow public projection for timeline consumers. It exposes only conference trips, Winter holidays, Summer holidays, and generic `unavailable` ranges. Conference trips use the same effective dates as Planning: one day before the conference through one day after it. When multiple private source records project to the same public tuple (`type`, `start_date`, `end_date`, `label`)—for example, multiple presentations during the same trip—the RPC collapses them to one anonymous-safe range. Sick records are never labelled Sick publicly; they appear only as `unavailable` with the label `Unavailable`. Administrative commitments, notes, source IDs, owner metadata, and per-period Calendar state remain private.
 
 The availability RPC is deliberately separate from work analytics: availability describes scheduled/public-safe date states, while work analytics describes observed work and coffee data.
 
