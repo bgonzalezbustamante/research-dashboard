@@ -796,9 +796,53 @@ export default async function PlanningPage({
       }
     )
 
-  const milestoneAllocations =
+  const milestoneAllocations:
+    PlanningAllocationView[] =
     aggregateMilestonesByPaperAndPeriod(
       milestoneRows
+    ).map(
+      (allocation) => ({
+        ...allocation,
+        source_type: null,
+        source_id: null,
+        label: null,
+        subtitle: null,
+        source_href: null,
+        range_start: null,
+        range_end: null,
+        dated_days: [],
+      })
+    )
+
+  const sourceBackedAllocations =
+    deriveSourceBackedPlanning({
+      year:
+        selectedYear,
+      conferences:
+        (conferencesResult.data ??
+          []) as ConferencePlanningSource[],
+      teaching:
+        (teachingResult.data ??
+          []) as TeachingPlanningSource[],
+      blockedEvents:
+        (blockedEventsResult.data ??
+          []) as BlockedEventPlanningSource[],
+      states:
+        (sourceStatesResult.data ??
+          []) as PlanningSourceState[],
+    })
+
+  const sourceAllocations:
+    PlanningAllocationView[] =
+    sourceBackedAllocations.map(
+      (allocation) => ({
+        ...allocation,
+        paper_id: null,
+        paper_short_title: null,
+        paper_title: null,
+        paper_archived: false,
+        milestones: [],
+      })
     )
 
   const milestoneKeys =
@@ -826,7 +870,14 @@ export default async function PlanningPage({
     PlanningAllocationView[] = [
       ...effectiveManualAllocations,
       ...milestoneAllocations,
+      ...sourceAllocations,
     ]
+
+  const selectedOverlaps =
+    findPlanningOverlaps(
+      sourceBackedAllocations,
+      selectedPeriodStart
+    )
 
   let workSessions:
     WorkSessionRow[] = []
