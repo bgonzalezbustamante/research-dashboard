@@ -55,6 +55,7 @@ export type DerivedPlanningAllocation = {
     | 'blocked_event'
   source_type: PlanningSourceType
   source_id: string
+  source_ids: string[]
   blocked_type:
     | 'conference'
     | 'teaching'
@@ -218,25 +219,53 @@ function withState(
     PlanningSourceState
   >
 ): DerivedPlanningAllocation {
-  const state =
-    states.get(
-      stateKey(
-        allocation.source_type,
-        allocation.source_id,
-        allocation.period_start
+  const matchingStates =
+    allocation.source_ids
+      .map((sourceId) =>
+        states.get(
+          stateKey(
+            allocation.source_type,
+            sourceId,
+            allocation.period_start
+          )
+        )
       )
+      .filter(
+        (
+          state
+        ): state is PlanningSourceState =>
+          Boolean(state)
+      )
+
+  const addedStates =
+    matchingStates.filter(
+      (state) =>
+        state.flowsavvy_added
     )
 
   const added =
-    state?.flowsavvy_added ??
-    false
+    addedStates.length > 0
+
+  const addedAt =
+    addedStates
+      .map(
+        (state) =>
+          state.flowsavvy_added_at
+      )
+      .filter(
+        (
+          value
+        ): value is string =>
+          Boolean(value)
+      )
+      .sort()
+      .at(-1) ?? null
 
   return {
     ...allocation,
     flowsavvy_added: added,
     flowsavvy_added_at:
-      state?.flowsavvy_added_at ??
-      null,
+      addedAt,
     flowsavvy_count:
       added ? 1 : 0,
     flowsavvy_total: 1,
@@ -246,6 +275,7 @@ function withState(
 function allocationsFromDatedSource({
   sourceType,
   sourceId,
+  sourceIds,
   blockedType,
   label,
   subtitle,
@@ -260,6 +290,7 @@ function allocationsFromDatedSource({
     | 'conference'
     | 'blocked_event'
   sourceId: string
+  sourceIds: string[]
   blockedType:
     | 'conference'
     | PlanningBlockedEventType
@@ -332,6 +363,8 @@ function allocationsFromDatedSource({
             sourceType,
           source_id:
             sourceId,
+          source_ids:
+            sourceIds,
           blocked_type:
             blockedType,
           label,
@@ -372,29 +405,80 @@ export function deriveSourceBackedPlanning({
   const allocations:
     DerivedPlanningAllocation[] = []
 
+  const conferenceGroups =
+    new Map<
+      string,
+      ConferencePlanningSource[]
+    >()
+
   for (const conference of
     conferences) {
+    const key = [
+      conference.event_name,
+      conference.event_short_name,
+      conference.start_date,
+      conference.end_date,
+    ].join('|')
+
+    const group =
+      conferenceGroups.get(
+        key
+      ) ?? []
+
+    group.push(conference)
+
+    conferenceGroups.set(
+      key,
+      group
+    )
+  }
+
+  for (const group of
+    conferenceGroups.values()) {
     if (
-      !conference.personal_attendance
+      !group.some(
+        (conference) =>
+          conference.personal_attendance
+      )
     ) {
       continue
     }
 
+    const representative =
+      [...group].sort(
+        (a, b) =>
+          a.id.localeCompare(b.id)
+      )[0]
+
+    const sourceIds =
+      group
+        .map(
+          (conference) =>
+            conference.id
+        )
+        .sort()
+
+    const involvesTrip =
+      group.some(
+        (conference) =>
+          conference.involves_trip
+      )
+
     const startDate =
-      conference.involves_trip
+      involvesTrip
         ? addDays(
-            conference.start_date,
+            representative.start_date,
             -1
           )
-        : conference.start_date
+        : representative.start_date
 
     const endDate =
-      conference.involves_trip
+      involvesTrip
         ? addDays(
-            conference.end_date,
+            representative.end_date,
             1
           )
-        : conference.end_date
+        : representative.end_date
 
     allocations.push(
       ...allocationsFromDatedSource(
@@ -402,13 +486,14 @@ export function deriveSourceBackedPlanning({
           sourceType:
             'conference',
           sourceId:
-            conference.id,
+            sourceIds[0],
+          sourceIds,
           blockedType:
             'conference',
           label:
-            conference.event_short_name,
+            representative.event_short_name,
           subtitle:
-            conference.involves_trip
+            involvesTrip
               ? 'Conference attendance + trip'
               : 'Conference attendance',
           startDate,
@@ -481,6 +566,9 @@ export function deriveSourceBackedPlanning({
                 'teaching',
               source_id:
                 item.id,
+              source_ids: [
+                item.id,
+              ],
               blocked_type:
                 'teaching',
               label:
@@ -517,6 +605,9 @@ export function deriveSourceBackedPlanning({
             'blocked_event',
           sourceId:
             event.id,
+          sourceIds: [
+            event.id,
+          ],
           blockedType:
             event.event_type,
           label:
