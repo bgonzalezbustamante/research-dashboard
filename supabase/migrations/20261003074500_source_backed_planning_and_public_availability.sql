@@ -25,7 +25,7 @@ returns boolean
 language sql
 immutable
 set search_path = ''
-as $
+as $function$
   select
     cardinality(p_values) =
     cardinality(
@@ -34,7 +34,7 @@ as $
         from unnest(p_values) value
       )
     );
-$;
+$function$;
 
 revoke all
   on function private.integer_array_has_unique_values(integer[])
