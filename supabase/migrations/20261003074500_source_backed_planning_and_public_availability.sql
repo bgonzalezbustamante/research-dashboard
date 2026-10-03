@@ -18,6 +18,28 @@ alter table public.teaching_portfolio
   add column planning_months integer[] not null default '{}'::integer[],
   add column committed_days_per_week smallint not null default 0;
 
+create or replace function private.integer_array_has_unique_values(
+  p_values integer[]
+)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $
+  select
+    cardinality(p_values) =
+    cardinality(
+      array(
+        select distinct value
+        from unnest(p_values) value
+      )
+    );
+$;
+
+revoke all
+  on function private.integer_array_has_unique_values(integer[])
+  from public, anon, authenticated;
+
 alter table public.teaching_portfolio
   add constraint teaching_portfolio_planning_months_check
   check (
@@ -26,9 +48,8 @@ alter table public.teaching_portfolio
       7, 8, 9, 10, 11, 12
     ]::integer[]
     and cardinality(planning_months) <= 12
-    and cardinality(planning_months) = (
-      select count(distinct month_value)
-      from unnest(planning_months) month_value
+    and private.integer_array_has_unique_values(
+      planning_months
     )
   ),
   add constraint teaching_portfolio_committed_days_per_week_check
