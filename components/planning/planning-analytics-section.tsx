@@ -1,5 +1,4 @@
-import Link from 'next/link'
-
+import PlanningYearCalendar from '@/components/planning/planning-year-calendar'
 import Card from '@/components/ui/card'
 
 type AllocationType =
@@ -140,26 +139,6 @@ function formatSignedDuration(
   )}`
 }
 
-function formatMonthShort(
-  year: number,
-  month: number
-) {
-  return new Intl.DateTimeFormat(
-    'en-GB',
-    {
-      month: 'short',
-    }
-  ).format(
-    new Date(
-      Date.UTC(
-        year,
-        month - 1,
-        1
-      )
-    )
-  )
-}
-
 function getPeriodStats(
   period:
     AnalyticsPeriod | undefined
@@ -230,42 +209,6 @@ function getPeriodStats(
         0
       ),
   }
-}
-
-function getPeriodTone(
-  totalDays: number,
-  selected = false
-) {
-  const ring =
-    selected
-      ? ' ring-2 ring-oxford-blue ring-offset-1'
-      : ''
-
-  if (totalDays === 0) {
-    return (
-      'border-oxford-stone bg-white' +
-      ring
-    )
-  }
-
-  if (totalDays <= 5) {
-    return (
-      'border-green-200 bg-green-50' +
-      ring
-    )
-  }
-
-  if (totalDays <= 10) {
-    return (
-      'border-yellow-200 bg-yellow-50' +
-      ring
-    )
-  }
-
-  return (
-    'border-orange-200 bg-orange-50' +
-    ring
-  )
 }
 
 function getGapPresentation(
@@ -511,148 +454,25 @@ export default function PlanningAnalyticsSection({
               Annual timeline
             </h3>
 
-            <p className="mt-1 text-sm text-oxford-ash">
-              Twenty-four
-              half-month planning
-              periods for{' '}
-              {selectedYear}.
+            <p className="mt-1 text-sm leading-6 text-oxford-ash">
+              Year view for{' '}
+              {selectedYear}. Click any
+              date to open its 1–15 or
+              16–end Planning period.
+              Hovering or focusing a
+              date highlights the whole
+              fortnight; the selected
+              fortnight remains marked.
             </p>
           </div>
 
-          <div className="mt-5 overflow-x-auto">
-            <div className="min-w-[720px] space-y-2">
-              <div className="grid grid-cols-[80px_1fr_1fr] gap-2 px-1 text-xs font-medium uppercase tracking-wide text-oxford-ash">
-                <div>
-                  Month
-                </div>
-
-                <div>
-                  1–15
-                </div>
-
-                <div>
-                  16–end
-                </div>
-              </div>
-
-              {Array.from(
-                {
-                  length: 12,
-                },
-                (
-                  _,
-                  index
-                ) => {
-                  const month =
-                    index + 1
-
-                  const monthText =
-                    String(
-                      month
-                    ).padStart(
-                      2,
-                      '0'
-                    )
-
-                  const starts = [
-                    `${selectedYear}-${monthText}-01`,
-                    `${selectedYear}-${monthText}-16`,
-                  ]
-
-                  return (
-                    <div
-                      key={
-                        month
-                      }
-                      className="grid grid-cols-[80px_1fr_1fr] items-stretch gap-2"
-                    >
-                      <div className="flex items-center px-1 text-sm font-medium text-oxford-charcoal">
-                        {formatMonthShort(
-                          selectedYear,
-                          month
-                        )}
-                      </div>
-
-                      {starts.map(
-                        (
-                          start
-                        ) => {
-                          const period =
-                            periodByStart.get(
-                              start
-                            )
-
-                          const stats =
-                            getPeriodStats(
-                              period
-                            )
-
-                          const selected =
-                            start ===
-                            selectedPeriodStart
-
-                          return (
-                            <Link
-                              key={
-                                start
-                              }
-                              href={`/planning?period=${start}#allocations`}
-                              className={`rounded-md border px-3 py-2 transition hover:border-oxford-blue ${getPeriodTone(
-                                stats.totalDays,
-                                selected
-                              )}`}
-                            >
-                              <div className="flex items-baseline justify-between gap-3">
-                                <span className="font-medium text-oxford-charcoal">
-                                  {
-                                    stats.totalDays
-                                  }
-                                  d
-                                </span>
-
-                                <span className="text-xs text-oxford-ash">
-                                  R{' '}
-                                  {
-                                    stats.paperDays
-                                  }
-                                  {' · '}
-                                  B{' '}
-                                  {
-                                    stats.blockedDays
-                                  }
-                                </span>
-                              </div>
-                            </Link>
-                          )
-                        }
-                      )}
-                    </div>
-                  )
-                }
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-oxford-stone pt-3 text-xs text-oxford-ash">
-            <span>
-              R = research
-            </span>
-
-            <span>
-              B = blocked time
-            </span>
-
-            <span>
-              Green ≤ 5 days
-            </span>
-
-            <span>
-              Yellow 6–10 days
-            </span>
-
-            <span>
-              Orange 11+ days
-            </span>
+          <div className="mt-5">
+            <PlanningYearCalendar
+              year={selectedYear}
+              selectedPeriodStart={
+                selectedPeriodStart
+              }
+            />
           </div>
         </Card>
 
