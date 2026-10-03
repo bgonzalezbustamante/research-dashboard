@@ -17,6 +17,7 @@ create table public.software_items (
   production_url text,
   documentation_url text,
   start_year integer,
+  end_year integer,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint software_items_name_length
@@ -39,6 +40,17 @@ create table public.software_items (
     check (
       start_year is null
       or start_year between 1000 and 9999
+    ),
+  constraint software_items_end_year_range
+    check (
+      end_year is null
+      or end_year between 1000 and 9999
+    ),
+  constraint software_items_year_order
+    check (
+      start_year is null
+      or end_year is null
+      or end_year >= start_year
     )
 );
 
@@ -46,12 +58,14 @@ alter table public.software_items
   add constraint software_items_category_check
   check (
     category in (
-      'Web application',
+      'Application',
+      'Website',
+      'Utility',
+      'Reusable component',
       'Package/library',
       'API/service',
       'Data product',
       'Template',
-      'Developer tool',
       'Other'
     )
   );
@@ -64,8 +78,7 @@ alter table public.software_items
       'Beta',
       'Release candidate',
       'Stable',
-      'Maintenance',
-      'Archived'
+      'Maintenance'
     )
   );
 
@@ -273,6 +286,7 @@ create function public.create_software_with_details(
   p_production_url text,
   p_documentation_url text,
   p_start_year integer,
+  p_end_year integer,
   p_featured boolean,
   p_public_visibility text
 )
@@ -309,7 +323,8 @@ begin
     repository_url,
     production_url,
     documentation_url,
-    start_year
+    start_year,
+    end_year
   )
   values (
     v_owner_id,
@@ -323,7 +338,8 @@ begin
     nullif(btrim(p_repository_url), ''),
     nullif(btrim(p_production_url), ''),
     nullif(btrim(p_documentation_url), ''),
-    p_start_year
+    p_start_year,
+    p_end_year
   )
   returning id
   into v_software_id;
@@ -359,6 +375,7 @@ create function public.update_software_with_details(
   p_production_url text,
   p_documentation_url text,
   p_start_year integer,
+  p_end_year integer,
   p_featured boolean,
   p_public_visibility text
 )
@@ -366,7 +383,7 @@ returns uuid
 language plpgsql
 security invoker
 set search_path = ''
-as $$
+as $
 declare
   v_owner_id uuid;
 begin
@@ -414,7 +431,8 @@ begin
         btrim(p_documentation_url),
         ''
       ),
-    start_year = p_start_year
+    start_year = p_start_year,
+    end_year = p_end_year
   where id = p_software_id;
 
   insert into public.software_public_metadata (
@@ -455,6 +473,7 @@ revoke all
     text,
     text,
     integer,
+    integer,
     boolean,
     text
   )
@@ -475,6 +494,7 @@ revoke all
     text,
     text,
     integer,
+    integer,
     boolean,
     text
   )
@@ -493,6 +513,7 @@ grant execute
     text,
     text,
     text,
+    integer,
     integer,
     boolean,
     text
@@ -514,6 +535,7 @@ grant execute
     text,
     text,
     integer,
+    integer,
     boolean,
     text
   )
@@ -533,6 +555,7 @@ returns table (
   production_url text,
   documentation_url text,
   start_year integer,
+  end_year integer,
   featured boolean
 )
 language sql
@@ -558,6 +581,7 @@ as $$
     s.production_url,
     s.documentation_url,
     s.start_year,
+    s.end_year,
     spm.featured
   from public.software_items s
   join public.software_public_metadata spm
@@ -591,6 +615,7 @@ returns table (
   production_url text,
   documentation_url text,
   start_year integer,
+  end_year integer,
   featured boolean
 )
 language sql
@@ -616,6 +641,7 @@ as $$
     s.production_url,
     s.documentation_url,
     s.start_year,
+    s.end_year,
     spm.featured
   from public.software_items s
   join public.software_public_metadata spm
