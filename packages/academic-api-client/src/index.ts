@@ -18,6 +18,7 @@ export type {
 
 export {
   AcademicApiValidationError,
+  parsePublicAvailabilityList,
   parsePublicConferenceList,
   parsePublicConferencePresentation,
   parsePublicPaperDetailResponse,
@@ -31,6 +32,8 @@ export {
 export type {
   ConferencePresentationType,
   PaperLanguage,
+  PublicAvailabilityItem,
+  PublicAvailabilityType,
   ProjectRole,
   ProjectStatus,
   PublicConferencePresentation,
