@@ -33,6 +33,14 @@
         "list_public_conference_presentations",
         "list_public_teaching"
       ]
+    },
+    {
+      "name": "Weekly Penguin Timeline",
+      "url": "https://github.com/bgonzalezbustamante/weekly-penguin-timeline",
+      "rpcs": [
+        "get_public_work_analytics",
+        "list_public_availability"
+      ]
     }
   ],
   "resources": [
@@ -73,24 +81,78 @@
           "purpose": "Lists papers whose public metadata is explicitly marked public and has a public slug.",
           "parameters": [],
           "fields": [
-            {"name": "slug", "type": "text"},
-            {"name": "title", "type": "text"},
-            {"name": "authors", "type": "text[]"},
-            {"name": "abstract", "type": "text"},
-            {"name": "venue", "type": "text"},
-            {"name": "publication_date", "type": "date"},
-            {"name": "doi_url", "type": "text"},
-            {"name": "publication_url", "type": "text"},
-            {"name": "preprint_url", "type": "text"},
-            {"name": "github_url", "type": "text"},
-            {"name": "dataset_url", "type": "text"},
-            {"name": "featured", "type": "boolean"},
-            {"name": "publication_index", "type": "text"},
-            {"name": "language", "type": "text"},
-            {"name": "google_scholar_citations", "type": "integer"},
-            {"name": "google_scholar_citations_captured_on", "type": "date"},
-            {"name": "project_url", "type": "text"},
-            {"name": "si_file_url", "type": "text"}
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "authors",
+              "type": "text[]"
+            },
+            {
+              "name": "abstract",
+              "type": "text"
+            },
+            {
+              "name": "venue",
+              "type": "text"
+            },
+            {
+              "name": "publication_date",
+              "type": "date"
+            },
+            {
+              "name": "doi_url",
+              "type": "text"
+            },
+            {
+              "name": "publication_url",
+              "type": "text"
+            },
+            {
+              "name": "preprint_url",
+              "type": "text"
+            },
+            {
+              "name": "github_url",
+              "type": "text"
+            },
+            {
+              "name": "dataset_url",
+              "type": "text"
+            },
+            {
+              "name": "featured",
+              "type": "boolean"
+            },
+            {
+              "name": "publication_index",
+              "type": "text"
+            },
+            {
+              "name": "language",
+              "type": "text"
+            },
+            {
+              "name": "google_scholar_citations",
+              "type": "integer"
+            },
+            {
+              "name": "google_scholar_citations_captured_on",
+              "type": "date"
+            },
+            {
+              "name": "project_url",
+              "type": "text"
+            },
+            {
+              "name": "si_file_url",
+              "type": "text"
+            }
           ],
           "detailOnly": [],
           "listingOnly": [],
@@ -105,32 +167,104 @@
           "kind": "Detail",
           "purpose": "Returns one explicitly public paper by its stable public slug.",
           "parameters": [
-            {"name": "p_slug", "type": "text"}
+            {
+              "name": "p_slug",
+              "type": "text"
+            }
           ],
           "fields": [
-            {"name": "slug", "type": "text"},
-            {"name": "title", "type": "text"},
-            {"name": "authors", "type": "text[]"},
-            {"name": "abstract", "type": "text"},
-            {"name": "venue", "type": "text"},
-            {"name": "publication_date", "type": "date"},
-            {"name": "doi_url", "type": "text"},
-            {"name": "publication_url", "type": "text"},
-            {"name": "preprint_url", "type": "text"},
-            {"name": "github_url", "type": "text"},
-            {"name": "dataset_url", "type": "text"},
-            {"name": "featured", "type": "boolean"},
-            {"name": "publication_index", "type": "text"},
-            {"name": "language", "type": "text"},
-            {"name": "google_scholar_citations", "type": "integer"},
-            {"name": "google_scholar_citations_captured_on", "type": "date"},
-            {"name": "citation", "type": "text"},
-            {"name": "highlight_text", "type": "text"},
-            {"name": "highlight_image_filename", "type": "text"},
-            {"name": "highlight_image_alt", "type": "text"},
-            {"name": "highlight_image_caption", "type": "text"},
-            {"name": "project_url", "type": "text"},
-            {"name": "si_file_url", "type": "text"}
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "authors",
+              "type": "text[]"
+            },
+            {
+              "name": "abstract",
+              "type": "text"
+            },
+            {
+              "name": "venue",
+              "type": "text"
+            },
+            {
+              "name": "publication_date",
+              "type": "date"
+            },
+            {
+              "name": "doi_url",
+              "type": "text"
+            },
+            {
+              "name": "publication_url",
+              "type": "text"
+            },
+            {
+              "name": "preprint_url",
+              "type": "text"
+            },
+            {
+              "name": "github_url",
+              "type": "text"
+            },
+            {
+              "name": "dataset_url",
+              "type": "text"
+            },
+            {
+              "name": "featured",
+              "type": "boolean"
+            },
+            {
+              "name": "publication_index",
+              "type": "text"
+            },
+            {
+              "name": "language",
+              "type": "text"
+            },
+            {
+              "name": "google_scholar_citations",
+              "type": "integer"
+            },
+            {
+              "name": "google_scholar_citations_captured_on",
+              "type": "date"
+            },
+            {
+              "name": "citation",
+              "type": "text"
+            },
+            {
+              "name": "highlight_text",
+              "type": "text"
+            },
+            {
+              "name": "highlight_image_filename",
+              "type": "text"
+            },
+            {
+              "name": "highlight_image_alt",
+              "type": "text"
+            },
+            {
+              "name": "highlight_image_caption",
+              "type": "text"
+            },
+            {
+              "name": "project_url",
+              "type": "text"
+            },
+            {
+              "name": "si_file_url",
+              "type": "text"
+            }
           ],
           "detailOnly": [
             "citation",
@@ -177,28 +311,76 @@
           "purpose": "Lists explicitly public projects and their already-public associated outputs.",
           "parameters": [],
           "fields": [
-            {"name": "slug", "type": "text"},
-            {"name": "short_title", "type": "text"},
-            {"name": "title", "type": "text"},
-            {"name": "abstract", "type": "text"},
-            {"name": "role", "type": "text"},
-            {"name": "funder", "type": "text"},
-            {"name": "funder_note", "type": "text"},
-            {"name": "url", "type": "text"},
-            {"name": "start_year", "type": "integer"},
-            {"name": "end_year", "type": "integer"},
-            {"name": "status", "type": "text"},
-            {"name": "featured", "type": "boolean"},
-            {"name": "project_image_filename", "type": "text"},
-            {"name": "funder_image_filename", "type": "text"},
-            {"name": "publication_slugs", "type": "text[]"},
-            {"name": "conference_presentations", "type": "jsonb"}
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "short_title",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "abstract",
+              "type": "text"
+            },
+            {
+              "name": "role",
+              "type": "text"
+            },
+            {
+              "name": "funder",
+              "type": "text"
+            },
+            {
+              "name": "funder_note",
+              "type": "text"
+            },
+            {
+              "name": "url",
+              "type": "text"
+            },
+            {
+              "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "end_year",
+              "type": "integer"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "featured",
+              "type": "boolean"
+            },
+            {
+              "name": "project_image_filename",
+              "type": "text"
+            },
+            {
+              "name": "funder_image_filename",
+              "type": "text"
+            },
+            {
+              "name": "publication_slugs",
+              "type": "text[]"
+            },
+            {
+              "name": "conference_presentations",
+              "type": "jsonb"
+            }
           ],
           "detailOnly": [],
           "listingOnly": [],
           "notes": [
             "publication_slugs contains only papers that are themselves explicitly public.",
-            "conference_presentations[] contains event_name, event_short_name, location, presentation_date, start_date, end_date, presentation_title, authors, presentation_type and url."
+            "conference_presentations[] contains event_name, event_short_name, location, presentation_date, start_date, end_date, personal_attendance, involves_trip, presentation_title, authors, presentation_type and url."
           ]
         },
         {
@@ -207,25 +389,76 @@
           "kind": "Detail",
           "purpose": "Returns one explicitly public project by its stable public slug.",
           "parameters": [
-            {"name": "p_slug", "type": "text"}
+            {
+              "name": "p_slug",
+              "type": "text"
+            }
           ],
           "fields": [
-            {"name": "slug", "type": "text"},
-            {"name": "short_title", "type": "text"},
-            {"name": "title", "type": "text"},
-            {"name": "abstract", "type": "text"},
-            {"name": "role", "type": "text"},
-            {"name": "funder", "type": "text"},
-            {"name": "funder_note", "type": "text"},
-            {"name": "url", "type": "text"},
-            {"name": "start_year", "type": "integer"},
-            {"name": "end_year", "type": "integer"},
-            {"name": "status", "type": "text"},
-            {"name": "featured", "type": "boolean"},
-            {"name": "project_image_filename", "type": "text"},
-            {"name": "funder_image_filename", "type": "text"},
-            {"name": "publication_slugs", "type": "text[]"},
-            {"name": "conference_presentations", "type": "jsonb"}
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "short_title",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "abstract",
+              "type": "text"
+            },
+            {
+              "name": "role",
+              "type": "text"
+            },
+            {
+              "name": "funder",
+              "type": "text"
+            },
+            {
+              "name": "funder_note",
+              "type": "text"
+            },
+            {
+              "name": "url",
+              "type": "text"
+            },
+            {
+              "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "end_year",
+              "type": "integer"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "featured",
+              "type": "boolean"
+            },
+            {
+              "name": "project_image_filename",
+              "type": "text"
+            },
+            {
+              "name": "funder_image_filename",
+              "type": "text"
+            },
+            {
+              "name": "publication_slugs",
+              "type": "text[]"
+            },
+            {
+              "name": "conference_presentations",
+              "type": "jsonb"
+            }
           ],
           "detailOnly": [],
           "listingOnly": [],
@@ -261,21 +494,60 @@
           "purpose": "Lists conference presentation records in descending conference-start-date order.",
           "parameters": [],
           "fields": [
-            {"name": "event_name", "type": "text"},
-            {"name": "event_short_name", "type": "text"},
-            {"name": "location", "type": "text"},
-            {"name": "presentation_date", "type": "date"},
-            {"name": "start_date", "type": "date"},
-            {"name": "end_date", "type": "date"},
-            {"name": "presentation_title", "type": "text"},
-            {"name": "authors", "type": "text[]"},
-            {"name": "presentation_type", "type": "text"},
-            {"name": "url", "type": "text"}
+            {
+              "name": "event_name",
+              "type": "text"
+            },
+            {
+              "name": "event_short_name",
+              "type": "text"
+            },
+            {
+              "name": "location",
+              "type": "text"
+            },
+            {
+              "name": "presentation_date",
+              "type": "date"
+            },
+            {
+              "name": "start_date",
+              "type": "date"
+            },
+            {
+              "name": "end_date",
+              "type": "date"
+            },
+            {
+              "name": "personal_attendance",
+              "type": "boolean"
+            },
+            {
+              "name": "involves_trip",
+              "type": "boolean"
+            },
+            {
+              "name": "presentation_title",
+              "type": "text"
+            },
+            {
+              "name": "authors",
+              "type": "text[]"
+            },
+            {
+              "name": "presentation_type",
+              "type": "text"
+            },
+            {
+              "name": "url",
+              "type": "text"
+            }
           ],
           "detailOnly": [],
           "listingOnly": [],
           "notes": [
             "presentation_date is a deprecated compatibility alias of start_date.",
+            "personal_attendance indicates that the profile owner attended or plans to attend; involves_trip implies personal_attendance.",
             "No public conference detail RPC currently exists."
           ]
         }
@@ -311,18 +583,54 @@
           "purpose": "Lists explicitly public teaching portfolio items for public cards and CV use.",
           "parameters": [],
           "fields": [
-            {"name": "slug", "type": "text"},
-            {"name": "name", "type": "text"},
-            {"name": "institution", "type": "text"},
-            {"name": "summary", "type": "text"},
-            {"name": "role", "type": "text"},
-            {"name": "start_year", "type": "integer"},
-            {"name": "end_year", "type": "integer"},
-            {"name": "is_current", "type": "boolean"},
-            {"name": "levels", "type": "text[]"},
-            {"name": "times_taught", "type": "integer"},
-            {"name": "student_count", "type": "integer"},
-            {"name": "course_image_filename", "type": "text"}
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "name",
+              "type": "text"
+            },
+            {
+              "name": "institution",
+              "type": "text"
+            },
+            {
+              "name": "summary",
+              "type": "text"
+            },
+            {
+              "name": "role",
+              "type": "text"
+            },
+            {
+              "name": "start_year",
+              "type": "integer"
+            },
+            {
+              "name": "end_year",
+              "type": "integer"
+            },
+            {
+              "name": "is_current",
+              "type": "boolean"
+            },
+            {
+              "name": "levels",
+              "type": "text[]"
+            },
+            {
+              "name": "times_taught",
+              "type": "integer"
+            },
+            {
+              "name": "student_count",
+              "type": "integer"
+            },
+            {
+              "name": "course_image_filename",
+              "type": "text"
+            }
           ],
           "detailOnly": [],
           "listingOnly": [],
@@ -358,13 +666,29 @@
           "kind": "Aggregate",
           "purpose": "Returns one calendar year of daily net working minutes and coffee counts plus two annual working-day averages.",
           "parameters": [
-            {"name": "p_year", "type": "integer", "note": "2000 through the current calendar year"}
+            {
+              "name": "p_year",
+              "type": "integer",
+              "note": "2000 through the current calendar year"
+            }
           ],
           "fields": [
-            {"name": "year", "type": "integer"},
-            {"name": "average_net_minutes_per_working_day", "type": "integer"},
-            {"name": "average_coffees_per_working_day", "type": "numeric"},
-            {"name": "days", "type": "jsonb[]"}
+            {
+              "name": "year",
+              "type": "integer"
+            },
+            {
+              "name": "average_net_minutes_per_working_day",
+              "type": "integer"
+            },
+            {
+              "name": "average_coffees_per_working_day",
+              "type": "numeric"
+            },
+            {
+              "name": "days",
+              "type": "jsonb[]"
+            }
           ],
           "jsonKeys": [
             "year",
@@ -381,6 +705,70 @@
             "Each days[] item contains date, net_minutes and coffee_count; calendar days without a daily log return zero for both measures.",
             "A working day is a daily log with at least one work session.",
             "The function rejects years before 2000 and years after the current calendar year."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "availability",
+      "title": "Availability",
+      "summary": "Public-safe dated availability ranges for timeline consumers, separate from work analytics and internal Planning details.",
+      "notExposed": [
+        "Internal blocked-event IDs and owner metadata",
+        "Administrative commitments",
+        "The Sick category and any sickness notes or medical reason",
+        "Conference source IDs and internal Planning state"
+      ],
+      "forbiddenFields": [
+        "id",
+        "owner_id",
+        "source_id",
+        "source_type",
+        "event_type",
+        "notes",
+        "sick",
+        "administrative",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_availability",
+          "signature": "list_public_availability(year)",
+          "kind": "Listing",
+          "purpose": "Lists public-safe conference trips, Winter/Summer holidays, and generic unavailable periods intersecting a requested calendar year.",
+          "parameters": [
+            {
+              "name": "p_year",
+              "type": "integer",
+              "note": "2000 through five years after the current calendar year"
+            }
+          ],
+          "fields": [
+            {
+              "name": "type",
+              "type": "text"
+            },
+            {
+              "name": "start_date",
+              "type": "date"
+            },
+            {
+              "name": "end_date",
+              "type": "date"
+            },
+            {
+              "name": "label",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Returned ranges are clipped to the requested calendar year.",
+            "Conference trips include one travel day before and one after the recorded conference dates.",
+            "Sick records are exposed only as type unavailable with label Unavailable; the underlying reason and notes remain private.",
+            "Administrative blocked events are deliberately omitted."
           ]
         }
       ]
@@ -465,6 +853,17 @@
         "undergraduate",
         "master",
         "phd"
+      ]
+    },
+    {
+      "id": "availability-type",
+      "label": "Public availability type",
+      "sourceFunction": "list_public_availability",
+      "values": [
+        "winter_holiday",
+        "summer_holiday",
+        "trip",
+        "unavailable"
       ]
     }
   ]
