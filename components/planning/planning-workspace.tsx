@@ -72,6 +72,7 @@ type PlanningAllocation = {
   milestones: PlanningMilestone[]
   source_type: PlanningSourceType | null
   source_id: string | null
+  source_ids: string[]
   label: string | null
   subtitle: string | null
   source_href: string | null
@@ -790,7 +791,8 @@ export default function PlanningWorkspace({
 
                   {isSource &&
                     allocation.source_type &&
-                    allocation.source_id && (
+                    allocation.source_ids
+                      .length > 0 && (
                     <form
                       action={
                         setPlanningSourceFlowSavvy
@@ -809,13 +811,20 @@ export default function PlanningWorkspace({
                           allocation.source_type
                         }
                       />
-                      <input
-                        type="hidden"
-                        name="source_id"
-                        value={
-                          allocation.source_id
-                        }
-                      />
+                      {allocation.source_ids.map(
+                        (sourceId) => (
+                          <input
+                            key={
+                              sourceId
+                            }
+                            type="hidden"
+                            name="source_id"
+                            value={
+                              sourceId
+                            }
+                          />
+                        )
+                      )}
                       <input
                         type="hidden"
                         name="flowsavvy_added"
