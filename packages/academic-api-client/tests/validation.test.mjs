@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   AcademicApiValidationError,
+  parsePublicAvailabilityList,
   parsePublicConferenceList,
   parsePublicPaperList,
   parsePublicProjectList,
@@ -50,6 +51,8 @@ const conference = {
   presentation_date: '2026-09-01',
   start_date: '2026-09-01',
   end_date: '2026-09-02',
+  personal_attendance: true,
+  involves_trip: true,
   presentation_title: null,
   authors: ['A. Author'],
   presentation_type: 'Conference paper',
@@ -135,6 +138,29 @@ test('accepts valid representative Public RPC resources', () => {
     ),
     workPayload(2026)
   )
+
+  const availability = [
+    {
+      type: 'trip',
+      start_date: '2026-09-01',
+      end_date: '2026-09-04',
+      label: 'CONF',
+    },
+    {
+      type: 'unavailable',
+      start_date: '2026-10-02',
+      end_date: '2026-10-02',
+      label: 'Unavailable',
+    },
+  ]
+
+  assert.deepEqual(
+    parsePublicAvailabilityList(
+      availability,
+      2026
+    ),
+    availability
+  )
 })
 
 test('rejects unexpected fields instead of silently accepting drift', () => {
@@ -201,6 +227,68 @@ test('rejects invalid project and conference ranges', () => {
         },
       ]),
     /end_date/
+  )
+})
+
+test('rejects inconsistent attendance and malformed availability', () => {
+  assert.throws(
+    () =>
+      parsePublicConferenceList([
+        {
+          ...conference,
+          personal_attendance: false,
+          involves_trip: true,
+        },
+      ]),
+    /personal_attendance/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicAvailabilityList(
+        [
+          {
+            type: 'trip',
+            start_date: '2026-12-31',
+            end_date: '2027-01-01',
+            label: 'CONF',
+          },
+        ],
+        2026
+      ),
+    /outside requested year/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicAvailabilityList(
+        [
+          {
+            type: 'unavailable',
+            start_date: '2026-05-01',
+            end_date: '2026-05-01',
+            label: 'Sick',
+          },
+        ],
+        2026
+      ),
+    /must be "Unavailable"/
+  )
+
+  const duplicate = {
+    type: 'winter_holiday',
+    start_date: '2026-12-20',
+    end_date: '2026-12-31',
+    label: 'Winter holiday',
+  }
+
+  assert.throws(
+    () =>
+      parsePublicAvailabilityList(
+        [duplicate, duplicate],
+        2026
+      ),
+    /duplicate range/
   )
 })
 
