@@ -539,12 +539,11 @@ export function parsePublicPaperDetailResponse(
       payload,
       'get_public_paper response',
       (value, path) => {
-        const paper =
-          parsePaperBase(
-            value,
-            RPC_FIELDS.get_public_paper,
-            path
-          )
+        parsePaperBase(
+          value,
+          RPC_FIELDS.get_public_paper,
+          path
+        )
 
         const record =
           value as RecordValue
@@ -714,12 +713,28 @@ function parsePublicProject(
     `${path}.end_year`
   )
 
-  for (const field of [
-    'start_year',
-    'end_year',
-  ] as const) {
-    const year = value[field]
+  const startYear =
+    value.start_year as
+      | number
+      | null
+  const endYear =
+    value.end_year as
+      | number
+      | null
 
+  for (const [
+    field,
+    year,
+  ] of [
+    [
+      'start_year',
+      startYear,
+    ],
+    [
+      'end_year',
+      endYear,
+    ],
+  ] as const) {
     if (
       year !== null &&
       (
@@ -735,10 +750,10 @@ function parsePublicProject(
   }
 
   if (
-    value.start_year !== null &&
-    value.end_year !== null &&
-    value.end_year <
-      value.start_year
+    startYear !== null &&
+    endYear !== null &&
+    endYear <
+      startYear
   ) {
     fail(
       `${path}.end_year`,
