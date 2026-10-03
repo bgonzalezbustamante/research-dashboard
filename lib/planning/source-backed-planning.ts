@@ -458,6 +458,16 @@ export function deriveSourceBackedPlanning({
         )
         .sort()
 
+    const sourceId =
+      sourceIds[0]
+
+    if (
+      !representative ||
+      !sourceId
+    ) {
+      continue
+    }
+
     const involvesTrip =
       group.some(
         (conference) =>
@@ -485,8 +495,7 @@ export function deriveSourceBackedPlanning({
         {
           sourceType:
             'conference',
-          sourceId:
-            sourceIds[0],
+          sourceId,
           sourceIds,
           blockedType:
             'conference',
