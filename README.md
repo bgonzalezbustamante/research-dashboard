@@ -12,10 +12,10 @@ A personal research-management dashboard for papers, projects, conferences, teac
 - Paper workflow, milestones, revision history, citations, research links, and paper-scoped coauthor access
 - Structured Projects, Conferences, and Teaching Portfolio modules
 - Manual working-hour logging with yearly research and workload analytics
-- Milestone-backed biweekly research-capacity planning and blocked-time planning
+- Source-backed biweekly Planning from Paper Milestones, conference attendance/trips, recurring Teaching schedules, and exact dated blocked events
 - Dashboard-wide read-only Viewer access and paper-specific collaboration permissions
 - Google Scholar citation snapshots and citation-yield indicators
-- Curated read-only public academic metadata for the Academic Website, Academic CV Studio, and other approved consumers
+- Curated read-only public academic metadata and availability ranges for the Academic Website, Academic CV Studio, Weekly Penguin Timeline, and other approved consumers
 - Public **Academic API — Public RPC v1** documentation at `/api`
 
 ## Public data interface
