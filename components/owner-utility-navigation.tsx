@@ -12,6 +12,10 @@ const ownerLinks = [
     href: '/dashboard/access',
     label: 'Access',
   },
+  {
+    href: '/software',
+    label: 'Software Ecosystem',
+  },
 ]
 
 export default function OwnerUtilityNavigation({
