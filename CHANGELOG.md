@@ -40,6 +40,7 @@
 - Kept exact dated overlaps additive and added an **Overlapping dated commitments** warning rather than silently deduplicating capacity.
 - Updated the main Dashboard Planning load to use the same source-backed derivation as the Planning page.
 - Fixed Teaching Portfolio saves after the Planning expansion by restoring the authenticated runtime permission required by the `planning_months` uniqueness constraint.
+- Fixed Conference edits so Personal attendance and Involves trip are persisted, and adjusted the Planning and attendance panel heading so it no longer overlaps the card border.
 
 `list pagination`
 
