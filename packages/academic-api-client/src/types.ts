@@ -120,42 +120,42 @@ type KeysEqual<
 
 type Assert<T extends true> = T
 
-type _PaperListKeys = Assert<
+export type PublicPaperContractKeysMatch = Assert<
   KeysEqual<
     PublicPaper,
     typeof RPC_FIELDS.list_public_papers
   >
 >
 
-type _PaperDetailKeys = Assert<
+export type PublicPaperDetailContractKeysMatch = Assert<
   KeysEqual<
     PublicPaperDetail,
     typeof RPC_FIELDS.get_public_paper
   >
 >
 
-type _ProjectKeys = Assert<
+export type PublicProjectContractKeysMatch = Assert<
   KeysEqual<
     PublicProject,
     typeof RPC_FIELDS.list_public_projects
   >
 >
 
-type _ConferenceKeys = Assert<
+export type PublicConferenceContractKeysMatch = Assert<
   KeysEqual<
     PublicConferencePresentation,
     typeof RPC_FIELDS.list_public_conference_presentations
   >
 >
 
-type _TeachingKeys = Assert<
+export type PublicTeachingContractKeysMatch = Assert<
   KeysEqual<
     PublicTeachingItem,
     typeof RPC_FIELDS.list_public_teaching
   >
 >
 
-type _WorkAnalyticsKeys = Assert<
+export type PublicWorkAnalyticsContractKeysMatch = Assert<
   KeysEqual<
     PublicWorkAnalytics,
     typeof RPC_FIELDS.get_public_work_analytics
