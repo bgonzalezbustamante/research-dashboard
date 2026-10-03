@@ -526,6 +526,12 @@ export async function deleteConferencePresentation(
   revalidatePath(
     '/conferences'
   )
+  revalidatePath(
+    '/planning'
+  )
+  revalidatePath(
+    '/dashboard'
+  )
 
   conferencesRedirect(
     'deleted',
