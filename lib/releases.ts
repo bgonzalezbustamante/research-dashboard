@@ -42,7 +42,7 @@ export const releases: ReleaseNote[] = [
           'Kept overlapping dated commitments additive and flag them visibly, while preserving older manual allocations as Legacy records.',
           'Fixed Teaching Portfolio saves when adding active Planning months and committed teaching days.',
           'Fixed Conference attendance/trip edits and refined the Planning and attendance panel heading.',
-          'Reorganised Planning commitments around a narrow dated-event utility card and wider source-backed commitment grid, restored clearer FlowSavvy status styling, and removed the redundant Monthly overview while retaining the Annual timeline.',
+          'Reorganised Planning commitments around a narrow dated-event utility card and wider source-backed commitment grid, restored clearer FlowSavvy status styling, removed the redundant Monthly overview, and redesigned the Annual timeline as a clickable 12-month fortnight calendar.',
           'Reorganised Teaching controls with the public contract and Teaching season status at the top and the course/activity form at full width below.',
         ],
       },
