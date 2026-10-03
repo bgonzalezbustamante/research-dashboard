@@ -15,6 +15,7 @@ import type {
   PublicPaperDetail,
   PublicProject,
   PublicTeachingItem,
+  PublicTeachingSettings,
   PublicWorkAnalytics,
   PublicWorkDay,
   PublicationIndex,
@@ -1002,6 +1003,42 @@ export function parsePublicTeachingList(
     'list_public_teaching response',
     parsePublicTeachingItem
   )
+}
+
+export function parsePublicTeachingSettingsResponse(
+  payload: unknown
+): PublicTeachingSettings {
+  const rows =
+    parseArray(
+      payload,
+      'get_public_teaching_settings response',
+      (value, path) => {
+        assertRecord(
+          value,
+          path
+        )
+        assertExactKeys(
+          value,
+          RPC_FIELDS.get_public_teaching_settings,
+          path
+        )
+        assertBoolean(
+          value.teaching_season_active,
+          `${path}.teaching_season_active`
+        )
+
+        return value as unknown as PublicTeachingSettings
+      }
+    )
+
+  if (rows.length !== 1) {
+    fail(
+      'get_public_teaching_settings response',
+      'expected exactly one row'
+    )
+  }
+
+  return rows[0]
 }
 
 export function parsePublicAvailabilityList(
