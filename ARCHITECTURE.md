@@ -2,7 +2,7 @@
 
 ## Administrative system of record
 
-Research Dashboard is the canonical administrative source for the structured academic records it manages: papers, projects, conference presentations, teaching portfolio data, work logs, planning data, permissions, and related internal workflow metadata.
+Research Dashboard is the canonical administrative source for the structured academic records it manages: papers, projects, conference presentations, teaching portfolio data, Software Ecosystem records, work logs, planning data, permissions, and related internal workflow metadata.
 
 Authenticated Dashboard modules may read and write the underlying Supabase tables according to the application permission model.
 
@@ -54,6 +54,8 @@ The current anonymous-safe function surface is:
 - `list_public_conference_presentations()`
 - `list_public_teaching()`
 - `get_public_teaching_settings()`
+- `list_public_software()`
+- `get_public_software(text)`
 - `get_public_work_analytics(year)`
 - `list_public_availability(year)`
 
@@ -98,7 +100,7 @@ The architecture therefore has three complementary checks:
 
 Work-analytics validation follows the strict rules first exercised in `weekly-penguin-timeline`: requested-year equality, real ISO calendar dates, unique daily rows, non-negative integer daily metrics, and complete 365/366-day coverage.
 
-Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
+Software validation enforces the controlled category, development-stage, status, and repository-visibility vocabularies, valid HTTP(S) URLs, and the privacy invariant that a Private repository cannot return a public `repository_url`. Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
 
 These layers complement one another. The reference client does not replace `lib/academic-api-contract.json`, the producer-side migration checks, or the Supabase RPC transport.
 
@@ -137,6 +139,12 @@ Only teaching portfolio items marked public are returned. Public portfolio field
 
 `get_public_teaching_settings()` separately exposes the single owner-level `teaching_season_active` boolean. The underlying Teaching settings row, owner identifier, and timestamps remain private, and the season flag does not change per-course visibility or Planning months.
 
+### Software Ecosystem
+
+Software Ecosystem is the canonical administrative registry for software, applications and reusable tools maintained through Research Dashboard. Operational metadata includes category, current version, development stage, status, repository visibility and URLs, start year, Featured state, and a separate public-exposure control.
+
+`list_public_software()` and `get_public_software(slug)` return only profiles explicitly marked Public. Repository visibility is deliberately independent from profile exposure: a software profile may be Public while its repository remains Private. In that case the public contract reports `repository_visibility = private` but forces `repository_url = null`. Internal software/owner IDs, public-exposure metadata, timestamps, and private repository URLs remain unavailable anonymously.
+
 ### Work analytics
 
 The public analytics RPC returns yearly aggregate measures plus daily net working minutes and daily coffee counts. Raw sessions, session start/end times, activity labels, locations, paper relationships, owner metadata, and internal identifiers remain private.
@@ -160,6 +168,10 @@ Public RPC v1 currently constrains:
 - Conference presentation type
 - Teaching role
 - Teaching level
+- Software category
+- Software development stage
+- Software status
+- Repository visibility
 - Public availability type
 
 The exact values are maintained in the database constraints and mirrored in `lib/academic-api-contract.json`; `npm run check:public-api` fails if they drift.
