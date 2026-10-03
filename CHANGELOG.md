@@ -31,12 +31,12 @@
 - Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
 - Added `get_public_teaching_settings()` as a ninth Public RPC v1 operation exposing only the owner-level `teaching_season_active` boolean; the underlying RLS-protected Teaching settings table remains unavailable anonymously.
 - Extended the reference client, runtime validation, live privacy checks, generated metadata, and API documentation for the Teaching season contract.
-- Added `list_public_software()` and `get_public_software(slug)` to Public RPC v1, with controlled software category/stage/status/repository-visibility values and strict suppression of private repository URLs.
+- Added `list_public_software()` and `get_public_software(slug)` to Public RPC v1, with the final controlled software category/stage/status/repository-visibility vocabularies, nullable lifecycle end year, and strict suppression of private repository URLs.
 
 `software ecosystem`
 
-- Added an Owner-only Software Ecosystem module after Access as the canonical registry for software, applications, packages, APIs, data products, templates, and developer tools.
-- Added canonical name/slug/description metadata, current version, controlled development stage and status, repository visibility and URL, production/demo and documentation URLs, start year, Featured state, and independent public exposure.
+- Added an Owner-only Software Ecosystem module after Access as the canonical registry for software, including Applications, Websites, Utilities, Reusable components, Packages/libraries, APIs/services, Data products, Templates, and Other items.
+- Added canonical name/slug/description metadata, current version, controlled development stage and status, repository visibility and URL, production/demo and documentation URLs, start/end year, Featured state, and independent public exposure.
 - Kept repository visibility independent from public exposure so a Private repository can still have a Public software profile; public RPCs never expose the private repository URL.
 - Added RLS-protected `software_items` and `software_public_metadata` tables, Owner CRUD workflows, and 10-item Software Ecosystem pagination.
 
