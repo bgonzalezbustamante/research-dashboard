@@ -43,6 +43,7 @@ export const releases: ReleaseNote[] = [
           'Fixed Teaching Portfolio saves when adding active Planning months and committed teaching days.',
           'Fixed Conference attendance/trip edits and refined the Planning and attendance panel heading.',
           'Reorganised Planning commitments around a narrow dated-event utility card and wider source-backed commitment grid, restored clearer FlowSavvy status styling, removed the redundant Monthly overview, and redesigned the Annual timeline as a clickable 12-month fortnight calendar.',
+          'Added year pagination and shared Period-load colours to the Annual timeline calendar.',
           'Reorganised Teaching controls with the public contract and Teaching season status at the top and the course/activity form at full width below.',
         ],
       },
