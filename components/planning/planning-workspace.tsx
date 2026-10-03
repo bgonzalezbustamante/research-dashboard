@@ -551,7 +551,7 @@ export default function PlanningWorkspace({
               </select>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4">
               <div>
                 <label
                   htmlFor="blocked-event-start"
@@ -1285,7 +1285,7 @@ export default function PlanningWorkspace({
         </div>
       </div>
 
-      <Card>
+      <Card className="mt-6">
         <h3 className="font-serif text-xl font-semibold text-oxford-blue">
           Automatic sources
         </h3>
