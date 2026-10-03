@@ -12,17 +12,17 @@ A personal research-management dashboard for papers, projects, conferences, teac
 - Paper workflow, milestones, revision history, citations, research links, and paper-scoped coauthor access
 - Structured Projects, Conferences, and Teaching Portfolio modules
 - Manual working-hour logging with yearly research and workload analytics
-- Source-backed biweekly Planning from Paper Milestones, conference attendance/trips, recurring Teaching schedules, and exact dated blocked events
+- Source-backed biweekly Planning from Paper Milestones, conference attendance/trips, recurring Teaching schedules, and exact dated blocked events, with a load-coloured 12-month calendar for fortnight navigation
 - Dashboard-wide read-only Viewer access and paper-specific collaboration permissions
 - Google Scholar citation snapshots and citation-yield indicators
-- Curated read-only public academic metadata and availability ranges for the Academic Website, Academic CV Studio, Weekly Penguin Timeline, and other approved consumers
+- Curated read-only public academic metadata, Teaching season state, work analytics, and availability ranges for the Academic Website, Academic CV Studio, Weekly Penguin Timeline, and other approved consumers
 - Public **Academic API — Public RPC v1** documentation at `/api`
 
 ## Public data interface
 
 Research Dashboard remains the administrative system of record. Public consumers do not query Dashboard tables directly; they use the curated anonymous-safe Supabase RPC layer with a publishable key.
 
-The human-readable contract is documented at [Academic API](https://dashboard.bgonzalezbustamante.com/api). The exact public field lists and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
+The human-readable contract is documented at [Academic API](https://dashboard.bgonzalezbustamante.com/api). Public RPC v1 currently contains nine curated operations. The exact public field lists, operation notes, consumer mappings, and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
 
 A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. Generated client metadata is derived from the canonical manifest rather than maintained independently.
 
