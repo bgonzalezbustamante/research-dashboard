@@ -346,6 +346,10 @@ export default async function PlanningPage({
     papersResult,
     dailyLogsResult,
     milestonesResult,
+    conferencesResult,
+    teachingResult,
+    blockedEventsResult,
+    sourceStatesResult,
   ] = await Promise.all([
     supabase
       .from('planning_periods')
@@ -444,30 +448,126 @@ export default async function PlanningPage({
         'target_date',
         yearEnd
       ),
+
+    supabase
+      .from(
+        'conference_presentations'
+      )
+      .select(`
+        id,
+        event_name,
+        event_short_name,
+        start_date,
+        end_date,
+        personal_attendance,
+        involves_trip
+      `),
+
+    supabase
+      .from('teaching_portfolio')
+      .select(`
+        id,
+        name,
+        start_year,
+        end_year,
+        is_current,
+        planning_months,
+        committed_days_per_week
+      `),
+
+    supabase
+      .from(
+        'planning_blocked_events'
+      )
+      .select(`
+        id,
+        event_type,
+        start_date,
+        end_date,
+        notes
+      `)
+      .lte(
+        'start_date',
+        yearEnd
+      )
+      .gte(
+        'end_date',
+        yearStart
+      )
+      .order(
+        'start_date',
+        {
+          ascending: true,
+        }
+      ),
+
+    supabase
+      .from(
+        'planning_source_period_states'
+      )
+      .select(`
+        source_type,
+        source_id,
+        period_start,
+        flowsavvy_added,
+        flowsavvy_added_at
+      `)
+      .gte(
+        'period_start',
+        yearStart
+      )
+      .lte(
+        'period_start',
+        yearEnd
+      ),
   ])
 
-  if (periodsResult.error) {
-    throw new Error(
-      `Could not load planning periods: ${periodsResult.error.message}`
-    )
-  }
-
-  if (papersResult.error) {
-    throw new Error(
-      `Could not load papers: ${papersResult.error.message}`
-    )
-  }
-
-  if (dailyLogsResult.error) {
-    throw new Error(
-      `Could not load working-hour dates: ${dailyLogsResult.error.message}`
-    )
-  }
-
-  if (milestonesResult.error) {
-    throw new Error(
-      `Could not load milestone-backed planning: ${milestonesResult.error.message}`
-    )
+  for (const [
+    label,
+    result,
+  ] of [
+    [
+      'planning periods',
+      periodsResult,
+    ],
+    [
+      'papers',
+      papersResult,
+    ],
+    [
+      'working-hour dates',
+      dailyLogsResult,
+    ],
+    [
+      'milestone-backed planning',
+      milestonesResult,
+    ],
+    [
+      'conference planning',
+      conferencesResult,
+    ],
+    [
+      'Teaching planning',
+      teachingResult,
+    ],
+    [
+      'dated blocked events',
+      blockedEventsResult,
+    ],
+    [
+      'source-backed Calendar state',
+      sourceStatesResult,
+    ],
+  ] as const) {
+    if (result.error) {
+      throw new Error(
+        `Could not load ${
+          label
+        }: ${
+          result.error.message
+        }`
+      )
+    }
   }
 
   const storedPeriods =
