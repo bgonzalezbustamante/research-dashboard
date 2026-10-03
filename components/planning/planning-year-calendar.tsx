@@ -315,20 +315,24 @@ export default function PlanningYearCalendar({
           Period load
         </span>
         <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm border border-green-200 bg-green-50" />
+          Open · 0d
+        </span>
+        <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-green-100" />
-          Open / light
+          Light · 1–5d
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-yellow-100" />
-          Moderate
+          Moderate · 6–10d
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-orange-100" />
-          Full
+          Full · 11–15d
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-orange-200" />
-          Overcommitted
+          Overcommitted · 16+d
         </span>
       </div>
     </>
