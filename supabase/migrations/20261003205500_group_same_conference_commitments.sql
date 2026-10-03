@@ -132,7 +132,7 @@ begin
       and pbe.start_date <= v_year_end
       and pbe.end_date >= v_year_start
   )
-  select
+  select distinct
     public_ranges.type,
     public_ranges.start_date,
     public_ranges.end_date,
@@ -147,4 +147,4 @@ end;
 $$;
 
 comment on function public.list_public_availability(integer) is
-  'Anonymous-safe yearly availability projection for public timeline consumers: conference trips grouped at event level, winter/summer holidays, and generic unavailable ranges. Multiple presentations at the same conference produce one trip range. Administrative commitments, sickness labels, notes, source IDs, and owner metadata remain private.';
+  'Anonymous-safe yearly availability projection for public timeline consumers: conference trips grouped at event level, winter/summer holidays, and generic unavailable ranges. Multiple presentations at the same conference produce one trip range, and identical public ranges are returned only once even when distinct source events imply the same availability. Administrative commitments, sickness labels, notes, source IDs, and owner metadata remain private.';
