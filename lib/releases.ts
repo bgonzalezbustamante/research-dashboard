@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.1',
     summary:
-      'Rustic Peak strengthens Planning and the public Academic API with source-backed commitments, public availability data, reusable response validation, clearer list navigation, and security and licensing improvements while the 1.0 release line continues to stabilise.',
+      'Rustic Peak strengthens Planning and the public Academic API, adds Software Ecosystem as the administrative registry for maintained applications and tools, and continues the 1.0 release line with reusable response validation, clearer navigation, and security and licensing improvements.',
     sections: [
       {
         title: 'Academic API and public data',
@@ -32,6 +32,15 @@ export const releases: ReleaseNote[] = [
           'Added public-safe availability ranges for trips, Winter and Summer holidays, and generic unavailable periods, while keeping sickness reasons and Administrative commitments private.',
           'Conference data now indicates personal attendance and whether attendance involved a trip.',
           'Added a public Teaching season status that external consumers can read independently from individual course visibility.',
+          'Added public Software Ecosystem listing and detail data while keeping private repository URLs hidden.',
+        ],
+      },
+      {
+        title: 'Software Ecosystem',
+        items: [
+          'Added an Owner-only Software Ecosystem registry for applications, packages, APIs, data products, templates and developer tools.',
+          'Tracks versions, development stages, lifecycle status, repository visibility, production and documentation links, start year and Featured state.',
+          'Keeps repository visibility separate from public profile exposure, allowing public profiles for private repositories without exposing their repository URLs.',
         ],
       },
       {
