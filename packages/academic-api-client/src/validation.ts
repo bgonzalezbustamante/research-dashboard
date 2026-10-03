@@ -14,6 +14,7 @@ import type {
   PublicPaper,
   PublicPaperDetail,
   PublicProject,
+  PublicSoftwareItem,
   PublicTeachingItem,
   PublicTeachingSettings,
   PublicWorkAnalytics,
@@ -993,6 +994,154 @@ function parsePublicTeachingItem(
   )
 
   return value as unknown as PublicTeachingItem
+}
+
+function parsePublicSoftwareItem(
+  value: unknown,
+  fields: readonly string[],
+  path: string
+): PublicSoftwareItem {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    fields,
+    path
+  )
+
+  for (const field of [
+    'slug',
+    'name',
+    'short_description',
+  ] as const) {
+    assertString(
+      value[field],
+      `${path}.${field}`
+    )
+  }
+
+  assertControlledValue<SoftwareCategory>(
+    value.category,
+    CONTROLLED_VOCABULARIES[
+      'software-category'
+    ],
+    `${path}.category`
+  )
+
+  assertNullableString(
+    value.current_version,
+    `${path}.current_version`
+  )
+
+  assertControlledValue<SoftwareDevelopmentStage>(
+    value.development_stage,
+    CONTROLLED_VOCABULARIES[
+      'software-development-stage'
+    ],
+    `${path}.development_stage`
+  )
+
+  assertControlledValue<SoftwareStatus>(
+    value.status,
+    CONTROLLED_VOCABULARIES[
+      'software-status'
+    ],
+    `${path}.status`
+  )
+
+  assertControlledValue<RepositoryVisibility>(
+    value.repository_visibility,
+    CONTROLLED_VOCABULARIES[
+      'repository-visibility'
+    ],
+    `${path}.repository_visibility`
+  )
+
+  for (const field of [
+    'repository_url',
+    'production_url',
+    'documentation_url',
+  ] as const) {
+    assertNullableHttpUrl(
+      value[field],
+      `${path}.${field}`
+    )
+  }
+
+  if (
+    value.repository_visibility ===
+      'private' &&
+    value.repository_url !== null
+  ) {
+    fail(
+      `${path}.repository_url`,
+      'must be null when repository_visibility is private'
+    )
+  }
+
+  assertNullableInteger(
+    value.start_year,
+    `${path}.start_year`
+  )
+
+  if (
+    value.start_year !== null &&
+    (
+      value.start_year < 1000 ||
+      value.start_year > 9999
+    )
+  ) {
+    fail(
+      `${path}.start_year`,
+      'expected a year from 1000 through 9999'
+    )
+  }
+
+  assertBoolean(
+    value.featured,
+    `${path}.featured`
+  )
+
+  return value as unknown as PublicSoftwareItem
+}
+
+export function parsePublicSoftwareList(
+  payload: unknown
+): PublicSoftwareItem[] {
+  return parseArray(
+    payload,
+    'list_public_software response',
+    (value, path) =>
+      parsePublicSoftwareItem(
+        value,
+        RPC_FIELDS.list_public_software,
+        path
+      )
+  )
+}
+
+export function parsePublicSoftwareDetailResponse(
+  payload: unknown
+): PublicSoftwareItem | null {
+  const rows =
+    parseArray(
+      payload,
+      'get_public_software response',
+      (value, path) =>
+        parsePublicSoftwareItem(
+          value,
+          RPC_FIELDS.get_public_software,
+          path
+        )
+    )
+
+  if (rows.length > 1) {
+    fail(
+      'get_public_software response',
+      'expected zero or one row'
+    )
+  }
+
+  return rows[0] ?? null
 }
 
 export function parsePublicTeachingList(
