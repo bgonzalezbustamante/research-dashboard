@@ -16,6 +16,17 @@
 - Updated the Academic API contract manifest, live payload checker, and architecture/privacy documentation to reflect the expanded public daily shape.
 - Kept raw `daily_logs` and `work_sessions` inaccessible to `anon`; only the curated aggregate RPC exposes the daily values.
 
+`academic API reference client`
+
+- Added an isolated `packages/academic-api-client/` reference implementation for external-consumer use, without routing authenticated Dashboard pages through the public interface.
+- Added canonical TypeScript resource types and a transport-agnostic client covering all seven Public RPC v1 operations; the package has no runtime dependency on Supabase and can accept a normal public client exposing `rpc()`.
+- Added generated client contract metadata derived from `lib/academic-api-contract.json` for RPC field names, parameter names, controlled vocabularies, and work-analytics day keys, with a stale-generation check to avoid maintaining those definitions independently.
+- Added dependency-free strict runtime validators with field-level diagnostics for exact payload shapes, required/nullable fields, primitive types, valid ISO dates, HTTP(S) URLs, non-negative numeric values, controlled vocabularies, array uniqueness, project/conference/teaching invariants, and Google Scholar snapshot pairing.
+- Adapted the strict `weekly-penguin-timeline` work-analytics validation: requested-year equality, valid/unique dates, non-negative integer daily minutes/coffee counts, and complete 365/366-day calendar coverage.
+- Added `npm run check:academic-api-client` for generated-contract compatibility, TypeScript compilation, and regression tests; the permanent Verify workflow now runs it on pull requests and `main`.
+- Updated `npm run check:public-api:live` so real anonymous RPC responses pass through the same reference-client validators before the existing direct-table privacy-boundary checks.
+- Updated `ARCHITECTURE.md` and `/api` to distinguish the Supabase Data API/RPC transport from the optional reference TypeScript client/runtime-validation layer.
+
 `list pagination`
 
 - Added First and Last controls to the existing 10-item Papers and Conferences pagination, alongside Previous and Next.

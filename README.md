@@ -24,7 +24,9 @@ Research Dashboard remains the administrative system of record. Public consumers
 
 The human-readable contract is documented at [Academic API](https://dashboard.bgonzalezbustamante.com/api). The exact public field lists and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
 
-For the technical public/private boundary, versioning rules, and integration model, see [ARCHITECTURE.md](ARCHITECTURE.md).
+A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. Generated client metadata is derived from the canonical manifest rather than maintained independently.
+
+For the technical public/private boundary, validation layers, versioning rules, and integration model, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Stack
 
@@ -43,10 +45,11 @@ Normal validation:
 ```bash
 npm run lint
 npm run check:public-api
+npm run check:academic-api-client
 npm run build
 ```
 
-The public API check is network-free by default and validates the contract manifest against the current Supabase migration definitions. Before releases or public-contract changes, run the live boundary check as well; it reads the normal local Supabase values from `.env.local`:
+The producer-side public API check is network-free and validates the contract manifest against the current Supabase migration definitions. The reference-client check verifies generated contract metadata, TypeScript compatibility, and strict runtime-validation tests. Before releases or public-contract changes, run the live boundary check as well; it reads the normal local Supabase values from `.env.local` and validates real RPC responses through the same reference-client validators:
 
 ```bash
 npm run check:public-api:live

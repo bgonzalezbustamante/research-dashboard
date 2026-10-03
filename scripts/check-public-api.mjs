@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -385,283 +385,168 @@ function assertMigrations(contract, operations, corpus) {
   console.log('✓ Controlled vocabularies match migrations')
 }
 
-function assertExactKeys(record, expected, label) {
-  const actual = Object.keys(record).sort()
-  const wanted = [...expected].sort()
-
-  if (!sameArray(actual, wanted)) {
-    fail(
-      label +
-        ' keys differ from Public RPC v1.\nExpected: ' +
-        wanted.join(', ') +
-        '\nActual: ' +
-        actual.join(', ')
-    )
-  }
-}
-
-async function liveCheck(contract) {
-  const live = process.argv.includes('--live')
+async function liveCheck() {
+  const live =
+    process.argv.includes('--live')
 
   if (!live) {
     console.log(
-      '• Live RPC validation skipped (run npm run check:public-api -- --live with Supabase public environment variables exported).'
+      '• Live RPC validation skipped (run npm run check:public-api:live).'
     )
     return
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL
   const publishableKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 
-  if (!url || !publishableKey) {
+  if (
+    !url ||
+    !publishableKey
+  ) {
     fail(
       'Live validation requires NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.'
     )
   }
 
-  const { createClient } = await import('@supabase/supabase-js')
-  const supabase = createClient(url, publishableKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  })
+  const referenceClientPath =
+    path.join(
+      root,
+      'node_modules',
+      '.cache',
+      'academic-api-client',
+      'index.js'
+    )
 
-  const byName = new Map(
-    contract.resources
-      .flatMap((resource) => resource.operations)
-      .map((operation) => [operation.name, operation])
-  )
-
-  async function call(name, args) {
-    const result = await supabase.rpc(name, args)
-
-    if (result.error) {
-      fail(name + ' live call failed: ' + result.error.message)
-    }
-
-    return result.data
-  }
-
-  const papers =
-    (await call('list_public_papers')) ?? []
-
-  for (const paper of papers) {
-    assertExactKeys(
-      paper,
-      fieldNames(byName.get('list_public_papers')),
-      'Public paper listing row'
+  if (
+    !fs.existsSync(
+      referenceClientPath
+    )
+  ) {
+    fail(
+      'Academic API reference client build is missing. Run npm run build:academic-api-client before the live checker.'
     )
   }
 
-  if (papers.length > 0) {
-    const details = await call('get_public_paper', {
-      p_slug: papers[0].slug,
-    })
-    const detail = details?.[0]
+  const [
+    { createClient },
+    { createAcademicApiClient },
+  ] = await Promise.all([
+    import(
+      '@supabase/supabase-js'
+    ),
+    import(
+      pathToFileURL(
+        referenceClientPath
+      ).href
+    ),
+  ])
+
+  const supabase =
+    createClient(
+      url,
+      publishableKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      }
+    )
+
+  const api =
+    createAcademicApiClient(
+      supabase
+    )
+
+  const papers =
+    await api.listPublicPapers()
+
+  if (
+    papers.length > 0
+  ) {
+    const detail =
+      await api.getPublicPaper(
+        papers[0].slug
+      )
 
     if (!detail) {
       fail(
-        'get_public_paper(text) did not resolve a listed Public slug.'
+        'get_public_paper(text) did not resolve a listed public slug.'
       )
     }
-
-    assertExactKeys(
-      detail,
-      fieldNames(byName.get('get_public_paper')),
-      'Public paper detail row'
-    )
   }
 
-  const missingPaper = await call(
-    'get_public_paper',
-    { p_slug: '__academic-api-contract-missing__' }
-  )
+  const missingPaper =
+    await api.getPublicPaper(
+      '__academic-api-contract-missing__'
+    )
 
-  if (!Array.isArray(missingPaper) || missingPaper.length !== 0) {
+  if (
+    missingPaper !== null
+  ) {
     fail(
       'get_public_paper(text) must return no row for an unknown/non-public slug.'
     )
   }
 
   const projects =
-    (await call('list_public_projects')) ?? []
+    await api.listPublicProjects()
 
-  const conferenceFields = fieldNames(
-    byName.get('list_public_conference_presentations')
-  )
-
-  for (const project of projects) {
-    assertExactKeys(
-      project,
-      fieldNames(byName.get('list_public_projects')),
-      'Public project listing row'
-    )
-
-    for (const presentation of project.conference_presentations ?? []) {
-      assertExactKeys(
-        presentation,
-        conferenceFields,
-        'Public project conference presentation'
+  if (
+    projects.length > 0
+  ) {
+    const detail =
+      await api.getPublicProject(
+        projects[0].slug
       )
-    }
-  }
-
-  if (projects.length > 0) {
-    const details = await call('get_public_project', {
-      p_slug: projects[0].slug,
-    })
-    const detail = details?.[0]
 
     if (!detail) {
       fail(
-        'get_public_project(text) did not resolve a listed Public slug.'
-      )
-    }
-
-    assertExactKeys(
-      detail,
-      fieldNames(byName.get('get_public_project')),
-      'Public project detail row'
-    )
-
-    for (const presentation of detail.conference_presentations ?? []) {
-      assertExactKeys(
-        presentation,
-        conferenceFields,
-        'Public project detail conference presentation'
+        'get_public_project(text) did not resolve a listed public slug.'
       )
     }
   }
 
-  const missingProject = await call(
-    'get_public_project',
-    { p_slug: '__academic-api-contract-missing__' }
-  )
+  const missingProject =
+    await api.getPublicProject(
+      '__academic-api-contract-missing__'
+    )
 
-  if (!Array.isArray(missingProject) || missingProject.length !== 0) {
+  if (
+    missingProject !== null
+  ) {
     fail(
       'get_public_project(text) must return no row for an unknown/non-public slug.'
     )
   }
 
-  const conferences =
-    (await call('list_public_conference_presentations')) ?? []
+  await api
+    .listPublicConferencePresentations()
 
-  for (const conference of conferences) {
-    assertExactKeys(
-      conference,
-      fieldNames(
-        byName.get('list_public_conference_presentations')
-      ),
-      'Public conference row'
-    )
-  }
+  await api
+    .listPublicTeaching()
 
-  const teaching =
-    (await call('list_public_teaching')) ?? []
-
-  for (const item of teaching) {
-    assertExactKeys(
-      item,
-      fieldNames(byName.get('list_public_teaching')),
-      'Public teaching row'
-    )
-  }
-
-  const year = Number(
-    new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Europe/Amsterdam',
-      year: 'numeric',
-    }).format(new Date())
-  )
-
-  const analytics = await call('get_public_work_analytics', {
-    p_year: year,
-  })
-
-  assertExactKeys(
-    analytics,
-    fieldNames(byName.get('get_public_work_analytics')),
-    'Public work analytics payload'
-  )
-
-  for (const day of analytics.days ?? []) {
-    assertExactKeys(
-      day,
-      ['date', 'net_minutes', 'coffee_count'],
-      'Public work analytics day'
-    )
-  }
-
-  const vocab = new Map(
-    contract.controlledVocabularies.map((item) => [
-      item.id,
-      new Set(item.values),
-    ])
-  )
-
-  for (const paper of papers) {
-    if (
-      paper.publication_index != null &&
-      !vocab
-        .get('publication-index')
-        .has(paper.publication_index)
-    ) {
-      fail(
-        'Live paper payload contains an unknown publication_index.'
+  const year =
+    Number(
+      new Intl.DateTimeFormat(
+        'en-GB',
+        {
+          timeZone:
+            'Europe/Amsterdam',
+          year: 'numeric',
+        }
+      ).format(
+        new Date()
       )
-    }
+    )
 
-    if (
-      paper.language != null &&
-      !vocab.get('paper-language').has(paper.language)
-    ) {
-      fail('Live paper payload contains an unknown language.')
-    }
-  }
-
-  for (const project of projects) {
-    if (
-      project.role != null &&
-      !vocab.get('project-role').has(project.role)
-    ) {
-      fail('Live project payload contains an unknown role.')
-    }
-
-    if (!vocab.get('project-status').has(project.status)) {
-      fail('Live project payload contains an unknown status.')
-    }
-  }
-
-  for (const presentation of conferences) {
-    if (
-      !vocab
-        .get('conference-presentation-type')
-        .has(presentation.presentation_type)
-    ) {
-      fail(
-        'Live conference payload contains an unknown presentation_type.'
-      )
-    }
-  }
-
-  for (const item of teaching) {
-    if (
-      item.role != null &&
-      !vocab.get('teaching-role').has(item.role)
-    ) {
-      fail('Live teaching payload contains an unknown role.')
-    }
-
-    for (const level of item.levels ?? []) {
-      if (!vocab.get('teaching-level').has(level)) {
-        fail('Live teaching payload contains an unknown level.')
-      }
-    }
-  }
+  await api
+    .getPublicWorkAnalytics(
+      year
+    )
 
   const privateTables = [
     'papers',
@@ -676,11 +561,15 @@ async function liveCheck(contract) {
     'work_sessions',
   ]
 
-  for (const table of privateTables) {
-    const result = await supabase
-      .from(table)
-      .select('*')
-      .limit(1)
+  for (
+    const table of
+    privateTables
+  ) {
+    const result =
+      await supabase
+        .from(table)
+        .select('*')
+        .limit(1)
 
     if (!result.error) {
       fail(
@@ -690,8 +579,12 @@ async function liveCheck(contract) {
     }
   }
 
-  console.log('✓ Live Public RPC v1 payload validation')
-  console.log('✓ Anonymous direct table access remains blocked')
+  console.log(
+    '✓ Live Public RPC v1 responses passed reference client validation'
+  )
+  console.log(
+    '✓ Anonymous direct table access remains blocked'
+  )
 }
 
 async function main() {
@@ -700,7 +593,7 @@ async function main() {
   const operations = assertManifest(contract)
 
   assertMigrations(contract, operations, corpus)
-  await liveCheck(contract)
+  await liveCheck()
 
   console.log('✓ Academic API contract validation passed.')
 }
