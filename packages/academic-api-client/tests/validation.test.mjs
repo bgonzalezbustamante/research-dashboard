@@ -106,7 +106,7 @@ const software = {
   name: 'Research Dashboard',
   short_description:
     'Academic research management software.',
-  category: 'Web application',
+  category: 'Application',
   current_version: 'v1.0.0-rc.2',
   development_stage:
     'Release candidate',
@@ -119,6 +119,7 @@ const software = {
   documentation_url:
     'https://dashboard.example.org/api',
   start_year: 2026,
+  end_year: null,
   featured: true,
 }
 
@@ -263,6 +264,17 @@ test('rejects malformed URLs and unknown controlled values', () => {
         },
       ]),
     /repository_url/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicSoftwareList([
+        {
+          ...software,
+          end_year: 2025,
+        },
+      ]),
+    /end_year/
   )
 })
 
