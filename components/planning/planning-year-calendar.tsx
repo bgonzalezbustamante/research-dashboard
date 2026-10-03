@@ -121,8 +121,9 @@ export default function PlanningYearCalendar({
   >(null)
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      {Array.from(
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {Array.from(
         {
           length: 12,
         },
@@ -306,7 +307,8 @@ export default function PlanningYearCalendar({
             </section>
           )
         }
-      )}
+        )}
+      </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-oxford-stone pt-3 text-xs text-oxford-ash">
         <span className="font-medium text-oxford-charcoal">
@@ -329,6 +331,6 @@ export default function PlanningYearCalendar({
           Overcommitted
         </span>
       </div>
-    </div>
+    </>
   )
 }
