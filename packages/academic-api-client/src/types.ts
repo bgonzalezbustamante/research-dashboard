@@ -17,6 +17,8 @@ export type TeachingRole =
   (typeof CONTROLLED_VOCABULARIES)['teaching-role'][number]
 export type TeachingLevel =
   (typeof CONTROLLED_VOCABULARIES)['teaching-level'][number]
+export type PublicAvailabilityType =
+  (typeof CONTROLLED_VOCABULARIES)['availability-type'][number]
 
 export type PublicPaper = {
   slug: string
@@ -55,6 +57,8 @@ export type PublicConferencePresentation = {
   presentation_date: string
   start_date: string
   end_date: string
+  personal_attendance: boolean
+  involves_trip: boolean
   presentation_title: string | null
   authors: string[]
   presentation_type: ConferencePresentationType
@@ -93,6 +97,13 @@ export type PublicTeachingItem = {
   times_taught: number
   student_count: number
   course_image_filename: string | null
+}
+
+export type PublicAvailabilityItem = {
+  type: PublicAvailabilityType
+  start_date: string
+  end_date: string
+  label: string
 }
 
 export type PublicWorkDay = {
@@ -152,6 +163,13 @@ export type PublicTeachingContractKeysMatch = Assert<
   KeysEqual<
     PublicTeachingItem,
     typeof RPC_FIELDS.list_public_teaching
+  >
+>
+
+export type PublicAvailabilityContractKeysMatch = Assert<
+  KeysEqual<
+    PublicAvailabilityItem,
+    typeof RPC_FIELDS.list_public_availability
   >
 >
 
