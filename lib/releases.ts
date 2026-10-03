@@ -31,6 +31,7 @@ export const releases: ReleaseNote[] = [
           'Live API verification now uses the same response validators while keeping the underlying daily logs, work sessions and other private tables unavailable to anonymous users.',
           'Added public-safe availability ranges for trips, Winter and Summer holidays, and generic unavailable periods, while keeping sickness reasons and Administrative commitments private.',
           'Conference data now indicates personal attendance and whether attendance involved a trip.',
+          'Added a public Teaching season status that external consumers can read independently from individual course visibility.',
         ],
       },
       {
@@ -41,6 +42,8 @@ export const releases: ReleaseNote[] = [
           'Kept overlapping dated commitments additive and flag them visibly, while preserving older manual allocations as Legacy records.',
           'Fixed Teaching Portfolio saves when adding active Planning months and committed teaching days.',
           'Fixed Conference attendance/trip edits and refined the Planning and attendance panel heading.',
+          'Reorganised Planning commitments around a narrow dated-event utility card and wider source-backed commitment grid, restored clearer FlowSavvy status styling, removed the redundant Monthly overview, and redesigned the Annual timeline as a clickable 12-month fortnight calendar.',
+          'Reorganised Teaching controls with the public contract and Teaching season status at the top and the course/activity form at full width below.',
         ],
       },
       {

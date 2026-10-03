@@ -26,6 +26,7 @@ export {
   parsePublicProjectDetailResponse,
   parsePublicProjectList,
   parsePublicTeachingList,
+  parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
 } from './validation.js'
 
@@ -41,6 +42,7 @@ export type {
   PublicPaperDetail,
   PublicProject,
   PublicTeachingItem,
+  PublicTeachingSettings,
   PublicWorkAnalytics,
   PublicWorkDay,
   PublicationIndex,

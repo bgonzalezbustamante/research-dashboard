@@ -556,12 +556,13 @@
     {
       "id": "teaching",
       "title": "Teaching",
-      "summary": "Public teaching portfolio metadata for items explicitly marked public.",
+      "summary": "Public teaching portfolio metadata for items explicitly marked public, plus the global Teaching season status.",
       "notExposed": [
         "Internal teaching and owner IDs",
         "Activity-label relationships",
         "Tracked teaching hours and session counts",
-        "Internal activity/work-session records"
+        "Internal activity/work-session records",
+        "Internal Teaching-setting owner metadata and timestamps"
       ],
       "forbiddenFields": [
         "id",
@@ -636,6 +637,25 @@
           "listingOnly": [],
           "notes": [
             "slug is optional for public Teaching items; no public teaching detail RPC currently exists."
+          ]
+        },
+        {
+          "name": "get_public_teaching_settings",
+          "signature": "get_public_teaching_settings()",
+          "kind": "Status",
+          "purpose": "Returns whether the Dashboard owner currently marks Teaching season as active.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "teaching_season_active",
+              "type": "boolean"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "This is an owner-level status independent of individual Teaching Portfolio item visibility.",
+            "The underlying Teaching settings row, owner identifier, and timestamps remain private."
           ]
         }
       ]

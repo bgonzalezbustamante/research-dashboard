@@ -113,6 +113,9 @@ export const RPC_FIELDS = {
     "student_count",
     "course_image_filename"
   ],
+  "get_public_teaching_settings": [
+    "teaching_season_active"
+  ],
   "get_public_work_analytics": [
     "year",
     "average_net_minutes_per_working_day",
@@ -138,6 +141,7 @@ export const RPC_PARAMETERS = {
   ],
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
+  "get_public_teaching_settings": [],
   "get_public_work_analytics": [
     "p_year"
   ],

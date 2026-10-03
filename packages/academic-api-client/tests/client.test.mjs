@@ -37,6 +37,21 @@ test('reference client calls the transport and validates the result', async () =
 
       if (
         name ===
+        'get_public_teaching_settings'
+      ) {
+        return {
+          data: [
+            {
+              teaching_season_active:
+                true,
+            },
+          ],
+          error: null,
+        }
+      }
+
+      if (
+        name ===
         'list_public_availability'
       ) {
         return {
@@ -83,6 +98,8 @@ test('reference client calls the transport and validates the result', async () =
     )
 
   await client.listPublicPapers()
+  const teachingSettings =
+    await client.getPublicTeachingSettings()
   const availability =
     await client.listPublicAvailability(
       2026
@@ -92,6 +109,10 @@ test('reference client calls the transport and validates the result', async () =
       2026
     )
 
+  assert.equal(
+    teachingSettings.teaching_season_active,
+    true
+  )
   assert.equal(
     availability[0].type,
     'trip'
@@ -105,6 +126,11 @@ test('reference client calls the transport and validates the result', async () =
     [
       {
         name: 'list_public_papers',
+        args: undefined,
+      },
+      {
+        name:
+          'get_public_teaching_settings',
         args: undefined,
       },
       {

@@ -351,7 +351,7 @@ function flowPresentation(
       icon: '☑',
       label: 'Added to FlowSavvy/Calendar',
       className:
-        'text-green-800',
+        'font-medium text-green-800',
     }
   }
 
@@ -360,10 +360,10 @@ function flowPresentation(
     0
   ) {
     return {
-      icon: '◩',
+      icon: '◐',
       label: 'Partially added to FlowSavvy/Calendar',
       className:
-        'text-amber-800',
+        'font-medium text-amber-800',
     }
   }
 
@@ -490,8 +490,8 @@ export default function PlanningWorkspace({
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 xl:grid-cols-[minmax(250px,0.7fr)_minmax(0,2.3fr)]">
+        <Card className="h-fit">
           <h3 className="font-serif text-xl font-semibold text-oxford-blue">
             Add dated blocked event
           </h3>
@@ -551,7 +551,7 @@ export default function PlanningWorkspace({
               </select>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4">
               <div>
                 <label
                   htmlFor="blocked-event-start"
@@ -615,63 +615,9 @@ export default function PlanningWorkspace({
           </form>
         </Card>
 
-        <Card>
-          <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-            Automatic sources
-          </h3>
-
-          <div className="mt-4 space-y-4 text-sm leading-6 text-oxford-charcoal">
-            <div>
-              <Link
-                href="/conferences"
-                className="font-medium text-oxford-blue hover:underline"
-              >
-                Conferences
-              </Link>
-              <p className="text-oxford-ash">
-                Personal attendance uses the
-                exact event dates. Trips add
-                one travel day before and
-                after.
-              </p>
-            </div>
-
-            <div>
-              <Link
-                href="/teaching"
-                className="font-medium text-oxford-blue hover:underline"
-              >
-                Teaching Portfolio
-              </Link>
-              <p className="text-oxford-ash">
-                Active months recur within
-                the portfolio period. One or
-                two committed days per week
-                become two or four days per
-                half-month.
-              </p>
-            </div>
-
-            <div>
-              <Link
-                href="/papers"
-                className="font-medium text-oxford-blue hover:underline"
-              >
-                Paper Milestones
-              </Link>
-              <p className="text-oxford-ash">
-                Capacity-bearing planned
-                milestones remain the source
-                of research commitments.
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="grid content-start gap-4 sm:grid-cols-2 2xl:grid-cols-3">
         {allocations.length === 0 ? (
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 2xl:col-span-3">
             <Card>
               <div className="py-7 text-center">
                 <h3 className="font-serif text-lg font-semibold text-oxford-blue">
@@ -1337,7 +1283,62 @@ export default function PlanningWorkspace({
             }
           )
         )}
+        </div>
+
       </div>
+
+      <Card className="mt-6">
+        <h3 className="font-serif text-xl font-semibold text-oxford-blue">
+          Automatic sources
+        </h3>
+
+        <div className="mt-4 grid gap-4 text-sm leading-6 text-oxford-charcoal md:grid-cols-3">
+          <div>
+            <Link
+              href="/conferences"
+              className="font-medium text-oxford-blue hover:underline"
+            >
+              Conferences
+            </Link>
+            <p className="text-oxford-ash">
+              Personal attendance uses the
+              exact event dates. Trips add
+              one travel day before and
+              after.
+            </p>
+          </div>
+
+          <div>
+            <Link
+              href="/teaching"
+              className="font-medium text-oxford-blue hover:underline"
+            >
+              Teaching Portfolio
+            </Link>
+            <p className="text-oxford-ash">
+              Active months recur within
+              the portfolio period. One or
+              two committed days per week
+              become two or four days per
+              half-month.
+            </p>
+          </div>
+
+          <div>
+            <Link
+              href="/papers"
+              className="font-medium text-oxford-blue hover:underline"
+            >
+              Paper Milestones
+            </Link>
+            <p className="text-oxford-ash">
+              Capacity-bearing planned
+              milestones remain the source
+              of research commitments.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <p className="mt-4 text-xs leading-5 text-oxford-ash">
         Selected Planning period:{' '}
