@@ -51,6 +51,7 @@ The current anonymous-safe function surface is:
 - `get_public_project(text)`
 - `list_public_conference_presentations()`
 - `list_public_teaching()`
+- `get_public_teaching_settings()`
 - `get_public_work_analytics(year)`
 - `list_public_availability(year)`
 
@@ -131,6 +132,8 @@ Private notes, internal owner IDs, presentation IDs, and the optional internal p
 ### Teaching Portfolio
 
 Only teaching portfolio items marked public are returned. Public portfolio fields include the controlled Teaching Role, academic levels, period/current state, cumulative teaching/student counts, and optional image filename. Activity labels, tracked hours, session counts, owner metadata, and internal IDs remain private.
+
+`get_public_teaching_settings()` separately exposes the single owner-level `teaching_season_active` boolean. The underlying Teaching settings row, owner identifier, and timestamps remain private, and the season flag does not change per-course visibility or Planning months.
 
 ### Work analytics
 
