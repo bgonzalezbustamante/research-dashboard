@@ -226,6 +226,8 @@ function assertManifest(contract) {
     'list_public_conference_presentations',
     'list_public_teaching',
     'get_public_teaching_settings',
+    'list_public_software',
+    'get_public_software',
     'get_public_work_analytics',
     'list_public_availability',
   ]
@@ -326,6 +328,27 @@ function assertManifest(contract) {
   ) {
     fail(
       'Project listing/detail shapes are expected to match in Public RPC v1.'
+    )
+  }
+
+  const software = contract.resources.find(
+    (resource) => resource.id === 'software'
+  )
+  const softwareList = software.operations.find(
+    (operation) => operation.name === 'list_public_software'
+  )
+  const softwareDetail = software.operations.find(
+    (operation) => operation.name === 'get_public_software'
+  )
+
+  if (
+    !sameArray(
+      fieldNames(softwareList),
+      fieldNames(softwareDetail)
+    )
+  ) {
+    fail(
+      'Software listing/detail shapes are expected to match in Public RPC v1.'
     )
   }
 
@@ -554,6 +577,37 @@ async function liveCheck() {
     )
   }
 
+  const software =
+    await api.listPublicSoftware()
+
+  if (
+    software.length > 0
+  ) {
+    const detail =
+      await api.getPublicSoftware(
+        software[0].slug
+      )
+
+    if (!detail) {
+      fail(
+        'get_public_software(text) did not resolve a listed public slug.'
+      )
+    }
+  }
+
+  const missingSoftware =
+    await api.getPublicSoftware(
+      '__academic-api-contract-missing__'
+    )
+
+  if (
+    missingSoftware !== null
+  ) {
+    fail(
+      'get_public_software(text) must return no row for an unknown/non-public slug.'
+    )
+  }
+
   await api
     .listPublicConferencePresentations()
 
@@ -597,6 +651,8 @@ async function liveCheck() {
     'teaching_portfolio',
     'teaching_public_metadata',
     'teaching_settings',
+    'software_items',
+    'software_public_metadata',
     'daily_logs',
     'work_sessions',
     'planning_blocked_events',

@@ -19,6 +19,14 @@ export type TeachingLevel =
   (typeof CONTROLLED_VOCABULARIES)['teaching-level'][number]
 export type PublicAvailabilityType =
   (typeof CONTROLLED_VOCABULARIES)['availability-type'][number]
+export type SoftwareCategory =
+  (typeof CONTROLLED_VOCABULARIES)['software-category'][number]
+export type SoftwareDevelopmentStage =
+  (typeof CONTROLLED_VOCABULARIES)['software-development-stage'][number]
+export type SoftwareStatus =
+  (typeof CONTROLLED_VOCABULARIES)['software-status'][number]
+export type RepositoryVisibility =
+  (typeof CONTROLLED_VOCABULARIES)['repository-visibility'][number]
 
 export type PublicPaper = {
   slug: string
@@ -103,6 +111,23 @@ export type PublicTeachingSettings = {
   teaching_season_active: boolean
 }
 
+export type PublicSoftwareItem = {
+  slug: string
+  name: string
+  short_description: string
+  category: SoftwareCategory
+  current_version: string | null
+  development_stage: SoftwareDevelopmentStage
+  status: SoftwareStatus
+  repository_visibility: RepositoryVisibility
+  repository_url: string | null
+  production_url: string | null
+  documentation_url: string | null
+  start_year: number | null
+  end_year: number | null
+  featured: boolean
+}
+
 export type PublicAvailabilityItem = {
   type: PublicAvailabilityType
   start_date: string
@@ -174,6 +199,20 @@ export type PublicTeachingSettingsContractKeysMatch = Assert<
   KeysEqual<
     PublicTeachingSettings,
     typeof RPC_FIELDS.get_public_teaching_settings
+  >
+>
+
+export type PublicSoftwareListContractKeysMatch = Assert<
+  KeysEqual<
+    PublicSoftwareItem,
+    typeof RPC_FIELDS.list_public_software
+  >
+>
+
+export type PublicSoftwareDetailContractKeysMatch = Assert<
+  KeysEqual<
+    PublicSoftwareItem,
+    typeof RPC_FIELDS.get_public_software
   >
 >
 

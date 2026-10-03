@@ -37,6 +37,26 @@ test('reference client calls the transport and validates the result', async () =
 
       if (
         name ===
+        'list_public_software'
+      ) {
+        return {
+          data: [],
+          error: null,
+        }
+      }
+
+      if (
+        name ===
+        'get_public_software'
+      ) {
+        return {
+          data: [],
+          error: null,
+        }
+      }
+
+      if (
+        name ===
         'get_public_teaching_settings'
       ) {
         return {
@@ -98,6 +118,11 @@ test('reference client calls the transport and validates the result', async () =
     )
 
   await client.listPublicPapers()
+  await client.listPublicSoftware()
+  const missingSoftware =
+    await client.getPublicSoftware(
+      'missing-software'
+    )
   const teachingSettings =
     await client.getPublicTeachingSettings()
   const availability =
@@ -109,6 +134,10 @@ test('reference client calls the transport and validates the result', async () =
       2026
     )
 
+  assert.equal(
+    missingSoftware,
+    null
+  )
   assert.equal(
     teachingSettings.teaching_season_active,
     true
@@ -127,6 +156,19 @@ test('reference client calls the transport and validates the result', async () =
       {
         name: 'list_public_papers',
         args: undefined,
+      },
+      {
+        name:
+          'list_public_software',
+        args: undefined,
+      },
+      {
+        name:
+          'get_public_software',
+        args: {
+          p_slug:
+            'missing-software',
+        },
       },
       {
         name:

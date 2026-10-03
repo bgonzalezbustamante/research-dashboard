@@ -116,6 +116,38 @@ export const RPC_FIELDS = {
   "get_public_teaching_settings": [
     "teaching_season_active"
   ],
+  "list_public_software": [
+    "slug",
+    "name",
+    "short_description",
+    "category",
+    "current_version",
+    "development_stage",
+    "status",
+    "repository_visibility",
+    "repository_url",
+    "production_url",
+    "documentation_url",
+    "start_year",
+    "end_year",
+    "featured"
+  ],
+  "get_public_software": [
+    "slug",
+    "name",
+    "short_description",
+    "category",
+    "current_version",
+    "development_stage",
+    "status",
+    "repository_visibility",
+    "repository_url",
+    "production_url",
+    "documentation_url",
+    "start_year",
+    "end_year",
+    "featured"
+  ],
   "get_public_work_analytics": [
     "year",
     "average_net_minutes_per_working_day",
@@ -142,6 +174,10 @@ export const RPC_PARAMETERS = {
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
   "get_public_teaching_settings": [],
+  "list_public_software": [],
+  "get_public_software": [
+    "p_slug"
+  ],
   "get_public_work_analytics": [
     "p_year"
   ],
@@ -201,6 +237,34 @@ export const CONTROLLED_VOCABULARIES = {
     "summer_holiday",
     "trip",
     "unavailable"
+  ],
+  "software-category": [
+    "Application",
+    "Website",
+    "Utility",
+    "Reusable component",
+    "Package/library",
+    "API/service",
+    "Data product",
+    "Template",
+    "Other"
+  ],
+  "software-development-stage": [
+    "Alpha",
+    "Beta",
+    "Release candidate",
+    "Stable",
+    "Maintenance"
+  ],
+  "software-status": [
+    "active",
+    "paused",
+    "completed",
+    "archived"
+  ],
+  "repository-visibility": [
+    "public",
+    "private"
   ]
 } as const
 

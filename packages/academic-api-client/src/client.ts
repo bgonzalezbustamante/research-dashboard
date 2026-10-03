@@ -4,6 +4,7 @@ import type {
   PublicPaper,
   PublicPaperDetail,
   PublicProject,
+  PublicSoftwareItem,
   PublicTeachingItem,
   PublicTeachingSettings,
   PublicWorkAnalytics,
@@ -15,6 +16,8 @@ import {
   parsePublicPaperList,
   parsePublicProjectDetailResponse,
   parsePublicProjectList,
+  parsePublicSoftwareDetailResponse,
+  parsePublicSoftwareList,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
@@ -86,6 +89,14 @@ export type AcademicApiClient = {
     slug: string
   ): Promise<
     PublicProject | null
+  >
+  listPublicSoftware(): Promise<
+    PublicSoftwareItem[]
+  >
+  getPublicSoftware(
+    slug: string
+  ): Promise<
+    PublicSoftwareItem | null
   >
   listPublicConferencePresentations(): Promise<
     PublicConferencePresentation[]
@@ -159,6 +170,32 @@ export function createAcademicApiClient(
         await callRpc(
           transport,
           'get_public_project',
+          { p_slug: slug }
+        )
+      )
+    },
+
+    async listPublicSoftware() {
+      return parsePublicSoftwareList(
+        await callRpc(
+          transport,
+          'list_public_software'
+        )
+      )
+    },
+
+    async getPublicSoftware(
+      slug
+    ) {
+      assertSlug(
+        slug,
+        'Software slug'
+      )
+
+      return parsePublicSoftwareDetailResponse(
+        await callRpc(
+          transport,
+          'get_public_software',
           { p_slug: slug }
         )
       )
