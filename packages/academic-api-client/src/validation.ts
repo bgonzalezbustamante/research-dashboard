@@ -513,7 +513,7 @@ function parsePaperBase(
     )
   }
 
-  return value as PublicPaper
+  return value as unknown as PublicPaper
 }
 
 export function parsePublicPaperList(
@@ -562,7 +562,7 @@ export function parsePublicPaperDetailResponse(
           )
         }
 
-        return paper as PublicPaperDetail
+        return value as unknown as PublicPaperDetail
       }
     )
 
@@ -653,7 +653,7 @@ export function parsePublicConferencePresentation(
     `${path}.url`
   )
 
-  return value as PublicConferencePresentation
+  return value as unknown as PublicConferencePresentation
 }
 
 export function parsePublicConferenceList(
@@ -779,7 +779,7 @@ function parsePublicProject(
     )
 
   return {
-    ...(value as Omit<
+    ...(value as unknown as Omit<
       PublicProject,
       'conference_presentations'
     >),
@@ -955,7 +955,7 @@ function parsePublicTeachingItem(
     `${path}.course_image_filename`
   )
 
-  return value as PublicTeachingItem
+  return value as unknown as PublicTeachingItem
 }
 
 export function parsePublicTeachingList(
