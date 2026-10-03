@@ -99,6 +99,10 @@ export type PublicTeachingItem = {
   course_image_filename: string | null
 }
 
+export type PublicTeachingSettings = {
+  teaching_season_active: boolean
+}
+
 export type PublicAvailabilityItem = {
   type: PublicAvailabilityType
   start_date: string
@@ -163,6 +167,13 @@ export type PublicTeachingContractKeysMatch = Assert<
   KeysEqual<
     PublicTeachingItem,
     typeof RPC_FIELDS.list_public_teaching
+  >
+>
+
+export type PublicTeachingSettingsContractKeysMatch = Assert<
+  KeysEqual<
+    PublicTeachingSettings,
+    typeof RPC_FIELDS.get_public_teaching_settings
   >
 >
 
