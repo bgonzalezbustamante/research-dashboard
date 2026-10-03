@@ -1091,30 +1091,41 @@ function parsePublicSoftwareItem(
     `${path}.end_year`
   )
 
-  for (const field of [
-    'start_year',
-    'end_year',
-  ] as const) {
-    const year = value[field]
+  const startYear =
+    value.start_year
+  const endYear =
+    value.end_year
 
-    if (
-      year !== null &&
-      (
-        year < 1000 ||
-        year > 9999
-      )
-    ) {
-      fail(
-        `${path}.${field}`,
-        'expected a year from 1000 through 9999'
-      )
-    }
+  if (
+    startYear !== null &&
+    (
+      startYear < 1000 ||
+      startYear > 9999
+    )
+  ) {
+    fail(
+      `${path}.start_year`,
+      'expected a year from 1000 through 9999'
+    )
   }
 
   if (
-    value.start_year !== null &&
-    value.end_year !== null &&
-    value.end_year < value.start_year
+    endYear !== null &&
+    (
+      endYear < 1000 ||
+      endYear > 9999
+    )
+  ) {
+    fail(
+      `${path}.end_year`,
+      'expected a year from 1000 through 9999'
+    )
+  }
+
+  if (
+    startYear !== null &&
+    endYear !== null &&
+    endYear < startYear
   ) {
     fail(
       `${path}.end_year`,
