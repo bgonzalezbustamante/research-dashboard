@@ -383,7 +383,7 @@ returns uuid
 language plpgsql
 security invoker
 set search_path = ''
-as $
+as $$
 declare
   v_owner_id uuid;
 begin
