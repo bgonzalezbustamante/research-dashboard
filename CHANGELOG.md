@@ -39,6 +39,7 @@
 - Added per-source/per-period FlowSavvy/Calendar state for Conference, Teaching, and dated blocked events; changing a source schedule resets its Calendar state.
 - Kept exact dated overlaps additive and added an **Overlapping dated commitments** warning rather than silently deduplicating capacity.
 - Updated the main Dashboard Planning load to use the same source-backed derivation as the Planning page.
+- Fixed Teaching Portfolio saves after the Planning expansion by restoring the authenticated runtime permission required by the `planning_months` uniqueness constraint.
 
 `list pagination`
 
