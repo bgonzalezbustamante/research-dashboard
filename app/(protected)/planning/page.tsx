@@ -711,7 +711,7 @@ export default async function PlanningPage({
               allocation.allocation_type ===
                 'paper'
                 ? 'legacy'
-                : 'blocked',
+                : 'legacy_blocked',
             blocked_type:
               allocation.blocked_type as BlockedType | null,
             committed_days:
@@ -737,6 +737,14 @@ export default async function PlanningPage({
                 paper?.archived_at
               ),
             milestones: [],
+            source_type: null,
+            source_id: null,
+            label: null,
+            subtitle: null,
+            source_href: null,
+            range_start: null,
+            range_end: null,
+            dated_days: [],
           }]
         }
       )
