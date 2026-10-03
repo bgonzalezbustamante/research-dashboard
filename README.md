@@ -2,7 +2,7 @@
 
 **v1.0.0-rc.2 "Rustic Peak" — in development**
 
-A personal research-management dashboard for papers, projects, conferences, teaching, working hours, research planning, collaboration, and cross-module analytics. Research Dashboard is also the canonical administrative source for selected academic metadata used by public downstream applications.
+A personal research-management dashboard for papers, projects, conferences, teaching, software, working hours, research planning, collaboration, and cross-module analytics. Research Dashboard is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
 **Production:** [dashboard.bgonzalezbustamante.com](https://dashboard.bgonzalezbustamante.com)  
 **Academic API:** [dashboard.bgonzalezbustamante.com/api](https://dashboard.bgonzalezbustamante.com/api)
@@ -10,19 +10,19 @@ A personal research-management dashboard for papers, projects, conferences, teac
 ## Features
 
 - Paper workflow, milestones, revision history, citations, research links, and paper-scoped coauthor access
-- Structured Projects, Conferences, and Teaching Portfolio modules
+- Structured Projects, Conferences, Teaching Portfolio, and Software Ecosystem modules
 - Manual working-hour logging with yearly research and workload analytics
 - Source-backed biweekly Planning from Paper Milestones, conference attendance/trips, recurring Teaching schedules, and exact dated blocked events, with a load-coloured 12-month calendar for fortnight navigation
 - Dashboard-wide read-only Viewer access and paper-specific collaboration permissions
 - Google Scholar citation snapshots and citation-yield indicators
-- Curated read-only public academic metadata, Teaching season state, work analytics, and availability ranges for the Academic Website, Academic CV Studio, Weekly Penguin Timeline, and other approved consumers
+- Curated read-only public academic and software metadata, Teaching season state, work analytics, and availability ranges for downstream applications
 - Public **Academic API — Public RPC v1** documentation at `/api`
 
 ## Public data interface
 
 Research Dashboard remains the administrative system of record. Public consumers do not query Dashboard tables directly; they use the curated anonymous-safe Supabase RPC layer with a publishable key.
 
-The human-readable contract is documented at [Academic API](https://dashboard.bgonzalezbustamante.com/api). Public RPC v1 currently contains nine curated operations. The exact public field lists, operation notes, consumer mappings, and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
+The human-readable contract is documented at [Academic API](https://dashboard.bgonzalezbustamante.com/api). Public RPC v1 currently contains eleven curated operations. The exact public field lists, operation notes, consumer mappings, and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
 
 A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. Generated client metadata is derived from the canonical manifest rather than maintained independently.
 
