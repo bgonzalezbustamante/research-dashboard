@@ -7,6 +7,7 @@ import {
   parsePublicConferenceList,
   parsePublicPaperList,
   parsePublicProjectList,
+  parsePublicSoftwareList,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
@@ -100,6 +101,27 @@ const project = {
   conference_presentations: [conference],
 }
 
+const software = {
+  slug: 'research-dashboard',
+  name: 'Research Dashboard',
+  short_description:
+    'Academic research management software.',
+  category: 'Web application',
+  current_version: 'v1.0.0-rc.2',
+  development_stage:
+    'Release candidate',
+  status: 'active',
+  repository_visibility: 'public',
+  repository_url:
+    'https://github.com/example/research-dashboard',
+  production_url:
+    'https://dashboard.example.org',
+  documentation_url:
+    'https://dashboard.example.org/api',
+  start_year: 2026,
+  featured: true,
+}
+
 const teaching = {
   slug: null,
   name: 'Course',
@@ -131,6 +153,10 @@ test('accepts valid representative Public RPC resources', () => {
   assert.deepEqual(
     parsePublicTeachingList([teaching]),
     [teaching]
+  )
+  assert.deepEqual(
+    parsePublicSoftwareList([software]),
+    [software]
   )
   assert.deepEqual(
     parsePublicTeachingSettingsResponse([
@@ -213,6 +239,30 @@ test('rejects malformed URLs and unknown controlled values', () => {
         },
       ]),
     /role/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicSoftwareList([
+        {
+          ...software,
+          development_stage:
+            'Prototype',
+        },
+      ]),
+    /development_stage/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicSoftwareList([
+        {
+          ...software,
+          repository_visibility:
+            'private',
+        },
+      ]),
+    /repository_url/
   )
 })
 
