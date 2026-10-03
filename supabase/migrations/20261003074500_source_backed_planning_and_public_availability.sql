@@ -1079,7 +1079,14 @@ begin
     );
 
   return query
-  with public_ranges as (
+  with dashboard_owner as (
+    select dm.owner_id
+    from public.dashboard_members dm
+    where dm.role = 'owner'
+      and dm.owner_id = dm.user_id
+    limit 1
+  ),
+  public_ranges as (
     select
       'trip'::text as type,
       greatest(
@@ -1092,6 +1099,8 @@ begin
       ) as end_date,
       cp.event_short_name as label
     from public.conference_presentations cp
+    join dashboard_owner owner
+      on owner.owner_id = cp.owner_id
     where cp.personal_attendance
       and cp.involves_trip
       and cp.start_date - 1 <= v_year_end
@@ -1125,6 +1134,8 @@ begin
           then 'Unavailable'
       end as label
     from public.planning_blocked_events pbe
+    join dashboard_owner owner
+      on owner.owner_id = pbe.owner_id
     where pbe.event_type in (
         'winter_holiday',
         'summer_holiday',
