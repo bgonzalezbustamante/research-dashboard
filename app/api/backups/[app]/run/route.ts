@@ -26,11 +26,34 @@ type RunBackupRouteProps = {
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   {
     params,
   }: RunBackupRouteProps
 ) {
+  const origin =
+    request.headers.get(
+      'origin'
+    )
+
+  if (
+    !origin ||
+    origin !==
+      new URL(
+        request.url
+      ).origin
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          'Backup requests must originate from Research Dashboard.',
+      },
+      {
+        status: 403,
+      }
+    )
+  }
+
   const {
     app,
   } = await params
