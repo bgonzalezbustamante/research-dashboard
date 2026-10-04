@@ -20,6 +20,7 @@
 - Renamed the utility-navigation label from **Software Ecosystem** to **Software** while keeping the full Software Ecosystem page title, and added **Backup** beside it.
 - Added backup-health regression tests and a permanent Verify workflow check.
 - Added an explicit GitHub REST User-Agent for Netlify runtime requests and safe request/status diagnostics for backup metadata and manual dispatch failures.
+- Added a read-only GitHub authentication retry for `401` responses (`Bearer` → `token`) and serialised workflow-run reads to avoid concurrent Actions requests in the Netlify server runtime; write/dispatch requests are never retried automatically.
 
 
 `academic API and public work analytics`

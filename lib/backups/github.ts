@@ -99,30 +99,32 @@ async function githubRequest<T>(
   const token =
     getGitHubToken()
 
-  const headers =
-    new Headers(
-      init.headers
+  const request = async (
+    scheme: 'Bearer' | 'token'
+  ) => {
+    const headers =
+      new Headers(
+        init.headers
+      )
+
+    headers.set(
+      'Accept',
+      'application/vnd.github+json'
+    )
+    headers.set(
+      'Authorization',
+      `${scheme} ${token}`
+    )
+    headers.set(
+      'X-GitHub-Api-Version',
+      '2022-11-28'
+    )
+    headers.set(
+      'User-Agent',
+      'research-dashboard-backup-integration'
     )
 
-  headers.set(
-    'Accept',
-    'application/vnd.github+json'
-  )
-  headers.set(
-    'Authorization',
-    `Bearer ${token}`
-  )
-  headers.set(
-    'X-GitHub-Api-Version',
-    '2022-11-28'
-  )
-  headers.set(
-    'User-Agent',
-    'research-dashboard-backup-integration'
-  )
-
-  const response =
-    await fetch(
+    return fetch(
       githubUrl(path),
       {
         ...init,
@@ -130,11 +132,37 @@ async function githubRequest<T>(
         headers,
       }
     )
+  }
+
+  let response =
+    await request('Bearer')
+
+  const method =
+    init.method?.toUpperCase() ??
+    'GET'
+
+  if (
+    response.status === 401 &&
+    method === 'GET'
+  ) {
+    response =
+      await request('token')
+  }
 
   if (!response.ok) {
+    const acceptedPermissions =
+      response.headers.get(
+        'x-accepted-github-permissions'
+      )
+
+    const permissionHint =
+      acceptedPermissions
+        ? ` Required GitHub permission: ${acceptedPermissions}.`
+        : ''
+
     throw new BackupIntegrationError(
       'github_request_failed',
-      `GitHub ${label} request failed with status ${response.status}.`
+      `GitHub ${label} request failed with status ${response.status}.${permissionHint}`
     )
   }
 
@@ -317,21 +345,24 @@ function isActiveRun(
 export async function getBackupStatuses(): Promise<
   BackupStatus[]
 > {
-  const [
-    releases,
-    runResponses,
-  ] = await Promise.all([
-    fetchReleases(),
-    Promise.all(
-      BACKUP_APPLICATION_KEYS.map(
-        (app) =>
-          fetchWorkflowRuns(
-            app,
-            10
-          )
+  const releases =
+    await fetchReleases()
+
+  const runResponses:
+    GitHubWorkflowRunsResponse[] =
+    []
+
+  for (
+    const app of
+    BACKUP_APPLICATION_KEYS
+  ) {
+    runResponses.push(
+      await fetchWorkflowRuns(
+        app,
+        10
       )
-    ),
-  ])
+    )
+  }
 
   return BACKUP_APPLICATION_KEYS.map(
     (app, index) => {
