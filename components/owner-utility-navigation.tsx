@@ -14,7 +14,11 @@ const ownerLinks = [
   },
   {
     href: '/software',
-    label: 'Software Ecosystem',
+    label: 'Software',
+  },
+  {
+    href: '/backups',
+    label: 'Backup',
   },
 ]
 

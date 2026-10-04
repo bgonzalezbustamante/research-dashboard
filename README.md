@@ -10,10 +10,11 @@ A personal research-management dashboard for papers, projects, conferences, teac
 ## Features
 
 - Paper workflow, milestones, revision history, citations, research links, and paper-scoped coauthor access
-- Structured Projects, Conferences, Teaching Portfolio, and Software Ecosystem modules
+- Structured Projects, Conferences, Teaching Portfolio, Software Ecosystem, and protected backup-operations modules
 - Manual working-hour logging with yearly research and workload analytics
 - Source-backed biweekly Planning from Paper Milestones, conference attendance/trips, recurring Teaching schedules, and exact dated blocked events, with a load-coloured 12-month calendar for fortnight navigation
 - Dashboard-wide read-only Viewer access and paper-specific collaboration permissions
+- Owner-only backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances through the private apps-backups repository
 - Google Scholar citation snapshots and citation-yield indicators
 - Curated read-only public academic and software metadata, Teaching season state, work analytics, and availability ranges for downstream applications
 - Public **Academic API — Public RPC v1** documentation at `/api`
@@ -46,6 +47,7 @@ Normal validation:
 npm run lint
 npm run check:public-api
 npm run check:academic-api-client
+npm run check:backups
 npm run build
 ```
 
@@ -54,6 +56,8 @@ The producer-side public API check is network-free and validates the contract ma
 ```bash
 npm run check:public-api:live
 ```
+
+Backup operations additionally require the server-only `APPS_BACKUPS_GITHUB_TOKEN`. Use a fine-grained GitHub token restricted to `bgonzalezbustamante/apps-backups` with **Actions: read and write** and **Contents: read**. Never expose it through a `NEXT_PUBLIC_*` variable.
 
 Local environment values and private application data must not be committed to the repository. Never use a Supabase secret/service-role credential in a public consumer.
 
