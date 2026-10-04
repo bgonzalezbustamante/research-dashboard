@@ -24,6 +24,7 @@ type GitHubRelease = {
   tag_name: string
   published_at: string | null
   html_url: string
+  draft: boolean
   assets: GitHubAsset[]
 }
 
@@ -93,21 +94,31 @@ async function githubRequest<T>(
   const token =
     getGitHubToken()
 
+  const headers =
+    new Headers(
+      init.headers
+    )
+
+  headers.set(
+    'Accept',
+    'application/vnd.github+json'
+  )
+  headers.set(
+    'Authorization',
+    `Bearer ${token}`
+  )
+  headers.set(
+    'X-GitHub-Api-Version',
+    '2022-11-28'
+  )
+
   const response =
     await fetch(
       githubUrl(path),
       {
         ...init,
         cache: 'no-store',
-        headers: {
-          Accept:
-            'application/vnd.github+json',
-          Authorization:
-            `Bearer ${token}`,
-          'X-GitHub-Api-Version':
-            '2022-11-28',
-          ...init.headers,
-        },
+        headers,
       }
     )
 
@@ -171,10 +182,28 @@ function toLatestSuccess(
   const matching =
     releases
       .filter(
-        (release) =>
-          release.tag_name.startsWith(
-            config.tagPrefix
+        (release) => {
+          if (
+            release.draft ||
+            !release.tag_name.startsWith(
+              config.tagPrefix
+            )
+          ) {
+            return false
+          }
+
+          const expectedArchive =
+            `${release.tag_name}.tar.gz.age`
+
+          return release.assets.some(
+            (asset) =>
+              asset.name ===
+                expectedArchive ||
+              asset.name.endsWith(
+                '.tar.gz.age'
+              )
           )
+        }
       )
       .map((release) => ({
         release,
@@ -274,15 +303,17 @@ export async function getBackupStatuses(): Promise<
 > {
   const [
     releases,
-    ...runResponses
+    runResponses,
   ] = await Promise.all([
     fetchReleases(),
-    ...BACKUP_APPLICATION_KEYS.map(
-      (app) =>
-        fetchWorkflowRuns(
-          app,
-          10
-        )
+    Promise.all(
+      BACKUP_APPLICATION_KEYS.map(
+        (app) =>
+          fetchWorkflowRuns(
+            app,
+            10
+          )
+      )
     ),
   ])
 
