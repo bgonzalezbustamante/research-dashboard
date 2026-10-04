@@ -1134,14 +1134,31 @@ export default async function DashboardPage({
         )
       : null
 
-  const oldestOverduePaper =
-    oldestOverdueMilestone
-      ? activePapers.find(
-          (paper) =>
-            paper.id ===
-            oldestOverdueMilestone.paper_id
-        ) ?? null
-      : null
+  const overduePaperIds =
+    [
+      ...new Set(
+        overdueMilestones.map(
+          (milestone) =>
+            milestone.paper_id
+        )
+      ),
+    ]
+
+  const overduePapers =
+    overduePaperIds.flatMap(
+      (paperId) => {
+        const paper =
+          activePapers.find(
+            (candidate) =>
+              candidate.id ===
+              paperId
+          )
+
+        return paper
+          ? [paper]
+          : []
+      }
+    )
 
   const planningTone =
     getPlanningTone(
@@ -1613,14 +1630,32 @@ export default async function DashboardPage({
           </div>
         </section>
 
-        <section className="rounded-lg border border-oxford-stone bg-white p-5">
+        <section
+          className={
+            overdueMilestones.length > 0
+              ? 'rounded-lg border border-orange-300 bg-orange-50 p-5 shadow-sm'
+              : 'rounded-lg border border-oxford-stone bg-white p-5'
+          }
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+              <div
+                className={
+                  overdueMilestones.length > 0
+                    ? 'text-xs font-medium uppercase tracking-wide text-orange-700'
+                    : 'text-xs font-medium uppercase tracking-wide text-oxford-ash'
+                }
+              >
                 Milestones
               </div>
 
-              <h2 className="mt-1 font-serif text-xl font-semibold text-oxford-blue">
+              <h2
+                className={
+                  overdueMilestones.length > 0
+                    ? 'mt-1 font-serif text-xl font-semibold text-orange-900'
+                    : 'mt-1 font-serif text-xl font-semibold text-oxford-blue'
+                }
+              >
                 Overdue milestones
               </h2>
             </div>
@@ -1629,7 +1664,7 @@ export default async function DashboardPage({
               className={
                 overdueMilestones.length >
                 0
-                  ? 'rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-800'
+                  ? 'rounded-full border border-orange-300 bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-900'
                   : 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
               }
             >
@@ -1640,7 +1675,13 @@ export default async function DashboardPage({
             </span>
           </div>
 
-          <div className="mt-5 font-serif text-4xl font-semibold text-oxford-blue">
+          <div
+            className={
+              overdueMilestones.length > 0
+                ? 'mt-5 font-serif text-4xl font-semibold text-orange-900'
+                : 'mt-5 font-serif text-4xl font-semibold text-oxford-blue'
+            }
+          >
             {
               overdueMilestones.length
             }
@@ -1648,7 +1689,7 @@ export default async function DashboardPage({
 
           {oldestOverdueMilestone &&
           oldestOverdueDays !== null ? (
-            <p className="mt-3 text-sm leading-6 text-oxford-charcoal">
+            <p className="mt-3 text-sm leading-6 text-orange-950">
               Oldest:{' '}
               <span className="font-medium">
                 {
@@ -1672,7 +1713,13 @@ export default async function DashboardPage({
             </p>
           )}
 
-          <p className="mt-3 text-xs leading-5 text-oxford-ash">
+          <p
+            className={
+              overdueMilestones.length > 0
+                ? 'mt-3 text-xs leading-5 text-orange-800'
+                : 'mt-3 text-xs leading-5 text-oxford-ash'
+            }
+          >
             Counts planned milestones
             with target dates before
             today. Completed and
@@ -1680,17 +1727,19 @@ export default async function DashboardPage({
             excluded.
           </p>
 
-          {oldestOverduePaper && (
-            <div className="mt-4">
-              <ButtonLink
-                href={`/papers/${oldestOverduePaper.id}`}
-                variant="secondary"
-              >
-                Open{' '}
-                {
-                  oldestOverduePaper.short_title
-                }
-              </ButtonLink>
+          {overduePapers.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {overduePapers.map(
+                (paper) => (
+                  <Link
+                    key={paper.id}
+                    href={`/papers/${paper.id}`}
+                    className="rounded-full border border-orange-300 bg-white px-2.5 py-1 text-xs font-medium text-orange-900 transition hover:border-orange-400 hover:bg-orange-100"
+                  >
+                    {paper.short_title}
+                  </Link>
+                )
+              )}
             </div>
           )}
         </section>
