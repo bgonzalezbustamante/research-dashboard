@@ -21,6 +21,25 @@ Per-period FlowSavvy/Calendar state for Conference, Teaching and dated blocked-e
 
 The Annual timeline is a derived navigation view over the same half-month periods. Its calendar colours reuse the Period load classification based on total committed days: Open = 0, Light = 1–5, Moderate = 6–10, Full = 11–15, and Overcommitted = 16+. Changing years preserves the selected month and half-month; individual calendar dates navigate to the corresponding fortnight.
 
+## Backup operations
+
+Research Dashboard provides a protected `/backups` operations view for Research Dashboard, Supervision Portal, and Household Finances. The private `bgonzalezbustamante/apps-backups` repository remains the backup system of record and owns backup creation, encrypted release storage, retention, pruning, and recovery procedures.
+
+The Dashboard keeps one typed server-side application registry containing the allow-listed workflow filename, tag prefix, display label, and weekly UTC schedule for each application. GitHub Releases provide the latest successful backup timestamp, encrypted `.tar.gz.age` archive size, and private release link. GitHub Actions workflow runs are queried separately so a newer failed/cancelled attempt is not hidden by an older successful release.
+
+Backup health uses four states:
+
+- **Healthy** — a successful backup exists and is no more than eight days old;
+- **Running** — the latest workflow attempt is queued or in progress;
+- **Attention** — no successful release exists, or a failed/cancelled attempt is newer than the latest successful release;
+- **Stale** — the latest successful backup is more than eight days old.
+
+Manual dispatch is exposed only through the authenticated server-side `POST /api/backups/[app]/run` endpoint. The application key is validated against the registry, the caller must have editable Dashboard access, the request must be same-origin, and dispatch is rejected while that application's workflow already has a queued or in-progress run. The endpoint dispatches only the configured workflow on `main`, polls the private Actions API briefly until the new manual run is discovered and progresses beyond queued where possible, revalidates `/backups`, and returns only a small operational response.
+
+All GitHub API requests execute server-side using `APPS_BACKUPS_GITHUB_TOKEN`. The intended credential is a fine-grained token restricted to `bgonzalezbustamante/apps-backups` with Actions read/write and Contents read permissions. The token, source Supabase credentials, age private key, and backup archive bytes never pass to the browser.
+
+The first integration is deliberately status/operations-only. Research Dashboard does not download, decrypt, restore, delete, or prune backups. Retention remains 12 recent releases plus 12 monthly anchors, with protected milestone tags retained by `apps-backups`.
+
 ## Public Academic API
 
 The public machine interface is intentionally narrower than the administrative data model.
