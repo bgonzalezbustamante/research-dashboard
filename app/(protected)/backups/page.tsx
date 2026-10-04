@@ -11,6 +11,7 @@ import type {
   BackupStatus,
 } from '@/lib/backups/core'
 import {
+  BackupIntegrationError,
   getBackupStatuses,
 } from '@/lib/backups/github'
 import {
@@ -223,9 +224,17 @@ export default async function BackupsPage() {
   try {
     statuses =
       await getBackupStatuses()
-  } catch {
-    integrationError =
-      'Backup metadata could not be loaded. Confirm APPS_BACKUPS_GITHUB_TOKEN is configured with access to the private apps-backups repository.'
+  } catch (error) {
+    if (
+      error instanceof
+      BackupIntegrationError
+    ) {
+      integrationError =
+        error.message
+    } else {
+      integrationError =
+        'Backup metadata could not be loaded because of an unexpected server-side error.'
+    }
   }
 
   const counts = {
