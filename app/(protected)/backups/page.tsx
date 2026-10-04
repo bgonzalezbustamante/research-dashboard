@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import Link from 'next/link'
 import {
   redirect,
@@ -52,26 +51,6 @@ function stateClass(
       return 'border-red-200 bg-red-50 text-red-800'
     case 'stale':
       return 'border-amber-200 bg-amber-50 text-amber-800'
-  }
-}
-
-function getRuntimeTokenFingerprint() {
-  const token =
-    process.env
-      .APPS_BACKUPS_GITHUB_TOKEN
-      ?.trim()
-
-  if (!token) {
-    return null
-  }
-
-  return {
-    length: token.length,
-    sha256Prefix:
-      createHash('sha256')
-        .update(token, 'utf8')
-        .digest('hex')
-        .slice(0, 12),
   }
 }
 
@@ -258,11 +237,6 @@ export default async function BackupsPage() {
     }
   }
 
-  const runtimeTokenFingerprint =
-    integrationError
-      ? getRuntimeTokenFingerprint()
-      : null
-
   const counts = {
     healthy:
       statuses?.filter(
@@ -377,31 +351,6 @@ export default async function BackupsPage() {
             Contents read permissions.
           </p>
 
-          <div className="mt-4 rounded-lg border border-red-200 bg-white/60 px-3 py-2 text-xs leading-5 text-red-900">
-            <div className="font-medium">
-              Temporary runtime token diagnostic
-            </div>
-
-            {runtimeTokenFingerprint ? (
-              <div className="mt-1 font-mono">
-                Length:{' '}
-                {
-                  runtimeTokenFingerprint.length
-                }
-                {' · '}
-                SHA-256 prefix:{' '}
-                {
-                  runtimeTokenFingerprint.sha256Prefix
-                }
-              </div>
-            ) : (
-              <div className="mt-1">
-                APPS_BACKUPS_GITHUB_TOKEN
-                is not available to this
-                runtime.
-              </div>
-            )}
-          </div>
         </Card>
       ) : (
         <div className="grid gap-6 xl:grid-cols-3">
