@@ -477,6 +477,8 @@
 
 `dashboard and analytics`
 
+- Strengthened the Home overdue-milestones warning state and replaced the single oldest-paper action with linked short-title pills for every paper with an overdue planned milestone.
+
 - Reused the shared Hours calculations for monthly workload and period summaries.
 - Added Monday–Sunday gross-workload traffic-light indicators:
   - below 30 hours: orange
