@@ -141,7 +141,10 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          'GitHub could not start the backup workflow.',
+          error instanceof
+          BackupIntegrationError
+            ? error.message
+            : 'GitHub could not start the backup workflow.',
       },
       {
         status: 502,
