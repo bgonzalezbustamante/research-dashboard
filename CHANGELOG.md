@@ -19,6 +19,7 @@
 - Kept recovery and retention operations out of Research Dashboard; downloading, decrypting, restoring, deleting, and pruning remain owned by `apps-backups`.
 - Renamed the utility-navigation label from **Software Ecosystem** to **Software** while keeping the full Software Ecosystem page title, and added **Backup** beside it.
 - Added backup-health regression tests and a permanent Verify workflow check.
+- Added an explicit GitHub REST User-Agent for Netlify runtime requests and safe request/status diagnostics for backup metadata and manual dispatch failures.
 
 
 `academic API and public work analytics`
