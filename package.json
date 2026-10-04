@@ -12,7 +12,10 @@
     "generate:academic-api-client": "node packages/academic-api-client/scripts/generate-contract.mjs",
     "build:academic-api-client": "node packages/academic-api-client/scripts/generate-contract.mjs --check && tsc -p packages/academic-api-client/tsconfig.json",
     "test:academic-api-client": "npm run build:academic-api-client && node --test packages/academic-api-client/tests/*.test.mjs",
-    "check:academic-api-client": "npm run test:academic-api-client"
+    "check:academic-api-client": "npm run test:academic-api-client",
+    "build:backups-core": "tsc -p tsconfig.backups.json",
+    "test:backups": "npm run build:backups-core && node --test tests/backups/*.test.mjs",
+    "check:backups": "npm run test:backups"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
