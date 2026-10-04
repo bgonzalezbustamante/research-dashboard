@@ -9,6 +9,18 @@
 
 ### Code changes
 
+`backup operations`
+
+- Added an Owner-only Backups page for Research Dashboard, Supervision Portal, and Household Finances using live release and Actions metadata from the private `apps-backups` repository.
+- Added Healthy, Running, Attention, and Stale backup-health states, with successful backups becoming stale after eight days and newer failed/cancelled attempts taking precedence as Attention.
+- Added a typed server-side backup registry for the three allow-listed workflow files, tag prefixes, labels, and Sunday UTC schedules.
+- Added encrypted archive-size, latest attempt/event, retention-policy, private release/run links, and server-side manual workflow dispatch with duplicate-run protection and post-dispatch polling.
+- Added the server-only `APPS_BACKUPS_GITHUB_TOKEN` boundary; no GitHub token, Supabase backup credentials, age private key, or archive bytes are exposed to browser code.
+- Kept recovery and retention operations out of Research Dashboard; downloading, decrypting, restoring, deleting, and pruning remain owned by `apps-backups`.
+- Renamed the utility-navigation label from **Software Ecosystem** to **Software** while keeping the full Software Ecosystem page title, and added **Backup** beside it.
+- Added backup-health regression tests and a permanent Verify workflow check.
+
+
 `academic API and public work analytics`
 
 - Extended `get_public_work_analytics(year)` so every `days[]` object returns `date`, `net_minutes`, and `coffee_count`; days without a daily log return zero for both numeric measures.
