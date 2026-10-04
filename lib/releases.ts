@@ -50,6 +50,7 @@ export const releases: ReleaseNote[] = [
           'Added a protected Backups view for Research Dashboard, Supervision Portal and Household Finances with live encrypted-backup and workflow status.',
           'Added Healthy, Running, Attention and Stale health states, weekly schedules, retention details, archive sizes and private GitHub release/run links.',
           'Added Owner-authorised manual backup dispatch through an allow-listed server-only GitHub integration with duplicate-run protection and post-dispatch polling.',
+          'Hardened Netlify runtime GitHub requests with an explicit REST User-Agent and safe upstream request/status diagnostics.',
           'Kept backup credentials, encrypted archive bytes, restore operations and retention/pruning outside the browser and outside Research Dashboard.',
           'Shortened the utility-navigation label from Software Ecosystem to Software and added Backup alongside it.',
         ],

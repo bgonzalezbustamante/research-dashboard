@@ -89,7 +89,12 @@ function githubUrl(
 
 async function githubRequest<T>(
   path: string,
-  init: RequestInit = {}
+  {
+    label,
+    ...init
+  }: RequestInit & {
+    label: string
+  }
 ): Promise<T> {
   const token =
     getGitHubToken()
@@ -111,6 +116,10 @@ async function githubRequest<T>(
     'X-GitHub-Api-Version',
     '2022-11-28'
   )
+  headers.set(
+    'User-Agent',
+    'research-dashboard-backup-integration'
+  )
 
   const response =
     await fetch(
@@ -125,7 +134,7 @@ async function githubRequest<T>(
   if (!response.ok) {
     throw new BackupIntegrationError(
       'github_request_failed',
-      `GitHub backup request failed with status ${response.status}.`
+      `GitHub ${label} request failed with status ${response.status}.`
     )
   }
 
@@ -150,7 +159,10 @@ async function fetchReleases() {
   >(
     repositoryPath(
       '/releases?per_page=100'
-    )
+    ),
+    {
+      label: 'releases',
+    }
   )
 }
 
@@ -168,7 +180,11 @@ async function fetchWorkflowRuns(
       `/actions/workflows/${encodeURIComponent(
         config.workflowFile
       )}/runs?branch=${BACKUP_REPOSITORY.ref}&per_page=${perPage}`
-    )
+    ),
+    {
+      label:
+        `${config.label} workflow runs`,
+    }
   )
 }
 
@@ -403,6 +419,8 @@ export async function dispatchBackupWorkflow(
       )}/dispatches`
     ),
     {
+      label:
+        `${config.label} workflow dispatch`,
       method: 'POST',
       headers: {
         'Content-Type':
