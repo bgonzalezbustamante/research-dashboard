@@ -21,6 +21,7 @@
 - Removed the four redundant Home mini-cards for Active papers, Net this week, Net this month, and Current plan; their substantive information remains available in the richer Dashboard sections below.
 - Restyled the Teaching season activation control as the same compact **Teaching season · On/Off** pill used by the Calendar controls.
 - Revised the **Activity over time** heatmap bands to 0h, <4h, 4–8h, 8–10h, 10–12h, and 12h+, updating both the displayed legend and the underlying colour thresholds.
+- Changed **Open · 0d** periods in the Planning Annual timeline from green to a light-grey treatment, including the matching legend swatch, while leaving the shared Period load presentation unchanged.
 
 `Academic API and settings`
 
