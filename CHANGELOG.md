@@ -5,7 +5,7 @@
 ### Summary
 
 - Started `v1.0.0-rc.3 "Bold Ridge"` with a reusable Catholic Calendar integration on the Dashboard Home.
-- Added an Owner-controlled public Calendar status so downstream applications can enable Calendar-related presentation independently from the signed-in Dashboard display.
+- Added compact Owner controls for enabling the Catholic Calendar on the Academic Website and independently stress-testing long Calendar displays.
 
 ### Code changes
 
@@ -13,15 +13,15 @@
 
 - Added the exact `@bgonzalezbustamante/catholic-calendar@0.1.0-beta.1` package and use its deterministic `getCatholicCalendarState()` and `getCalendarDisplaySummary()` APIs rather than duplicating calendar rules in Research Dashboard.
 - Added the package's fixed two-item composed display above the four Home KPI cards, resolved for the current civil date in Europe/Amsterdam.
-- Kept long composed combinations on one line inside a horizontally scrollable strip so the layout remains stable on narrow screens.
-- Added a direct link from the Home strip to the Catholic Calendar application.
+- Refined the Home Calendar card to mirror the standalone Catholic Calendar display at a smaller scale, including its coral left rule, subtle Oxford-blue gradient, quotation treatment, serif display typography, muted icons, and natural wrapping.
+- Added a direct link from the Home card to the Catholic Calendar application.
 - Added the curated Christicons required by the package's display metadata under `public/catholic-calendar/` and documented their third-party licensing in `NOTICE`.
-- Added an Owner-only compact activation control beside the composed display. The public status defaults to inactive and does not hide the signed-in Dashboard Calendar display.
+- Added two low-emphasis Owner controls below the composed display: **Academic Website · On/Off** and **Stress test · On/Off**. Both default to inactive and neither hides the signed-in Dashboard Calendar display.
 
 `Academic API and settings`
 
-- Added the RLS-protected `calendar_settings` table with one owner-level `catholic_calendar_active` boolean.
-- Added `get_public_calendar_settings()` as a new anonymous-safe Public RPC v1 operation returning only that boolean; the underlying settings row, owner ID, and timestamps remain private.
+- Added the RLS-protected `calendar_settings` table with owner-level `catholic_calendar_active` and `stress_test_active` booleans.
+- Added `get_public_calendar_settings()` as a new anonymous-safe Public RPC v1 operation returning only those two flags. The first controls whether the Academic Website enables its Catholic Calendar integration; the second lets the Website substitute a deliberately long composed display for layout testing. The underlying settings row, owner ID, and timestamps remain private.
 - Kept `get_public_teaching_settings()` unchanged so existing strict Teaching-season consumers remain compatible.
 - Added Calendar settings to the Academic Website consumer contract and extended the reference client, generated metadata, strict runtime validation, regression tests, live privacy checks, and API documentation for the new RPC.
 
