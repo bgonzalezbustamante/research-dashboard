@@ -21,19 +21,19 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.2',
     summary:
-      'Bold Ridge brings the Catholic Calendar into the Dashboard Home and adds a public switch for Calendar-related features in companion applications.',
+      'Bold Ridge brings the Catholic Calendar into the Dashboard Home and adds compact controls for its Academic Website integration and layout stress testing.',
     sections: [
       {
         title: 'Catholic Calendar',
         items: [
-          'The Dashboard Home now shows the same compact two-item Catholic Calendar display used by the standalone Calendar project.',
-          'A new public activation switch beside the display lets companion applications know when Calendar-related features should be active.',
+          'The Dashboard Home now shows a smaller version of the standalone Catholic Calendar’s composed display.',
+          'Compact controls let the Academic Website turn its Calendar feature on or off and independently test unusually long displays.',
         ],
       },
       {
         title: 'Public integration',
         items: [
-          'The Calendar switch is available through the Academic API without exposing private Dashboard settings.',
+          'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
           'The existing Teaching-season status remains unchanged for current consumers.',
         ],
       },
