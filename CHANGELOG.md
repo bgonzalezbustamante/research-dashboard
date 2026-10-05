@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.0.0-rc.2 "Rustic Peak" (in development)
+## v1.0.0-rc.2 "Rustic Peak"
 
 ### Summary
 
@@ -88,10 +88,10 @@
 
 ### Release status
 
-- Rustic Peak rc.2 is in development.
-- Distant Forge rc.1 remains the current published pre-release.
+- Rustic Peak rc.2 is the current published pre-release.
+- Distant Forge rc.1 is the previous release candidate.
 - Supabase leaked-password protection is deferred to a future hardening batch and is not part of rc.2.
-- Release date: TBC.
+- Release date: 5 Oct 2026.
 
 ---
 
