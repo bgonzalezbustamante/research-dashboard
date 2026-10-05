@@ -664,7 +664,7 @@
     {
       "id": "calendar-settings",
       "title": "Calendar settings",
-      "summary": "Owner-level public feature status for Catholic Calendar integrations.",
+      "summary": "Owner-level public feature settings for Catholic Calendar integration on the Academic Website.",
       "notExposed": [
         "Underlying Calendar settings row and owner identifier",
         "Internal created/updated timestamps"
@@ -679,19 +679,24 @@
           "name": "get_public_calendar_settings",
           "signature": "get_public_calendar_settings()",
           "kind": "Status",
-          "purpose": "Returns whether the Dashboard owner currently marks the Catholic Calendar integration as active.",
+          "purpose": "Returns whether the Academic Website Catholic Calendar integration and its long-display stress test are active.",
           "parameters": [],
           "fields": [
             {
               "name": "catholic_calendar_active",
+              "type": "boolean"
+            },
+            {
+              "name": "stress_test_active",
               "type": "boolean"
             }
           ],
           "detailOnly": [],
           "listingOnly": [],
           "notes": [
-            "This is an owner-level public feature flag for downstream Calendar integrations.",
-            "It does not hide the signed-in Dashboard Calendar display.",
+            "catholic_calendar_active controls whether the Academic Website should enable its Catholic Calendar integration.",
+            "stress_test_active allows the Academic Website to substitute a deliberately long composed display for layout testing.",
+            "Neither flag hides the signed-in Dashboard Calendar display.",
             "The underlying Calendar settings row, owner identifier, and timestamps remain private."
           ]
         }
