@@ -72,6 +72,21 @@ test('reference client calls the transport and validates the result', async () =
 
       if (
         name ===
+        'get_public_calendar_settings'
+      ) {
+        return {
+          data: [
+            {
+              catholic_calendar_active:
+                true,
+            },
+          ],
+          error: null,
+        }
+      }
+
+      if (
+        name ===
         'list_public_availability'
       ) {
         return {
@@ -125,6 +140,8 @@ test('reference client calls the transport and validates the result', async () =
     )
   const teachingSettings =
     await client.getPublicTeachingSettings()
+  const calendarSettings =
+    await client.getPublicCalendarSettings()
   const availability =
     await client.listPublicAvailability(
       2026
@@ -140,6 +157,10 @@ test('reference client calls the transport and validates the result', async () =
   )
   assert.equal(
     teachingSettings.teaching_season_active,
+    true
+  )
+  assert.equal(
+    calendarSettings.catholic_calendar_active,
     true
   )
   assert.equal(
@@ -173,6 +194,11 @@ test('reference client calls the transport and validates the result', async () =
       {
         name:
           'get_public_teaching_settings',
+        args: undefined,
+      },
+      {
+        name:
+          'get_public_calendar_settings',
         args: undefined,
       },
       {
