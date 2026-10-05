@@ -1425,128 +1425,130 @@ export default async function DashboardPage({
 
             </div>
 
-            <div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:justify-end">
-              {access.canEdit ? (
-                <>
-                  <form
-                    action={
-                      updateAcademicWebsiteCalendarStatus
-                    }
-                  >
-                    <input
-                      type="hidden"
-                      name="catholic_calendar_active"
-                      value={
-                        catholicCalendarActive
-                          ? 'false'
-                          : 'true'
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                {access.canEdit ? (
+                  <>
+                    <form
+                      action={
+                        updateAcademicWebsiteCalendarStatus
                       }
-                    />
-
-                    {params.year && (
+                    >
                       <input
                         type="hidden"
-                        name="year"
+                        name="catholic_calendar_active"
                         value={
-                          params.year
+                          catholicCalendarActive
+                            ? 'false'
+                            : 'true'
                         }
                       />
-                    )}
 
-                    <button
-                      type="submit"
+                      {params.year && (
+                        <input
+                          type="hidden"
+                          name="year"
+                          value={
+                            params.year
+                          }
+                        />
+                      )}
+
+                      <button
+                        type="submit"
+                        className={
+                          catholicCalendarActive
+                            ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800 transition hover:bg-green-100'
+                            : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 transition hover:bg-gray-200'
+                        }
+                      >
+                        Academic Website ·{' '}
+                        {catholicCalendarActive
+                          ? 'On'
+                          : 'Off'}
+                      </button>
+                    </form>
+
+                    <form
+                      action={
+                        updateCalendarStressTest
+                      }
+                    >
+                      <input
+                        type="hidden"
+                        name="stress_test_active"
+                        value={
+                          calendarStressTestActive
+                            ? 'false'
+                            : 'true'
+                        }
+                      />
+
+                      {params.year && (
+                        <input
+                          type="hidden"
+                          name="year"
+                          value={
+                            params.year
+                          }
+                        />
+                      )}
+
+                      <button
+                        type="submit"
+                        className={
+                          calendarStressTestActive
+                            ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800 transition hover:bg-amber-100'
+                            : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 transition hover:bg-gray-100'
+                        }
+                      >
+                        Stress test ·{' '}
+                        {calendarStressTestActive
+                          ? 'On'
+                          : 'Off'}
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <span
                       className={
                         catholicCalendarActive
-                          ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800 transition hover:bg-green-100'
-                          : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 transition hover:bg-gray-200'
+                          ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800'
+                          : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700'
                       }
                     >
                       Academic Website ·{' '}
                       {catholicCalendarActive
                         ? 'On'
                         : 'Off'}
-                    </button>
-                  </form>
+                    </span>
 
-                  <form
-                    action={
-                      updateCalendarStressTest
-                    }
-                  >
-                    <input
-                      type="hidden"
-                      name="stress_test_active"
-                      value={
-                        calendarStressTestActive
-                          ? 'false'
-                          : 'true'
-                      }
-                    />
-
-                    {params.year && (
-                      <input
-                        type="hidden"
-                        name="year"
-                        value={
-                          params.year
-                        }
-                      />
-                    )}
-
-                    <button
-                      type="submit"
+                    <span
                       className={
                         calendarStressTestActive
-                          ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800 transition hover:bg-amber-100'
-                          : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 transition hover:bg-gray-100'
+                          ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800'
+                          : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600'
                       }
                     >
                       Stress test ·{' '}
                       {calendarStressTestActive
                         ? 'On'
                         : 'Off'}
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <span
-                    className={
-                      catholicCalendarActive
-                        ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800'
-                        : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700'
-                    }
-                  >
-                    Academic Website ·{' '}
-                    {catholicCalendarActive
-                      ? 'On'
-                      : 'Off'}
-                  </span>
+                    </span>
+                  </>
+                )}
+              </div>
 
-                  <span
-                    className={
-                      calendarStressTestActive
-                        ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800'
-                        : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600'
-                    }
-                  >
-                    Stress test ·{' '}
-                    {calendarStressTestActive
-                      ? 'On'
-                      : 'Off'}
-                  </span>
-                </>
-              )}
+              <a
+                href="https://catholic.bgonzalezbustamante.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-right text-[11px] font-medium text-oxford-peach underline decoration-oxford-peach/50 underline-offset-2 hover:text-oxford-blue"
+              >
+                catholic.bgonzalezbustamante.com
+              </a>
             </div>
-
-            <a
-              href="https://catholic.bgonzalezbustamante.com"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 block text-right text-[11px] font-medium text-oxford-peach underline decoration-oxford-peach/50 underline-offset-2 hover:text-oxford-blue"
-            >
-              catholic.bgonzalezbustamante.com
-            </a>
           </div>
         </div>
       </section>
