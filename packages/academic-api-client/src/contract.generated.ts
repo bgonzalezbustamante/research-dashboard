@@ -117,7 +117,8 @@ export const RPC_FIELDS = {
     "teaching_season_active"
   ],
   "get_public_calendar_settings": [
-    "catholic_calendar_active"
+    "catholic_calendar_active",
+    "stress_test_active"
   ],
   "list_public_software": [
     "slug",
