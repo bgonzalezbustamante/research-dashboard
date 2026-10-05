@@ -113,6 +113,7 @@ export type PublicTeachingSettings = {
 
 export type PublicCalendarSettings = {
   catholic_calendar_active: boolean
+  stress_test_active: boolean
 }
 
 export type PublicSoftwareItem = {
