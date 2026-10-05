@@ -1,9 +1,18 @@
+import {
+  getCalendarDisplaySummary,
+  getCatholicCalendarState,
+} from '@bgonzalezbustamante/catholic-calendar'
 import Link from 'next/link'
 
+import CatholicCalendarDisplay from '@/components/dashboard/catholic-calendar-display'
 import CrossModuleAnalyticsSection from '@/components/dashboard/cross-module-analytics-section'
 import PageHeader from '@/components/page-header'
+import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
+import {
+  requireDashboardAccess,
+} from '@/lib/auth/dashboard-access'
 import {
   deriveSourceBackedPlanning,
   type BlockedEventPlanningSource,
@@ -23,6 +32,10 @@ import {
   parseDate,
   summarisePeriod,
 } from '@/lib/hours/analytics'
+
+import {
+  updateCatholicCalendarStatus,
+} from './actions'
 
 type PaperStatus =
   | 'writing'
@@ -91,6 +104,8 @@ type PlanningAllocationRow = {
 type DashboardPageProps = {
   searchParams: Promise<{
     year?: string
+    calendar?: string
+    calendar_error?: string
   }>
 }
 
@@ -435,8 +450,18 @@ export default async function DashboardPage({
   const params =
     await searchParams
 
+  const access =
+    await requireDashboardAccess()
+
   const today =
     getAmsterdamDate()
+
+  const calendarDisplay =
+    getCalendarDisplaySummary(
+      getCatholicCalendarState(
+        today
+      )
+    )
 
   const currentYear =
     Number(
@@ -516,6 +541,7 @@ export default async function DashboardPage({
     teachingResult,
     blockedEventsResult,
     sourceStatesResult,
+    calendarSettingsResult,
   ] = await Promise.all([
     supabase
       .from('papers')
@@ -639,6 +665,19 @@ export default async function DashboardPage({
         'period_start',
         `${currentYear}-12-31`
       ),
+
+    supabase
+      .from(
+        'calendar_settings'
+      )
+      .select(
+        'owner_id, catholic_calendar_active'
+      )
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .maybeSingle(),
   ])
 
   if (
@@ -685,6 +724,10 @@ export default async function DashboardPage({
       'source-backed Calendar state',
       sourceStatesResult,
     ],
+    [
+      'Catholic Calendar settings',
+      calendarSettingsResult,
+    ],
   ] as const) {
     if (result.error) {
       throw new Error(
@@ -692,6 +735,12 @@ export default async function DashboardPage({
       )
     }
   }
+
+  const catholicCalendarActive =
+    calendarSettingsResult
+      .data
+      ?.catholic_calendar_active ??
+    false
 
   const papers =
     (papersResult.data ??
@@ -1329,6 +1378,113 @@ export default async function DashboardPage({
           >
             Review planning
           </ButtonLink>
+        </div>
+      </div>
+
+      {params.calendar_error && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {
+            params.calendar_error
+          }
+        </div>
+      )}
+
+      {params.calendar && (
+        <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          {params.calendar ===
+          'active'
+            ? 'Public Catholic Calendar integration activated.'
+            : 'Public Catholic Calendar integration deactivated.'}
+        </div>
+      )}
+
+      <div className="mb-4 rounded-lg border border-oxford-stone bg-white px-4 py-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium uppercase tracking-wide text-oxford-ash">
+              <a
+                href="https://catholic.bgonzalezbustamante.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-oxford-blue"
+              >
+                Catholic calendar
+              </a>
+
+              <span aria-hidden="true">
+                ·
+              </span>
+
+              <span>
+                {formatDate(
+                  today
+                )}
+              </span>
+            </div>
+
+            <CatholicCalendarDisplay
+              items={
+                calendarDisplay.items
+              }
+            />
+          </div>
+
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <span
+              className={
+                catholicCalendarActive
+                  ? 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
+                  : 'rounded-full border border-gray-300 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700'
+              }
+            >
+              Public{' '}
+              {catholicCalendarActive
+                ? 'active'
+                : 'inactive'}
+            </span>
+
+            {access.canEdit && (
+              <form
+                action={
+                  updateCatholicCalendarStatus
+                }
+              >
+                <input
+                  type="hidden"
+                  name="catholic_calendar_active"
+                  value={
+                    catholicCalendarActive
+                      ? 'false'
+                      : 'true'
+                  }
+                />
+
+                {params.year && (
+                  <input
+                    type="hidden"
+                    name="year"
+                    value={
+                      params.year
+                    }
+                  />
+                )}
+
+                <Button
+                  type="submit"
+                  size="compact"
+                  variant={
+                    catholicCalendarActive
+                      ? 'warning'
+                      : 'success'
+                  }
+                >
+                  {catholicCalendarActive
+                    ? 'Deactivate public calendar'
+                    : 'Activate public calendar'}
+                </Button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
 
