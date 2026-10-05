@@ -2,7 +2,7 @@
 
 ## Administrative system of record
 
-Research Dashboard is the canonical administrative source for the structured academic records it manages: papers, projects, conference presentations, teaching portfolio data, Software Ecosystem records, work logs, planning data, permissions, and related internal workflow metadata.
+Research Dashboard is the canonical administrative source for the structured academic records it manages: papers, projects, conference presentations, teaching portfolio data, Software Ecosystem records, owner-level Calendar settings, work logs, planning data, permissions, and related internal workflow metadata.
 
 Authenticated Dashboard modules may read and write the underlying Supabase tables according to the application permission model.
 
@@ -73,6 +73,7 @@ The current anonymous-safe function surface is:
 - `list_public_conference_presentations()`
 - `list_public_teaching()`
 - `get_public_teaching_settings()`
+- `get_public_calendar_settings()`
 - `list_public_software()`
 - `get_public_software(text)`
 - `get_public_work_analytics(year)`
@@ -157,6 +158,14 @@ Private notes, internal owner IDs, presentation IDs, and the optional internal p
 Only teaching portfolio items marked public are returned. Public portfolio fields include the controlled Teaching Role, academic levels, period/current state, cumulative teaching/student counts, and optional image filename. Activity labels, tracked hours, session counts, owner metadata, and internal IDs remain private.
 
 `get_public_teaching_settings()` separately exposes the single owner-level `teaching_season_active` boolean. The underlying Teaching settings row, owner identifier, and timestamps remain private, and the season flag does not change per-course visibility or Planning months.
+
+### Catholic Calendar settings
+
+The signed-in Dashboard Home resolves the current Europe/Amsterdam civil date through the reusable `@bgonzalezbustamante/catholic-calendar` package and renders the package's fixed two-item composed display. The calendar engine remains external to Research Dashboard; this repository stores only the supporting icon assets used to render the package's semantic icon names.
+
+`get_public_calendar_settings()` exposes only the owner-level `catholic_calendar_active` boolean. The flag is intended for downstream presentation decisions, including Calendar-related features on the Academic Website. It does not control whether the composed Calendar display appears for signed-in Dashboard users.
+
+The underlying `calendar_settings` row, owner identifier, and timestamps remain private and direct anonymous table access is blocked.
 
 ### Software Ecosystem
 
