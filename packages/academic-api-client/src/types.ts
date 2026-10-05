@@ -111,6 +111,10 @@ export type PublicTeachingSettings = {
   teaching_season_active: boolean
 }
 
+export type PublicCalendarSettings = {
+  catholic_calendar_active: boolean
+}
+
 export type PublicSoftwareItem = {
   slug: string
   name: string
@@ -199,6 +203,13 @@ export type PublicTeachingSettingsContractKeysMatch = Assert<
   KeysEqual<
     PublicTeachingSettings,
     typeof RPC_FIELDS.get_public_teaching_settings
+  >
+>
+
+export type PublicCalendarSettingsContractKeysMatch = Assert<
+  KeysEqual<
+    PublicCalendarSettings,
+    typeof RPC_FIELDS.get_public_calendar_settings
   >
 >
 
