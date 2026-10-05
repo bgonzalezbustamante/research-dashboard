@@ -163,7 +163,7 @@ Only teaching portfolio items marked public are returned. Public portfolio field
 
 The signed-in Dashboard Home resolves the current Europe/Amsterdam civil date through the reusable `@bgonzalezbustamante/catholic-calendar` package and renders the package's fixed two-item composed display. The calendar engine remains external to Research Dashboard; this repository stores only the supporting icon assets used to render the package's semantic icon names.
 
-`get_public_calendar_settings()` exposes only the owner-level `catholic_calendar_active` boolean. The flag is intended for downstream presentation decisions, including Calendar-related features on the Academic Website. It does not control whether the composed Calendar display appears for signed-in Dashboard users.
+`get_public_calendar_settings()` exposes two owner-level booleans for the Academic Website: `catholic_calendar_active` enables or disables the Website's Calendar integration, while `stress_test_active` asks the Website to substitute a deliberately long composed display for layout testing. The controls are independent and neither controls whether the composed Calendar display appears for signed-in Dashboard users.
 
 The underlying `calendar_settings` row, owner identifier, and timestamps remain private and direct anonymous table access is blocked.
 
