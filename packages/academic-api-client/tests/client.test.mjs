@@ -79,6 +79,8 @@ test('reference client calls the transport and validates the result', async () =
             {
               catholic_calendar_active:
                 true,
+              stress_test_active:
+                true,
             },
           ],
           error: null,
@@ -161,6 +163,10 @@ test('reference client calls the transport and validates the result', async () =
   )
   assert.equal(
     calendarSettings.catholic_calendar_active,
+    true
+  )
+  assert.equal(
+    calendarSettings.stress_test_active,
     true
   )
   assert.equal(
