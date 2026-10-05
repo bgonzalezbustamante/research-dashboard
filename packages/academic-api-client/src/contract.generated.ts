@@ -116,6 +116,9 @@ export const RPC_FIELDS = {
   "get_public_teaching_settings": [
     "teaching_season_active"
   ],
+  "get_public_calendar_settings": [
+    "catholic_calendar_active"
+  ],
   "list_public_software": [
     "slug",
     "name",
@@ -174,6 +177,7 @@ export const RPC_PARAMETERS = {
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
   "get_public_teaching_settings": [],
+  "get_public_calendar_settings": [],
   "list_public_software": [],
   "get_public_software": [
     "p_slug"
