@@ -40,19 +40,23 @@ function dashboardRedirect(
 
 function calendarRedirectParams(
   formData: FormData
-) {
+): Record<string, string> {
   const requestedYear =
     getText(
       formData,
       'year'
     )
 
-  return requestedYear
-    ? {
-        year:
-          requestedYear,
-      }
-    : {}
+  const params:
+    Record<string, string> =
+      {}
+
+  if (requestedYear) {
+    params.year =
+      requestedYear
+  }
+
+  return params
 }
 
 export async function updateAcademicWebsiteCalendarStatus(
