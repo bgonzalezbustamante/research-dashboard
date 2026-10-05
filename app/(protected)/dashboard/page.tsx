@@ -7,7 +7,6 @@ import Link from 'next/link'
 import CatholicCalendarDisplay from '@/components/dashboard/catholic-calendar-display'
 import CrossModuleAnalyticsSection from '@/components/dashboard/cross-module-analytics-section'
 import PageHeader from '@/components/page-header'
-import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
 import {
@@ -34,7 +33,8 @@ import {
 } from '@/lib/hours/analytics'
 
 import {
-  updateCatholicCalendarStatus,
+  updateAcademicWebsiteCalendarStatus,
+  updateCalendarStressTest,
 } from './actions'
 
 type PaperStatus =
@@ -671,7 +671,7 @@ export default async function DashboardPage({
         'calendar_settings'
       )
       .select(
-        'owner_id, catholic_calendar_active'
+        'owner_id, catholic_calendar_active, stress_test_active'
       )
       .eq(
         'owner_id',
@@ -740,6 +740,12 @@ export default async function DashboardPage({
     calendarSettingsResult
       .data
       ?.catholic_calendar_active ??
+    false
+
+  const calendarStressTestActive =
+    calendarSettingsResult
+      .data
+      ?.stress_test_active ??
     false
 
   const papers =
@@ -1392,97 +1398,180 @@ export default async function DashboardPage({
       {params.calendar && (
         <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
           {params.calendar ===
-          'active'
-            ? 'Public Catholic Calendar integration activated.'
-            : 'Public Catholic Calendar integration deactivated.'}
+          'website-active'
+            ? 'Catholic Calendar enabled on the Academic Website.'
+            : params.calendar ===
+                'website-inactive'
+              ? 'Catholic Calendar disabled on the Academic Website.'
+              : params.calendar ===
+                  'stress-active'
+                ? 'Calendar stress test enabled.'
+                : 'Calendar stress test disabled.'}
         </div>
       )}
 
-      <div className="mb-4 rounded-lg border border-oxford-stone bg-white px-4 py-3">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium uppercase tracking-wide text-oxford-ash">
-              <a
-                href="https://catholic.bgonzalezbustamante.com"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-oxford-blue"
-              >
-                Catholic calendar
-              </a>
+      <div className="relative mb-4 overflow-hidden rounded-lg border border-[rgba(0,33,71,0.16)] border-l-4 border-l-oxford-peach bg-[linear-gradient(135deg,rgba(0,33,71,0.045),transparent_62%)] bg-white px-4 py-3 shadow-[0_5px_16px_rgba(0,33,71,0.05)]">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-0.5 -top-5 z-0 font-serif text-6xl leading-none text-[rgba(0,33,71,0.10)]"
+        >
+          “
+        </span>
 
-              <span aria-hidden="true">
-                ·
-              </span>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-9 right-2 z-0 font-serif text-6xl leading-none text-[rgba(0,33,71,0.10)]"
+        >
+          ”
+        </span>
 
-              <span>
-                {formatDate(
-                  today
-                )}
-              </span>
+        <div className="relative z-10">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="mb-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-bold uppercase tracking-[0.08em] text-oxford-ash">
+                <span>
+                  Composed calendar display
+                </span>
+
+                <span aria-hidden="true">
+                  ·
+                </span>
+
+                <span>
+                  {formatDate(
+                    today
+                  )}
+                </span>
+              </div>
+
+              <CatholicCalendarDisplay
+                items={
+                  calendarDisplay.items
+                }
+              />
             </div>
 
-            <CatholicCalendarDisplay
-              items={
-                calendarDisplay.items
-              }
-            />
+            <a
+              href="https://catholic.bgonzalezbustamante.com"
+              target="_blank"
+              rel="noreferrer"
+              className="shrink-0 text-[11px] font-medium text-oxford-ash underline decoration-oxford-stone underline-offset-2 hover:text-oxford-blue"
+            >
+              Catholic Calendar
+            </a>
           </div>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <span
-              className={
-                catholicCalendarActive
-                  ? 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
-                  : 'rounded-full border border-gray-300 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700'
-              }
-            >
-              Public{' '}
-              {catholicCalendarActive
-                ? 'active'
-                : 'inactive'}
-            </span>
-
-            {access.canEdit && (
-              <form
-                action={
-                  updateCatholicCalendarStatus
-                }
-              >
-                <input
-                  type="hidden"
-                  name="catholic_calendar_active"
-                  value={
-                    catholicCalendarActive
-                      ? 'false'
-                      : 'true'
-                  }
-                />
-
-                {params.year && (
-                  <input
-                    type="hidden"
-                    name="year"
-                    value={
-                      params.year
-                    }
-                  />
-                )}
-
-                <Button
-                  type="submit"
-                  size="compact"
-                  variant={
-                    catholicCalendarActive
-                      ? 'warning'
-                      : 'success'
+          <div className="mt-2.5 flex flex-wrap items-center justify-end gap-1.5 border-t border-[rgba(0,33,71,0.08)] pt-2">
+            {access.canEdit ? (
+              <>
+                <form
+                  action={
+                    updateAcademicWebsiteCalendarStatus
                   }
                 >
+                  <input
+                    type="hidden"
+                    name="catholic_calendar_active"
+                    value={
+                      catholicCalendarActive
+                        ? 'false'
+                        : 'true'
+                    }
+                  />
+
+                  {params.year && (
+                    <input
+                      type="hidden"
+                      name="year"
+                      value={
+                        params.year
+                      }
+                    />
+                  )}
+
+                  <button
+                    type="submit"
+                    className={
+                      catholicCalendarActive
+                        ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800 transition hover:bg-green-100'
+                        : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 transition hover:bg-gray-200'
+                    }
+                  >
+                    Academic Website ·{' '}
+                    {catholicCalendarActive
+                      ? 'On'
+                      : 'Off'}
+                  </button>
+                </form>
+
+                <form
+                  action={
+                    updateCalendarStressTest
+                  }
+                >
+                  <input
+                    type="hidden"
+                    name="stress_test_active"
+                    value={
+                      calendarStressTestActive
+                        ? 'false'
+                        : 'true'
+                    }
+                  />
+
+                  {params.year && (
+                    <input
+                      type="hidden"
+                      name="year"
+                      value={
+                        params.year
+                      }
+                    />
+                  )}
+
+                  <button
+                    type="submit"
+                    className={
+                      calendarStressTestActive
+                        ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800 transition hover:bg-amber-100'
+                        : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 transition hover:bg-gray-100'
+                    }
+                  >
+                    Stress test ·{' '}
+                    {calendarStressTestActive
+                      ? 'On'
+                      : 'Off'}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <span
+                  className={
+                    catholicCalendarActive
+                      ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800'
+                      : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700'
+                  }
+                >
+                  Academic Website ·{' '}
                   {catholicCalendarActive
-                    ? 'Deactivate public calendar'
-                    : 'Activate public calendar'}
-                </Button>
-              </form>
+                    ? 'On'
+                    : 'Off'}
+                </span>
+
+                <span
+                  className={
+                    calendarStressTestActive
+                      ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800'
+                      : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600'
+                  }
+                >
+                  Stress test ·{' '}
+                  {calendarStressTestActive
+                    ? 'On'
+                    : 'Off'}
+                </span>
+              </>
             )}
           </div>
         </div>
