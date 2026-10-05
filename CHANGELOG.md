@@ -2,96 +2,69 @@
 
 ## v1.0.0-rc.2 "Rustic Peak"
 
+Released 5 Oct 2026.
+
 ### Summary
 
-- Started `v1.0.0-rc.2 "Rustic Peak"` as the next release candidate in the 1.0.0 line.
-- Extended the Academic API work-analytics contract so each calendar day now exposes both net working minutes and coffee count.
+- Expanded source-backed Planning so conferences, trips, Teaching schedules, and dated blocked events contribute consistently to research-capacity planning.
+- Extended Public RPC v1 with richer work analytics, public-safe availability, Teaching-season state, and Software Ecosystem data, backed by a portable reference client and stricter validation.
+- Added the Software Ecosystem registry and protected backup operations for Research Dashboard, Supervision Portal, and Household Finances.
+- Refined annual Planning navigation, overdue-milestone visibility, list pagination, security checks, and licensing documentation.
 
 ### Code changes
 
-`backup operations`
+`source-backed planning and dashboard`
 
-- Added an Owner-only Backups page for Research Dashboard, Supervision Portal, and Household Finances using live release and Actions metadata from the private `apps-backups` repository.
-- Added Healthy, Running, Attention, and Stale backup-health states, with successful backups becoming stale after eight days and newer failed/cancelled attempts taking precedence as Attention.
-- Added a typed server-side backup registry for the three allow-listed workflow files, tag prefixes, labels, and Sunday UTC schedules.
-- Added encrypted archive-size, latest attempt/event, retention-policy, private release/run links, and server-side manual workflow dispatch with duplicate-run protection and post-dispatch polling.
-- Added the server-only `APPS_BACKUPS_GITHUB_TOKEN` boundary; no GitHub token, Supabase backup credentials, age private key, or archive bytes are exposed to browser code.
-- Kept recovery and retention operations out of Research Dashboard; downloading, decrypting, restoring, deleting, and pruning remain owned by `apps-backups`.
-- Renamed the utility-navigation label from **Software Ecosystem** to **Software** while keeping the full Software Ecosystem page title, and added **Backup** beside it.
-- Added backup-health regression tests and a permanent Verify workflow check.
-- Added an explicit GitHub REST User-Agent for Netlify runtime requests and safe request/status diagnostics for backup metadata and manual dispatch failures.
-- Confirmed standard Bearer authentication and parallel GitHub metadata reads after correcting the production Netlify secret value; retained the explicit User-Agent and safe request/status diagnostics.
+- Replaced new manual blocked-time authoring with source-backed commitments while retaining historical manual allocations as Legacy records.
+- Added Personal attendance and Involves trip controls to Conference records. Personally attended conferences use exact inclusive dates; trips add one travel day before and after.
+- Grouped repeated presentation records for the same conference into one attendance/trip commitment, while keeping genuinely different dated overlaps additive and visibly flagged.
+- Added recurring Teaching planning months and 0/1/2 committed days per week, converted to 0/2/4 committed days in each active half-month across the covered years.
+- Added exact dated Winter holiday, Summer holiday, Administrative, and Sick events as Planning sources.
+- Added per-source/per-period FlowSavvy/Calendar state for Conference, Teaching, and dated blocked events; source scheduling changes reset that state.
+- Updated the main Dashboard to use the same source-backed Planning derivation and strengthened the overdue-milestones warning with linked affected papers.
+- Replaced the redundant Monthly overview with a clickable 12-month Annual timeline, including previous/next-year navigation, persistent fortnight selection, and shared load bands.
+- Fixed Teaching Portfolio saves after the Planning expansion and corrected persistence/presentation of Conference attendance and trip settings.
 
+`academic API and public data`
 
-`academic API and public work analytics`
-
-- Extended `get_public_work_analytics(year)` so every `days[]` object returns `date`, `net_minutes`, and `coffee_count`; days without a daily log return zero for both numeric measures.
-- Preserved the existing annual `average_net_minutes_per_working_day` and `average_coffees_per_working_day` fields and kept Public RPC at v1 because the change is additive.
-- Updated the Academic API contract manifest, live payload checker, and architecture/privacy documentation to reflect the expanded public daily shape.
-- Kept raw `daily_logs` and `work_sessions` inaccessible to `anon`; only the curated aggregate RPC exposes the daily values.
-
-`academic API reference client`
-
-- Added an isolated `packages/academic-api-client/` reference implementation for external-consumer use, without routing authenticated Dashboard pages through the public interface.
-- Added canonical TypeScript resource types and a transport-agnostic client covering all eleven Public RPC v1 operations; the package has no runtime dependency on Supabase and can accept a normal public client exposing `rpc()`.
-- Added generated client contract metadata derived from `lib/academic-api-contract.json` for RPC field names, parameter names, controlled vocabularies, and work-analytics day keys, with a stale-generation check to avoid maintaining those definitions independently.
-- Added dependency-free strict runtime validators with field-level diagnostics for exact payload shapes, required/nullable fields, primitive types, valid ISO dates, HTTP(S) URLs, non-negative numeric values, controlled vocabularies, array uniqueness, project/conference/teaching invariants, and Google Scholar snapshot pairing.
-- Adapted the strict `weekly-penguin-timeline` work-analytics validation: requested-year equality, valid/unique dates, non-negative integer daily minutes/coffee counts, and complete 365/366-day calendar coverage.
-- Added `npm run check:academic-api-client` for generated-contract compatibility, TypeScript compilation, and regression tests; the permanent Verify workflow now runs it on pull requests and `main`.
-- Updated `npm run check:public-api:live` so real anonymous RPC responses pass through the same reference-client validators before the existing direct-table privacy-boundary checks.
-- Updated `ARCHITECTURE.md` and `/api` to distinguish the Supabase Data API/RPC transport from the optional reference TypeScript client/runtime-validation layer.
-- Added `list_public_availability(year)` as an anonymous-safe Public RPC v1 resource for conference trips, Winter/Summer holidays, and generic unavailable periods; Administrative commitments and sickness reasons/notes remain private.
-- Updated public availability so multiple presentations at the same conference produce one trip range rather than duplicate identical ranges.
+- Extended `get_public_work_analytics(year)` so each daily record exposes both `net_minutes` and `coffee_count`, while keeping raw logs and work sessions private.
+- Added `list_public_availability(year)` for conference trips, Winter/Summer holidays, and generic unavailable periods. Duplicate public ranges are rejected and repeated conference presentations collapse to one trip range.
+- Extended public Conference data with `personal_attendance` and `involves_trip`, with trip status requiring personal attendance.
+- Added `get_public_teaching_settings()` to expose only the owner-level `teaching_season_active` flag.
+- Added `list_public_software()` and `get_public_software(slug)`, including controlled software vocabularies and suppression of private repository URLs.
+- Added `packages/academic-api-client/`: a transport-agnostic TypeScript reference client, generated contract metadata, canonical types, and strict runtime validators.
+- Added `npm run check:academic-api-client` and extended `npm run check:public-api:live` so live RPC responses use the same validators while direct anonymous table access is checked separately.
+- Updated the Academic API manifest, documentation, architecture notes, migration definitions, validator tests, and consumer mappings to match the expanded Public RPC v1 contract.
 - Aligned the conference-grouping migration filename with the production Supabase migration version recorded during rc.2 closeout.
-- Extended the public conference contract with `personal_attendance` and `involves_trip`; trip status requires personal attendance and project-embedded conference summaries use the same shape.
-- Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
-- Added `get_public_teaching_settings()` as a ninth Public RPC v1 operation exposing only the owner-level `teaching_season_active` boolean; the underlying RLS-protected Teaching settings table remains unavailable anonymously.
-- Extended the reference client, runtime validation, live privacy checks, generated metadata, and API documentation for the Teaching season contract.
-- Added `list_public_software()` and `get_public_software(slug)` to Public RPC v1, with the final controlled software category/stage/status/repository-visibility vocabularies, nullable lifecycle end year, and strict suppression of private repository URLs.
 
 `software ecosystem`
 
-- Added an Owner-only Software Ecosystem module after Access as the canonical registry for software, including Applications, Websites, Utilities, Reusable components, Packages/libraries, APIs/services, Data products, Templates, and Other items.
-- Added canonical name/slug/description metadata, current version, controlled development stage and status, repository visibility and URL, production/demo and documentation URLs, start/end year, Featured state, and independent public exposure.
-- Kept repository visibility independent from public exposure so a Private repository can still have a Public software profile; public RPCs never expose the private repository URL.
-- Added RLS-protected `software_items` and `software_public_metadata` tables, Owner CRUD workflows, and 10-item Software Ecosystem pagination.
+- Added an Owner-only Software Ecosystem module as the canonical registry for Applications, Websites, Utilities, Reusable components, Packages/libraries, APIs/services, Data products, Templates, and Other items.
+- Added name/slug/description, current version, controlled development stage and status, repository visibility and URL, production/demo and documentation URLs, start/end year, Featured state, and independent public exposure.
+- Kept repository visibility separate from public profile exposure so private repositories can have public software profiles without exposing their repository URLs.
+- Added RLS-protected `software_items` and `software_public_metadata` storage, Owner CRUD workflows, and 10-item pagination.
 
-`source-backed planning`
+`backup operations`
 
-- Replaced new manual blocked-time authoring with source-backed Planning commitments while retaining historical manual allocations as Legacy records.
-- Conference records now include Personal attendance and Involves trip controls. Personally attended conferences contribute their exact inclusive event dates; trips add one calendar day before and after and split automatically across half-month Planning periods.
-- Teaching Portfolio items now carry recurring active-month checkboxes and 0/1/2 committed days per week, converted to 0/2/4 committed days in each active half-month for every covered year.
-- Added exact dated Winter holiday, Summer holiday, Administrative, and Sick events as private Planning sources with inclusive date ranges.
-- Added per-source/per-period FlowSavvy/Calendar state for Conference, Teaching, and dated blocked events; changing a source schedule resets its Calendar state.
-- Kept exact dated overlaps additive and added an **Overlapping dated commitments** warning rather than silently deduplicating capacity.
-- Grouped multiple presentation records from the same conference event into one Planning attendance/trip commitment, while preserving additive overlap warnings for genuinely different dated commitments.
-- Updated the main Dashboard Planning load to use the same source-backed derivation as the Planning page.
-- Fixed Teaching Portfolio saves after the Planning expansion by restoring the authenticated runtime permission required by the `planning_months` uniqueness constraint.
-- Fixed Conference edits so Personal attendance and Involves trip are persisted, and adjusted the Planning and attendance panel heading so it no longer overlaps the card border.
-- Restored the stronger pre-source-backed FlowSavvy/Calendar status presentation, including medium-weight positive/partial states and the half-filled partial indicator.
-- Reorganised Planning commitments so the dated-event form is a narrow utility column, source-backed commitment cards receive the wider responsive area, and Automatic sources sits below as a compact reference strip.
-- Removed the redundant Monthly overview and replaced the Annual timeline table with a Google Calendar-inspired 12-month year view; every calendar date navigates to its corresponding 1–15 or 16–end Planning period, with whole-fortnight hover/focus and persistent selected-period highlighting.
-- Added previous/next-year pagination to the Annual timeline while preserving the selected month and fortnight, and colour-coded each fortnight using the same Period load bands: Open 0 days, Light 1–5, Moderate 6–10, Full 11–15, and Overcommitted 16+.
-- Reorganised Teaching so Public teaching contract and the new Teaching season control sit at the top, with Add course or activity spanning the full width below.
+- Added an Owner-only Backups page using private GitHub Releases and Actions metadata from `bgonzalezbustamante/apps-backups`.
+- Added Healthy, Running, Attention, and Stale states, with successful backups considered stale after eight days and newer failed/cancelled attempts taking precedence as Attention.
+- Added a typed server-side allow-list for the three backup workflows, tag prefixes, display labels, and Sunday UTC schedules.
+- Added encrypted archive size, latest workflow attempt, retention information, private release/run links, and manual workflow dispatch with duplicate-run protection and post-dispatch polling.
+- Kept the GitHub token, source Supabase credentials, age private key, archive bytes, restore operations, and retention/pruning outside browser code; recovery remains owned by `apps-backups`.
+- Uses standard Bearer authentication with an explicit GitHub REST User-Agent and safe status diagnostics; backup-health regression tests are part of the permanent Verify workflow.
 
-`list pagination`
+`navigation and list views`
 
-- Added First and Last controls to the existing 10-item Papers and Conferences pagination, alongside Previous and Next.
-- Added 10-item pagination to Projects and Teaching while preserving their existing sort order and full-dataset counts.
-- Standardised all four list views on First, Previous, Next, and Last navigation with invalid or out-of-range page requests clamped to a valid page.
+- Renamed the compact utility-navigation item to **Software** and added **Backup**, while retaining **Software Ecosystem** as the page title.
+- Standardised Papers, Projects, Conferences, and Teaching on 10-item pagination with First, Previous, Next, and Last controls and valid-page clamping.
 
-`security and licensing`
+`security, licensing, and release validation`
 
-- Documented the final full-history Gitleaks release check: 655 commits and approximately 2.64 MB scanned with no leaks found.
-- Added a repository `NOTICE` clarifying that the MIT licence covers the repository software and original documentation but does not grant rights to third-party trademarks, logos, crests, or institutional branding; `public/branding/oxford-logo.svg` is explicitly identified as an institutional branding asset outside the MIT grant.
-- Recorded GHSA-vfj7-8cjw-p6xm / CVE-2026-93687 in the development-only ESLint/Next.js dependency chain: full `npm audit` reports 5 high-severity findings through `braces@3.0.3`, while `npm audit --omit=dev` reports 0 production vulnerabilities. The advisory currently has no patched `braces` release, so the unsafe `npm audit fix --force` downgrade is intentionally avoided; follow-up is tracked in GitHub issue #36 for patching as soon as an official compatible fix is available.
-
-### Release status
-
-- Rustic Peak rc.2 is the current published pre-release.
-- Distant Forge rc.1 is the previous release candidate.
-- Supabase leaked-password protection is deferred to a future hardening batch and is not part of rc.2.
-- Release date: 5 Oct 2026.
+- Added `NOTICE` to clarify that third-party logos, trademarks, crests, and institutional branding are outside the repository MIT licence.
+- Recorded GHSA-vfj7-8cjw-p6xm / CVE-2026-93687 in the development-only ESLint/Next.js dependency chain. Full `npm audit` reports five high-severity findings through `braces@3.0.3`, while `npm audit --omit=dev` reports zero production vulnerabilities; the unsafe forced downgrade is intentionally avoided and follow-up remains tracked in issue #36.
+- Final rc.2 validation passed lint, static Academic API checks, reference-client tests, backup-integration tests, production build, live anonymous API validation, Netlify deployment checks, and production Supabase availability verification.
+- The final full-history Gitleaks scan covered 655 commits and approximately 2.64 MB with no leaks found.
+- Supabase leaked-password protection remains deferred to a future hardening batch.
 
 ---
 
