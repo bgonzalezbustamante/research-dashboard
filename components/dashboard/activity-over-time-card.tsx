@@ -129,15 +129,15 @@ function getHeatmapClass(
     return 'bg-sky-100'
   }
 
-  if (minutes < 360) {
+  if (minutes < 480) {
     return 'bg-sky-300'
   }
 
-  if (minutes < 480) {
+  if (minutes < 600) {
     return 'bg-sky-500'
   }
 
-  if (minutes < 600) {
+  if (minutes < 720) {
     return 'bg-sky-700'
   }
 
@@ -398,10 +398,10 @@ export default function ActivityOverTimeCard({
         <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border-t border-oxford-stone pt-3 text-xs text-oxford-ash">
           <span>0h</span>
           <span>&lt;4h</span>
-          <span>4–6h</span>
-          <span>6–8h</span>
+          <span>4–8h</span>
           <span>8–10h</span>
-          <span>10h+</span>
+          <span>10–12h</span>
+          <span>12h+</span>
         </div>
       </Card>
     </div>
