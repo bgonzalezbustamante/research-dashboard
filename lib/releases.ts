@@ -15,9 +15,34 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.3',
+    codename: 'Bold Ridge',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.2',
+    summary:
+      'Bold Ridge brings the Catholic Calendar into the Dashboard Home and adds a public switch for Calendar-related features in companion applications.',
+    sections: [
+      {
+        title: 'Catholic Calendar',
+        items: [
+          'The Dashboard Home now shows the same compact two-item Catholic Calendar display used by the standalone Calendar project.',
+          'A new public activation switch beside the display lets companion applications know when Calendar-related features should be active.',
+        ],
+      },
+      {
+        title: 'Public integration',
+        items: [
+          'The Calendar switch is available through the Academic API without exposing private Dashboard settings.',
+          'The existing Teaching-season status remains unchanged for current consumers.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.2',
     codename: 'Rustic Peak',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '5 Oct 2026',
     comparison: 'Changes since rc.1',
     summary:
