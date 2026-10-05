@@ -20,6 +20,7 @@
 - Added a dedicated **Catholic calendar** section heading, changed the card date to the full weekday format (for example, Monday, 5 October 2026), and moved the standalone Calendar link below the composed display.
 - Removed the four redundant Home mini-cards for Active papers, Net this week, Net this month, and Current plan; their substantive information remains available in the richer Dashboard sections below.
 - Restyled the Teaching season activation control as the same compact **Teaching season · On/Off** pill used by the Calendar controls.
+- Revised the **Activity over time** heatmap bands to 0h, <4h, 4–8h, 8–10h, 10–12h, and 12h+, updating both the displayed legend and the underlying colour thresholds.
 
 `Academic API and settings`
 
