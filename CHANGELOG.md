@@ -20,7 +20,7 @@
 - Renamed the utility-navigation label from **Software Ecosystem** to **Software** while keeping the full Software Ecosystem page title, and added **Backup** beside it.
 - Added backup-health regression tests and a permanent Verify workflow check.
 - Added an explicit GitHub REST User-Agent for Netlify runtime requests and safe request/status diagnostics for backup metadata and manual dispatch failures.
-- Added a read-only GitHub authentication retry for `401` responses (`Bearer` → `token`) and serialised workflow-run reads to avoid concurrent Actions requests in the Netlify server runtime; write/dispatch requests are never retried automatically.
+- Confirmed standard Bearer authentication and parallel GitHub metadata reads after correcting the production Netlify secret value; retained the explicit User-Agent and safe request/status diagnostics.
 
 
 `academic API and public work analytics`
@@ -42,6 +42,7 @@
 - Updated `ARCHITECTURE.md` and `/api` to distinguish the Supabase Data API/RPC transport from the optional reference TypeScript client/runtime-validation layer.
 - Added `list_public_availability(year)` as an anonymous-safe Public RPC v1 resource for conference trips, Winter/Summer holidays, and generic unavailable periods; Administrative commitments and sickness reasons/notes remain private.
 - Updated public availability so multiple presentations at the same conference produce one trip range rather than duplicate identical ranges.
+- Aligned the conference-grouping migration filename with the production Supabase migration version recorded during rc.2 closeout.
 - Extended the public conference contract with `personal_attendance` and `involves_trip`; trip status requires personal attendance and project-embedded conference summaries use the same shape.
 - Extended the reference client, static producer checker, live response checker, generated metadata, controlled availability vocabulary, and validator tests for the new availability contract.
 - Added `get_public_teaching_settings()` as a ninth Public RPC v1 operation exposing only the owner-level `teaching_season_active` boolean; the underlying RLS-protected Teaching settings table remains unavailable anonymously.
