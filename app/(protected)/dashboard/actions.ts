@@ -38,23 +38,34 @@ function dashboardRedirect(
   )
 }
 
-export async function updateCatholicCalendarStatus(
+function calendarRedirectParams(
   formData: FormData
 ) {
-  const access =
-    await requireDashboardOwner()
-
-  const catholicCalendarActive =
-    getText(
-      formData,
-      'catholic_calendar_active'
-    ) === 'true'
-
   const requestedYear =
     getText(
       formData,
       'year'
     )
+
+  return requestedYear
+    ? {
+        year:
+          requestedYear,
+      }
+    : {}
+}
+
+export async function updateAcademicWebsiteCalendarStatus(
+  formData: FormData
+) {
+  const access =
+    await requireDashboardOwner()
+
+  const active =
+    getText(
+      formData,
+      'catholic_calendar_active'
+    ) === 'true'
 
   const supabase =
     await createClient()
@@ -69,7 +80,7 @@ export async function updateCatholicCalendarStatus(
           owner_id:
             access.ownerId,
           catholic_calendar_active:
-            catholicCalendarActive,
+            active,
         },
         {
           onConflict:
@@ -79,34 +90,89 @@ export async function updateCatholicCalendarStatus(
 
   if (error) {
     console.error(
-      'Catholic Calendar status update failed:',
+      'Academic Website Calendar status update failed:',
       error
     )
 
     dashboardRedirect({
-      ...(requestedYear
-        ? {
-            year:
-              requestedYear,
-          }
-        : {}),
+      ...calendarRedirectParams(
+        formData
+      ),
       calendar_error:
-        'Calendar status could not be updated.',
+        'Academic Website Calendar status could not be updated.',
     })
   }
 
   revalidatePath('/dashboard')
 
   dashboardRedirect({
-    ...(requestedYear
-      ? {
-          year:
-            requestedYear,
-        }
-      : {}),
+    ...calendarRedirectParams(
+      formData
+    ),
     calendar:
-      catholicCalendarActive
-        ? 'active'
-        : 'inactive',
+      active
+        ? 'website-active'
+        : 'website-inactive',
+  })
+}
+
+export async function updateCalendarStressTest(
+  formData: FormData
+) {
+  const access =
+    await requireDashboardOwner()
+
+  const active =
+    getText(
+      formData,
+      'stress_test_active'
+    ) === 'true'
+
+  const supabase =
+    await createClient()
+
+  const { error } =
+    await supabase
+      .from(
+        'calendar_settings'
+      )
+      .upsert(
+        {
+          owner_id:
+            access.ownerId,
+          stress_test_active:
+            active,
+        },
+        {
+          onConflict:
+            'owner_id',
+        }
+      )
+
+  if (error) {
+    console.error(
+      'Calendar stress test update failed:',
+      error
+    )
+
+    dashboardRedirect({
+      ...calendarRedirectParams(
+        formData
+      ),
+      calendar_error:
+        'Calendar stress test could not be updated.',
+    })
+  }
+
+  revalidatePath('/dashboard')
+
+  dashboardRedirect({
+    ...calendarRedirectParams(
+      formData
+    ),
+    calendar:
+      active
+        ? 'stress-active'
+        : 'stress-inactive',
   })
 }
