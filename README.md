@@ -13,7 +13,7 @@ A personal research-management dashboard for papers, projects, conferences, teac
 - **Work and planning** — manual work logs, yearly analytics, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
 - **Collaboration and access** — Dashboard-wide Viewer access, paper-scoped Coauthor permissions, and Owner-only administrative controls.
 - **Software and operations** — a Software Ecosystem registry plus protected backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances.
-- **Public data** — curated anonymous-safe academic, software, work-analytics, Teaching-season, Catholic Calendar status, and availability data for approved downstream consumers.
+- **Public data** — curated anonymous-safe academic, software, work-analytics, Teaching-season, Catholic Calendar controls, and availability data for approved downstream consumers.
 - **Cross-module analytics** — workload, research activity, planning, Google Scholar citation snapshots, and citation-yield indicators.
 
 ## Public data interface
