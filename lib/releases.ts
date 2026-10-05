@@ -26,7 +26,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Catholic Calendar',
         items: [
-          'The Dashboard Home now shows a smaller version of the standalone Catholic Calendar’s composed display.',
+          'The Dashboard Home now gives the Catholic Calendar its own compact section using the standalone Calendar’s composed display style.',
           'Compact controls let the Academic Website turn its Calendar feature on or off and independently test unusually long displays.',
         ],
       },
@@ -34,7 +34,7 @@ export const releases: ReleaseNote[] = [
         title: 'Public integration',
         items: [
           'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
-          'The existing Teaching-season status remains unchanged for current consumers.',
+          'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
         ],
       },
     ],
