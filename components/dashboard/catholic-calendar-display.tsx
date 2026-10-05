@@ -9,38 +9,38 @@ export default function CatholicCalendarDisplay({
 }) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-oxford-charcoal">
+      <p className="relative z-10 font-serif text-base font-semibold text-oxford-blue">
         No selected observance or active period
       </p>
     )
   }
 
   return (
-    <div className="overflow-x-auto pb-1">
-      <div className="flex min-w-max items-center gap-2 text-sm text-oxford-charcoal">
-        {items.map(
-          (
-            item,
-            index
-          ) => (
-            <span
-              className="flex items-center gap-2 whitespace-nowrap"
-              key={
-                item.id
-              }
-            >
-              {index > 0 && (
-                <span
-                  aria-hidden="true"
-                  className="text-oxford-ash"
-                >
-                  ·
-                </span>
-              )}
-
+    <p className="relative z-10 m-0 flex flex-wrap items-center gap-x-1.5 gap-y-1 font-serif text-[clamp(1rem,1.8vw,1.25rem)] font-semibold leading-snug text-oxford-blue">
+      {items.map(
+        (
+          item,
+          index
+        ) => (
+          <span
+            className="inline-flex items-center gap-1.5"
+            key={
+              item.id
+            }
+          >
+            {index > 0 && (
               <span
                 aria-hidden="true"
-                className="h-4 w-4 shrink-0 bg-oxford-blue"
+                className="font-sans font-normal text-oxford-stone"
+              >
+                ·
+              </span>
+            )}
+
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className="h-[18px] w-[18px] shrink-0 bg-oxford-ash"
                 style={{
                   WebkitMaskImage:
                     `url("/catholic-calendar/${item.icon}.svg")`,
@@ -67,9 +67,9 @@ export default function CatholicCalendarDisplay({
                 }
               </span>
             </span>
-          )
-        )}
-      </div>
-    </div>
+          </span>
+        )
+      )}
+    </p>
   )
 }
