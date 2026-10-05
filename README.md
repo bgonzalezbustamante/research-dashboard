@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.2 "Rustic Peak"**
+**v1.0.0-rc.3 "Bold Ridge" — in development**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, software, working hours, planning, collaboration, and cross-module analytics. It is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
@@ -13,14 +13,14 @@ A personal research-management dashboard for papers, projects, conferences, teac
 - **Work and planning** — manual work logs, yearly analytics, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
 - **Collaboration and access** — Dashboard-wide Viewer access, paper-scoped Coauthor permissions, and Owner-only administrative controls.
 - **Software and operations** — a Software Ecosystem registry plus protected backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances.
-- **Public data** — curated anonymous-safe academic, software, work-analytics, Teaching-season, and availability data for approved downstream consumers.
+- **Public data** — curated anonymous-safe academic, software, work-analytics, Teaching-season, Catholic Calendar status, and availability data for approved downstream consumers.
 - **Cross-module analytics** — workload, research activity, planning, Google Scholar citation snapshots, and citation-yield indicators.
 
 ## Public data interface
 
 Research Dashboard is the administrative system of record. Public consumers use the curated Supabase RPC layer rather than querying Dashboard tables directly.
 
-The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 currently contains eleven curated operations; canonical fields, parameters, notes, and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
+The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 currently contains twelve curated operations; canonical fields, parameters, notes, and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
 
 A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. For the public/private boundary, validation model, and versioning rules, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
