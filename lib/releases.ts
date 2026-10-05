@@ -17,8 +17,8 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.2',
     codename: 'Rustic Peak',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
+    status: 'Release candidate',
+    releasedOn: '5 Oct 2026',
     comparison: 'Changes since rc.1',
     summary:
       'Rustic Peak strengthens Planning and the public Academic API, adds Software Ecosystem as the administrative registry for maintained applications and tools, and continues the 1.0 release line with reusable response validation, clearer navigation, and security and licensing improvements.',
