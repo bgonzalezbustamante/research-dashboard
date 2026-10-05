@@ -226,6 +226,7 @@ function assertManifest(contract) {
     'list_public_conference_presentations',
     'list_public_teaching',
     'get_public_teaching_settings',
+    'get_public_calendar_settings',
     'list_public_software',
     'get_public_software',
     'get_public_work_analytics',
@@ -617,6 +618,9 @@ async function liveCheck() {
   await api
     .getPublicTeachingSettings()
 
+  await api
+    .getPublicCalendarSettings()
+
   const year =
     Number(
       new Intl.DateTimeFormat(
@@ -651,6 +655,7 @@ async function liveCheck() {
     'teaching_portfolio',
     'teaching_public_metadata',
     'teaching_settings',
+    'calendar_settings',
     'software_items',
     'software_public_metadata',
     'daily_logs',
