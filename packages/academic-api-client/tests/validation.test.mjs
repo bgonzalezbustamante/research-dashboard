@@ -174,10 +174,12 @@ test('accepts valid representative Public RPC resources', () => {
     parsePublicCalendarSettingsResponse([
       {
         catholic_calendar_active: true,
+        stress_test_active: false,
       },
     ]),
     {
       catholic_calendar_active: true,
+      stress_test_active: false,
     }
   )
   assert.deepEqual(
@@ -498,8 +500,23 @@ test('validates the singleton Calendar settings contract', () => {
         {
           catholic_calendar_active:
             'yes',
+          stress_test_active:
+            false,
         },
       ]),
     /catholic_calendar_active/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicCalendarSettingsResponse([
+        {
+          catholic_calendar_active:
+            true,
+          stress_test_active:
+            'yes',
+        },
+      ]),
+    /stress_test_active/
   )
 })
