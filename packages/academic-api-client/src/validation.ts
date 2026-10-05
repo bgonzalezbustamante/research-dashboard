@@ -1249,6 +1249,10 @@ export function parsePublicCalendarSettingsResponse(
           value.catholic_calendar_active,
           `${path}.catholic_calendar_active`
         )
+        assertBoolean(
+          value.stress_test_active,
+          `${path}.stress_test_active`
+        )
 
         return value as unknown as PublicCalendarSettings
       }
