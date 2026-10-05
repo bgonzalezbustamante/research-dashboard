@@ -245,11 +245,13 @@ export default function PlanningYearCalendar({
                     const hovered =
                       period ===
                       hoveredPeriod
+                    const totalDays =
+                      periodLoads[
+                        period
+                      ] ?? 0
                     const load =
                       getPlanningLoadPresentation(
-                        periodLoads[
-                          period
-                        ] ?? 0
+                        totalDays
                       )
 
                     return (
@@ -288,7 +290,11 @@ export default function PlanningYearCalendar({
                         }
                         className={
                           'flex aspect-square items-center justify-center rounded text-xs transition focus:outline-none focus:ring-2 focus:ring-oxford-blue focus:ring-offset-1 ' +
-                          load.calendar +
+                          (
+                            totalDays === 0
+                              ? 'bg-gray-100 text-gray-600'
+                              : load.calendar
+                          ) +
                           (
                             selected
                               ? ' font-semibold ring-2 ring-inset ring-oxford-blue'
@@ -315,7 +321,7 @@ export default function PlanningYearCalendar({
           Period load
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm border border-green-200 bg-green-50" />
+          <span className="h-2.5 w-2.5 rounded-sm border border-gray-200 bg-gray-100" />
           Open · 0d
         </span>
         <span className="inline-flex items-center gap-1.5">
