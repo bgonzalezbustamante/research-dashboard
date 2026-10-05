@@ -1422,14 +1422,16 @@ export default async function DashboardPage({
                 }
               />
 
-              <a
-                href="https://catholic.bgonzalezbustamante.com"
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 inline-block text-[11px] font-medium text-oxford-ash underline decoration-oxford-stone underline-offset-2 hover:text-oxford-blue"
-              >
-                Open Catholic Calendar
-              </a>
+              <div className="mt-2 text-right">
+                <a
+                  href="https://catholic.bgonzalezbustamante.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] font-medium text-oxford-ash underline decoration-oxford-stone underline-offset-2 hover:text-oxford-blue"
+                >
+                  catholic.bgonzalezbustamante.com
+                </a>
+              </div>
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:justify-end">
