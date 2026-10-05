@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## v1.0.0-rc.3 "Bold Ridge" (in development)
+
+### Summary
+
+- Started `v1.0.0-rc.3 "Bold Ridge"` with a reusable Catholic Calendar integration on the Dashboard Home.
+- Added compact Owner controls for enabling the Catholic Calendar on the Academic Website and independently stress-testing long Calendar displays.
+
+### Code changes
+
+`dashboard and Catholic Calendar`
+
+- Added the exact `@bgonzalezbustamante/catholic-calendar@0.1.0-beta.1` package and use its deterministic `getCatholicCalendarState()` and `getCalendarDisplaySummary()` APIs rather than duplicating calendar rules in Research Dashboard.
+- Added the package's fixed two-item composed display above the four Home KPI cards, resolved for the current civil date in Europe/Amsterdam.
+- Refined the Home Calendar card to mirror the standalone Catholic Calendar display at a smaller scale, including its coral left rule, subtle Oxford-blue gradient, serif display typography, muted icons, and natural wrapping; the decorative quotation marks were omitted for a cleaner Dashboard treatment.
+- Added a direct link from the Home card to the Catholic Calendar application.
+- Added the curated Christicons required by the package's display metadata under `public/catholic-calendar/` and documented their third-party licensing in `NOTICE`.
+- Added two low-emphasis Owner controls in the Calendar card header: **Academic Website · On/Off** and **Stress test · On/Off**. Both default to inactive and neither hides the signed-in Dashboard Calendar display.
+- Added a dedicated **Catholic calendar** section heading, changed the card date to the full weekday format (for example, Monday, 5 October 2026), and moved the standalone Calendar link below the composed display.
+- Removed the four redundant Home mini-cards for Active papers, Net this week, Net this month, and Current plan; their substantive information remains available in the richer Dashboard sections below.
+- Restyled the Teaching season activation control as the same compact **Teaching season · On/Off** pill used by the Calendar controls.
+
+`Academic API and settings`
+
+- Added the RLS-protected `calendar_settings` table with owner-level `catholic_calendar_active` and `stress_test_active` booleans.
+- Added `get_public_calendar_settings()` as a new anonymous-safe Public RPC v1 operation returning only those two flags. The first controls whether the Academic Website enables its Catholic Calendar integration; the second lets the Website substitute a deliberately long composed display for layout testing. The underlying settings row, owner ID, and timestamps remain private.
+- Kept `get_public_teaching_settings()` unchanged so existing strict Teaching-season consumers remain compatible.
+- Added Calendar settings to the Academic Website consumer contract and extended the reference client, generated metadata, strict runtime validation, regression tests, live privacy checks, and API documentation for the new RPC.
+
+---
+
 ## v1.0.0-rc.2 "Rustic Peak"
 
 Released 5 Oct 2026.

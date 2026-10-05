@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import {
   AcademicApiValidationError,
   parsePublicAvailabilityList,
+  parsePublicCalendarSettingsResponse,
   parsePublicConferenceList,
   parsePublicPaperList,
   parsePublicProjectList,
@@ -167,6 +168,18 @@ test('accepts valid representative Public RPC resources', () => {
     ]),
     {
       teaching_season_active: true,
+    }
+  )
+  assert.deepEqual(
+    parsePublicCalendarSettingsResponse([
+      {
+        catholic_calendar_active: true,
+        stress_test_active: false,
+      },
+    ]),
+    {
+      catholic_calendar_active: true,
+      stress_test_active: false,
     }
   )
   assert.deepEqual(
@@ -471,5 +484,39 @@ test('validates the singleton Teaching settings contract', () => {
         },
       ]),
     /teaching_season_active/
+  )
+})
+
+test('validates the singleton Calendar settings contract', () => {
+  assert.throws(
+    () =>
+      parsePublicCalendarSettingsResponse([]),
+    /expected exactly one row/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicCalendarSettingsResponse([
+        {
+          catholic_calendar_active:
+            'yes',
+          stress_test_active:
+            false,
+        },
+      ]),
+    /catholic_calendar_active/
+  )
+
+  assert.throws(
+    () =>
+      parsePublicCalendarSettingsResponse([
+        {
+          catholic_calendar_active:
+            true,
+          stress_test_active:
+            'yes',
+        },
+      ]),
+    /stress_test_active/
   )
 })

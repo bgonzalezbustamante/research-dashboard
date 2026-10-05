@@ -15,9 +15,34 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.3',
+    codename: 'Bold Ridge',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.2',
+    summary:
+      'Bold Ridge brings the Catholic Calendar into the Dashboard Home and adds compact controls for its Academic Website integration and layout stress testing.',
+    sections: [
+      {
+        title: 'Catholic Calendar',
+        items: [
+          'The Dashboard Home now gives the Catholic Calendar its own compact section using the standalone Calendar’s composed display style.',
+          'Compact controls let the Academic Website turn its Calendar feature on or off and independently test unusually long displays.',
+        ],
+      },
+      {
+        title: 'Public integration',
+        items: [
+          'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
+          'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.2',
     codename: 'Rustic Peak',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '5 Oct 2026',
     comparison: 'Changes since rc.1',
     summary:

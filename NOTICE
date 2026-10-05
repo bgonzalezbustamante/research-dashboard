@@ -10,3 +10,13 @@ In particular:
 - Any future third-party institutional or organisational branding added to the repository should be treated on the same basis unless a separate licence or permission notice explicitly states otherwise.
 
 No trademark rights are granted by the repository's MIT License.
+
+## Christicons
+
+The Catholic Calendar display uses selected SVG icons from **Christicons**, created and maintained by **Dimitri Conejo Sanz**.
+
+- Project: https://christicons.com/
+- Licence: Christicons Icon License, Version 1.0 — 29 May 2026
+- Licence text: https://christicons.com/license
+
+The icons are incorporated as supporting interface assets under `public/catholic-calendar/`. They remain subject to the Christicons licence and are not relicensed under this repository's MIT License. They must not be redistributed as a standalone icon collection or used in a way that implies endorsement or official association.

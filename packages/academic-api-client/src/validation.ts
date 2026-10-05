@@ -14,6 +14,7 @@ import type {
   SoftwareStatus,
   PublicAvailabilityItem,
   PublicAvailabilityType,
+  PublicCalendarSettings,
   PublicConferencePresentation,
   PublicPaper,
   PublicPaperDetail,
@@ -1220,6 +1221,46 @@ export function parsePublicTeachingSettingsResponse(
   if (rows.length !== 1) {
     fail(
       'get_public_teaching_settings response',
+      'expected exactly one row'
+    )
+  }
+
+  return rows[0]
+}
+
+export function parsePublicCalendarSettingsResponse(
+  payload: unknown
+): PublicCalendarSettings {
+  const rows =
+    parseArray(
+      payload,
+      'get_public_calendar_settings response',
+      (value, path) => {
+        assertRecord(
+          value,
+          path
+        )
+        assertExactKeys(
+          value,
+          RPC_FIELDS.get_public_calendar_settings,
+          path
+        )
+        assertBoolean(
+          value.catholic_calendar_active,
+          `${path}.catholic_calendar_active`
+        )
+        assertBoolean(
+          value.stress_test_active,
+          `${path}.stress_test_active`
+        )
+
+        return value as unknown as PublicCalendarSettings
+      }
+    )
+
+  if (rows.length !== 1) {
+    fail(
+      'get_public_calendar_settings response',
       'expected exactly one row'
     )
   }

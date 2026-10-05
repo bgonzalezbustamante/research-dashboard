@@ -657,17 +657,50 @@ export default async function TeachingPage({
               </p>
             </div>
 
-            <span
-              className={
-                teachingSeasonActive
-                  ? 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
-                  : 'rounded-full border border-gray-300 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700'
-              }
-            >
-              {teachingSeasonActive
-                ? 'Active'
-                : 'Inactive'}
-            </span>
+            {isOwner ? (
+              <form
+                action={
+                  updateTeachingSeason
+                }
+              >
+                <input
+                  type="hidden"
+                  name="teaching_season_active"
+                  value={
+                    teachingSeasonActive
+                      ? 'false'
+                      : 'true'
+                  }
+                />
+
+                <button
+                  type="submit"
+                  className={
+                    teachingSeasonActive
+                      ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800 transition hover:bg-green-100'
+                      : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 transition hover:bg-gray-200'
+                  }
+                >
+                  Teaching season ·{' '}
+                  {teachingSeasonActive
+                    ? 'On'
+                    : 'Off'}
+                </button>
+              </form>
+            ) : (
+              <span
+                className={
+                  teachingSeasonActive
+                    ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800'
+                    : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700'
+                }
+              >
+                Teaching season ·{' '}
+                {teachingSeasonActive
+                  ? 'On'
+                  : 'Off'}
+              </span>
+            )}
           </div>
 
           <div className="mt-4 rounded-md border border-oxford-stone bg-oxford-off-white p-4 text-sm leading-6 text-oxford-charcoal">
@@ -690,38 +723,6 @@ export default async function TeachingPage({
               months.
             </p>
           </div>
-
-          {isOwner && (
-            <form
-              action={
-                updateTeachingSeason
-              }
-              className="mt-4"
-            >
-              <input
-                type="hidden"
-                name="teaching_season_active"
-                value={
-                  teachingSeasonActive
-                    ? 'false'
-                    : 'true'
-                }
-              />
-
-              <Button
-                type="submit"
-                variant={
-                  teachingSeasonActive
-                    ? 'warning'
-                    : 'success'
-                }
-              >
-                {teachingSeasonActive
-                  ? 'Deactivate Teaching season'
-                  : 'Activate Teaching season'}
-              </Button>
-            </form>
-          )}
         </Card>
       </div>
 

@@ -1,9 +1,17 @@
+import {
+  getCalendarDisplaySummary,
+  getCatholicCalendarState,
+} from '@bgonzalezbustamante/catholic-calendar'
 import Link from 'next/link'
 
+import CatholicCalendarDisplay from '@/components/dashboard/catholic-calendar-display'
 import CrossModuleAnalyticsSection from '@/components/dashboard/cross-module-analytics-section'
 import PageHeader from '@/components/page-header'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
+import {
+  requireDashboardAccess,
+} from '@/lib/auth/dashboard-access'
 import {
   deriveSourceBackedPlanning,
   type BlockedEventPlanningSource,
@@ -23,6 +31,11 @@ import {
   parseDate,
   summarisePeriod,
 } from '@/lib/hours/analytics'
+
+import {
+  updateAcademicWebsiteCalendarStatus,
+  updateCalendarStressTest,
+} from './actions'
 
 type PaperStatus =
   | 'writing'
@@ -91,6 +104,8 @@ type PlanningAllocationRow = {
 type DashboardPageProps = {
   searchParams: Promise<{
     year?: string
+    calendar?: string
+    calendar_error?: string
   }>
 }
 
@@ -214,6 +229,22 @@ function formatDate(
     {
       day: 'numeric',
       month: 'short',
+      year: 'numeric',
+    }
+  ).format(
+    parseDate(value)
+  )
+}
+
+function formatCatholicCalendarDate(
+  value: string
+) {
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
       year: 'numeric',
     }
   ).format(
@@ -435,8 +466,18 @@ export default async function DashboardPage({
   const params =
     await searchParams
 
+  const access =
+    await requireDashboardAccess()
+
   const today =
     getAmsterdamDate()
+
+  const calendarDisplay =
+    getCalendarDisplaySummary(
+      getCatholicCalendarState(
+        today
+      )
+    )
 
   const currentYear =
     Number(
@@ -516,6 +557,7 @@ export default async function DashboardPage({
     teachingResult,
     blockedEventsResult,
     sourceStatesResult,
+    calendarSettingsResult,
   ] = await Promise.all([
     supabase
       .from('papers')
@@ -639,6 +681,19 @@ export default async function DashboardPage({
         'period_start',
         `${currentYear}-12-31`
       ),
+
+    supabase
+      .from(
+        'calendar_settings'
+      )
+      .select(
+        'owner_id, catholic_calendar_active, stress_test_active'
+      )
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .maybeSingle(),
   ])
 
   if (
@@ -685,6 +740,10 @@ export default async function DashboardPage({
       'source-backed Calendar state',
       sourceStatesResult,
     ],
+    [
+      'Catholic Calendar settings',
+      calendarSettingsResult,
+    ],
   ] as const) {
     if (result.error) {
       throw new Error(
@@ -692,6 +751,18 @@ export default async function DashboardPage({
       )
     }
   }
+
+  const catholicCalendarActive =
+    calendarSettingsResult
+      .data
+      ?.catholic_calendar_active ??
+    false
+
+  const calendarStressTestActive =
+    calendarSettingsResult
+      .data
+      ?.stress_test_active ??
+    false
 
   const papers =
     (papersResult.data ??
@@ -894,24 +965,11 @@ export default async function DashboardPage({
       weekEnd
     )
 
-  const monthSummary =
-    summarisePeriod(
-      analyticsLogs,
-      monthStart,
-      monthEnd
-    )
-
   const weekGrossMinutes =
     weekSummary.grossMinutes
 
   const weekNetMinutes =
     weekSummary.netMinutes
-
-  const monthNetMinutes =
-    monthSummary.netMinutes
-
-  const monthBreakMinutes =
-    monthSummary.breakMinutes
 
   const weekDailyLogs =
     dailyLogs.filter(
@@ -1064,10 +1122,6 @@ export default async function DashboardPage({
     blockedDays *
     MINUTES_PER_PLANNED_DAY
 
-  const totalPlannedMinutes =
-    totalPlannedDays *
-    MINUTES_PER_PLANNED_DAY
-
   const flowsavvyCount =
     currentPlanningMilestones.filter(
       (milestone) =>
@@ -1174,15 +1228,6 @@ export default async function DashboardPage({
     getCoffeePresentation(
       highCoffeeDays
     )
-
-  const reviewRevisionCount =
-    activePapers.filter(
-      (paper) =>
-        paper.status ===
-          'under-review' ||
-        paper.status ===
-          'revise-round'
-    ).length
 
   const nextMilestoneByPaper =
     new Map<
@@ -1332,93 +1377,181 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Active papers
-          </div>
+      {params.calendar_error && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {
+            params.calendar_error
+          }
+        </div>
+      )}
 
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {
-              activePapers.length
-            }
-          </div>
+      {params.calendar && (
+        <div className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          {params.calendar ===
+          'website-active'
+            ? 'Catholic Calendar enabled on the Academic Website.'
+            : params.calendar ===
+                'website-inactive'
+              ? 'Catholic Calendar disabled on the Academic Website.'
+              : params.calendar ===
+                  'stress-active'
+                ? 'Calendar stress test enabled.'
+                : 'Calendar stress test disabled.'}
+        </div>
+      )}
 
-          <div className="mt-1 text-xs text-oxford-ash">
-            {
-              reviewRevisionCount
-            }{' '}
-            in review / revision
-          </div>
+      <section className="mb-8">
+        <div className="mb-3">
+          <h2 className="font-serif text-lg font-semibold text-oxford-blue">
+            Catholic calendar
+          </h2>
         </div>
 
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Net this week
-          </div>
+        <div className="rounded-lg border border-[rgba(0,33,71,0.16)] border-l-4 border-l-oxford-peach bg-[linear-gradient(135deg,rgba(0,33,71,0.045),transparent_62%)] bg-white px-4 py-3 shadow-[0_5px_16px_rgba(0,33,71,0.05)]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-oxford-ash">
+                {formatCatholicCalendarDate(
+                  today
+                )}
+              </div>
 
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {formatDuration(
-              weekNetMinutes
-            )}
-          </div>
+              <CatholicCalendarDisplay
+                items={
+                  calendarDisplay.items
+                }
+              />
 
-          <div className="mt-1 text-xs text-oxford-ash">
-            {
-              weekSummary.workingDays
-            }{' '}
-            working{' '}
-            {weekSummary.workingDays ===
-            1
-              ? 'day'
-              : 'days'}{' '}
-            · {weekCoffees}{' '}
-            coffees
+
+            </div>
+
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                {access.canEdit ? (
+                  <>
+                    <form
+                      action={
+                        updateAcademicWebsiteCalendarStatus
+                      }
+                    >
+                      <input
+                        type="hidden"
+                        name="catholic_calendar_active"
+                        value={
+                          catholicCalendarActive
+                            ? 'false'
+                            : 'true'
+                        }
+                      />
+
+                      {params.year && (
+                        <input
+                          type="hidden"
+                          name="year"
+                          value={
+                            params.year
+                          }
+                        />
+                      )}
+
+                      <button
+                        type="submit"
+                        className={
+                          catholicCalendarActive
+                            ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800 transition hover:bg-green-100'
+                            : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700 transition hover:bg-gray-200'
+                        }
+                      >
+                        Academic Website ·{' '}
+                        {catholicCalendarActive
+                          ? 'On'
+                          : 'Off'}
+                      </button>
+                    </form>
+
+                    <form
+                      action={
+                        updateCalendarStressTest
+                      }
+                    >
+                      <input
+                        type="hidden"
+                        name="stress_test_active"
+                        value={
+                          calendarStressTestActive
+                            ? 'false'
+                            : 'true'
+                        }
+                      />
+
+                      {params.year && (
+                        <input
+                          type="hidden"
+                          name="year"
+                          value={
+                            params.year
+                          }
+                        />
+                      )}
+
+                      <button
+                        type="submit"
+                        className={
+                          calendarStressTestActive
+                            ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800 transition hover:bg-amber-100'
+                            : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600 transition hover:bg-gray-100'
+                        }
+                      >
+                        Stress test ·{' '}
+                        {calendarStressTestActive
+                          ? 'On'
+                          : 'Off'}
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className={
+                        catholicCalendarActive
+                          ? 'rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-800'
+                          : 'rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-700'
+                      }
+                    >
+                      Academic Website ·{' '}
+                      {catholicCalendarActive
+                        ? 'On'
+                        : 'Off'}
+                    </span>
+
+                    <span
+                      className={
+                        calendarStressTestActive
+                          ? 'rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800'
+                          : 'rounded-full border border-gray-300 bg-white px-2 py-0.5 text-[10px] font-medium text-gray-600'
+                      }
+                    >
+                      Stress test ·{' '}
+                      {calendarStressTestActive
+                        ? 'On'
+                        : 'Off'}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <a
+                href="https://catholic.bgonzalezbustamante.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-right text-[11px] font-medium text-oxford-peach underline decoration-oxford-peach/50 underline-offset-2 hover:text-oxford-blue"
+              >
+                catholic.bgonzalezbustamante.com
+              </a>
+            </div>
           </div>
         </div>
-
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Net this month
-          </div>
-
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {formatDuration(
-              monthNetMinutes
-            )}
-          </div>
-
-          <div className="mt-1 text-xs text-oxford-ash">
-            {formatDuration(
-              monthBreakMinutes
-            )}{' '}
-            break recorded
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Current plan
-          </div>
-
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {formatDuration(
-              totalPlannedMinutes
-            )}
-          </div>
-
-          <div className="mt-1 text-xs text-oxford-ash">
-            Research{' '}
-            {formatDuration(
-              researchPlannedMinutes
-            )}{' '}
-            · Blocked{' '}
-            {formatDuration(
-              blockedPlannedMinutes
-            )}
-          </div>
-        </div>
-      </div>
+      </section>
 
       <section className="mb-8">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
