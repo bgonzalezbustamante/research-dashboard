@@ -56,8 +56,8 @@ type ResolveHoursPenguinArgs = {
   blockedEvents: BlockedEventRow[]
 }
 
-const TIMELINE_BASE =
-  'https://timeline.bgonzalezbustamante.com/penguins'
+const PENGUIN_BASE =
+  '/penguins'
 
 const CATHOLIC_OBSERVANCE_IDS =
   new Set([
@@ -358,7 +358,7 @@ function resolveAsset(
   coffeeBucket: CoffeeBucket
 ) {
   const stateBase =
-    `${TIMELINE_BASE}/states/webp`
+    `${PENGUIN_BASE}/states/webp`
 
   switch (mode) {
     case 'saturday':
@@ -395,7 +395,7 @@ function resolveAsset(
         coffeeBucket ===
           'zero'
       ) {
-        return `${TIMELINE_BASE}/canonical-baseline.webp`
+        return `${PENGUIN_BASE}/canonical-baseline.webp`
       }
 
       return `${stateBase}/work-${workBucket}__coffee-${coffeeBucket}.webp`
