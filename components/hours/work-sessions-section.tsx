@@ -59,6 +59,7 @@ type WorkSessionsSectionProps = {
   locationPage: number
   mergeError?: string
   mergeMessage?: string
+  period: string
 }
 
 const inputClass =
@@ -135,6 +136,7 @@ export default async function WorkSessionsSection({
   locationPage,
   mergeError,
   mergeMessage,
+  period,
 }: WorkSessionsSectionProps) {
   const supabase =
     await createClient()
@@ -942,6 +944,9 @@ export default async function WorkSessionsSection({
         }
         mergeMessage={
           mergeMessage
+        }
+        period={
+          period
         }
       />
     </>
