@@ -758,14 +758,14 @@ export default async function HoursPage({
           className="relative h-full rounded-lg border border-oxford-stone bg-white p-4"
         >
           <div
-            className="absolute right-3 top-3 flex w-32 flex-col items-center gap-0.5 text-center"
+            className="absolute right-2 top-2 flex w-[188px] flex-col items-center gap-0.5 text-center"
           >
             <span
               role="img"
               aria-label={
                 selectedPenguin.label
               }
-              className="block h-10 w-10 bg-contain bg-center bg-no-repeat"
+              className="block aspect-square w-[188px] bg-contain bg-center bg-no-repeat drop-shadow-[0_6px_7px_rgba(0,33,71,0.08)]"
               style={{
                 backgroundImage:
                   `url("${selectedPenguin.src}")`,
@@ -776,7 +776,7 @@ export default async function HoursPage({
               href="https://timeline.bgonzalezbustamante.com"
               target="_blank"
               rel="noreferrer"
-              className="whitespace-nowrap text-[7px] font-medium leading-3 text-oxford-peach underline decoration-oxford-peach/50 underline-offset-2 hover:text-oxford-blue"
+              className="whitespace-nowrap text-[9px] font-medium leading-3 text-oxford-peach underline decoration-oxford-peach/50 underline-offset-2 hover:text-oxford-blue"
             >
               timeline.bgonzalezbustamante.com
             </a>
