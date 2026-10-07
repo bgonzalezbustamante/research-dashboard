@@ -45,6 +45,13 @@ type WorkSession = {
   end_time: string
 }
 
+type NonPaperWorkSession = {
+  id: string
+  activity_label_id: string
+  start_time: string
+  end_time: string
+}
+
 type UsageSummary = {
   sessions: number
   minutes: number
@@ -385,6 +392,70 @@ export default async function HoursRelationshipsPage() {
     }
   }
 
+  const nonPaperSessions:
+    NonPaperWorkSession[] = []
+
+  if (labels.length > 0) {
+    let from = 0
+
+    while (true) {
+      const { data, error } =
+        await supabase
+          .from('work_sessions')
+          .select(`
+            id,
+            activity_label_id,
+            start_time,
+            end_time
+          `)
+          .is(
+            'paper_id',
+            null
+          )
+          .in(
+            'activity_label_id',
+            labels.map(
+              (label) =>
+                label.id
+            )
+          )
+          .order(
+            'id',
+            { ascending: true }
+          )
+          .range(
+            from,
+            from +
+              SESSION_PAGE_SIZE -
+              1
+          )
+
+      if (error) {
+        throw new Error(
+          `Could not load non-Paper work sessions: ${error.message}`
+        )
+      }
+
+      const rows =
+        (data ?? []) as
+          NonPaperWorkSession[]
+
+      nonPaperSessions.push(
+        ...rows
+      )
+
+      if (
+        rows.length <
+        SESSION_PAGE_SIZE
+      ) {
+        break
+      }
+
+      from +=
+        SESSION_PAGE_SIZE
+    }
+  }
+
   const labelById =
     new Map(
       labels.map(
@@ -571,6 +642,46 @@ export default async function HoursRelationshipsPage() {
     )
   }
 
+  const nonPaperUsageByLabel =
+    new Map<
+      string,
+      UsageSummary
+    >()
+
+  for (const session of
+    nonPaperSessions) {
+    const existing =
+      nonPaperUsageByLabel.get(
+        session.activity_label_id
+      ) ?? {
+        sessions: 0,
+        minutes: 0,
+      }
+
+    existing.sessions += 1
+    existing.minutes +=
+      getDurationMinutes(
+        session.start_time,
+        session.end_time
+      )
+
+    nonPaperUsageByLabel.set(
+      session.activity_label_id,
+      existing
+    )
+  }
+
+  const missingAssignments:
+    {
+      paper: Paper
+      observedLabel: ActivityLabel
+      paperProjects: Project[]
+      usage: UsageSummary
+      nonPaperUsage:
+        | UsageSummary
+        | null
+    }[] = []
+
   const mismatches:
     {
       paper: Paper
@@ -598,17 +709,62 @@ export default async function HoursRelationshipsPage() {
         paperId
       ) ?? new Set<string>()
 
+    const paperProjects =
+      [
+        ...ownProjectIds,
+      ]
+        .map(
+          (projectId) =>
+            projectById.get(
+              projectId
+            )
+        )
+        .filter(
+          (
+            project
+          ): project is Project =>
+            Boolean(project)
+        )
+
     for (const [
       labelId,
       usage,
     ] of paperUsage) {
+      const observedLabel =
+        labelById.get(
+          labelId
+        )
+
+      if (!observedLabel) {
+        continue
+      }
+
       const assignedProjectId =
         labelProjectId.get(
           labelId
         )
 
+      if (!assignedProjectId) {
+        if (
+          ownProjectIds.size >
+          0
+        ) {
+          missingAssignments.push({
+            paper,
+            observedLabel,
+            paperProjects,
+            usage,
+            nonPaperUsage:
+              nonPaperUsageByLabel.get(
+                labelId
+              ) ?? null,
+          })
+        }
+
+        continue
+      }
+
       if (
-        !assignedProjectId ||
         ownProjectIds.has(
           assignedProjectId
         )
@@ -616,39 +772,14 @@ export default async function HoursRelationshipsPage() {
         continue
       }
 
-      const observedLabel =
-        labelById.get(
-          labelId
-        )
-
       const assignedProject =
         projectById.get(
           assignedProjectId
         )
 
-      if (
-        !observedLabel ||
-        !assignedProject
-      ) {
+      if (!assignedProject) {
         continue
       }
-
-      const paperProjects =
-        [
-          ...ownProjectIds,
-        ]
-          .map(
-            (projectId) =>
-              projectById.get(
-                projectId
-              )
-          )
-          .filter(
-            (
-              project
-            ): project is Project =>
-              Boolean(project)
-          )
 
       mismatches.push({
         paper,
@@ -659,6 +790,15 @@ export default async function HoursRelationshipsPage() {
       })
     }
   }
+
+  missingAssignments.sort(
+    (a, b) =>
+      b.usage.minutes -
+        a.usage.minutes ||
+      a.paper.short_title.localeCompare(
+        b.paper.short_title
+      )
+  )
 
   mismatches.sort(
     (a, b) =>
@@ -680,16 +820,14 @@ export default async function HoursRelationshipsPage() {
         )
     )
 
-  const standaloneLabelIds =
+  const observedPaperLabelIds =
     new Set<string>()
 
-  for (const paper of
-    standalonePapers) {
+  for (const usage of
+    usageByPaper.values()) {
     for (const labelId of
-      usageByPaper
-        .get(paper.id)
-        ?.keys() ?? []) {
-      standaloneLabelIds.add(
+      usage.keys()) {
+      observedPaperLabelIds.add(
         labelId
       )
     }
@@ -711,7 +849,7 @@ export default async function HoursRelationshipsPage() {
         !explicitlyAssociatedLabels.has(
           label.id
         ) &&
-        !standaloneLabelIds.has(
+        !observedPaperLabelIds.has(
           label.id
         )
     )
@@ -773,6 +911,10 @@ export default async function HoursRelationshipsPage() {
                   paperId
                 ) ?? new Set<string>()
 
+              const missingProjectAssignment =
+                !assignedProjectId &&
+                ownProjects.size > 0
+
               const mismatch =
                 Boolean(
                   assignedProjectId &&
@@ -787,7 +929,9 @@ export default async function HoursRelationshipsPage() {
                   className={
                     mismatch
                       ? 'rounded-full border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900'
-                      : 'rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-1 text-xs text-oxford-charcoal'
+                      : missingProjectAssignment
+                        ? 'rounded-full border border-yellow-300 bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-900'
+                        : 'rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-1 text-xs text-oxford-charcoal'
                   }
                 >
                   Observed: {label.name}
@@ -797,7 +941,9 @@ export default async function HoursRelationshipsPage() {
                   )}
                   {mismatch
                     ? ' · Potential mismatch'
-                    : ''}
+                    : missingProjectAssignment
+                      ? ' · Missing Project assignment'
+                      : ''}
                 </span>
               )
             }
@@ -823,7 +969,7 @@ export default async function HoursRelationshipsPage() {
       </div>
 
       <Card>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
               Assigned
@@ -839,6 +985,15 @@ export default async function HoursRelationshipsPage() {
             </div>
             <p className="mt-1 text-sm leading-6 text-oxford-charcoal">
               Activity labels actually used in work sessions linked to a Paper.
+            </p>
+          </div>
+
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-yellow-800">
+              Missing Project assignment
+            </div>
+            <p className="mt-1 text-sm leading-6 text-oxford-charcoal">
+              A Project-backed Paper used a label that is not assigned to any Project.
             </p>
           </div>
 
@@ -859,50 +1014,116 @@ export default async function HoursRelationshipsPage() {
             Relationship check
           </h2>
           <p className="mt-1 text-sm text-oxford-ash">
-            Conservative cross-Project checks only; general labels such as Writing are not treated as mismatches.
+            Missing assignments are reminders; cross-Project assignments are stronger potential mismatches.
           </p>
         </div>
 
-        {mismatches.length ===
-        0 ? (
+        {missingAssignments.length ===
+          0 &&
+        mismatches.length ===
+          0 ? (
           <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
-            No cross-Project Activity-label mismatches detected.
+            No Project Activity-label relationship issues detected.
           </div>
         ) : (
-          <div className="space-y-3">
-            {mismatches.map(
-              (mismatch) => (
-                <div
-                  key={`${mismatch.paper.id}-${mismatch.observedLabel.id}`}
-                  className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/papers/${mismatch.paper.id}`}
-                      className="font-medium text-oxford-blue hover:underline"
-                    >
-                      {mismatch.paper.short_title}
-                    </Link>
-                    <span className="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-xs font-medium text-amber-900">
-                      Potential mismatch
-                    </span>
-                  </div>
+          <div className="space-y-5">
+            {missingAssignments.length >
+              0 && (
+              <div>
+                <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                  Missing Project assignments
+                </h3>
 
-                  <p className="mt-1 text-sm leading-6 text-amber-950">
-                    Observed label “{mismatch.observedLabel.name}” ({formatDuration(
-                      mismatch.usage.minutes
-                    )}) is assigned to {mismatch.assignedProject.short_title}
-                    {mismatch.paperProjects.length > 0
-                      ? `, while this Paper belongs to ${mismatch.paperProjects
-                          .map(
-                            (project) =>
-                              project.short_title
-                          )
-                          .join(', ')}.`
-                      : ', while this Paper has no Project association.'}
-                  </p>
+                <div className="mt-3 space-y-3">
+                  {missingAssignments.map(
+                    (issue) => (
+                      <div
+                        key={`missing-${issue.paper.id}-${issue.observedLabel.id}`}
+                        className="rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link
+                            href={`/papers/${issue.paper.id}`}
+                            className="font-medium text-oxford-blue hover:underline"
+                          >
+                            {issue.paper.short_title}
+                          </Link>
+                          <span className="rounded-full border border-yellow-300 bg-white px-2 py-0.5 text-xs font-medium text-yellow-900">
+                            Missing Project assignment
+                          </span>
+                        </div>
+
+                        <p className="mt-1 text-sm leading-6 text-yellow-950">
+                          Observed label “{issue.observedLabel.name}” ({formatDuration(
+                            issue.usage.minutes
+                          )}) is not assigned to a Project, while this Paper belongs to {issue.paperProjects
+                            .map(
+                              (project) =>
+                                project.short_title
+                            )
+                            .join(', ')}.
+                        </p>
+
+                        {issue.nonPaperUsage &&
+                          issue.nonPaperUsage.minutes >
+                            0 && (
+                          <p className="mt-1 text-xs leading-5 text-yellow-900">
+                            The same label also has {formatDuration(
+                              issue.nonPaperUsage.minutes
+                            )} across {issue.nonPaperUsage.sessions} session{issue.nonPaperUsage.sessions === 1 ? '' : 's'} without a Paper, so assigning the whole label to this Project may overstate Project-specific time.
+                          </p>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
-              )
+              </div>
+            )}
+
+            {mismatches.length >
+              0 && (
+              <div>
+                <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                  Potential mismatches
+                </h3>
+
+                <div className="mt-3 space-y-3">
+                  {mismatches.map(
+                    (mismatch) => (
+                      <div
+                        key={`${mismatch.paper.id}-${mismatch.observedLabel.id}`}
+                        className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link
+                            href={`/papers/${mismatch.paper.id}`}
+                            className="font-medium text-oxford-blue hover:underline"
+                          >
+                            {mismatch.paper.short_title}
+                          </Link>
+                          <span className="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-xs font-medium text-amber-900">
+                            Potential mismatch
+                          </span>
+                        </div>
+
+                        <p className="mt-1 text-sm leading-6 text-amber-950">
+                          Observed label “{mismatch.observedLabel.name}” ({formatDuration(
+                            mismatch.usage.minutes
+                          )}) is assigned to {mismatch.assignedProject.short_title}
+                          {mismatch.paperProjects.length > 0
+                            ? `, while this Paper belongs to ${mismatch.paperProjects
+                                .map(
+                                  (project) =>
+                                    project.short_title
+                                )
+                                .join(', ')}.`
+                            : ', while this Paper has no Project association.'}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
             )}
           </div>
         )}
