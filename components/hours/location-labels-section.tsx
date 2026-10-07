@@ -1,18 +1,36 @@
+import Link from 'next/link'
+
 import { setDefaultLocationLabel } from '@/app/(protected)/hours/location-default-action'
 import {
+  consolidateLocationLabels,
   createLocationLabel,
   deleteLocationLabel,
   setLocationLabelActive,
   updateLocationLabel,
 } from '@/app/(protected)/hours/location-actions'
+import { consolidateActivityLabels } from '@/app/(protected)/hours/actions'
 
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
 import { createClient } from '@/lib/supabase/server'
 
+type ActivityLabel = {
+  id: string
+  name: string
+  is_system: boolean
+  is_break: boolean
+  is_active: boolean
+  merged_into_id: string | null
+  merged_at: string | null
+}
+
 type LocationLabelsSectionProps = {
   returnDate: string
   actionError?: string
+  page: number
+  activityLabels: ActivityLabel[]
+  mergeError?: string
+  mergeMessage?: string
 }
 
 type LocationLabel = {
@@ -21,6 +39,8 @@ type LocationLabel = {
   description: string | null
   is_active: boolean
   is_default: boolean
+  merged_into_id: string | null
+  merged_at: string | null
 }
 
 const inputClass =
@@ -28,6 +48,25 @@ const inputClass =
 
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
+
+const LABELS_PER_PAGE = 10
+
+function formatMergedDate(
+  value: string | null
+) {
+  if (!value) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }
+  ).format(new Date(value))
+}
 
 function LocationErrorNotice({
   message,
@@ -54,6 +93,10 @@ function LocationErrorNotice({
 export default async function LocationLabelsSection({
   returnDate,
   actionError,
+  page,
+  activityLabels,
+  mergeError,
+  mergeMessage,
 }: LocationLabelsSectionProps) {
   const supabase =
     await createClient()
@@ -66,7 +109,9 @@ export default async function LocationLabelsSection({
         name,
         description,
         is_active,
-        is_default
+        is_default,
+        merged_into_id,
+        merged_at
       `)
       .order(
         'is_active',
@@ -131,6 +176,121 @@ export default async function LocationLabelsSection({
     labels.find(
       (label) => label.is_default
     ) ?? null
+
+  const sortedLabels =
+    [...labels].sort(
+      (a, b) => {
+        const aMerged =
+          a.merged_into_id !==
+          null
+        const bMerged =
+          b.merged_into_id !==
+          null
+
+        if (
+          aMerged !== bMerged
+        ) {
+          return aMerged
+            ? 1
+            : -1
+        }
+
+        if (
+          a.is_active !==
+          b.is_active
+        ) {
+          return a.is_active
+            ? -1
+            : 1
+        }
+
+        if (
+          a.is_default !==
+          b.is_default
+        ) {
+          return a.is_default
+            ? -1
+            : 1
+        }
+
+        return a.name.localeCompare(
+          b.name
+        )
+      }
+    )
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        sortedLabels.length /
+          LABELS_PER_PAGE
+      )
+    )
+
+  const currentPage =
+    Math.min(
+      Number.isFinite(page) &&
+      page > 0
+        ? page
+        : 1,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    LABELS_PER_PAGE
+
+  const paginatedLabels =
+    sortedLabels.slice(
+      pageStart,
+      pageStart +
+        LABELS_PER_PAGE
+    )
+
+  const labelById =
+    new Map(
+      labels.map(
+        (label) => [
+          label.id,
+          label,
+        ]
+      )
+    )
+
+  const activityMergeOptions =
+    activityLabels.filter(
+      (label) =>
+        label.is_active &&
+        !label.is_system &&
+        !label.is_break &&
+        !label.merged_into_id
+    )
+
+  const locationMergeOptions =
+    labels.filter(
+      (label) =>
+        label.is_active &&
+        !label.merged_into_id
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) => {
+    const params =
+      new URLSearchParams({
+        date: returnDate,
+      })
+
+    if (pageNumber > 1) {
+      params.set(
+        'locationPage',
+        String(pageNumber)
+      )
+    }
+
+    return `/hours?${params.toString()}#location-labels`
+  }
 
   return (
     <section
@@ -266,7 +426,7 @@ export default async function LocationLabelsSection({
               </Card>
             </div>
           ) : (
-            labels.map((label) => (
+            paginatedLabels.map((label) => (
               <Card
                 key={label.id}
                 className="h-fit"
@@ -303,6 +463,27 @@ export default async function LocationLabelsSection({
                   </p>
                 )}
 
+                {label.merged_into_id ? (
+                  <p className="mt-3 border-t border-oxford-stone pt-2 text-[10px] leading-4 text-oxford-ash">
+                    {(() => {
+                      const target =
+                        labelById.get(
+                          label.merged_into_id
+                        )
+
+                      const sibling =
+                        labels.find(
+                          (candidate) =>
+                            candidate.id !==
+                              label.id &&
+                            candidate.merged_into_id ===
+                              label.merged_into_id
+                        )
+
+                      return `Merged${sibling ? ` with “${sibling.name}”` : ''} into current “${target?.name ?? 'canonical location'}”${label.merged_at ? ` · ${formatMergedDate(label.merged_at)}` : ''}`
+                    })()}
+                  </p>
+                ) : (
                 <div className="mt-3 border-t border-oxford-stone pt-3">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     {!label.is_default && (
@@ -473,9 +654,331 @@ export default async function LocationLabelsSection({
                     </details>
                   </div>
                 </div>
+                )}
               </Card>
             ))
           )}
+        </div>
+      </div>
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Location labels pagination"
+          className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3"
+        >
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+
+          <div className="flex gap-2">
+            {currentPage > 1 ? (
+              <Link
+                href={getPageHref(
+                  currentPage - 1
+                )}
+                className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal hover:bg-oxford-shell"
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2 text-sm text-oxford-ash">
+                Previous
+              </span>
+            )}
+
+            {currentPage < totalPages ? (
+              <Link
+                href={getPageHref(
+                  currentPage + 1
+                )}
+                className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal hover:bg-oxford-shell"
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2 text-sm text-oxford-ash">
+                Next
+              </span>
+            )}
+          </div>
+        </nav>
+      )}
+
+      <div
+        id="label-consolidation"
+        className="mt-10 scroll-mt-6 rounded-lg border border-red-200 bg-red-50/40 p-5"
+      >
+        <div>
+          <h2 className="font-serif text-2xl font-semibold text-red-800">
+            Danger zone
+          </h2>
+
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-red-800">
+            Consolidation creates a new canonical label, moves the relevant managed relationships, and keeps both source labels as immutable inactive provenance records. This cannot be reversed in the interface.
+          </p>
+        </div>
+
+        {mergeMessage && (
+          <div className="mt-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+            {mergeMessage}
+          </div>
+        )}
+
+        {mergeError && (
+          <div className="mt-4 rounded-md border border-red-300 bg-white px-3 py-2 text-sm text-red-800">
+            {mergeError}
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <div className="rounded-lg border border-red-200 bg-white p-4">
+            <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+              Consolidate activity labels
+            </h3>
+
+            <p className="mt-1 text-xs leading-5 text-oxford-ash">
+              Work sessions move to the new label. Compatible Project and Teaching links move with them; incompatible links block the operation.
+            </p>
+
+            {activityMergeOptions.length >= 2 ? (
+              <form
+                action={
+                  consolidateActivityLabels
+                }
+                className="mt-4 space-y-3"
+              >
+                <input
+                  type="hidden"
+                  name="return_date"
+                  value={returnDate}
+                />
+
+                <div>
+                  <label
+                    htmlFor="activity-source-a"
+                    className={labelClass}
+                  >
+                    First label
+                  </label>
+                  <select
+                    id="activity-source-a"
+                    name="source_a_id"
+                    required
+                    className={inputClass}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select label
+                    </option>
+                    {activityMergeOptions.map(
+                      (label) => (
+                        <option
+                          key={label.id}
+                          value={label.id}
+                        >
+                          {label.name}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="activity-source-b"
+                    className={labelClass}
+                  >
+                    Second label
+                  </label>
+                  <select
+                    id="activity-source-b"
+                    name="source_b_id"
+                    required
+                    className={inputClass}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select label
+                    </option>
+                    {activityMergeOptions.map(
+                      (label) => (
+                        <option
+                          key={label.id}
+                          value={label.id}
+                        >
+                          {label.name}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="activity-target-name"
+                    className={labelClass}
+                  >
+                    New canonical name
+                  </label>
+                  <input
+                    id="activity-target-name"
+                    name="target_name"
+                    type="text"
+                    required
+                    placeholder="May reuse either source name"
+                    className={inputClass}
+                  />
+                </div>
+
+                <label className="flex items-start gap-2 text-xs leading-5 text-red-800">
+                  <input
+                    type="checkbox"
+                    name="confirm_merge"
+                    value="yes"
+                    required
+                    className="mt-1"
+                  />
+                  I understand both source labels will become permanently read-only.
+                </label>
+
+                <Button
+                  type="submit"
+                  variant="danger"
+                >
+                  Consolidate activity labels
+                </Button>
+              </form>
+            ) : (
+              <p className="mt-4 text-sm text-oxford-ash">
+                At least two active custom activity labels are required.
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-red-200 bg-white p-4">
+            <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+              Consolidate location labels
+            </h3>
+
+            <p className="mt-1 text-xs leading-5 text-oxford-ash">
+              The managed location vocabulary is consolidated while historical session location text remains unchanged.
+            </p>
+
+            {locationMergeOptions.length >= 2 ? (
+              <form
+                action={
+                  consolidateLocationLabels
+                }
+                className="mt-4 space-y-3"
+              >
+                <input
+                  type="hidden"
+                  name="return_date"
+                  value={returnDate}
+                />
+
+                <div>
+                  <label
+                    htmlFor="location-source-a"
+                    className={labelClass}
+                  >
+                    First location
+                  </label>
+                  <select
+                    id="location-source-a"
+                    name="source_a_id"
+                    required
+                    className={inputClass}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select location
+                    </option>
+                    {locationMergeOptions.map(
+                      (label) => (
+                        <option
+                          key={label.id}
+                          value={label.id}
+                        >
+                          {label.name}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="location-source-b"
+                    className={labelClass}
+                  >
+                    Second location
+                  </label>
+                  <select
+                    id="location-source-b"
+                    name="source_b_id"
+                    required
+                    className={inputClass}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Select location
+                    </option>
+                    {locationMergeOptions.map(
+                      (label) => (
+                        <option
+                          key={label.id}
+                          value={label.id}
+                        >
+                          {label.name}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="location-target-name"
+                    className={labelClass}
+                  >
+                    New canonical name
+                  </label>
+                  <input
+                    id="location-target-name"
+                    name="target_name"
+                    type="text"
+                    required
+                    placeholder="May reuse either source name"
+                    className={inputClass}
+                  />
+                </div>
+
+                <label className="flex items-start gap-2 text-xs leading-5 text-red-800">
+                  <input
+                    type="checkbox"
+                    name="confirm_merge"
+                    value="yes"
+                    required
+                    className="mt-1"
+                  />
+                  I understand both source locations will become permanently read-only.
+                </label>
+
+                <Button
+                  type="submit"
+                  variant="danger"
+                >
+                  Consolidate location labels
+                </Button>
+              </form>
+            ) : (
+              <p className="mt-4 text-sm text-oxford-ash">
+                At least two active location labels are required.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
