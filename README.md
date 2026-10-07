@@ -10,7 +10,7 @@ A personal research-management dashboard for papers, projects, conferences, teac
 ## Core capabilities
 
 - **Research records** — paper workflows, milestones, revision history, citations, projects, conferences, teaching, and linked research resources, with status-focused Paper summaries and compact citation-history navigation.
-- **Work and planning** — manual work logs with a locally resolved Penguin Timeline state for the selected day, yearly analytics, paginated activity/location label management with provenance-preserving consolidation, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
+- **Work and planning** — manual work logs with a locally resolved and locally served Penguin Timeline state for the selected day, yearly analytics, paginated activity/location label management with provenance-preserving consolidation, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
 - **Collaboration and access** — Dashboard-wide Viewer access, paper-scoped Coauthor permissions, and Owner-only administrative controls.
 - **Software and operations** — a Software Ecosystem registry plus protected backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances.
 - **Public data** — curated anonymous-safe academic, software, work-analytics, Teaching-season, Catholic Calendar controls, and availability data for approved downstream consumers.
