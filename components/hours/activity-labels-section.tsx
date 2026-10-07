@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import {
   createActivityLabel,
   deleteActivityLabel,
@@ -17,6 +19,8 @@ type ActivityLabel = {
   is_system: boolean
   is_break: boolean
   is_active: boolean
+  merged_into_id: string | null
+  merged_at: string | null
 }
 
 type MajorActivity =
@@ -30,6 +34,8 @@ type ActivityLabelsSectionProps = {
   error?: string
   message?: string
   returnDate: string
+  period: string
+  page: number
 }
 
 const majorActivityOptions: {
@@ -63,11 +69,32 @@ const compactSelectClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
+const LABELS_PER_PAGE = 10
+
+function formatMergedDate(
+  value: string | null
+) {
+  if (!value) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }
+  ).format(new Date(value))
+}
+
 export default async function ActivityLabelsSection({
   labels,
   error,
   message,
   returnDate,
+  period,
+  page,
 }: ActivityLabelsSectionProps) {
   const supabase =
     await createClient()
@@ -135,6 +162,106 @@ export default async function ActivityLabelsSection({
           label.id
         )
     ).length
+
+  const sortedLabels =
+    [...labels].sort(
+      (a, b) => {
+        const aMerged =
+          a.merged_into_id !==
+          null
+        const bMerged =
+          b.merged_into_id !==
+          null
+
+        if (
+          aMerged !== bMerged
+        ) {
+          return aMerged
+            ? 1
+            : -1
+        }
+
+        if (
+          a.is_active !==
+          b.is_active
+        ) {
+          return a.is_active
+            ? -1
+            : 1
+        }
+
+        if (
+          a.is_system !==
+          b.is_system
+        ) {
+          return a.is_system
+            ? -1
+            : 1
+        }
+
+        return a.name.localeCompare(
+          b.name
+        )
+      }
+    )
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        sortedLabels.length /
+          LABELS_PER_PAGE
+      )
+    )
+
+  const currentPage =
+    Math.min(
+      Number.isFinite(page) &&
+      page > 0
+        ? page
+        : 1,
+      totalPages
+    )
+
+  const pageStart =
+    (currentPage - 1) *
+    LABELS_PER_PAGE
+
+  const paginatedLabels =
+    sortedLabels.slice(
+      pageStart,
+      pageStart +
+        LABELS_PER_PAGE
+    )
+
+  const getPageHref = (
+    pageNumber: number
+  ) => {
+    const params =
+      new URLSearchParams({
+        date: returnDate,
+        period,
+      })
+
+    if (pageNumber > 1) {
+      params.set(
+        'activityPage',
+        String(pageNumber)
+      )
+    }
+
+    return `/hours?${params.toString()}#activity-labels`
+  }
+
+  const labelById =
+    new Map(
+      labels.map(
+        (label) => [
+          label.id,
+          label,
+        ]
+      )
+    )
 
   return (
     <section
@@ -253,7 +380,7 @@ export default async function ActivityLabelsSection({
         </Card>
 
         <div className="grid content-start gap-4 sm:grid-cols-2">
-          {labels.map(
+          {paginatedLabels.map(
             (label) => {
               const majorActivity =
                 majorActivityById.get(
@@ -317,8 +444,8 @@ export default async function ActivityLabelsSection({
                     </p>
                   )}
 
-                  <div className="mt-3 rounded-md border border-oxford-stone bg-oxford-shell px-2.5 py-2">
-                    <div className="text-[11px] font-medium uppercase tracking-wide text-oxford-ash">
+                  <div className="mt-2 rounded-md border border-oxford-stone bg-oxford-shell px-2 py-1.5">
+                    <div className="text-[10px] font-medium uppercase tracking-wide text-oxford-ash">
                       Major activity
                     </div>
 
@@ -326,7 +453,7 @@ export default async function ActivityLabelsSection({
                       <div className="mt-1 text-xs font-medium text-oxford-charcoal">
                         Breaks
                       </div>
-                    ) : label.is_system ? (
+                    ) : label.is_system || label.merged_into_id ? (
                       <div className="mt-1 text-xs font-medium text-oxford-charcoal">
                         {majorActivityLabel}
                       </div>
@@ -394,6 +521,26 @@ export default async function ActivityLabelsSection({
                   {label.is_system ? (
                     <p className="mt-3 border-t border-oxford-stone pt-3 text-xs leading-5 text-oxford-ash">
                       Protected system label. It cannot be modified or deactivated. Break labels are classified as Breaks automatically.
+                    </p>
+                  ) : label.merged_into_id ? (
+                    <p className="mt-3 border-t border-oxford-stone pt-2 text-[10px] leading-4 text-oxford-ash">
+                      {(() => {
+                        const target =
+                          labelById.get(
+                            label.merged_into_id
+                          )
+
+                        const sibling =
+                          labels.find(
+                            (candidate) =>
+                              candidate.id !==
+                                label.id &&
+                              candidate.merged_into_id ===
+                                label.merged_into_id
+                          )
+
+                        return `Merged${sibling ? ` with “${sibling.name}”` : ''} into current “${target?.name ?? 'canonical label'}”${label.merged_at ? ` · ${formatMergedDate(label.merged_at)}` : ''}`
+                      })()}
                     </p>
                   ) : (
                     <div className="mt-3 border-t border-oxford-stone pt-3">
@@ -544,6 +691,50 @@ export default async function ActivityLabelsSection({
           )}
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Activity labels pagination"
+          className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3"
+        >
+          <span className="text-sm text-oxford-ash">
+            Page {currentPage} of{' '}
+            {totalPages}
+          </span>
+
+          <div className="flex gap-2">
+            {currentPage > 1 ? (
+              <Link
+                href={getPageHref(
+                  currentPage - 1
+                )}
+                className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal hover:bg-oxford-shell"
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2 text-sm text-oxford-ash">
+                Previous
+              </span>
+            )}
+
+            {currentPage < totalPages ? (
+              <Link
+                href={getPageHref(
+                  currentPage + 1
+                )}
+                className="rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm font-medium text-oxford-charcoal hover:bg-oxford-shell"
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-md border border-oxford-stone bg-oxford-shell px-3 py-2 text-sm text-oxford-ash">
+                Next
+              </span>
+            )}
+          </div>
+        </nav>
+      )}
     </section>
   )
 }
