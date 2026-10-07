@@ -24,6 +24,10 @@ type HoursPageProps = {
     labelMessage?: string
     locationError?: string
     sessionError?: string
+    activityPage?: string
+    locationPage?: string
+    mergeError?: string
+    mergeMessage?: string
   }>
 }
 
@@ -251,7 +255,9 @@ export default async function HoursPage({
         description,
         is_system,
         is_break,
-        is_active
+        is_active,
+        merged_into_id,
+        merged_at
       `)
       .order(
         'is_system',
@@ -708,6 +714,19 @@ export default async function HoursPage({
         locationError={
           params.locationError
         }
+        locationPage={
+          Number.parseInt(
+            params.locationPage ??
+              '1',
+            10
+          )
+        }
+        mergeError={
+          params.mergeError
+        }
+        mergeMessage={
+          params.mergeMessage
+        }
       />
 
       <HoursAnalyticsSection
@@ -734,6 +753,16 @@ export default async function HoursPage({
         }
         returnDate={
           selectedDate
+        }
+        period={
+          selectedPeriod
+        }
+        page={
+          Number.parseInt(
+            params.activityPage ??
+              '1',
+            10
+          )
         }
       />
     </div>
