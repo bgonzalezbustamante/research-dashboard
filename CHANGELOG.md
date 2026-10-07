@@ -6,6 +6,7 @@
 
 - Started `v1.0.0-rc.3 "Bold Ridge"` with a reusable Catholic Calendar integration on the Dashboard Home.
 - Added compact Owner controls for enabling the Catholic Calendar on the Academic Website and independently stress-testing long Calendar displays.
+- Refined Papers status summaries and citation-history navigation, and added safer long-term management for Hours activity and location labels.
 
 ### Code changes
 
@@ -22,6 +23,23 @@
 - Restyled the Teaching season activation control as the same compact **Teaching season · On/Off** pill used by the Calendar controls.
 - Revised the **Activity over time** heatmap bands to 0h, <4h, 4–8h, 8–10h, 10–12h, and 12h+, updating both the displayed legend and the underlying colour thresholds.
 - Changed **Open · 0d** periods in the Planning Annual timeline from green to a light-grey treatment, including the matching legend swatch, while leaving the shared Period load presentation unchanged.
+
+`Papers`
+
+- Replaced the generic Papers KPI row with five pastel status cards in the order Published, Review/revision, Writing/reframing, VOR typesetting, and Standby.
+- Made each status card a direct filter link, adding combined Review/revision and Writing/reframing filters while retaining the individual workflow-status filters.
+- Paginated each citation source's Snapshot history at one snapshot per page while leaving the citation trajectory chart unchanged.
+
+`Hours label management`
+
+- Added 10-item pagination to Activity labels and Location labels, with inactive merged labels kept at the end of each list.
+- Reduced the footprint of the Major Activity control inside Activity-label cards.
+- Added an Hours **Danger zone** for atomically consolidating two active custom Activity labels or two active Location labels into a new canonical label whose visible name may reuse either source name.
+- Implemented soft consolidation with fresh canonical IDs, immutable inactive source labels, and compact provenance metadata showing the paired source, canonical target, and merge date.
+- Activity-label consolidation reassigns historical work sessions and compatible Project/Teaching label links in one database transaction; conflicting Project links, conflicting Teaching links, incompatible major-activity classifications, System labels, and Break labels block the operation.
+- Location-label consolidation keeps existing work-session place text unchanged while consolidating the managed location vocabulary; if either source was the default location, the new canonical location becomes the default.
+- Replaced global per-owner label-name uniqueness with active/canonical-only uniqueness so a new canonical label can legitimately reuse the visible name of a merged historical source.
+- Added database guards preventing merged Activity or Location labels from being edited, reactivated, or deleted through normal Dashboard operations.
 
 `Academic API and settings`
 
