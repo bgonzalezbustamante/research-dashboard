@@ -98,8 +98,16 @@ const statusOptions = [
     label: 'All statuses',
   },
   {
+    value: 'writing-reframing',
+    label: 'Writing / reframing',
+  },
+  {
     value: 'writing',
     label: 'Writing',
+  },
+  {
+    value: 'review-revision',
+    label: 'Review / revision',
   },
   {
     value: 'under-review',
@@ -893,11 +901,31 @@ export default async function PapersPage({
 
         if (
           statusFilter !==
-            'all' &&
-          paper.status !==
-            statusFilter
+          'all'
         ) {
-          return false
+          const matchesStatus =
+            statusFilter ===
+            'review-revision'
+              ? [
+                  'under-review',
+                  'revise-round',
+                ].includes(
+                  paper.status
+                )
+              : statusFilter ===
+                  'writing-reframing'
+                ? [
+                    'writing',
+                    'reframing',
+                  ].includes(
+                    paper.status
+                  )
+                : paper.status ===
+                  statusFilter
+
+          if (!matchesStatus) {
+            return false
+          }
         }
 
         if (
@@ -1146,18 +1174,11 @@ export default async function PapersPage({
         null
     )
 
-  const activeCount =
-    activePapers.length
-
-  const archivedCount =
-    papers.length -
-    activeCount
-
-  const writingCount =
+  const publishedCount =
     activePapers.filter(
       (paper) =>
         paper.status ===
-        'writing'
+        'published'
     ).length
 
   const reviewCount =
@@ -1169,11 +1190,27 @@ export default async function PapersPage({
           'revise-round'
     ).length
 
-  const publishedCount =
+  const writingReframingCount =
     activePapers.filter(
       (paper) =>
         paper.status ===
-        'published'
+          'writing' ||
+        paper.status ===
+          'reframing'
+    ).length
+
+  const vorTypesettingCount =
+    activePapers.filter(
+      (paper) =>
+        paper.status ===
+        'vor-typesetting'
+    ).length
+
+  const standbyCount =
+    activePapers.filter(
+      (paper) =>
+        paper.status ===
+        'standby'
     ).length
 
   return (
@@ -1194,55 +1231,70 @@ export default async function PapersPage({
       </div>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Active
-          </div>
-
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {activeCount}
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Writing
-          </div>
-
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {writingCount}
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Review / revision
-          </div>
-
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {reviewCount}
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
+        <Link
+          href="/papers?status=published"
+          className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 transition hover:border-green-300 hover:bg-green-100/70"
+        >
+          <div className="text-xs font-medium uppercase tracking-wide text-green-800">
             Published
           </div>
 
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
+          <div className="mt-1 font-serif text-2xl font-semibold text-green-950">
             {publishedCount}
           </div>
-        </div>
+        </Link>
 
-        <div className="rounded-lg border border-oxford-stone bg-white px-4 py-3">
-          <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Archived
+        <Link
+          href="/papers?status=review-revision"
+          className="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 transition hover:border-yellow-300 hover:bg-yellow-100/70"
+        >
+          <div className="text-xs font-medium uppercase tracking-wide text-yellow-800">
+            Review / revision
           </div>
 
-          <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {archivedCount}
+          <div className="mt-1 font-serif text-2xl font-semibold text-yellow-950">
+            {reviewCount}
           </div>
-        </div>
+        </Link>
+
+        <Link
+          href="/papers?status=writing-reframing"
+          className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 transition hover:border-orange-300 hover:bg-orange-100/70"
+        >
+          <div className="text-xs font-medium uppercase tracking-wide text-orange-800">
+            Writing / reframing
+          </div>
+
+          <div className="mt-1 font-serif text-2xl font-semibold text-orange-950">
+            {writingReframingCount}
+          </div>
+        </Link>
+
+        <Link
+          href="/papers?status=vor-typesetting"
+          className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 transition hover:border-sky-300 hover:bg-sky-100/70"
+        >
+          <div className="text-xs font-medium uppercase tracking-wide text-sky-800">
+            VOR typesetting
+          </div>
+
+          <div className="mt-1 font-serif text-2xl font-semibold text-sky-950">
+            {vorTypesettingCount}
+          </div>
+        </Link>
+
+        <Link
+          href="/papers?status=standby"
+          className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 transition hover:border-gray-300 hover:bg-gray-100"
+        >
+          <div className="text-xs font-medium uppercase tracking-wide text-gray-700">
+            Standby
+          </div>
+
+          <div className="mt-1 font-serif text-2xl font-semibold text-gray-900">
+            {standbyCount}
+          </div>
+        </Link>
       </div>
 
       <form
