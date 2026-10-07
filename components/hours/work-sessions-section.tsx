@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import {
   createWorkSession,
   deleteWorkSession,
@@ -292,6 +294,13 @@ export default async function WorkSessionsSection({
               location, and optional
               paper.
             </p>
+
+            <Link
+              href="/hours/relationships"
+              className="mt-2 inline-flex text-sm font-medium text-oxford-blue hover:underline"
+            >
+              View activity relationships →
+            </Link>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
