@@ -42,6 +42,7 @@ export const releases: ReleaseNote[] = [
         items: [
           'Paper status cards now focus on the five main workflow groups and open the matching filters, while citation histories are easier to browse one snapshot at a time.',
           'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated; recorded sessions move to the new canonical activity or location and old labels remain read-only historical records.',
+          'A new Activity relationships view maps Project and Teaching label assignments alongside the labels actually used for Papers, highlights cross-Project mismatches, and Hours analytics now summarises time by major activity instead of by Paper.',
         ],
       },
       {
