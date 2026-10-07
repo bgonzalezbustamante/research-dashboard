@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.2',
     summary:
-      'Bold Ridge brings the Catholic Calendar into the Dashboard Home and adds compact controls for its Academic Website integration and layout stress testing.',
+      'Bold Ridge brings the Catholic Calendar into the Dashboard Home, sharpens Paper status and citation views, and makes Hours labels safer to maintain over time.',
     sections: [
       {
         title: 'Catholic Calendar',
@@ -35,6 +35,20 @@ export const releases: ReleaseNote[] = [
         items: [
           'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
           'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
+        ],
+      },
+      {
+        title: 'Papers and Hours',
+        items: [
+          'Paper status cards now focus on the five main workflow groups and open the matching filters, while citation histories are easier to browse one snapshot at a time.',
+          'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated with old labels kept as read-only historical records.',
+        ],
+      },
+      {
+        title: 'Reliability and maintenance',
+        items: [
+          'Patched newly reported production dependency issues and re-ran the public-data, build, audit and secret-scanning checks successfully.',
+          'The known development-only linting advisory remains isolated from production rather than applying npm\'s breaking forced downgrade.',
         ],
       },
     ],

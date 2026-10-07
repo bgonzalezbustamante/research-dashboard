@@ -15,6 +15,8 @@ type ActivityLabel = {
   is_system: boolean
   is_break: boolean
   is_active: boolean
+  merged_into_id: string | null
+  merged_at: string | null
 }
 
 type LocationLabel = {
@@ -22,6 +24,8 @@ type LocationLabel = {
   name: string
   is_active: boolean
   is_default: boolean
+  merged_into_id: string | null
+  merged_at: string | null
 }
 
 type PaperOption = {
@@ -52,6 +56,10 @@ type WorkSessionsSectionProps = {
   papers: PaperOption[]
   error?: string
   locationError?: string
+  locationPage: number
+  mergeError?: string
+  mergeMessage?: string
+  period: string
 }
 
 const inputClass =
@@ -125,6 +133,10 @@ export default async function WorkSessionsSection({
   papers,
   error,
   locationError,
+  locationPage,
+  mergeError,
+  mergeMessage,
+  period,
 }: WorkSessionsSectionProps) {
   const supabase =
     await createClient()
@@ -136,7 +148,9 @@ export default async function WorkSessionsSection({
         id,
         name,
         is_active,
-        is_default
+        is_default,
+        merged_into_id,
+        merged_at
       `)
       .order(
         'is_active',
@@ -174,7 +188,8 @@ export default async function WorkSessionsSection({
   const selectableLocations =
     locationLabels.filter(
       (location) =>
-        location.is_active
+        location.is_active &&
+        !location.merged_into_id
     )
 
   const defaultLocation =
@@ -195,7 +210,8 @@ export default async function WorkSessionsSection({
     labels
       .filter(
         (label) =>
-          label.is_active
+          label.is_active &&
+          !label.merged_into_id
       )
       .sort((a, b) => {
         if (
@@ -573,8 +589,9 @@ export default async function WorkSessionsSection({
                   const currentLocation =
                     locationLabels.find(
                       (location) =>
+                        !location.merged_into_id &&
                         location.name.toLocaleLowerCase() ===
-                        session.place.toLocaleLowerCase()
+                          session.place.toLocaleLowerCase()
                     )
 
                   return (
@@ -733,7 +750,12 @@ export default async function WorkSessionsSection({
                                   }
                                   className={inputClass}
                                 >
-                                  {labels.map(
+                                  {labels
+                                    .filter(
+                                      (label) =>
+                                        !label.merged_into_id
+                                    )
+                                    .map(
                                     (label) => (
                                       <option
                                         key={label.id}
@@ -778,7 +800,12 @@ export default async function WorkSessionsSection({
                                       </option>
                                     )}
 
-                                    {locationLabels.map(
+                                    {locationLabels
+                                      .filter(
+                                        (location) =>
+                                          !location.merged_into_id
+                                      )
+                                      .map(
                                       (location) => (
                                         <option
                                           key={location.id}
@@ -905,6 +932,21 @@ export default async function WorkSessionsSection({
         returnDate={date}
         actionError={
           locationError
+        }
+        page={
+          locationPage
+        }
+        activityLabels={
+          labels
+        }
+        mergeError={
+          mergeError
+        }
+        mergeMessage={
+          mergeMessage
+        }
+        period={
+          period
         }
       />
     </>

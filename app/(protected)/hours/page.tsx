@@ -7,6 +7,8 @@ import WorkSessionsSection from '@/components/hours/work-sessions-section'
 import PageHeader from '@/components/page-header'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
+import { resolveHoursPenguin } from '@/lib/hours/penguin-state'
 import { createClient } from '@/lib/supabase/server'
 
 type AnalyticsPeriod =
@@ -24,6 +26,10 @@ type HoursPageProps = {
     labelMessage?: string
     locationError?: string
     sessionError?: string
+    activityPage?: string
+    locationPage?: string
+    mergeError?: string
+    mergeMessage?: string
   }>
 }
 
@@ -156,6 +162,34 @@ function formatDate(
   )
 }
 
+function getSessionMinutes(
+  startTime: string,
+  endTime: string
+) {
+  const toMinutes = (
+    value: string
+  ) => {
+    const [
+      hours,
+      minutes,
+    ] = value
+      .slice(0, 5)
+      .split(':')
+      .map(Number)
+
+    return (
+      hours * 60 +
+      minutes
+    )
+  }
+
+  return Math.max(
+    0,
+    toMinutes(endTime) -
+      toMinutes(startTime)
+  )
+}
+
 export default async function HoursPage({
   searchParams,
 }: HoursPageProps) {
@@ -211,6 +245,9 @@ export default async function HoursPage({
       6
     )
 
+  const access =
+    await requireDashboardAccess()
+
   const supabase =
     await createClient()
 
@@ -218,6 +255,9 @@ export default async function HoursPage({
     dailyLogsResult,
     labelsResult,
     papersResult,
+    conferencesResult,
+    blockedEventsResult,
+    teachingSettingsResult,
   ] = await Promise.all([
     supabase
       .from('daily_logs')
@@ -251,7 +291,9 @@ export default async function HoursPage({
         description,
         is_system,
         is_break,
-        is_active
+        is_active,
+        merged_into_id,
+        merged_at
       `)
       .order(
         'is_system',
@@ -285,6 +327,65 @@ export default async function HoursPage({
           ascending: true,
         }
       ),
+
+    supabase
+      .from(
+        'conference_presentations'
+      )
+      .select(`
+        event_short_name,
+        start_date,
+        end_date,
+        personal_attendance,
+        involves_trip
+      `)
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .lte(
+        'start_date',
+        nextDate
+      )
+      .gte(
+        'end_date',
+        previousDate
+      ),
+
+    supabase
+      .from(
+        'planning_blocked_events'
+      )
+      .select(`
+        event_type,
+        start_date,
+        end_date
+      `)
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .lte(
+        'start_date',
+        selectedDate
+      )
+      .gte(
+        'end_date',
+        selectedDate
+      ),
+
+    supabase
+      .from(
+        'teaching_settings'
+      )
+      .select(
+        'teaching_season_active'
+      )
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .maybeSingle(),
   ])
 
   if (
@@ -309,6 +410,30 @@ export default async function HoursPage({
     throw new Error(
       `Could not load papers: ${papersResult.error.message}`
     )
+  }
+
+  for (const [
+    label,
+    result,
+  ] of [
+    [
+      'conference data',
+      conferencesResult,
+    ],
+    [
+      'availability data',
+      blockedEventsResult,
+    ],
+    [
+      'Teaching settings',
+      teachingSettingsResult,
+    ],
+  ] as const) {
+    if (result.error) {
+      throw new Error(
+        `Could not load Penguin Timeline ${label}: ${result.error.message}`
+      )
+    }
   }
 
   const dailyLogs =
@@ -540,6 +665,49 @@ export default async function HoursPage({
         ) ?? []
       : []
 
+  const selectedNetMinutes =
+    selectedSessions
+      .filter(
+        (session) =>
+          !session.label_is_break
+      )
+      .reduce(
+        (
+          total,
+          session
+        ) =>
+          total +
+          getSessionMinutes(
+            session.start_time,
+            session.end_time
+          ),
+        0
+      )
+
+  const selectedPenguin =
+    resolveHoursPenguin({
+      date:
+        selectedDate,
+      today,
+      netMinutes:
+        selectedNetMinutes,
+      coffeeCount:
+        selectedDailyLog
+          ?.coffee_count ??
+        0,
+      teachingSeasonActive:
+        teachingSettingsResult
+          .data
+          ?.teaching_season_active ??
+        false,
+      conferences:
+        conferencesResult.data ??
+        [],
+      blockedEvents:
+        blockedEventsResult.data ??
+        [],
+    })
+
   const analyticsLogs =
     dailyLogs.map(
       (log) => ({
@@ -587,8 +755,33 @@ export default async function HoursPage({
       <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
         <section
           aria-label="Date selection"
-          className="h-full rounded-lg border border-oxford-stone bg-white p-4"
+          className="relative h-full rounded-lg border border-oxford-stone bg-white p-4"
         >
+          <div
+            className="absolute bottom-2 right-2 flex w-[188px] flex-col items-center gap-0.5 text-center"
+          >
+            <span
+              role="img"
+              aria-label={
+                selectedPenguin.label
+              }
+              className="block aspect-square w-[188px] bg-contain bg-center bg-no-repeat drop-shadow-[0_6px_7px_rgba(0,33,71,0.08)]"
+              style={{
+                backgroundImage:
+                  `url("${selectedPenguin.src}")`,
+              }}
+            />
+
+            <a
+              href="https://timeline.bgonzalezbustamante.com"
+              target="_blank"
+              rel="noreferrer"
+              className="whitespace-nowrap text-[9px] font-medium leading-3 text-oxford-peach underline decoration-oxford-peach/50 underline-offset-2 hover:text-oxford-blue"
+            >
+              timeline.bgonzalezbustamante.com
+            </a>
+          </div>
+
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
               Selected day
@@ -708,6 +901,22 @@ export default async function HoursPage({
         locationError={
           params.locationError
         }
+        locationPage={
+          Number.parseInt(
+            params.locationPage ??
+              '1',
+            10
+          )
+        }
+        mergeError={
+          params.mergeError
+        }
+        mergeMessage={
+          params.mergeMessage
+        }
+        period={
+          selectedPeriod
+        }
       />
 
       <HoursAnalyticsSection
@@ -734,6 +943,16 @@ export default async function HoursPage({
         }
         returnDate={
           selectedDate
+        }
+        period={
+          selectedPeriod
+        }
+        page={
+          Number.parseInt(
+            params.activityPage ??
+              '1',
+            10
+          )
         }
       />
     </div>

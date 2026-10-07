@@ -1,10 +1,9 @@
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
+import CitationSnapshotHistory from '@/components/papers/citation-snapshot-history'
 
 import {
   createCitationSnapshot,
-  deleteCitationSnapshot,
-  updateCitationSnapshot,
 } from '@/app/(protected)/papers/citation-actions'
 
 type CitationSnapshot = {
@@ -485,11 +484,6 @@ export default function CitationsSection({
                       previous.citation_count
                     : null
 
-                const descendingSnapshots =
-                  [
-                    ...sourceSnapshots,
-                  ].reverse()
-
                 return (
                   <Card
                     key={source}
@@ -546,244 +540,14 @@ export default function CitationsSection({
                       }
                     />
 
-                    <div className="mt-6 border-t border-oxford-stone pt-4">
-                      <h4 className="font-medium text-oxford-charcoal">
-                        Snapshot history
-                      </h4>
-
-                      <div className="mt-3 divide-y divide-oxford-stone">
-                        {descendingSnapshots.map(
-                          (snapshot) => {
-                            const snapshotIndex =
-                              sourceSnapshots.findIndex(
-                                (item) =>
-                                  item.id ===
-                                  snapshot.id
-                              )
-
-                            const preceding =
-                              snapshotIndex >
-                              0
-                                ? sourceSnapshots[
-                                    snapshotIndex -
-                                      1
-                                  ]
-                                : null
-
-                            const snapshotDelta =
-                              preceding
-                                ? snapshot.citation_count -
-                                  preceding.citation_count
-                                : null
-
-                            return (
-                              <div
-                                key={
-                                  snapshot.id
-                                }
-                                className="py-4 first:pt-0 last:pb-0"
-                              >
-                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                  <div>
-                                    <div className="flex flex-wrap items-baseline gap-3">
-                                      <span className="text-lg font-semibold text-oxford-charcoal">
-                                        {
-                                          snapshot.citation_count
-                                        }
-                                      </span>
-
-                                      {snapshotDelta !==
-                                        null && (
-                                        <span className="text-sm text-oxford-ash">
-                                          {snapshotDelta >
-                                          0
-                                            ? `+${snapshotDelta}`
-                                            : snapshotDelta}
-                                        </span>
-                                      )}
-                                    </div>
-
-                                    <div className="mt-1 text-sm text-oxford-ash">
-                                      {formatDate(
-                                        snapshot.captured_on
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <details className="mt-3">
-                                  <summary className="cursor-pointer text-sm font-medium text-oxford-blue hover:underline">
-                                    Edit
-                                    snapshot
-                                  </summary>
-
-                                  <form
-                                    action={
-                                      updateCitationSnapshot
-                                    }
-                                    className="mt-4 grid gap-4 rounded-md border border-oxford-stone bg-oxford-off-white p-4 md:grid-cols-3"
-                                  >
-                                    <input
-                                      type="hidden"
-                                      name="paper_id"
-                                      value={
-                                        paperId
-                                      }
-                                    />
-
-                                    <input
-                                      type="hidden"
-                                      name="snapshot_id"
-                                      value={
-                                        snapshot.id
-                                      }
-                                    />
-
-                                    <div>
-                                      <label
-                                        htmlFor={`citation-source-${snapshot.id}`}
-                                        className={
-                                          labelClass
-                                        }
-                                      >
-                                        Source
-                                      </label>
-
-                                      <input
-                                        id={`citation-source-${snapshot.id}`}
-                                        name="source"
-                                        type="text"
-                                        required
-                                        defaultValue={
-                                          snapshot.source
-                                        }
-                                        className={
-                                          inputClass
-                                        }
-                                      />
-                                    </div>
-
-                                    <div>
-                                      <label
-                                        htmlFor={`citation-count-${snapshot.id}`}
-                                        className={
-                                          labelClass
-                                        }
-                                      >
-                                        Count
-                                      </label>
-
-                                      <input
-                                        id={`citation-count-${snapshot.id}`}
-                                        name="citation_count"
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                        required
-                                        defaultValue={
-                                          snapshot.citation_count
-                                        }
-                                        className={
-                                          inputClass
-                                        }
-                                      />
-                                    </div>
-
-                                    <div>
-                                      <label
-                                        htmlFor={`citation-date-${snapshot.id}`}
-                                        className={
-                                          labelClass
-                                        }
-                                      >
-                                        Date
-                                      </label>
-
-                                      <input
-                                        id={`citation-date-${snapshot.id}`}
-                                        name="captured_on"
-                                        type="date"
-                                        required
-                                        defaultValue={
-                                          snapshot.captured_on
-                                        }
-                                        className={
-                                          inputClass
-                                        }
-                                      />
-                                    </div>
-
-                                    <div className="md:col-span-3">
-                                      <Button
-                                        type="submit"
-                                        variant="primary"
-                                      >
-                                        Save
-                                        snapshot
-                                      </Button>
-                                    </div>
-                                  </form>
-                                </details>
-
-                                <details className="mt-3">
-                                  <summary className="cursor-pointer text-sm font-medium text-red-700 hover:underline">
-                                    Delete
-                                    snapshot
-                                  </summary>
-
-                                  <div className="mt-3 rounded-md border border-red-200 bg-red-50 p-4">
-                                    <p className="text-sm text-red-800">
-                                      This
-                                      permanently
-                                      removes
-                                      this
-                                      citation
-                                      snapshot.
-                                      Use this
-                                      only for
-                                      an
-                                      erroneous
-                                      record.
-                                    </p>
-
-                                    <form
-                                      action={
-                                        deleteCitationSnapshot
-                                      }
-                                      className="mt-3"
-                                    >
-                                      <input
-                                        type="hidden"
-                                        name="paper_id"
-                                        value={
-                                          paperId
-                                        }
-                                      />
-
-                                      <input
-                                        type="hidden"
-                                        name="snapshot_id"
-                                        value={
-                                          snapshot.id
-                                        }
-                                      />
-
-                                      <Button
-                                        type="submit"
-                                        variant="danger"
-                                      >
-                                        Confirm
-                                        delete
-                                      </Button>
-                                    </form>
-                                  </div>
-                                </details>
-                              </div>
-                            )
-                          }
-                        )}
-                      </div>
-                    </div>
+                    <CitationSnapshotHistory
+                      paperId={paperId}
+                      snapshots={
+                        [
+                          ...sourceSnapshots,
+                        ].reverse()
+                      }
+                    />
                   </Card>
                 )
               }

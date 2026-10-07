@@ -240,6 +240,7 @@ export async function updateLocationLabel(
       })
       .eq('id', labelId)
       .eq('owner_id', userId)
+      .is('merged_into_id', null)
       .select('id')
       .maybeSingle()
 
@@ -310,6 +311,7 @@ export async function setLocationLabelActive(
       })
       .eq('id', labelId)
       .eq('owner_id', userId)
+      .is('merged_into_id', null)
       .select('id')
       .maybeSingle()
 
@@ -327,6 +329,116 @@ export async function setLocationLabelActive(
 
   revalidatePath('/hours')
   redirectToLocations(returnDate)
+}
+
+export async function consolidateLocationLabels(
+  formData: FormData
+) {
+  const returnDate =
+    getReturnDate(formData)
+
+  const {
+    supabase,
+  } = await requireLocationWriteAccess(
+    returnDate
+  )
+
+  const sourceAId =
+    getRequiredText(
+      formData,
+      'source_a_id'
+    )
+
+  const sourceBId =
+    getRequiredText(
+      formData,
+      'source_b_id'
+    )
+
+  const targetName =
+    getRequiredText(
+      formData,
+      'target_name'
+    )
+
+  const confirmed =
+    getRequiredText(
+      formData,
+      'confirm_merge'
+    ) === 'yes'
+
+  const redirectMergeError = (
+    message: string
+  ): never => {
+    redirect(
+      `/hours?date=${encodeURIComponent(
+        returnDate
+      )}&mergeError=${encodeURIComponent(
+        message
+      )}#label-consolidation`
+    )
+  }
+
+  if (
+    !sourceAId ||
+    !sourceBId ||
+    sourceAId === sourceBId
+  ) {
+    redirectMergeError(
+      'Choose two different location labels.'
+    )
+  }
+
+  if (!targetName) {
+    redirectMergeError(
+      'Enter the name of the new canonical location label.'
+    )
+  }
+
+  if (!confirmed) {
+    redirectMergeError(
+      'Confirm that you understand the two source locations will become read-only.'
+    )
+  }
+
+  const {
+    error,
+  } = await supabase.rpc(
+    'consolidate_location_labels',
+    {
+      p_source_a_id:
+        sourceAId,
+      p_source_b_id:
+        sourceBId,
+      p_target_name:
+        targetName,
+    }
+  )
+
+  if (error) {
+    console.error(
+      'Location-label consolidation failed:',
+      error
+    )
+
+    const message =
+      error.message?.trim()
+
+    redirectMergeError(
+      message ||
+        'The location labels could not be consolidated.'
+    )
+  }
+
+  revalidatePath('/hours')
+
+  redirect(
+    `/hours?date=${encodeURIComponent(
+      returnDate
+    )}&mergeMessage=${encodeURIComponent(
+      'Location labels consolidated.'
+    )}#label-consolidation`
+  )
 }
 
 export async function deleteLocationLabel(
@@ -359,9 +471,10 @@ export async function deleteLocationLabel(
     error: labelError,
   } = await supabase
     .from('location_labels')
-    .select('id, name')
+    .select('id, name, merged_into_id')
     .eq('id', labelId)
     .eq('owner_id', userId)
+    .is('merged_into_id', null)
     .maybeSingle()
 
   if (labelError || !label) {
@@ -407,6 +520,7 @@ export async function deleteLocationLabel(
       .delete()
       .eq('id', labelId)
       .eq('owner_id', userId)
+      .is('merged_into_id', null)
       .select('id')
       .maybeSingle()
 
