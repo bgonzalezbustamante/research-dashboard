@@ -393,7 +393,8 @@ async function validateSessionReferences(
     .select(`
       id,
       is_break,
-      is_active
+      is_active,
+      merged_into_id
     `)
     .eq(
       'id',
@@ -412,6 +413,13 @@ async function validateSessionReferences(
     return {
       error:
         'The selected activity label is not available.',
+    }
+  }
+
+  if (label.merged_into_id) {
+    return {
+      error:
+        'Merged activity labels are historical and cannot be assigned to sessions.',
     }
   }
 
@@ -907,6 +915,10 @@ export async function updateActivityLabel(
       'is_system',
       false
     )
+    .is(
+      'merged_into_id',
+      null
+    )
     .select('id')
     .maybeSingle()
 
@@ -1001,6 +1013,10 @@ export async function setActivityLabelActive(
       'is_system',
       false
     )
+    .is(
+      'merged_into_id',
+      null
+    )
     .select('id')
     .maybeSingle()
 
@@ -1067,6 +1083,10 @@ export async function deleteActivityLabel(
       'is_system',
       false
     )
+    .is(
+      'merged_into_id',
+      null
+    )
     .select('id')
     .maybeSingle()
 
@@ -1096,6 +1116,119 @@ export async function deleteActivityLabel(
 
   redirectToLabels(
     returnDate
+  )
+}
+
+export async function consolidateActivityLabels(
+  formData: FormData
+) {
+  const {
+    supabase,
+  } = await requireAuth()
+
+  const returnDate =
+    getReturnDate(
+      formData
+    )
+
+  const sourceAId =
+    getRequiredText(
+      formData,
+      'source_a_id'
+    )
+
+  const sourceBId =
+    getRequiredText(
+      formData,
+      'source_b_id'
+    )
+
+  const targetName =
+    getRequiredText(
+      formData,
+      'target_name'
+    )
+
+  const confirmed =
+    getRequiredText(
+      formData,
+      'confirm_merge'
+    ) === 'yes'
+
+  const redirectMergeError = (
+    message: string
+  ): never => {
+    redirect(
+      `/hours?date=${encodeURIComponent(
+        returnDate
+      )}&mergeError=${encodeURIComponent(
+        message
+      )}#label-consolidation`
+    )
+  }
+
+  if (
+    !sourceAId ||
+    !sourceBId ||
+    sourceAId === sourceBId
+  ) {
+    redirectMergeError(
+      'Choose two different activity labels.'
+    )
+  }
+
+  if (!targetName) {
+    redirectMergeError(
+      'Enter the name of the new canonical activity label.'
+    )
+  }
+
+  if (!confirmed) {
+    redirectMergeError(
+      'Confirm that you understand the two source labels will become read-only.'
+    )
+  }
+
+  const {
+    error,
+  } = await supabase.rpc(
+    'consolidate_activity_labels',
+    {
+      p_source_a_id:
+        sourceAId,
+      p_source_b_id:
+        sourceBId,
+      p_target_name:
+        targetName,
+    }
+  )
+
+  if (error) {
+    console.error(
+      'Activity-label consolidation failed:',
+      error
+    )
+
+    const message =
+      error.message?.trim()
+
+    redirectMergeError(
+      message ||
+        'The activity labels could not be consolidated.'
+    )
+  }
+
+  revalidatePath('/hours')
+  revalidatePath('/dashboard')
+  revalidatePath('/projects')
+  revalidatePath('/teaching')
+
+  redirect(
+    `/hours?date=${encodeURIComponent(
+      returnDate
+    )}&mergeMessage=${encodeURIComponent(
+      'Activity labels consolidated.'
+    )}#label-consolidation`
   )
 }
 
