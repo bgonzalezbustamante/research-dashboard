@@ -36,6 +36,9 @@
 - Added the Penguin Timeline WebP runtime artwork under `public/penguins/` so Working Hours serves the selected-day image locally, while retaining `timeline.bgonzalezbustamante.com` only as the coral attribution/navigation link.
 - Added 20-item pagination to Activity labels and 10-item pagination to Location labels, with inactive merged labels kept at the end of each list.
 - Reduced the footprint of the Major Activity control inside Activity-label cards.
+- Added a read-only **Activity relationships** subpage under Hours, linked directly below Work sessions. The tree shows explicit Project → Activity label → Paper relationships, explicit Teaching → Activity label assignments, observed Activity-label usage for standalone Papers, and other active labels without those relationships.
+- Added a conservative **Potential mismatch** check that flags a Paper only when its recorded work uses an Activity label explicitly assigned to a different Project; general unassigned labels such as Writing remain visible as observed usage without being treated as errors.
+- Replaced the Hours analytics **By paper** card with **By major activity**, grouping net working time into Research, Teaching, Administration, Outreach, or Unclassified while excluding Break.
 - Added an Hours **Danger zone** for atomically consolidating two active custom Activity labels or two active Location labels into a new canonical label whose visible name may reuse either source name.
 - Implemented soft consolidation with fresh canonical IDs, immutable inactive source labels, and compact provenance metadata showing the paired source, canonical target, and merge date.
 - Activity-label consolidation reassigns historical work sessions and compatible Project/Teaching label links in one database transaction; conflicting Project links, conflicting Teaching links, incompatible major-activity classifications, System labels, and Break labels block the operation.
