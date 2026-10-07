@@ -44,6 +44,13 @@ export const releases: ReleaseNote[] = [
           'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated with old labels kept as read-only historical records.',
         ],
       },
+      {
+        title: 'Reliability and maintenance',
+        items: [
+          'Patched newly reported production dependency issues and re-ran the public-data, build, audit and secret-scanning checks successfully.',
+          'The known development-only linting advisory remains isolated from production rather than applying npm\'s breaking forced downgrade.',
+        ],
+      },
     ],
   },
   {
