@@ -727,6 +727,9 @@ export default async function HoursPage({
         mergeMessage={
           params.mergeMessage
         }
+        period={
+          selectedPeriod
+        }
       />
 
       <HoursAnalyticsSection
