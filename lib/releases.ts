@@ -41,7 +41,7 @@ export const releases: ReleaseNote[] = [
         title: 'Papers and Hours',
         items: [
           'Paper status cards now focus on the five main workflow groups and open the matching filters, while citation histories are easier to browse one snapshot at a time.',
-          'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated with old labels kept as read-only historical records.',
+          'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated; recorded sessions move to the new canonical activity or location and old labels remain read-only historical records.',
         ],
       },
       {
