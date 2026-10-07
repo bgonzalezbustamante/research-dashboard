@@ -587,6 +587,7 @@ export default async function HoursPage({
         label_name: string
         label_is_break: boolean
         label_is_active: boolean
+        label_major_activity: string | null
         paper_short_title: string | null
         paper_archived: boolean
       }[]
