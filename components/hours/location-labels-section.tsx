@@ -312,7 +312,8 @@ export default async function LocationLabelsSection({
             choose one active location
             as the default. Existing
             session locations remain
-            recorded as historical text.
+            historical unless their
+            labels are consolidated.
           </p>
         </div>
 
@@ -865,7 +866,7 @@ export default async function LocationLabelsSection({
             </h3>
 
             <p className="mt-1 text-xs leading-5 text-oxford-ash">
-              The managed location vocabulary is consolidated while historical session location text remains unchanged.
+              Work sessions using either source location move to the new canonical location, while both source labels remain as read-only provenance.
             </p>
 
             {locationMergeOptions.length >= 2 ? (
