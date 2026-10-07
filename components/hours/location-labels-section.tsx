@@ -31,6 +31,7 @@ type LocationLabelsSectionProps = {
   activityLabels: ActivityLabel[]
   mergeError?: string
   mergeMessage?: string
+  period: string
 }
 
 type LocationLabel = {
@@ -97,6 +98,7 @@ export default async function LocationLabelsSection({
   activityLabels,
   mergeError,
   mergeMessage,
+  period,
 }: LocationLabelsSectionProps) {
   const supabase =
     await createClient()
@@ -280,6 +282,7 @@ export default async function LocationLabelsSection({
     const params =
       new URLSearchParams({
         date: returnDate,
+        period,
       })
 
     if (pageNumber > 1) {
