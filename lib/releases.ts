@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.2',
     summary:
-      'Bold Ridge brings the Catholic Calendar into the Dashboard Home and adds compact controls for its Academic Website integration and layout stress testing.',
+      'Bold Ridge brings the Catholic Calendar into the Dashboard Home, sharpens Paper status and citation views, and makes Hours labels safer to maintain over time.',
     sections: [
       {
         title: 'Catholic Calendar',
@@ -35,6 +35,13 @@ export const releases: ReleaseNote[] = [
         items: [
           'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
           'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
+        ],
+      },
+      {
+        title: 'Papers and Hours',
+        items: [
+          'Paper status cards now focus on the five main workflow groups and open the matching filters, while citation histories are easier to browse one snapshot at a time.',
+          'Activity and location labels now use shorter paginated lists and can be safely consolidated while keeping old labels as read-only historical records.',
         ],
       },
     ],
