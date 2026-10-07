@@ -32,7 +32,7 @@
 
 `Hours and label management`
 
-- Added a compact Penguin Timeline state to the **Selected day** card in Working Hours, resolved directly from Dashboard work/coffee data, conference/travel records, Winter/Summer holidays, sick periods, Teaching-season state, and the installed Catholic Calendar package rather than calling the Academic API.
+- Added the standard 188px Penguin Timeline day-state artwork to the **Selected day** card in Working Hours, resolved directly from Dashboard work/coffee data, conference/travel records, Winter/Summer holidays, sick periods, Teaching-season state, and the installed Catholic Calendar package rather than calling the Academic API.
 - Reused the Timeline deployment's generated WebP artwork and linked the small card treatment directly to `timeline.bgonzalezbustamante.com`.
 - Added 20-item pagination to Activity labels and 10-item pagination to Location labels, with inactive merged labels kept at the end of each list.
 - Reduced the footprint of the Major Activity control inside Activity-label cards.
