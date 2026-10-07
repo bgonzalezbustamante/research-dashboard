@@ -23,6 +23,9 @@ export type HoursAnalyticsSession =
     id: string
     place: string
     label_name: string
+    label_major_activity:
+      | string
+      | null
     paper_short_title:
       | string
       | null
@@ -554,7 +557,7 @@ export function getActivityTotals(
     )
 }
 
-export function getPaperTotals(
+export function getMajorActivityTotals(
   logs:
     HoursAnalyticsDailyLog[],
   start: string,
@@ -592,8 +595,18 @@ export function getPaperTotals(
         )
 
       const name =
-        session.paper_short_title ??
-        'Unassigned'
+        session.label_major_activity
+          ? session.label_major_activity
+              .split('-')
+              .map(
+                (part) =>
+                  part
+                    .charAt(0)
+                    .toUpperCase() +
+                  part.slice(1)
+              )
+              .join(' ')
+          : 'Unclassified'
 
       totals.set(
         name,

@@ -292,6 +292,7 @@ export default async function HoursPage({
         is_system,
         is_break,
         is_active,
+        major_activity,
         merged_into_id,
         merged_at
       `)
@@ -465,11 +466,13 @@ export default async function HoursPage({
             name: string
             is_break: boolean
             is_active: boolean
+            major_activity: string | null
           }
         | {
             name: string
             is_break: boolean
             is_active: boolean
+            major_activity: string | null
           }[]
         | null
       papers:
@@ -509,7 +512,8 @@ export default async function HoursPage({
           activity_labels (
             name,
             is_break,
-            is_active
+            is_active,
+            major_activity
           ),
           papers (
             short_title,
@@ -583,6 +587,7 @@ export default async function HoursPage({
         label_name: string
         label_is_break: boolean
         label_is_active: boolean
+        label_major_activity: string | null
         paper_short_title: string | null
         paper_archived: boolean
       }[]
@@ -626,6 +631,9 @@ export default async function HoursPage({
       label_is_active:
         activityLabel?.is_active ??
         false,
+      label_major_activity:
+        activityLabel?.major_activity ??
+        null,
       paper_short_title:
         paper?.short_title ??
         null,
@@ -738,6 +746,8 @@ export default async function HoursPage({
                 session.label_name,
               label_is_break:
                 session.label_is_break,
+              label_major_activity:
+                session.label_major_activity,
               paper_short_title:
                 session.paper_short_title,
             })

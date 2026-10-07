@@ -9,7 +9,7 @@ import {
   formatPeriodLabel,
   getActivityTotals,
   getLocationTotals,
-  getPaperTotals,
+  getMajorActivityTotals,
   getPeriodBounds,
   summarisePeriod,
 } from '@/lib/hours/analytics'
@@ -125,8 +125,8 @@ export default function HoursAnalyticsSection({
       selectedBounds.end
     )
 
-  const papers =
-    getPaperTotals(
+  const majorActivities =
+    getMajorActivityTotals(
       logs,
       selectedBounds.start,
       selectedBounds.end
@@ -148,10 +148,10 @@ export default function HoursAnalyticsSection({
       )
     )
 
-  const maxPaper =
+  const maxMajorActivity =
     Math.max(
       0,
-      ...papers.map(
+      ...majorActivities.map(
         (item) =>
           item.minutes
       )
@@ -360,50 +360,52 @@ export default function HoursAnalyticsSection({
 
         <Card>
           <h3 className="font-serif text-xl font-semibold text-oxford-blue">
-            By paper
+            By major activity
           </h3>
 
           <p className="mt-1 text-sm text-oxford-ash">
-            Net working time only.
-            General work appears as
-            Unassigned.
+            Net working time grouped
+            as Research, Teaching,
+            Administration, Outreach,
+            or Unclassified. Break is
+            excluded.
           </p>
 
-          {papers.length ===
+          {majorActivities.length ===
           0 ? (
             <p className="mt-5 text-sm text-oxford-ash">
-              No paper allocation
-              data for this period.
+              No major-activity data
+              for this period.
             </p>
           ) : (
             <div className="mt-5 space-y-4">
-              {papers.map(
-                (paper) => (
+              {majorActivities.map(
+                (activity) => (
                   <div
                     key={
-                      paper.name
+                      activity.name
                     }
                   >
                     <div className="flex items-baseline justify-between gap-3 text-sm">
                       <span className="min-w-0 truncate font-medium text-oxford-charcoal">
                         {
-                          paper.name
+                          activity.name
                         }
                       </span>
 
                       <span className="shrink-0 text-oxford-ash">
                         {formatDuration(
-                          paper.minutes
+                          activity.minutes
                         )}
                       </span>
                     </div>
 
                     <BreakdownBar
                       value={
-                        paper.minutes
+                        activity.minutes
                       }
                       maximum={
-                        maxPaper
+                        maxMajorActivity
                       }
                     />
                   </div>
