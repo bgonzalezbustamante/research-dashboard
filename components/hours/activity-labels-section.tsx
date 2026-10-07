@@ -69,7 +69,7 @@ const compactSelectClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
-const LABELS_PER_PAGE = 10
+const LABELS_PER_PAGE = 20
 
 function formatMergedDate(
   value: string | null
