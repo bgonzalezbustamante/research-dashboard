@@ -43,6 +43,13 @@
 - Replaced global per-owner label-name uniqueness with active/canonical-only uniqueness so a new canonical label can legitimately reuse the visible name of a merged historical source.
 - Added database guards preventing merged Activity or Location labels from being edited, reactivated, or deleted through normal Dashboard operations.
 
+`security and validation`
+
+- Updated patched transitive dependencies after the rc.3 production audit surfaced `sharp@0.35.4` and `source-map-js@1.2.1`; the lockfile now resolves `sharp@0.35.5`, the matching Sharp/libvips platform packages, and `source-map-js@1.2.2` without changing direct application dependencies.
+- Confirmed `npm audit --omit=dev` reports zero production vulnerabilities. The previously documented development-only `braces` advisory in the Next.js ESLint dependency chain remains intentionally unresolved because npm's forced fix would introduce a breaking downgrade.
+- Re-ran lint, static Academic API contract validation, reference-client validation, live anonymous Public RPC validation, backup integration tests, production build, production dependency audit, and full-history Gitleaks checks successfully before merging this batch.
+- Left the `unrs-resolver` postinstall script unapproved because the current lint/build toolchain does not require an additional install-script allow-list change.
+
 `Academic API and settings`
 
 - Added the RLS-protected `calendar_settings` table with owner-level `catholic_calendar_active` and `stress_test_active` booleans.
