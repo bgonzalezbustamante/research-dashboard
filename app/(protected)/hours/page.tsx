@@ -758,7 +758,7 @@ export default async function HoursPage({
           className="relative h-full rounded-lg border border-oxford-stone bg-white p-4"
         >
           <div
-            className="absolute right-2 top-2 flex w-[188px] flex-col items-center gap-0.5 text-center"
+            className="absolute bottom-2 right-2 flex w-[188px] flex-col items-center gap-0.5 text-center"
           >
             <span
               role="img"
