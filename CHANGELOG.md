@@ -13,7 +13,7 @@
 `Public availability API — live in Supabase; Dashboard integration pending`
 
 - Added read-only `list_public_paper_milestones()` and `list_public_planning_allocations()` RPCs for milestone dates, statuses, committed capacity, half-month planning allocations, and anonymised Paper associations.
-- Extended the milestone RPC with FlowSavvy/Calendar added state and timestamp, preserving private Paper identities and denying direct anonymous table reads.
+- Extended the milestone RPC with FlowSavvy/Calendar added state and timestamp, followed by the milestone title (including those associated with non-public Papers). Private Paper identities remain concealed and direct anonymous table reads remain denied.
 - Recorded the live SQL changes in versioned migrations. API manifest, reference client, tests and Dashboard UI integration remain scheduled for November; commits and the draft PR use Netlify skip directives to avoid previews.
 
 `dashboard and Catholic Calendar`
