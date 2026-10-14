@@ -34,6 +34,7 @@ export const releases: ReleaseNote[] = [
         title: 'Public integration',
         items: [
           'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
+          'Two additional public data feeds now share Paper milestone and planning capacity information, including whether milestones have been added to FlowSavvy, without revealing private Paper names.',
           'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
         ],
       },
