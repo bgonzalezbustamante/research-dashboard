@@ -32,6 +32,7 @@
 
 `Papers`
 
+- Moved **Milestones** ahead of **Submission and revision history** in Paper workspaces and their navigation, keeping all editing permissions and records unchanged.
 - Replaced the generic Papers KPI row with five pastel status cards in the order Published, Review/revision, Writing/reframing, VOR typesetting, and Standby.
 - Made each status card a direct filter link, adding combined Review/revision and Writing/reframing filters while retaining the individual workflow-status filters.
 - Paginated each citation source's Snapshot history at one snapshot per page while leaving the citation trajectory chart unchanged.
