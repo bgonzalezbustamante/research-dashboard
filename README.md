@@ -20,7 +20,7 @@ A personal research-management dashboard for papers, projects, conferences, teac
 
 Research Dashboard is the administrative system of record. Public consumers use the curated Supabase RPC layer rather than querying Dashboard tables directly.
 
-The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 currently describes twelve curated operations in `lib/academic-api-contract.json`. Two additional read-only RPCs are already live in Supabase: `list_public_paper_milestones()` (including milestone title, FlowSavvy added state and timestamp) and `list_public_planning_allocations()` (including period dates). Their contract and reference-client integration is queued for the November rc.3 release; neither RPC exposes internal Paper identifiers or notes.
+The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 now documents fourteen curated operations in `lib/academic-api-contract.json`, including `list_public_paper_milestones()` and `list_public_planning_allocations()`. Milestone records deliberately disclose the milestone title and full associated Paper title even for private Papers; private Paper slugs, IDs and notes remain hidden. FlowSavvy state and timestamp are provided for milestones. The allocation endpoint returns historical/manual records, not the complete derived Planning view. Both are supported by the reference client and strict validation checks.
 
 A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. For the public/private boundary, validation model, and versioning rules, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
