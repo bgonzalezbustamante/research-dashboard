@@ -133,6 +133,28 @@ export type PublicSoftwareItem = {
   featured: boolean
 }
 
+export type PublicPaperMilestone = {
+  target_date: string | null
+  completed_on: string | null
+  status: 'planned' | 'completed' | 'cancelled'
+  committed_days: number | null
+  paper_slug: string | null
+  flowsavvy_added: boolean
+  flowsavvy_added_at: string | null
+  title: string
+  paper_title: string
+}
+
+export type PublicPlanningAllocation = {
+  period_start: string
+  period_end: string
+  allocation_type: 'paper' | 'blocked'
+  blocked_type: 'teaching' | 'conference' | 'holiday' | 'administrative' | null
+  committed_days: number
+  paper_slug: string | null
+  superseded_by_milestone: boolean
+}
+
 export type PublicAvailabilityItem = {
   type: PublicAvailabilityType
   start_date: string
@@ -225,6 +247,20 @@ export type PublicSoftwareDetailContractKeysMatch = Assert<
   KeysEqual<
     PublicSoftwareItem,
     typeof RPC_FIELDS.get_public_software
+  >
+>
+
+export type PublicPaperMilestoneContractKeysMatch = Assert<
+  KeysEqual<
+    PublicPaperMilestone,
+    typeof RPC_FIELDS.list_public_paper_milestones
+  >
+>
+
+export type PublicPlanningAllocationContractKeysMatch = Assert<
+  KeysEqual<
+    PublicPlanningAllocation,
+    typeof RPC_FIELDS.list_public_planning_allocations
   >
 >
 
