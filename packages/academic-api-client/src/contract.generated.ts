@@ -221,7 +221,8 @@ export const CONTROLLED_VOCABULARIES = {
     "Book chapter",
     "SciELO/Latindex",
     "Working paper",
-    "Preprint"
+    "Preprint",
+    "Dataset"
   ],
   "paper-language": [
     "English",
