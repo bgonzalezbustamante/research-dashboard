@@ -596,3 +596,10 @@ test('validates the singleton Calendar settings contract', () => {
     /stress_test_active/
   )
 })
+
+test('accepts Guest lecture as a controlled Conference presentation type', () => {
+  assert.deepEqual(
+    parsePublicConferenceList([{ ...conference, presentation_type: 'Guest lecture' }])[0].presentation_type,
+    'Guest lecture'
+  )
+})
