@@ -118,7 +118,7 @@ const inputClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
-const PROJECTS_PER_PAGE = 10
+const PROJECTS_PER_PAGE = 5
 
 const projectRoleOptions = [
   'Principal Investigator',
