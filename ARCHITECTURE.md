@@ -64,7 +64,7 @@ The `/api` page does not introduce a parallel REST service. Public consumers con
 
 ## Public RPC v1
 
-The current anonymous-safe function surface is:
+The current publicly callable function surface is (with explicit Paper-title disclosure for milestone records):
 
 - `list_public_papers()`
 - `get_public_paper(text)`
@@ -78,6 +78,10 @@ The current anonymous-safe function surface is:
 - `get_public_software(text)`
 - `get_public_work_analytics(year)`
 - `list_public_availability(year)`
+- `list_public_paper_milestones()`
+- `list_public_planning_allocations()`
+
+The milestones endpoint deliberately publishes milestone titles and the full titles of associated Papers, including otherwise private Papers, while concealing private Paper slugs, IDs and notes. The planning-allocation endpoint lists stored manual/legacy allocations and fortnight dates rather than all source-backed Planning commitments. Consumers must avoid counting legacy allocations marked as superseded alongside milestone commitments.
 
 The canonical field lists and controlled vocabularies used by the documentation live in:
 
