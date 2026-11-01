@@ -7,12 +7,88 @@ import {
   parsePublicCalendarSettingsResponse,
   parsePublicConferenceList,
   parsePublicPaperList,
+  parsePublicPaperMilestoneList,
+  parsePublicPlanningAllocationList,
   parsePublicProjectList,
   parsePublicSoftwareList,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
 } from '../../../node_modules/.cache/academic-api-client/index.js'
+
+
+const milestone = {
+  target_date: '2026-11-10',
+  completed_on: null,
+  status: 'planned',
+  committed_days: 5,
+  paper_slug: null,
+  flowsavvy_added: true,
+  flowsavvy_added_at: '2026-11-01T12:30:00+00:00',
+  title: 'Revise theoretical framework',
+  paper_title: 'Working Paper (private)',
+}
+
+const planningAllocation = {
+  period_start: '2026-11-01',
+  period_end: '2026-11-15',
+  allocation_type: 'paper',
+  blocked_type: null,
+  committed_days: 5,
+  paper_slug: null,
+  superseded_by_milestone: false,
+}
+
+test('validates public milestone and allocation records without requiring public Paper slugs', () => {
+  assert.deepEqual(parsePublicPaperMilestoneList([milestone]), [milestone])
+  assert.deepEqual(parsePublicPlanningAllocationList([planningAllocation]), [planningAllocation])
+  assert.deepEqual(parsePublicPaperMilestoneList([]), [])
+  assert.deepEqual(parsePublicPlanningAllocationList([]), [])
+  assert.deepEqual(
+    parsePublicPlanningAllocationList([{
+      ...planningAllocation,
+      allocation_type: 'blocked',
+      blocked_type: 'teaching',
+    }]).length,
+    1
+  )
+})
+
+test('rejects unsafe or malformed milestone and allocation responses', () => {
+  assert.throws(
+    () => parsePublicPaperMilestoneList([{...milestone, paper_id: 'private-uuid'}]),
+    /unexpected object shape/
+  )
+  assert.throws(
+    () => parsePublicPaperMilestoneList([{...milestone, paper_title: ''}]),
+    /paper_title/
+  )
+  assert.throws(
+    () => parsePublicPaperMilestoneList([{...milestone, flowsavvy_added_at: null}]),
+    /flowsavvy_added_at/
+  )
+  assert.throws(
+    () => parsePublicPaperMilestoneList([{...milestone, committed_days: 7}]),
+    /committed_days/
+  )
+  assert.throws(
+    () => parsePublicPlanningAllocationList([{...planningAllocation, notes: 'private'}]),
+    /unexpected object shape/
+  )
+  assert.throws(
+    () => parsePublicPlanningAllocationList([{
+      ...planningAllocation,
+      allocation_type: 'blocked',
+      blocked_type: 'administrative',
+      superseded_by_milestone: true,
+    }]),
+    /allocation_type/
+  )
+  assert.throws(
+    () => parsePublicPlanningAllocationList([{...planningAllocation, period_end: '2026-10-31'}]),
+    /period_end/
+  )
+})
 
 function calendarDays(year) {
   const days = []
