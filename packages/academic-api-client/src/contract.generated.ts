@@ -163,6 +163,26 @@ export const RPC_FIELDS = {
     "start_date",
     "end_date",
     "label"
+  ],
+  "list_public_paper_milestones": [
+    "target_date",
+    "completed_on",
+    "status",
+    "committed_days",
+    "paper_slug",
+    "flowsavvy_added",
+    "flowsavvy_added_at",
+    "title",
+    "paper_title"
+  ],
+  "list_public_planning_allocations": [
+    "period_start",
+    "period_end",
+    "allocation_type",
+    "blocked_type",
+    "committed_days",
+    "paper_slug",
+    "superseded_by_milestone"
   ]
 } as const
 
@@ -188,7 +208,9 @@ export const RPC_PARAMETERS = {
   ],
   "list_public_availability": [
     "p_year"
-  ]
+  ],
+  "list_public_paper_milestones": [],
+  "list_public_planning_allocations": []
 } as const
 
 export const CONTROLLED_VOCABULARIES = {
