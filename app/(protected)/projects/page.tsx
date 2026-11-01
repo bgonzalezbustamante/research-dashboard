@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
+import ListPagination from '@/components/ui/list-pagination'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
@@ -1245,6 +1246,16 @@ export default async function ProjectsPage({
         </div>
       )}
 
+      <div className="mb-4 mt-4">
+        <ListPagination
+          label="Projects"
+          position="top"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
+
       <div className="mt-5 space-y-6">
         {sortedProjects.length ===
         0 ? (
@@ -2366,62 +2377,15 @@ export default async function ProjectsPage({
         )}
       </div>
 
-      {totalPages > 1 && (
-        <nav
-          aria-label="Projects pagination"
-          className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span className="text-sm text-oxford-ash">
-            Page {currentPage} of{' '}
-            {totalPages}
-          </span>
-
-          <div className="flex flex-wrap gap-2">
-            {currentPage > 1 && (
-              <>
-                <ButtonLink
-                  href={getPageHref(1)}
-                  variant="secondary"
-                >
-                  First
-                </ButtonLink>
-
-                <ButtonLink
-                  href={getPageHref(
-                    currentPage - 1
-                  )}
-                  variant="secondary"
-                >
-                  Previous
-                </ButtonLink>
-              </>
-            )}
-
-            {currentPage <
-              totalPages && (
-              <>
-                <ButtonLink
-                  href={getPageHref(
-                    currentPage + 1
-                  )}
-                  variant="secondary"
-                >
-                  Next
-                </ButtonLink>
-
-                <ButtonLink
-                  href={getPageHref(
-                    totalPages
-                  )}
-                  variant="secondary"
-                >
-                  Last
-                </ButtonLink>
-              </>
-            )}
-          </div>
-        </nav>
-      )}
+      <div className="mt-6">
+        <ListPagination
+          label="Projects"
+          position="bottom"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
     </div>
   )
 }
