@@ -246,7 +246,8 @@ export const CONTROLLED_VOCABULARIES = {
   "conference-presentation-type": [
     "Conference paper",
     "Keynote",
-    "Workshop"
+    "Workshop",
+    "Guest lecture"
   ],
   "teaching-role": [
     "Course Convenor",
