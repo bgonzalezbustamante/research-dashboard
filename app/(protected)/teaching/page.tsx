@@ -23,6 +23,11 @@ type TeachingPageProps = {
     deleted?: string
     season?: string
     page?: string
+    q?: string
+    institution?: string
+    role?: string
+    level?: string
+    current?: string
   }>
 }
 
@@ -98,7 +103,7 @@ const inputClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
-const TEACHING_PER_PAGE = 10
+const TEACHING_PER_PAGE = 5
 
 const levelLabels: Record<
   TeachingLevel,
@@ -215,6 +220,13 @@ export default async function TeachingPage({
 
   const params =
     await searchParams
+
+  const searchQuery = params.q?.trim() ?? ''
+  const normalisedQuery = searchQuery.toLowerCase()
+  const currentFilter =
+    ['current', 'historical'].includes(params.current ?? '')
+      ? params.current!
+      : 'all'
 
   const requestedPage =
     Number.parseInt(
@@ -475,9 +487,38 @@ export default async function TeachingPage({
       )
     )
 
+  const institutions = [...new Set(
+    teachingItems.map((item) => item.institution)
+  )].sort((a, b) => a.localeCompare(b))
+
+  const institutionFilter =
+    params.institution && institutions.includes(params.institution)
+      ? params.institution
+      : 'all'
+
+  const roleFilter =
+    params.role === 'unassigned' ||
+    teachingRoleOptions.includes(params.role as TeachingRole)
+      ? params.role!
+      : 'all'
+
+  const levelFilter =
+    ['undergraduate', 'master', 'phd'].includes(params.level ?? '')
+      ? params.level!
+      : 'all'
+
   const sortedTeaching = [
     ...teachingItems,
-  ].sort((a, b) => {
+  ].filter((item) => (
+    (!normalisedQuery ||
+      [item.name, item.institution].join(' ').toLowerCase().includes(normalisedQuery)) &&
+    (institutionFilter === 'all' || item.institution === institutionFilter) &&
+    (roleFilter === 'all' ||
+      (roleFilter === 'unassigned' ? item.role === null : item.role === roleFilter)) &&
+    (levelFilter === 'all' || item.levels.includes(levelFilter as TeachingLevel)) &&
+    (currentFilter === 'all' ||
+      item.is_current === (currentFilter === 'current'))
+  )).sort((a, b) => {
     if (
       a.is_current !==
       b.is_current
@@ -548,13 +589,16 @@ export default async function TeachingPage({
       sortedTeaching.length
     )
 
-  const getPageHref = (
-    pageNumber: number
-  ) =>
-    pageNumber > 1
-      ? '/teaching?page=' +
-        pageNumber
-      : '/teaching'
+  const getPageHref = (pageNumber: number) => {
+    const query = new URLSearchParams()
+    if (searchQuery) query.set('q', searchQuery)
+    if (institutionFilter !== 'all') query.set('institution', institutionFilter)
+    if (roleFilter !== 'all') query.set('role', roleFilter)
+    if (levelFilter !== 'all') query.set('level', levelFilter)
+    if (currentFilter !== 'all') query.set('current', currentFilter)
+    if (pageNumber > 1) query.set('page', String(pageNumber))
+    return query.size > 0 ? `/teaching?${query.toString()}` : '/teaching'
+  }
 
   const isOwner =
     access.canEdit
@@ -1214,6 +1258,63 @@ export default async function TeachingPage({
           </Card>
         )}
 
+
+      <form method="get" className="mt-8 rounded-lg border border-oxford-stone bg-white p-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+          <div>
+            <label htmlFor="teaching-search" className={labelClass}>Search</label>
+            <input
+              id="teaching-search"
+              name="q"
+              type="search"
+              defaultValue={searchQuery}
+              placeholder="Course title or institution"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="teaching-institution" className={labelClass}>Institution</label>
+            <select id="teaching-institution" name="institution" defaultValue={institutionFilter} className={inputClass}>
+              <option value="all">All institutions</option>
+              {institutions.map((institution) => (
+                <option key={institution} value={institution}>{institution}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="teaching-role" className={labelClass}>Role</label>
+            <select id="teaching-role" name="role" defaultValue={roleFilter} className={inputClass}>
+              <option value="all">All roles</option>
+              {teachingRoleOptions.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+              <option value="unassigned">Not specified</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="teaching-level" className={labelClass}>Level</label>
+            <select id="teaching-level" name="level" defaultValue={levelFilter} className={inputClass}>
+              <option value="all">All levels</option>
+              {(Object.keys(levelLabels) as TeachingLevel[]).map((level) => (
+                <option key={level} value={level}>{levelLabels[level]}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="teaching-current" className={labelClass}>Period</label>
+            <select id="teaching-current" name="current" defaultValue={currentFilter} className={inputClass}>
+              <option value="all">Current and historical</option>
+              <option value="current">Current</option>
+              <option value="historical">Historical</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button type="submit">Apply filters</Button>
+          <ButtonLink href="/teaching" variant="secondary">Reset</ButtonLink>
+        </div>
+      </form>
+
       <section className="mt-8">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -1257,8 +1358,9 @@ export default async function TeachingPage({
         0 ? (
           <Card>
             <p className="text-sm text-oxford-ash">
-              No Teaching Portfolio
-              items yet.
+              {teachingItems.length === 0
+                ? 'No Teaching Portfolio items yet.'
+                : 'No Teaching items match these filters.'}
             </p>
           </Card>
         ) : (
