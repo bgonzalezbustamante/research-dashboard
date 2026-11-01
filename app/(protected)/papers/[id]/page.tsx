@@ -903,18 +903,6 @@ export default async function PaperPage({
         </div>
       </section>
 
-      <HistorySection
-        paperId={
-          paper.id
-        }
-        events={
-          historyEvents
-        }
-        error={
-          historyError
-        }
-      />
-
       <MilestonesSection
         paperId={
           paper.id
@@ -924,6 +912,18 @@ export default async function PaperPage({
         }
         error={
           milestoneError
+        }
+      />
+
+      <HistorySection
+        paperId={
+          paper.id
+        }
+        events={
+          historyEvents
+        }
+        error={
+          historyError
         }
       />
 

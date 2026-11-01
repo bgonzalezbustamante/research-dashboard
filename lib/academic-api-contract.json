@@ -1006,6 +1006,128 @@
           ]
         }
       ]
+    },
+    {
+      "id": "milestone-planning",
+      "title": "Paper milestones and planning allocations",
+      "summary": "Read-only capacity and scheduling records for availability tracking. Full Paper titles and milestone titles are deliberately public even when a Paper is private.",
+      "notExposed": [
+        "Paper identifiers, owner IDs, internal notes, and milestone or allocation record identifiers",
+        "Private Paper slugs and URLs (returned as null unless explicitly public)",
+        "Sorting metadata, creation/update timestamps and FlowSavvy state of legacy planning allocations",
+        "Source-backed commitments derived from conferences, teaching and dated blocked events (these RPCs return stored records only)"
+      ],
+      "forbiddenFields": [
+        "id",
+        "paper_id",
+        "planning_period_id",
+        "owner_id",
+        "notes",
+        "created_at",
+        "updated_at",
+        "sort_order",
+        "flowsavvy_count"
+      ],
+      "operations": [
+        {
+          "name": "list_public_paper_milestones",
+          "signature": "list_public_paper_milestones()",
+          "kind": "Listing",
+          "purpose": "Lists stored Paper milestones for the Dashboard owner with dates, status, capacity, FlowSavvy scheduling details, milestone title and associated full Paper title.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "target_date",
+              "type": "date"
+            },
+            {
+              "name": "completed_on",
+              "type": "date"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "committed_days",
+              "type": "integer"
+            },
+            {
+              "name": "paper_slug",
+              "type": "text"
+            },
+            {
+              "name": "flowsavvy_added",
+              "type": "boolean"
+            },
+            {
+              "name": "flowsavvy_added_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "paper_title",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Milestone title and full Paper title are intentionally public, including when the associated Paper is private. The Paper slug remains null unless its public metadata explicitly permits disclosure.",
+            "The title field is the milestone title; paper_title is the associated Paper's full bibliographic title.",
+            "The response contains all statuses (planned, completed and cancelled). target_date, completed_on and committed_days may be null. Committed days, when specified, are 5, 10 or 15.",
+            "flowsavvy_added_at is null unless flowsavvy_added is true. This RPC exposes stored milestones, not a complete derived planning calendar."
+          ]
+        },
+        {
+          "name": "list_public_planning_allocations",
+          "signature": "list_public_planning_allocations()",
+          "kind": "Listing",
+          "purpose": "Lists stored legacy Paper and blocked-time allocations, with the half-month planning-period dates needed to interpret each record.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "period_start",
+              "type": "date"
+            },
+            {
+              "name": "period_end",
+              "type": "date"
+            },
+            {
+              "name": "allocation_type",
+              "type": "text"
+            },
+            {
+              "name": "blocked_type",
+              "type": "text"
+            },
+            {
+              "name": "committed_days",
+              "type": "integer"
+            },
+            {
+              "name": "paper_slug",
+              "type": "text"
+            },
+            {
+              "name": "superseded_by_milestone",
+              "type": "boolean"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Allocation records are historical/manual data, not the full derived Planning view; planned Paper commitments are now sourced from milestones, and Teaching/conference/blocked-event commitments are derived separately.",
+            "allocation_type is paper or blocked; paper entries have blocked_type null, blocked entries have a category (teaching, conference, holiday or administrative) and paper_slug null.",
+            "Committed days are an integer from 1 to 15. superseded_by_milestone flags a legacy Paper allocation matching a capacity-bearing planned milestone in the same period; consumers can avoid double counting.",
+            "The associated Paper slug is null for non-public Papers. No private Paper title, internal notes, identifiers or FlowSavvy metadata are returned by this RPC."
+          ]
+        }
+      ]
     }
   ],
   "controlledVocabularies": [
@@ -1020,7 +1142,8 @@
         "Book chapter",
         "SciELO/Latindex",
         "Working paper",
-        "Preprint"
+        "Preprint",
+        "Dataset"
       ]
     },
     {
@@ -1064,7 +1187,8 @@
       "values": [
         "Conference paper",
         "Keynote",
-        "Workshop"
+        "Workshop",
+        "Guest lecture"
       ]
     },
     {

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
+import ListPagination from '@/components/ui/list-pagination'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
@@ -22,6 +23,11 @@ type ConferencesPageProps = {
     saved?: string
     deleted?: string
     page?: string
+    q?: string
+    year?: string
+    type?: string
+    attendance?: string
+    trip?: string
   }>
 }
 
@@ -39,6 +45,7 @@ type ConferencePresentation = {
     | 'Conference paper'
     | 'Keynote'
     | 'Workshop'
+    | 'Guest lecture'
   personal_attendance: boolean
   involves_trip: boolean
   url: string | null
@@ -59,6 +66,26 @@ const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
 const CONFERENCES_PER_PAGE = 10
+
+const presentationTypes = [
+  'Conference paper',
+  'Keynote',
+  'Workshop',
+  'Guest lecture',
+] as const
+
+function eventShortNameClass(name: string) {
+  const colours = [
+    'border-[#24486d] bg-[#e9eff6] text-[#163955]',
+    'border-[#ebb4a4] bg-[#fff0eb] text-[#9a4436]',
+    'border-[#9ad5cb] bg-[#e9f8f5] text-[#176660]',
+  ]
+  let hash = 0
+  for (const character of name.toLowerCase()) {
+    hash = (hash + character.charCodeAt(0)) % colours.length
+  }
+  return colours[hash]
+}
 
 function formatDate(
   value: string | null
@@ -197,6 +224,21 @@ export default async function ConferencesPage({
   const params =
     await searchParams
 
+  const searchQuery = params.q?.trim() ?? ''
+  const normalisedQuery = searchQuery.toLowerCase()
+  const attendanceFilter =
+    ['yes', 'no'].includes(params.attendance ?? '')
+      ? params.attendance!
+      : 'all'
+  const tripFilter =
+    ['yes', 'no'].includes(params.trip ?? '')
+      ? params.trip!
+      : 'all'
+  const typeFilter =
+    presentationTypes.includes(params.type as typeof presentationTypes[number])
+      ? params.type!
+      : 'all'
+
   const requestedPage =
     Number.parseInt(
       params.page ?? '1',
@@ -289,9 +331,38 @@ export default async function ConferencesPage({
 
   const today = getToday()
 
+  const availableYears = [...new Set(
+    presentations.map((presentation) => presentation.start_date.slice(0, 4))
+  )].sort().reverse()
+
+  const yearFilter =
+    params.year && availableYears.includes(params.year)
+      ? params.year
+      : 'all'
+
+  const matchingPresentations = presentations.filter((presentation) => {
+    const searchable = [
+      presentation.event_name,
+      presentation.event_short_name,
+      presentation.presentation_title,
+      presentation.location,
+      ...(presentation.authors ?? []),
+    ].filter(Boolean).join(' ').toLowerCase()
+
+    return (
+      (!normalisedQuery || searchable.includes(normalisedQuery)) &&
+      (yearFilter === 'all' || presentation.start_date.slice(0, 4) === yearFilter) &&
+      (typeFilter === 'all' || presentation.presentation_type === typeFilter) &&
+      (attendanceFilter === 'all' ||
+        presentation.personal_attendance === (attendanceFilter === 'yes')) &&
+      (tripFilter === 'all' ||
+        presentation.involves_trip === (tripFilter === 'yes'))
+    )
+  })
+
   const sortedPresentations =
     sortPresentations(
-      presentations,
+      matchingPresentations,
       today
     )
 
@@ -348,13 +419,16 @@ export default async function ConferencesPage({
       sortedPresentations.length
     )
 
-  const getPageHref = (
-    pageNumber: number
-  ) =>
-    pageNumber > 1
-      ? '/conferences?page=' +
-        pageNumber
-      : '/conferences'
+  const getPageHref = (pageNumber: number) => {
+    const query = new URLSearchParams()
+    if (searchQuery) query.set('q', searchQuery)
+    if (yearFilter !== 'all') query.set('year', yearFilter)
+    if (typeFilter !== 'all') query.set('type', typeFilter)
+    if (attendanceFilter !== 'all') query.set('attendance', attendanceFilter)
+    if (tripFilter !== 'all') query.set('trip', tripFilter)
+    if (pageNumber > 1) query.set('page', String(pageNumber))
+    return query.size > 0 ? `/conferences?${query.toString()}` : '/conferences'
+  }
 
   const isOwner =
     access.canEdit
@@ -624,6 +698,7 @@ export default async function ConferencesPage({
                   <option value="Workshop">
                     Workshop
                   </option>
+                  <option value="Guest lecture">Guest lecture</option>
                 </select>
               </div>
 
@@ -724,6 +799,61 @@ export default async function ConferencesPage({
         </Card>
       )}
 
+
+      <form method="get" className="mt-8 rounded-lg border border-oxford-stone bg-white p-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div className="md:col-span-2 lg:col-span-2">
+            <label htmlFor="conference-search" className={labelClass}>Search presentations</label>
+            <input
+              id="conference-search"
+              name="q"
+              type="search"
+              defaultValue={searchQuery}
+              placeholder="Event, short name, title, location or author"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="conference-year" className={labelClass}>Year</label>
+            <select id="conference-year" name="year" defaultValue={yearFilter} className={inputClass}>
+              <option value="all">All years</option>
+              {availableYears.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="conference-type" className={labelClass}>Presentation type</label>
+            <select id="conference-type" name="type" defaultValue={typeFilter} className={inputClass}>
+              <option value="all">All types</option>
+              {presentationTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="conference-attendance" className={labelClass}>Personal attendance</label>
+            <select id="conference-attendance" name="attendance" defaultValue={attendanceFilter} className={inputClass}>
+              <option value="all">All</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="conference-trip" className={labelClass}>Trip</label>
+            <select id="conference-trip" name="trip" defaultValue={tripFilter} className={inputClass}>
+              <option value="all">All</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button type="submit">Apply filters</Button>
+          <ButtonLink href="/conferences" variant="secondary">Reset</ButtonLink>
+        </div>
+      </form>
+
       <div className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <span className="text-sm text-oxford-ash">
           Showing{' '}
@@ -752,13 +882,24 @@ export default async function ConferencesPage({
         </span>
       </div>
 
+      <div className="mb-4 mt-4">
+        <ListPagination
+          label="Conferences"
+          position="top"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
+
       <div className="mt-5 space-y-5">
         {sortedPresentations.length ===
         0 ? (
           <Card>
             <p className="text-sm text-oxford-ash">
-              No conference
-              presentations yet.
+              {presentations.length === 0
+                ? 'No conference presentations yet.'
+                : 'No presentations match these filters.'}
             </p>
           </Card>
         ) : (
@@ -798,7 +939,7 @@ export default async function ConferencesPage({
                           }
                         </h2>
 
-                        <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2 py-0.5 text-xs font-medium text-oxford-ash">
+                        <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${eventShortNameClass(presentation.event_short_name)}`}>
                           {
                             presentation.event_short_name
                           }
@@ -1183,6 +1324,7 @@ export default async function ConferencesPage({
                                 <option value="Workshop">
                                   Workshop
                                 </option>
+                                <option value="Guest lecture">Guest lecture</option>
                               </select>
                             </div>
 
@@ -1333,62 +1475,15 @@ export default async function ConferencesPage({
         )}
       </div>
 
-      {totalPages > 1 && (
-        <nav
-          aria-label="Conference pagination"
-          className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span className="text-sm text-oxford-ash">
-            Page {currentPage} of{' '}
-            {totalPages}
-          </span>
-
-          <div className="flex flex-wrap gap-2">
-            {currentPage > 1 && (
-              <>
-                <ButtonLink
-                  href={getPageHref(1)}
-                  variant="secondary"
-                >
-                  First
-                </ButtonLink>
-
-                <ButtonLink
-                  href={getPageHref(
-                    currentPage - 1
-                  )}
-                  variant="secondary"
-                >
-                  Previous
-                </ButtonLink>
-              </>
-            )}
-
-            {currentPage <
-              totalPages && (
-              <>
-                <ButtonLink
-                  href={getPageHref(
-                    currentPage + 1
-                  )}
-                  variant="secondary"
-                >
-                  Next
-                </ButtonLink>
-
-                <ButtonLink
-                  href={getPageHref(
-                    totalPages
-                  )}
-                  variant="secondary"
-                >
-                  Last
-                </ButtonLink>
-              </>
-            )}
-          </div>
-        </nav>
-      )}
+      <div className="mt-6">
+        <ListPagination
+          label="Conferences"
+          position="bottom"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
     </div>
   )
 }

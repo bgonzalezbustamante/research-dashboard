@@ -64,7 +64,7 @@ The `/api` page does not introduce a parallel REST service. Public consumers con
 
 ## Public RPC v1
 
-The current anonymous-safe function surface is:
+The current publicly callable function surface is (with explicit Paper-title disclosure for milestone records):
 
 - `list_public_papers()`
 - `get_public_paper(text)`
@@ -78,6 +78,10 @@ The current anonymous-safe function surface is:
 - `get_public_software(text)`
 - `get_public_work_analytics(year)`
 - `list_public_availability(year)`
+- `list_public_paper_milestones()`
+- `list_public_planning_allocations()`
+
+The milestones endpoint deliberately publishes milestone titles and the full titles of associated Papers, including otherwise private Papers, while concealing private Paper slugs, IDs and notes. The planning-allocation endpoint lists stored manual/legacy allocations and fortnight dates rather than all source-backed Planning commitments. Consumers must avoid counting legacy allocations marked as superseded alongside milestone commitments.
 
 The canonical field lists and controlled vocabularies used by the documentation live in:
 
@@ -139,7 +143,7 @@ Resource-specific boundaries are documented on `/api` and encoded in the API con
 
 ### Publications
 
-Only papers explicitly marked public with a public slug appear in the list/detail contracts. Public bibliographic and selected research-resource metadata may be exposed. Internal workflow state, milestones, revision/submission history, notes, Overleaf links, raw citation history, internal IDs, and private author metadata remain unavailable.
+Only papers explicitly marked public with a public slug appear in the **publication list/detail RPCs**. A separate, intentionally broader milestone RPC publishes milestone dates, status, FlowSavvy state, milestone title and the full associated Paper title, including for otherwise private Papers. Private Paper slugs, internal IDs, notes, revision/submission history, Overleaf links, raw citation history and private author metadata remain unavailable through that RPC.
 
 Only the latest stored Google Scholar citation snapshot is exposed, as a count and capture date. Snapshot IDs, historical snapshots, citation source metadata, and other citation sources remain private.
 

@@ -240,3 +240,54 @@ test('reference client surfaces RPC errors before validation', async () => {
     /list_public_papers failed: denied/
   )
 })
+
+
+test('reference client fetches and validates public milestone and allocation records', async () => {
+  const calls = []
+  const api = createAcademicApiClient({
+    async rpc(name, args) {
+      calls.push({ name, args })
+      if (name === 'list_public_paper_milestones') {
+        return {
+          data: [{
+            target_date: '2026-11-10',
+            completed_on: null,
+            status: 'planned',
+            committed_days: 5,
+            paper_slug: null,
+            flowsavvy_added: false,
+            flowsavvy_added_at: null,
+            title: 'Complete revisions',
+            paper_title: 'Private working paper',
+          }],
+          error: null,
+        }
+      }
+      if (name === 'list_public_planning_allocations') {
+        return {
+          data: [{
+            period_start: '2026-11-01',
+            period_end: '2026-11-15',
+            allocation_type: 'blocked',
+            blocked_type: 'conference',
+            committed_days: 2,
+            paper_slug: null,
+            superseded_by_milestone: false,
+          }],
+          error: null,
+        }
+      }
+      throw new Error('Unexpected RPC')
+    },
+  })
+
+  const milestones = await api.listPublicPaperMilestones()
+  const allocations = await api.listPublicPlanningAllocations()
+
+  assert.equal(milestones[0].paper_title, 'Private working paper')
+  assert.equal(allocations[0].blocked_type, 'conference')
+  assert.deepEqual(calls, [
+    { name: 'list_public_paper_milestones', args: undefined },
+    { name: 'list_public_planning_allocations', args: undefined },
+  ])
+})

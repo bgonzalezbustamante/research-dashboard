@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
+import ListPagination from '@/components/ui/list-pagination'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
@@ -27,6 +28,11 @@ type PaperRow = {
   archived_at: string | null
   created_at: string
   updated_at: string
+}
+
+type PaperPublicationMetadataRow = {
+  paper_id: string
+  publication_index: string | null
 }
 
 type CitationRow = {
@@ -85,6 +91,7 @@ type PapersPageProps = {
     q?: string
     status?: string
     archive?: string
+    publication_index?: string
     sort?: string
     page?: string
   }>
@@ -140,18 +147,22 @@ const statusOptions = [
 ]
 
 const archiveOptions = [
-  {
-    value: 'active',
-    label: 'Active papers',
-  },
-  {
-    value: 'archived',
-    label: 'Archived papers',
-  },
-  {
-    value: 'all',
-    label: 'Active + archived',
-  },
+  { value: 'active', label: 'Active papers' },
+  { value: 'archived', label: 'Archived papers' },
+  { value: 'all', label: 'Active + archived' },
+]
+
+const publicationIndexOptions = [
+  { value: 'all', label: 'All publication indexes' },
+  { value: 'WoS-SSCI', label: 'WoS-SSCI' },
+  { value: 'Scopus', label: 'Scopus' },
+  { value: 'WoS-ESCI', label: 'WoS-ESCI' },
+  { value: 'Book chapter', label: 'Book chapter' },
+  { value: 'SciELO/Latindex', label: 'SciELO/Latindex' },
+  { value: 'Working paper', label: 'Working paper' },
+  { value: 'Preprint', label: 'Preprint' },
+  { value: 'Dataset', label: 'Dataset' },
+  { value: 'unindexed', label: 'Not specified' },
 ]
 
 const sortOptions = [
@@ -166,6 +177,10 @@ const sortOptions = [
   {
     value: 'updated-desc',
     label: 'Recently updated',
+  },
+  {
+    value: 'citations-desc',
+    label: 'Google Scholar citations',
   },
 ]
 
@@ -620,6 +635,35 @@ function getCitationDisplays(
   return result
 }
 
+
+function getLatestGoogleScholarCitations(
+  citations: CitationRow[]
+) {
+  const latest = new Map<string, CitationRow>()
+
+  for (const row of citations) {
+    if (row.source.trim().toLowerCase() !== 'google scholar') {
+      continue
+    }
+    const previous = latest.get(row.paper_id)
+    if (
+      !previous ||
+      row.captured_on > previous.captured_on ||
+      (row.captured_on === previous.captured_on &&
+        row.created_at > previous.created_at)
+    ) {
+      latest.set(row.paper_id, row)
+    }
+  }
+
+  return new Map(
+    [...latest.entries()].map(([paperId, citation]) => [
+      paperId,
+      citation.citation_count,
+    ])
+  )
+}
+
 export default async function PapersPage({
   searchParams,
 }: PapersPageProps) {
@@ -646,6 +690,13 @@ export default async function PapersPage({
     )
       ? params.archive!
       : 'active'
+
+  const publicationIndexFilter =
+    publicationIndexOptions.some(
+      (option) => option.value === params.publication_index
+    )
+      ? params.publication_index!
+      : 'all'
 
   const sort =
     sortOptions.some(
@@ -705,6 +756,9 @@ export default async function PapersPage({
         paper.id
     )
 
+  let publicationMetadata:
+    PaperPublicationMetadataRow[] = []
+
   let citations:
     CitationRow[] = []
 
@@ -725,6 +779,7 @@ export default async function PapersPage({
       historyResult,
       authorResult,
       workSessionResult,
+      publicationMetadataResult,
     ] = await Promise.all([
       supabase
         .from(
@@ -799,6 +854,10 @@ export default async function PapersPage({
           'paper_id',
           paperIds
         ),
+      supabase
+        .from('paper_public_metadata')
+        .select('paper_id, publication_index')
+        .in('paper_id', paperIds),
     ])
 
     if (
@@ -833,6 +892,15 @@ export default async function PapersPage({
       )
     }
 
+    if (publicationMetadataResult.error) {
+      throw new Error(
+        `Could not load paper publication indexes: ${publicationMetadataResult.error.message}`
+      )
+    }
+
+    publicationMetadata =
+      (publicationMetadataResult.data ?? []) as PaperPublicationMetadataRow[]
+
     citations =
       (citationResult.data ??
         []) as CitationRow[]
@@ -863,6 +931,17 @@ export default async function PapersPage({
   const citationDisplayByPaper =
     getCitationDisplays(
       citations
+    )
+
+  const googleScholarCitations =
+    getLatestGoogleScholarCitations(citations)
+
+  const publicationIndexByPaper =
+    new Map(
+      publicationMetadata.map((row) => [
+        row.paper_id,
+        row.publication_index,
+      ])
     )
 
   const hoursByPaper =
@@ -897,6 +976,19 @@ export default async function PapersPage({
             null
         ) {
           return false
+        }
+
+        if (publicationIndexFilter !== 'all') {
+          const paperIndex =
+            publicationIndexByPaper.get(paper.id) ?? null
+
+          if (
+            publicationIndexFilter === 'unindexed'
+              ? paperIndex !== null
+              : paperIndex !== publicationIndexFilter
+          ) {
+            return false
+          }
         }
 
         if (
@@ -1057,6 +1149,12 @@ export default async function PapersPage({
           a.updated_at
         )
 
+      case 'citations-desc': {
+        const aCount = googleScholarCitations.get(a.id) ?? -1
+        const bCount = googleScholarCitations.get(b.id) ?? -1
+        return bCount - aCount || compareStartedDescending(a, b)
+      }
+
       default:
         return 0
     }
@@ -1141,6 +1239,10 @@ export default async function PapersPage({
         'archive',
         archiveFilter
       )
+    }
+
+    if (publicationIndexFilter !== 'all') {
+      pageParams.set('publication_index', publicationIndexFilter)
     }
 
     if (
@@ -1301,6 +1403,9 @@ export default async function PapersPage({
         method="get"
         className="mb-6 rounded-lg border border-oxford-stone bg-white p-4"
       >
+        {archiveFilter !== 'active' && (
+          <input type="hidden" name="archive" value={archiveFilter} />
+        )}
         <div className="grid gap-4 lg:grid-cols-4">
           <div>
             <label
@@ -1359,36 +1464,23 @@ export default async function PapersPage({
 
           <div>
             <label
-              htmlFor="archive"
+              htmlFor="publication_index"
               className="mb-1 block text-sm font-medium text-oxford-charcoal"
             >
-              Archive
+              Publication index
             </label>
 
             <select
-              id="archive"
-              name="archive"
-              defaultValue={
-                archiveFilter
-              }
+              id="publication_index"
+              name="publication_index"
+              defaultValue={publicationIndexFilter}
               className="w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue"
             >
-              {archiveOptions.map(
-                (option) => (
-                  <option
-                    key={
-                      option.value
-                    }
-                    value={
-                      option.value
-                    }
-                  >
-                    {
-                      option.label
-                    }
-                  </option>
-                )
-              )}
+              {publicationIndexOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -1442,6 +1534,13 @@ export default async function PapersPage({
             Reset
           </ButtonLink>
 
+          <ButtonLink
+            href={archiveFilter === 'archived' ? '/papers' : '/papers?archive=archived'}
+            variant="secondary"
+          >
+            {archiveFilter === 'archived' ? 'Active papers' : 'Archived papers'}
+          </ButtonLink>
+
           <span className="ml-auto text-sm text-oxford-ash">
             Showing{' '}
             <strong className="font-medium text-oxford-charcoal">
@@ -1459,6 +1558,16 @@ export default async function PapersPage({
           </span>
         </div>
       </form>
+
+      <div className="mb-4 mt-4">
+        <ListPagination
+          label="Papers"
+          position="top"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
 
       {totalMatchingPapers ===
       0 ? (
@@ -1701,68 +1810,15 @@ export default async function PapersPage({
             </table>
           </div>
 
-          {totalPages > 1 && (
-            <nav
-              aria-label="Papers pagination"
-              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <p className="text-sm text-oxford-ash">
-                Page{' '}
-                <strong className="font-medium text-oxford-charcoal">
-                  {currentPage}
-                </strong>{' '}
-                of{' '}
-                <strong className="font-medium text-oxford-charcoal">
-                  {totalPages}
-                </strong>
-              </p>
-
-              <div className="flex flex-wrap items-center gap-2">
-                {currentPage > 1 && (
-                  <>
-                    <ButtonLink
-                      href={getPageHref(1)}
-                      variant="secondary"
-                    >
-                      First
-                    </ButtonLink>
-
-                    <ButtonLink
-                      href={getPageHref(
-                        currentPage - 1
-                      )}
-                      variant="secondary"
-                    >
-                      Previous
-                    </ButtonLink>
-                  </>
-                )}
-
-                {currentPage <
-                  totalPages && (
-                  <>
-                    <ButtonLink
-                      href={getPageHref(
-                        currentPage + 1
-                      )}
-                      variant="secondary"
-                    >
-                      Next
-                    </ButtonLink>
-
-                    <ButtonLink
-                      href={getPageHref(
-                        totalPages
-                      )}
-                      variant="secondary"
-                    >
-                      Last
-                    </ButtonLink>
-                  </>
-                )}
-              </div>
-            </nav>
-          )}
+          <div className="mt-6">
+        <ListPagination
+          label="Papers"
+          position="bottom"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
         </div>
       )}
     </div>

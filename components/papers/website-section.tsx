@@ -205,6 +205,9 @@ export default function WebsiteSection({
                   <option value="Preprint">
                     Preprint
                   </option>
+                  <option value="Dataset">
+                    Dataset
+                  </option>
                 </select>
               </div>
 

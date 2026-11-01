@@ -13,6 +13,8 @@ import type {
   SoftwareDevelopmentStage,
   SoftwareStatus,
   PublicAvailabilityItem,
+  PublicPaperMilestone,
+  PublicPlanningAllocation,
   PublicAvailabilityType,
   PublicCalendarSettings,
   PublicConferencePresentation,
@@ -1266,6 +1268,120 @@ export function parsePublicCalendarSettingsResponse(
   }
 
   return rows[0]
+}
+
+
+function assertNullableIsoTimestamp(
+  value: unknown,
+  path: string
+): asserts value is string | null {
+  if (value === null) {
+    return
+  }
+
+  assertString(value, path)
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) ||
+    !Number.isFinite(Date.parse(value))
+  ) {
+    fail(path, 'expected an ISO timestamp with a timezone')
+  }
+}
+
+export function parsePublicPaperMilestoneList(
+  payload: unknown
+): PublicPaperMilestone[] {
+  return parseArray(
+    payload,
+    'list_public_paper_milestones response',
+    (value, path) => {
+      assertRecord(value, path)
+      assertExactKeys(
+        value,
+        RPC_FIELDS.list_public_paper_milestones,
+        path
+      )
+
+      assertNullableIsoDate(value.target_date, `${path}.target_date`)
+      assertNullableIsoDate(value.completed_on, `${path}.completed_on`)
+      assertControlledValue(
+        value.status,
+        ['planned', 'completed', 'cancelled'] as const,
+        `${path}.status`
+      )
+      assertNullableInteger(value.committed_days, `${path}.committed_days`)
+      if (
+        value.committed_days !== null &&
+        ![5, 10, 15].includes(value.committed_days as number)
+      ) {
+        fail(`${path}.committed_days`, 'expected 5, 10 or 15')
+      }
+      if (value.committed_days !== null && value.target_date === null) {
+        fail(`${path}.target_date`, 'required for capacity-bearing milestones')
+      }
+      assertNullableString(value.paper_slug, `${path}.paper_slug`)
+      if (value.paper_slug !== null) {
+        assertString(value.paper_slug, `${path}.paper_slug`)
+      }
+      assertBoolean(value.flowsavvy_added, `${path}.flowsavvy_added`)
+      assertNullableIsoTimestamp(value.flowsavvy_added_at, `${path}.flowsavvy_added_at`)
+      if (value.flowsavvy_added !== (value.flowsavvy_added_at !== null)) {
+        fail(`${path}.flowsavvy_added_at`, 'must be set exactly when FlowSavvy is added')
+      }
+      if (value.flowsavvy_added && value.committed_days === null) {
+        fail(`${path}.flowsavvy_added`, 'requires committed days')
+      }
+      assertString(value.title, `${path}.title`)
+      assertString(value.paper_title, `${path}.paper_title`)
+      return value as unknown as PublicPaperMilestone
+    }
+  )
+}
+
+export function parsePublicPlanningAllocationList(
+  payload: unknown
+): PublicPlanningAllocation[] {
+  return parseArray(
+    payload,
+    'list_public_planning_allocations response',
+    (value, path) => {
+      assertRecord(value, path)
+      assertExactKeys(
+        value,
+        RPC_FIELDS.list_public_planning_allocations,
+        path
+      )
+      assertIsoDate(value.period_start, `${path}.period_start`)
+      assertIsoDate(value.period_end, `${path}.period_end`)
+      if ((value.period_end as string) < (value.period_start as string)) {
+        fail(`${path}.period_end`, 'must be on or after period_start')
+      }
+      assertControlledValue(value.allocation_type, ['paper', 'blocked'] as const, `${path}.allocation_type`)
+      assertNullableControlledValue(
+        value.blocked_type,
+        ['teaching', 'conference', 'holiday', 'administrative'] as const,
+        `${path}.blocked_type`
+      )
+      assertInteger(value.committed_days, `${path}.committed_days`)
+      if ((value.committed_days as number) < 1 || (value.committed_days as number) > 15) {
+        fail(`${path}.committed_days`, 'expected 1–15')
+      }
+      assertNullableString(value.paper_slug, `${path}.paper_slug`)
+      if (value.paper_slug !== null) {
+        assertString(value.paper_slug, `${path}.paper_slug`)
+      }
+      assertBoolean(value.superseded_by_milestone, `${path}.superseded_by_milestone`)
+      if (value.allocation_type === 'paper' && value.blocked_type !== null) {
+        fail(`${path}.blocked_type`, 'paper allocations cannot have a blocked category')
+      }
+      if (value.allocation_type === 'blocked' &&
+          (value.blocked_type === null || value.paper_slug !== null || value.superseded_by_milestone)) {
+        fail(`${path}.allocation_type`, 'blocked allocations require a category and cannot identify a Paper or be superseded')
+      }
+      return value as unknown as PublicPlanningAllocation
+    }
+  )
 }
 
 export function parsePublicAvailabilityList(

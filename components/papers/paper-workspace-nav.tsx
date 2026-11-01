@@ -14,14 +14,14 @@ const items = [
     countKey: null,
   },
   {
-    href: '#history',
-    label: 'Submissions & revisions',
-    countKey: 'historyCount',
-  },
-  {
     href: '#milestones',
     label: 'Milestones',
     countKey: 'milestoneCount',
+  },
+  {
+    href: '#history',
+    label: 'Submissions & revisions',
+    countKey: 'historyCount',
   },
   {
     href: '#citations',

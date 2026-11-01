@@ -9,18 +9,18 @@ A personal research-management dashboard for papers, projects, conferences, teac
 
 ## Core capabilities
 
-- **Research records** — paper workflows, milestones, revision history, citations, projects, conferences, teaching, and linked research resources, with status-focused Paper summaries and compact citation-history navigation.
+- **Research records** — Paper workflows, milestones, revision history and citations, with publication-index filtering (including Dataset), Google Scholar citation sorting, and milestone-first Paper workspaces; searchable Projects, Conferences and Teaching Portfolio with dedicated filters and consistent top/bottom pagination.
 - **Work and planning** — manual work logs with a locally resolved and locally served Penguin Timeline state for the selected day, day/week/month/year analytics including major-activity breakdowns, a read-only Activity relationships map for Project/Teaching assignments and observed Paper usage, paginated activity/location label management with provenance-preserving consolidation, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
 - **Collaboration and access** — Dashboard-wide Viewer access, paper-scoped Coauthor permissions, and Owner-only administrative controls.
 - **Software and operations** — a Software Ecosystem registry plus protected backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances.
-- **Public data** — curated anonymous-safe academic, software, work-analytics, Teaching-season, Catholic Calendar controls, and availability data for approved downstream consumers.
+- **Public data** — curated public academic, software, analytics, Calendar and availability RPCs for downstream consumers, with explicitly documented publication of full Paper titles in the milestone feed.
 - **Cross-module analytics** — workload, research activity, planning, Google Scholar citation snapshots, and citation-yield indicators.
 
 ## Public data interface
 
 Research Dashboard is the administrative system of record. Public consumers use the curated Supabase RPC layer rather than querying Dashboard tables directly.
 
-The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 currently contains twelve curated operations; canonical fields, parameters, notes, and controlled vocabularies are maintained in `lib/academic-api-contract.json`.
+The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 now documents fourteen curated operations in `lib/academic-api-contract.json`, including `list_public_paper_milestones()` and `list_public_planning_allocations()`. Milestone records deliberately disclose the milestone title and full associated Paper title even for private Papers; private Paper slugs, IDs and notes remain hidden. FlowSavvy state and timestamp are provided for milestones. The allocation endpoint returns historical/manual records, not the complete derived Planning view. Both are supported by the reference client and strict validation checks.
 
 A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. For the public/private boundary, validation model, and versioning rules, see [ARCHITECTURE.md](ARCHITECTURE.md).
 

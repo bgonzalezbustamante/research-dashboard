@@ -231,6 +231,8 @@ function assertManifest(contract) {
     'get_public_software',
     'get_public_work_analytics',
     'list_public_availability',
+    'list_public_paper_milestones',
+    'list_public_planning_allocations',
   ]
 
   const operations = contract.resources.flatMap((resource) =>
@@ -645,9 +647,15 @@ async function liveCheck() {
       year
     )
 
+  await api.listPublicPaperMilestones()
+  await api.listPublicPlanningAllocations()
+
   const privateTables = [
     'papers',
     'paper_public_metadata',
+    'paper_milestones',
+    'planning_periods',
+    'planning_allocations',
     'citation_snapshots',
     'projects',
     'project_public_metadata',

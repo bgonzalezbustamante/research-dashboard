@@ -20,6 +20,7 @@ const allowedPublicationIndexes =
     'SciELO/Latindex',
     'Working paper',
     'Preprint',
+    'Dataset',
   ])
 
 const slugPattern =

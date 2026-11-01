@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
+import ListPagination from '@/components/ui/list-pagination'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
@@ -22,6 +23,7 @@ type ProjectsPageProps = {
     saved?: string
     deleted?: string
     page?: string
+    q?: string
   }>
 }
 
@@ -116,7 +118,7 @@ const inputClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
-const PROJECTS_PER_PAGE = 10
+const PROJECTS_PER_PAGE = 5
 
 const projectRoleOptions = [
   'Principal Investigator',
@@ -255,6 +257,9 @@ export default async function ProjectsPage({
 
   const params =
     await searchParams
+
+  const searchQuery = params.q?.trim() ?? ''
+  const normalisedQuery = searchQuery.toLowerCase()
 
   const requestedPage =
     Number.parseInt(
@@ -591,7 +596,15 @@ export default async function ProjectsPage({
 
   const sortedProjects = [
     ...projects,
-  ].sort((a, b) => {
+  ]
+    .filter((project) => !normalisedQuery || [
+      project.short_title,
+      project.title,
+      project.funder,
+      project.role,
+      project.status,
+    ].filter(Boolean).join(' ').toLowerCase().includes(normalisedQuery))
+    .sort((a, b) => {
     if (
       a.status !==
       b.status
@@ -655,11 +668,18 @@ export default async function ProjectsPage({
 
   const getPageHref = (
     pageNumber: number
-  ) =>
-    pageNumber > 1
-      ? '/projects?page=' +
-        pageNumber
+  ) => {
+    const query = new URLSearchParams()
+    if (searchQuery) {
+      query.set('q', searchQuery)
+    }
+    if (pageNumber > 1) {
+      query.set('page', String(pageNumber))
+    }
+    return query.size > 0
+      ? `/projects?${query.toString()}`
       : '/projects'
+  }
 
   const isOwner =
     access.canEdit
@@ -1215,6 +1235,30 @@ export default async function ProjectsPage({
         </Card>
       )}
 
+
+      <form
+        method="get"
+        className="mt-8 flex flex-wrap items-end gap-3 rounded-lg border border-oxford-stone bg-white p-4"
+      >
+        <div className="min-w-64 flex-1">
+          <label htmlFor="project-search" className={labelClass}>
+            Search projects
+          </label>
+          <input
+            id="project-search"
+            name="q"
+            type="search"
+            defaultValue={searchQuery}
+            placeholder="Title, funder, role or status"
+            className={inputClass}
+          />
+        </div>
+        <Button type="submit">Search</Button>
+        <ButtonLink href="/projects" variant="secondary">
+          Reset
+        </ButtonLink>
+      </form>
+
       {sortedProjects.length > 0 && (
         <div className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-oxford-ash">
@@ -1245,13 +1289,24 @@ export default async function ProjectsPage({
         </div>
       )}
 
+      <div className="mb-4 mt-4">
+        <ListPagination
+          label="Projects"
+          position="top"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
+
       <div className="mt-5 space-y-6">
         {sortedProjects.length ===
         0 ? (
           <Card>
             <p className="text-sm text-oxford-ash">
-              No projects have been
-              created yet.
+              {projects.length === 0
+                ? 'No projects have been created yet.'
+                : 'No projects match this search.'}
             </p>
           </Card>
         ) : (
@@ -2366,62 +2421,15 @@ export default async function ProjectsPage({
         )}
       </div>
 
-      {totalPages > 1 && (
-        <nav
-          aria-label="Projects pagination"
-          className="mt-6 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span className="text-sm text-oxford-ash">
-            Page {currentPage} of{' '}
-            {totalPages}
-          </span>
-
-          <div className="flex flex-wrap gap-2">
-            {currentPage > 1 && (
-              <>
-                <ButtonLink
-                  href={getPageHref(1)}
-                  variant="secondary"
-                >
-                  First
-                </ButtonLink>
-
-                <ButtonLink
-                  href={getPageHref(
-                    currentPage - 1
-                  )}
-                  variant="secondary"
-                >
-                  Previous
-                </ButtonLink>
-              </>
-            )}
-
-            {currentPage <
-              totalPages && (
-              <>
-                <ButtonLink
-                  href={getPageHref(
-                    currentPage + 1
-                  )}
-                  variant="secondary"
-                >
-                  Next
-                </ButtonLink>
-
-                <ButtonLink
-                  href={getPageHref(
-                    totalPages
-                  )}
-                  variant="secondary"
-                >
-                  Last
-                </ButtonLink>
-              </>
-            )}
-          </div>
-        </nav>
-      )}
+      <div className="mt-6">
+        <ListPagination
+          label="Projects"
+          position="bottom"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getPageHref={getPageHref}
+        />
+      </div>
     </div>
   )
 }
