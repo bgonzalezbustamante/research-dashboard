@@ -143,7 +143,7 @@ Resource-specific boundaries are documented on `/api` and encoded in the API con
 
 ### Publications
 
-Only papers explicitly marked public with a public slug appear in the list/detail contracts. Public bibliographic and selected research-resource metadata may be exposed. Internal workflow state, milestones, revision/submission history, notes, Overleaf links, raw citation history, internal IDs, and private author metadata remain unavailable.
+Only papers explicitly marked public with a public slug appear in the **publication list/detail RPCs**. A separate, intentionally broader milestone RPC publishes milestone dates, status, FlowSavvy state, milestone title and the full associated Paper title, including for otherwise private Papers. Private Paper slugs, internal IDs, notes, revision/submission history, Overleaf links, raw citation history and private author metadata remain unavailable through that RPC.
 
 Only the latest stored Google Scholar citation snapshot is exposed, as a count and capture date. Snapshot IDs, historical snapshots, citation source metadata, and other citation sources remain private.
 
