@@ -36,6 +36,18 @@
 - Replaced the generic Papers KPI row with five pastel status cards in the order Published, Review/revision, Writing/reframing, VOR typesetting, and Standby.
 - Made each status card a direct filter link, adding combined Review/revision and Writing/reframing filters while retaining the individual workflow-status filters.
 - Paginated each citation source's Snapshot history at one snapshot per page while leaving the citation trajectory chart unchanged.
+- Replaced the Papers Archive dropdown with publication-index filtering (including an explicit Not specified option); retained an Archived papers link and compatible archive URLs.
+- Added sorting by latest Google Scholar citation count, placing Papers without a stored Google Scholar snapshot last.
+- Added Dataset after Preprint in the publication-index constraint, Website editing form, Public Academic API vocabulary and reference-client metadata.
+
+`Projects, conferences and Teaching`
+
+- Added Projects search across short/full title, funder, role and status, while retaining active-first ordering.
+- Added Conference search across event names, short names, presentation titles, locations and authors, plus filters for year, presentation type, personal attendance and trips.
+- Added Guest lecture to the controlled Conference presentation types in Supabase, Dashboard forms and Public Academic API vocabulary.
+- Coloured Conference short-name badges consistently using Oxford blue, coral and aqua styles.
+- Added Teaching search by course and institution, with institution, role, academic level and current/historical filters.
+- Standardised the four principal lists with page sizes of Papers 10, Projects 5, Conferences 10 and Teaching 5; pagination now appears above and below results, preserves active filters, and includes First, Previous, Next and Last links.
 
 `Hours and label management`
 
