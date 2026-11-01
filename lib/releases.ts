@@ -36,14 +36,14 @@ export const releases: ReleaseNote[] = [
           'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
           'Two public data feeds now share milestone and planning capacity information, including full Paper titles and FlowSavvy milestone tracking. Private Paper titles are intentionally public here, while internal notes and identifiers remain hidden.',
           'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
-          'Conference records now support Guest lectures and use clearer coloured event labels.'
+          'Conference records now support Guest lectures and use clearer coloured event labels.',
         ],
       },
       {
         title: 'Papers and Hours',
         items: [
           'Paper status cards now focus on the five main workflow groups; Paper milestones come before submission history, publication-index filters include Dataset, and Papers can be sorted by Google Scholar citations.',
-          'Papers, Projects, Conferences and Teaching now have easier page navigation, with searches and relevant filters for browsing growing records.'
+          'Papers, Projects, Conferences and Teaching now have easier page navigation, with searches and relevant filters for browsing growing records.',
           'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated; recorded sessions move to the new canonical activity or location and old labels remain read-only historical records.',
           'A new Activity relationships view maps Project and Teaching label assignments alongside the labels actually used for Papers, highlights missing or conflicting Project relationships, and Hours analytics now summarises time by major activity instead of by Paper.',
         ],
