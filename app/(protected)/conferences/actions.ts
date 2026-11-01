@@ -11,6 +11,7 @@ const allowedPresentationTypes =
     'Conference paper',
     'Keynote',
     'Workshop',
+    'Guest lecture',
   ])
 
 function getRequiredText(
@@ -208,7 +209,7 @@ function validateConferenceFields(
     return {
       ok: false as const,
       error:
-        'Presentation type must be Conference paper, Keynote, or Workshop.',
+        'Presentation type must be Conference paper, Keynote, Workshop, or Guest lecture.',
     }
   }
 
