@@ -1282,7 +1282,7 @@ function assertNullableIsoTimestamp(
   assertString(value, path)
 
   if (
-    !/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$/.test(value) ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) ||
     !Number.isFinite(Date.parse(value))
   ) {
     fail(path, 'expected an ISO timestamp with a timezone')
