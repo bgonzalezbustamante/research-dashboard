@@ -23,6 +23,7 @@ type ProjectsPageProps = {
     saved?: string
     deleted?: string
     page?: string
+    q?: string
   }>
 }
 
@@ -256,6 +257,9 @@ export default async function ProjectsPage({
 
   const params =
     await searchParams
+
+  const searchQuery = params.q?.trim() ?? ''
+  const normalisedQuery = searchQuery.toLowerCase()
 
   const requestedPage =
     Number.parseInt(
@@ -592,7 +596,15 @@ export default async function ProjectsPage({
 
   const sortedProjects = [
     ...projects,
-  ].sort((a, b) => {
+  ]
+    .filter((project) => !normalisedQuery || [
+      project.short_title,
+      project.title,
+      project.funder,
+      project.role,
+      project.status,
+    ].filter(Boolean).join(' ').toLowerCase().includes(normalisedQuery))
+    .sort((a, b) => {
     if (
       a.status !==
       b.status
@@ -656,11 +668,18 @@ export default async function ProjectsPage({
 
   const getPageHref = (
     pageNumber: number
-  ) =>
-    pageNumber > 1
-      ? '/projects?page=' +
-        pageNumber
+  ) => {
+    const query = new URLSearchParams()
+    if (searchQuery) {
+      query.set('q', searchQuery)
+    }
+    if (pageNumber > 1) {
+      query.set('page', String(pageNumber))
+    }
+    return query.size > 0
+      ? `/projects?${query.toString()}`
       : '/projects'
+  }
 
   const isOwner =
     access.canEdit
@@ -1216,6 +1235,30 @@ export default async function ProjectsPage({
         </Card>
       )}
 
+
+      <form
+        method="get"
+        className="mt-8 flex flex-wrap items-end gap-3 rounded-lg border border-oxford-stone bg-white p-4"
+      >
+        <div className="min-w-64 flex-1">
+          <label htmlFor="project-search" className={labelClass}>
+            Search projects
+          </label>
+          <input
+            id="project-search"
+            name="q"
+            type="search"
+            defaultValue={searchQuery}
+            placeholder="Title, funder, role or status"
+            className={inputClass}
+          />
+        </div>
+        <Button type="submit">Search</Button>
+        <ButtonLink href="/projects" variant="secondary">
+          Reset
+        </ButtonLink>
+      </form>
+
       {sortedProjects.length > 0 && (
         <div className="mt-8 flex flex-col gap-3 rounded-lg border border-oxford-stone bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-oxford-ash">
@@ -1261,8 +1304,9 @@ export default async function ProjectsPage({
         0 ? (
           <Card>
             <p className="text-sm text-oxford-ash">
-              No projects have been
-              created yet.
+              {projects.length === 0
+                ? 'No projects have been created yet.'
+                : 'No projects match this search.'}
             </p>
           </Card>
         ) : (
