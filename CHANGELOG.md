@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.0.0-rc.4 "Velvet Torch" (in development)
+
+### Summary
+
+- Started `v1.0.0-rc.4 "Velvet Torch"` to replace Coauthor access with a restricted Website Editor role and to let Projects publish relevant external research outputs through the Academic API.
+
 ## v1.0.0-rc.3 "Bold Ridge"
 
 Released 3 Nov 2026.
