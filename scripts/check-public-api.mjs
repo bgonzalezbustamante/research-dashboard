@@ -442,6 +442,135 @@ function assertMigrations(contract, operations, corpus) {
   console.log('✓ Controlled vocabularies match migrations')
 }
 
+function hasRole(roleList, role) {
+  return roleList
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .includes(role)
+}
+
+// Replays function DDL and EXECUTE grants in migration order. Standard
+// Supabase default privileges grant EXECUTE on new public functions to anon,
+// so a function counts as anon-executable until a revoke names anon.
+function anonExecutableFunctions(corpus) {
+  const sql = corpus.replace(/--[^\n]*/g, '')
+  const events = new RegExp(
+    [
+      'create(?:\\s+or\\s+replace)?\\s+function\\s+public\\.(\\w+)\\s*\\(',
+      'drop\\s+function\\s+(?:if\\s+exists\\s+)?public\\.(\\w+)',
+      'alter\\s+function\\s+public\\.(\\w+)\\s*\\([^)]*\\)\\s+set\\s+schema',
+      '(grant|revoke)\\s+(?:all|execute)(?:\\s+privileges)?\\s+on\\s+function\\s+public\\.(\\w+)(?:\\s*\\([^)]*\\))?\\s+(?:to|from)\\s+([^;]+);',
+      'revoke\\s+(?:all|execute)(?:\\s+privileges)?\\s+on\\s+all\\s+functions\\s+in\\s+schema\\s+public\\s+from\\s+([^;]+);',
+    ].join('|'),
+    'gi'
+  )
+  const functions = new Map()
+  let match
+
+  while ((match = events.exec(sql))) {
+    const [
+      ,
+      created,
+      dropped,
+      moved,
+      action,
+      granted,
+      grantRoles,
+      bulkRoles,
+    ] = match
+
+    if (created) {
+      const name = created.toLowerCase()
+      const header = sql.slice(
+        match.index,
+        sql.indexOf('$', match.index)
+      )
+      const existing = functions.get(name)
+
+      functions.set(name, {
+        anon: existing ? existing.anon : true,
+        trigger: /returns\s+trigger/i.test(header),
+      })
+    } else if (dropped || moved) {
+      functions.delete((dropped ?? moved).toLowerCase())
+    } else if (granted) {
+      const state = functions.get(granted.toLowerCase())
+
+      if (!state) {
+        continue
+      }
+
+      if (action.toLowerCase() === 'grant') {
+        if (
+          hasRole(grantRoles, 'anon') ||
+          hasRole(grantRoles, 'public')
+        ) {
+          state.anon = true
+        }
+      } else if (hasRole(grantRoles, 'anon')) {
+        state.anon = false
+      }
+    } else if (bulkRoles && hasRole(bulkRoles, 'anon')) {
+      for (const state of functions.values()) {
+        state.anon = false
+      }
+    }
+  }
+
+  return [...functions]
+    .filter(([, state]) => state.anon && !state.trigger)
+    .map(([name]) => name)
+    .sort()
+}
+
+function assertAnonSurface(operations, corpus) {
+  const expected = operations
+    .map(({ operation }) => operation.name)
+    .sort()
+  const actual = anonExecutableFunctions(corpus)
+  const unexpected = actual.filter(
+    (name) => !expected.includes(name)
+  )
+  const missing = expected.filter(
+    (name) => !actual.includes(name)
+  )
+
+  if (unexpected.length > 0) {
+    fail(
+      'Migrations leave anon EXECUTE on functions outside the Academic API manifest: ' +
+        unexpected.join(', ') +
+        '. Revoke them from anon explicitly.'
+    )
+  }
+
+  if (missing.length > 0) {
+    fail(
+      'Academic API RPCs are not executable by anon in migrations: ' +
+        missing.join(', ')
+    )
+  }
+
+  const tableGrant = corpus
+    .replace(/--[^\n]*/g, '')
+    .match(
+      /grant\s+(?:select|insert|update|delete|truncate|all)\b[^;]*?\bon\s+(?!function\b|all\s+functions\b|schema\b)[^;]*?\bto\s+[^;]*\banon\b[^;]*;/i
+    )
+
+  if (tableGrant) {
+    fail(
+      'Migrations grant table privileges to anon: ' +
+        tableGrant[0].replace(/\s+/g, ' ')
+    )
+  }
+
+  console.log(
+    '✓ Anon EXECUTE in migrations is limited to the ' +
+      expected.length +
+      ' manifest RPCs'
+  )
+  console.log('✓ Migrations grant no table privileges to anon')
+}
+
 async function liveCheck() {
   const live =
     process.argv.includes('--live')
@@ -690,11 +819,62 @@ async function liveCheck() {
     }
   }
 
+  // RLS-only tables may answer anon with an empty result instead of an error.
+  const rowFreeTables = [
+    'paper_authors',
+    'paper_links',
+    'paper_members',
+    'authors',
+    'project_papers',
+    'profiles',
+    'dashboard_members',
+    'access_invitations',
+    'access_audit_log',
+  ]
+
+  for (
+    const table of
+    rowFreeTables
+  ) {
+    const result =
+      await supabase
+        .from(table)
+        .select('*')
+        .limit(1)
+
+    if (
+      !result.error &&
+      (result.data ?? []).length > 0
+    ) {
+      fail(
+        'Anonymous direct table access returned rows for: ' +
+          table
+      )
+    }
+  }
+
+  const authenticatedOnlyRpc =
+    await supabase.rpc(
+      'get_my_pending_access_invitation'
+    )
+
+  if (
+    authenticatedOnlyRpc.error?.code !==
+    '42501'
+  ) {
+    fail(
+      'Anonymous EXECUTE was not denied by privilege (42501) for get_my_pending_access_invitation().'
+    )
+  }
+
   console.log(
     '✓ Live Public RPC v1 responses passed reference client validation'
   )
   console.log(
     '✓ Anonymous direct table access remains blocked'
+  )
+  console.log(
+    '✓ Anonymous EXECUTE is denied for authenticated-only RPCs'
   )
 }
 
@@ -704,6 +884,7 @@ async function main() {
   const operations = assertManifest(contract)
 
   assertMigrations(contract, operations, corpus)
+  assertAnonSurface(operations, corpus)
   await liveCheck()
 
   console.log('✓ Academic API contract validation passed.')
