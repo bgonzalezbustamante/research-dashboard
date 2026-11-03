@@ -227,6 +227,16 @@ export default function MilestonesSection({
             completed steps in the
             paper&apos;s development.
           </p>
+
+          <p className="mt-1 text-xs text-oxford-ash">
+            Public via the Academic
+            API: milestone titles,
+            dates, status, committed
+            days, FlowSavvy state and
+            this paper&apos;s full
+            title, even when the
+            paper is private.
+          </p>
         </div>
 
         <div className="flex gap-4 text-sm text-oxford-ash">

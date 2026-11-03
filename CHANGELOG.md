@@ -1,20 +1,25 @@
 # CHANGELOG
 
-## v1.0.0-rc.3 "Bold Ridge" (in development)
+## v1.0.0-rc.3 "Bold Ridge"
+
+Released 3 Nov 2026.
 
 ### Summary
 
 - Started `v1.0.0-rc.3 "Bold Ridge"` with a reusable Catholic Calendar integration on the Dashboard Home.
 - Added compact Owner controls for enabling the Catholic Calendar on the Academic Website and independently stress-testing long Calendar displays.
 - Refined Papers status summaries and citation-history navigation, and added safer long-term management for Hours activity and location labels.
+- Added public milestone and planning-allocation feeds to the Academic API, and search, filtering and pagination across Papers, Projects, Conferences and Teaching.
+- Closed rc.3 with critical Next.js security updates, a narrower anonymous function surface, and a stricter static check for the public API boundary.
 
 ### Code changes
 
-`Public availability API — live in Supabase; Dashboard integration pending`
+`Public milestone and planning API`
 
 - Added read-only `list_public_paper_milestones()` and `list_public_planning_allocations()` RPCs for milestone dates, status, committed capacity and stored half-month planning allocations.
 - Extended the milestone RPC with FlowSavvy/Calendar state and timestamp, milestone title, and full associated Paper title (including private Papers); private Paper identifiers, slugs and notes remain withheld, and direct anonymous table reads remain denied.
-- Reconciled the manually applied October migration in Supabase's history, brought the 14-operation Public API manifest and generated reference client into line with the live RPCs, and added strict response and privacy regression checks. Dashboard UI integration remains separate.
+- Reconciled the manually applied October migration in Supabase's history, brought the 14-operation Public API manifest and generated reference client into line with the live RPCs, and added strict response and privacy regression checks.
+- Added a Milestones notice in Paper workspaces stating which milestone and Paper details the Academic API publishes, including for private Papers.
 
 `dashboard and Catholic Calendar`
 
@@ -73,6 +78,10 @@
 - Confirmed `npm audit --omit=dev` reports zero production vulnerabilities. The previously documented development-only `braces` advisory in the Next.js ESLint dependency chain remains intentionally unresolved because npm's forced fix would introduce a breaking downgrade.
 - Re-ran lint, static Academic API contract validation, reference-client validation, live anonymous Public RPC validation, backup integration tests, production build, production dependency audit, and full-history Gitleaks checks successfully before merging this batch.
 - Left the `unrs-resolver` postinstall script unapproved because the current lint/build toolchain does not require an additional install-script allow-list change.
+- Upgraded `next` from 16.3.6 to 16.4.4 and `eslint-config-next` from 16.3.2 to 16.4.4 after the rc.3 close-out audit reported ten Next.js advisories affecting 16.3.6, including two critical unauthenticated remote code execution issues (Image Optimization with SVG files, and `use cache` functions returning typed arrays) and a high-severity Server Actions denial of service. `npm audit --omit=dev` again reports zero production vulnerabilities.
+- Closed a Coauthor write gap: the Coauthor paper-field guard now also blocks direct changes to `papers.language`, which had been added after the guard was written.
+- Made anonymous EXECUTE revocation explicit in migrations for 14 authenticated-only RPCs (invitations, managed accounts, paper create/update, Coauthor collaboration, default location) whose migrations revoked access only from `PUBLIC`. Live anonymous probes confirmed that production already denies these calls (`42501`); the explicit revokes keep the repository's migration history authoritative instead of relying on project-level default privileges.
+- Hardened `npm run check:public-api`: it now replays function DDL and EXECUTE grants across all migrations and fails unless the anon-executable function set equals the manifest's RPCs, and it fails on any table privilege granted to anon. The live check also confirms that RLS-only tables return no anonymous rows and that an authenticated-only RPC rejects anonymous calls.
 
 `Academic API and settings`
 
