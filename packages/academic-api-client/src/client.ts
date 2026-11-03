@@ -5,6 +5,7 @@ import type {
   PublicPaper,
   PublicPaperDetail,
   PublicPaperMilestone,
+  PublicProjectPublication,
   PublicPlanningAllocation,
   PublicProject,
   PublicSoftwareItem,
@@ -19,6 +20,7 @@ import {
   parsePublicPaperDetailResponse,
   parsePublicPaperList,
   parsePublicPaperMilestoneList,
+  parsePublicProjectPublicationList,
   parsePublicPlanningAllocationList,
   parsePublicProjectDetailResponse,
   parsePublicProjectList,
@@ -115,6 +117,9 @@ export type AcademicApiClient = {
   >
   getPublicCalendarSettings(): Promise<
     PublicCalendarSettings
+  >
+  listPublicProjectPublications(): Promise<
+    PublicProjectPublication[]
   >
   listPublicPaperMilestones(): Promise<
     PublicPaperMilestone[]
@@ -249,6 +254,12 @@ export function createAcademicApiClient(
           transport,
           'get_public_calendar_settings'
         )
+      )
+    },
+
+    async listPublicProjectPublications() {
+      return parsePublicProjectPublicationList(
+        await callRpc(transport, 'list_public_project_publications')
       )
     },
 

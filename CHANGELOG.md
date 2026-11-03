@@ -20,6 +20,14 @@
 - Staged the retirement of Coauthor access: the additive migration keeps the rc.3 app working, while `supabase/release-window/retire_coauthor_access.sql` replaces every collaborator write policy with an Owner-only policy, removes Coauthor rows, functions and the Coauthor field guard, and switches invitations to Website Editor only. It is applied in the rc.4 release window.
 - Added `supabase/tests/rc4_access_policies.sql`, a rolled-back SQL suite that impersonates QA accounts to verify Website Editor isolation, Viewer read-only access and the anonymous function and table surface.
 
+`Project publications`
+
+- Added external publications: research outputs relevant to a Project on which the Dashboard Owner is not an author. They live in the new `external_publications` and `project_external_publications` tables, so Papers views, workflow statuses, Planning, analytics, Google Scholar citations, Hours and the existing Paper RPCs never see them.
+- External publications record title, authors, venue, publication year, an optional date in that year, DOI and publication URLs, language and their own Private/Public visibility (Private by default). The Owner manages them at `/projects/publications` through Owner-only `create_external_publication`, `update_external_publication` and `delete_external_publication` RPCs; Viewers can read them, and each Project card lists its external publications.
+- Added `list_public_project_publications()` as the fifteenth Public RPC v1 operation. For each Public Project it returns the owner's own Public Papers (`authorship = own`, with the Paper slug) and Public external publications (`authorship = external`, slug always null), with authors, venue, dates, DOI and publication URLs and language. Existing RPC shapes are unchanged, and external publications never appear in `list_public_papers()` or `get_public_paper()`.
+- Added the `publication-authorship` controlled vocabulary, the `project-publications` manifest resource, the reference-client `listPublicProjectPublications()` method with strict validation (own rows require a slug, external rows forbid one and require a year, the year matches any date) and regression tests.
+- Added live compatibility checks: each Public Project's `own` rows must equal its `publication_slugs`, every `own` row must be a public Paper, no external title may appear in `list_public_papers()`, and the new tables must stay closed to anonymous callers.
+
 ## v1.0.0-rc.3 "Bold Ridge"
 
 Released 3 Nov 2026.

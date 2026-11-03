@@ -10,6 +10,7 @@ import {
   parsePublicPaperMilestoneList,
   parsePublicPlanningAllocationList,
   parsePublicProjectList,
+  parsePublicProjectPublicationList,
   parsePublicSoftwareList,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
@@ -602,4 +603,73 @@ test('accepts Guest lecture as a controlled Conference presentation type', () =>
     parsePublicConferenceList([{ ...conference, presentation_type: 'Guest lecture' }])[0].presentation_type,
     'Guest lecture'
   )
+})
+
+const ownProjectPublication = {
+  project_slug: 'time-use',
+  authorship: 'own',
+  paper_slug: 'public-paper',
+  title: 'Public paper',
+  authors: ['Bastián González-Bustamante'],
+  venue: 'Journal',
+  publication_date: '2026-03-01',
+  publication_year: 2026,
+  doi_url: 'https://doi.org/10.1000/example',
+  publication_url: null,
+  language: 'English',
+}
+
+const externalProjectPublication = {
+  ...ownProjectPublication,
+  authorship: 'external',
+  paper_slug: null,
+  title: 'Related study by project partners',
+  authors: ['A. Partner', 'B. Partner'],
+  publication_date: null,
+  publication_year: 2025,
+  doi_url: null,
+  publication_url: 'https://example.org/report',
+  language: null,
+}
+
+test('validates own and external project publications', () => {
+  const rows = parsePublicProjectPublicationList([
+    ownProjectPublication,
+    externalProjectPublication,
+    {
+      ...ownProjectPublication,
+      paper_slug: 'working-paper',
+      publication_date: null,
+      publication_year: null,
+    },
+  ])
+
+  assert.deepEqual(
+    rows.map((row) => row.authorship),
+    ['own', 'external', 'own']
+  )
+})
+
+test('rejects project publications that break the own/external contract', () => {
+  const invalid = [
+    [{ ...externalProjectPublication, paper_slug: 'leaked-slug' }, /paper_slug/],
+    [{ ...ownProjectPublication, paper_slug: null }, /paper_slug/],
+    [{ ...externalProjectPublication, publication_year: null }, /publication_year/],
+    [{ ...ownProjectPublication, publication_year: 2025 }, /publication_year/],
+    [{ ...ownProjectPublication, publication_date: null }, /publication_year/],
+    [{ ...externalProjectPublication, authorship: 'coauthored' }, /authorship/],
+    [{ ...externalProjectPublication, authors: [] }, /authors/],
+    [{ ...externalProjectPublication, language: 'Klingon' }, /language/],
+    [{ ...externalProjectPublication, publication_url: 'javascript:alert(1)' }, /publication_url/],
+    [{ ...externalProjectPublication, visibility: 'private' }, /unexpected object shape/],
+  ]
+
+  for (const [row, pattern] of invalid) {
+    assert.throws(
+      () => parsePublicProjectPublicationList([row]),
+      (error) =>
+        error instanceof AcademicApiValidationError &&
+        pattern.test(error.message)
+    )
+  }
 })

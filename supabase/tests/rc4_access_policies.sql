@@ -108,6 +108,8 @@ begin
     'authors',
     'projects',
     'project_papers',
+    'external_publications',
+    'project_external_publications',
     'conference_presentations',
     'teaching_portfolio',
     'software_items',
@@ -357,6 +359,7 @@ declare
     'list_public_paper_milestones',
     'list_public_papers',
     'list_public_planning_allocations',
+    'list_public_project_publications',
     'list_public_projects',
     'list_public_software',
     'list_public_teaching'

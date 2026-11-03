@@ -233,6 +233,7 @@ function assertManifest(contract) {
     'list_public_availability',
     'list_public_paper_milestones',
     'list_public_planning_allocations',
+    'list_public_project_publications',
   ]
 
   const operations = contract.resources.flatMap((resource) =>
@@ -709,6 +710,110 @@ async function liveCheck() {
     )
   }
 
+  // Compatibility: project publications add external outputs without
+  // changing what the existing paper and project contracts expose.
+  const projectPublications =
+    await api.listPublicProjectPublications()
+
+  const publicProjectSlugs =
+    new Set(
+      projects.map(
+        (project) =>
+          project.slug
+      )
+    )
+
+  for (const project of projects) {
+    const ownSlugs =
+      projectPublications
+        .filter(
+          (row) =>
+            row.project_slug ===
+              project.slug &&
+            row.authorship ===
+              'own'
+        )
+        .map(
+          (row) => row.paper_slug
+        )
+        .sort()
+
+    const expectedSlugs =
+      [...project.publication_slugs]
+        .sort()
+
+    if (
+      ownSlugs.length !==
+        expectedSlugs.length ||
+      ownSlugs.some(
+        (slug, index) =>
+          slug !==
+          expectedSlugs[index]
+      )
+    ) {
+      fail(
+        'list_public_project_publications() own rows differ from publication_slugs for project: ' +
+          project.slug
+      )
+    }
+  }
+
+  const unknownProjectRow =
+    projectPublications.find(
+      (row) =>
+        !publicProjectSlugs.has(
+          row.project_slug
+        )
+    )
+
+  if (unknownProjectRow) {
+    fail(
+      'list_public_project_publications() returned a project that is not public: ' +
+        unknownProjectRow.project_slug
+    )
+  }
+
+  const publicPaperSlugs =
+    new Set(
+      papers.map(
+        (paper) => paper.slug
+      )
+    )
+
+  const publicPaperTitles =
+    new Set(
+      papers.map(
+        (paper) => paper.title
+      )
+    )
+
+  for (const row of projectPublications) {
+    if (
+      row.authorship === 'own' &&
+      !publicPaperSlugs.has(
+        row.paper_slug
+      )
+    ) {
+      fail(
+        'list_public_project_publications() own row is not a public paper: ' +
+          row.paper_slug
+      )
+    }
+
+    if (
+      row.authorship ===
+        'external' &&
+      publicPaperTitles.has(
+        row.title
+      )
+    ) {
+      fail(
+        'An external publication title also appears in list_public_papers(): ' +
+          row.title
+      )
+    }
+  }
+
   const software =
     await api.listPublicSoftware()
 
@@ -824,8 +929,11 @@ async function liveCheck() {
     'paper_authors',
     'paper_links',
     'paper_members',
+    'paper_website_editors',
     'authors',
     'project_papers',
+    'external_publications',
+    'project_external_publications',
     'profiles',
     'dashboard_members',
     'access_invitations',

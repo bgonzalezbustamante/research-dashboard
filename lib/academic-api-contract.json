@@ -471,6 +471,89 @@
       ]
     },
     {
+      "id": "project-publications",
+      "title": "Project publications",
+      "summary": "Publications relevant to each explicitly public project: the owner’s own explicitly public Papers and curated external publications by other authors.",
+      "notExposed": [
+        "Internal project, Paper, external publication and owner IDs",
+        "Private Papers and private external publications",
+        "Internal association-row IDs, visibility settings and timestamps"
+      ],
+      "forbiddenFields": [
+        "id",
+        "project_id",
+        "paper_id",
+        "external_publication_id",
+        "owner_id",
+        "visibility",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_project_publications",
+          "signature": "list_public_project_publications()",
+          "kind": "Listing",
+          "purpose": "Lists the publications of every explicitly public project, distinguishing the owner’s own Papers from external publications.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "project_slug",
+              "type": "text"
+            },
+            {
+              "name": "authorship",
+              "type": "text"
+            },
+            {
+              "name": "paper_slug",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "authors",
+              "type": "text[]"
+            },
+            {
+              "name": "venue",
+              "type": "text"
+            },
+            {
+              "name": "publication_date",
+              "type": "date"
+            },
+            {
+              "name": "publication_year",
+              "type": "integer"
+            },
+            {
+              "name": "doi_url",
+              "type": "text"
+            },
+            {
+              "name": "publication_url",
+              "type": "text"
+            },
+            {
+              "name": "language",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "authorship is own for the owner’s explicitly public Papers and external for publications by other authors. Own rows match each project’s publication_slugs exactly and carry the Paper slug; external rows always have paper_slug null.",
+            "External publications never appear in list_public_papers() or get_public_paper(), so consumers that list the owner’s own publications are unaffected.",
+            "External rows always have a publication_year; publication_date is optional and, when present, falls in that year. Own rows derive publication_year from publication_date and may have both null.",
+            "Rows are ordered by project_slug, then most recent publication first, then title."
+          ]
+        }
+      ]
+    },
+    {
       "id": "conferences",
       "title": "Conferences",
       "summary": "Public presentation metadata for conference records. The current RPC has no per-record visibility flag: every stored conference presentation is included in this curated field-level contract.",
@@ -1270,6 +1353,15 @@
       "values": [
         "public",
         "private"
+      ]
+    },
+    {
+      "id": "publication-authorship",
+      "label": "Publication authorship",
+      "sourceFunction": "list_public_project_publications",
+      "values": [
+        "own",
+        "external"
       ]
     }
   ]

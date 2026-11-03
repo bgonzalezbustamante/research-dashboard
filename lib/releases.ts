@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.3',
     summary:
-      'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues.',
+      'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues and lets Projects present relevant work by other authors.',
     sections: [
       {
         title: 'Access',
@@ -29,6 +29,13 @@ export const releases: ReleaseNote[] = [
           'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can edit just the public Website content, such as the citation and Key highlight, without access to the wider Dashboard.',
           'Visibility, public addresses and Featured status stay with the Dashboard Owner, and every Website content edit by a colleague is recorded in the Access audit trail.',
           'Existing Coauthor assignments carry over as Website Editor assignments, so nobody needs a new invitation.',
+        ],
+      },
+      {
+        title: 'Project publications',
+        items: [
+          'Projects can now list relevant publications by other authors alongside your own papers, kept separate from your Papers, Planning and analytics.',
+          'Each external publication stays Private until you make it Public, and a new public feed shares a Project’s own and external publications with the Academic Website without changing any existing public data.',
         ],
       },
     ],
