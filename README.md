@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.3 "Bold Ridge" — in development**
+**v1.0.0-rc.3 "Bold Ridge"**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, software, working hours, planning, collaboration, and cross-module analytics. It is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
@@ -63,4 +63,4 @@ npm audit --omit=dev
 gitleaks git .
 ```
 
-For rc.2, the production dependency audit reported zero vulnerabilities and the final full-history Gitleaks scan covered 655 commits (approximately 2.64 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
+For rc.3, the production dependency audit reported zero vulnerabilities after upgrading Next.js to 16.4.4, and the final full-history Gitleaks scan covered 791 commits (approximately 2.93 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.

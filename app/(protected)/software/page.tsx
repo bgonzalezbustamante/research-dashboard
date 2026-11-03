@@ -274,7 +274,7 @@ function SoftwareFields({
           }
           name="current_version"
           maxLength={100}
-          placeholder="v1.0.0-rc.2"
+          placeholder="v1.0.0"
           defaultValue={
             item?.current_version ??
             ''

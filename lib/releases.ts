@@ -17,8 +17,8 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.3',
     codename: 'Bold Ridge',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
+    status: 'Release candidate',
+    releasedOn: '3 Nov 2026',
     comparison: 'Changes since rc.2',
     summary:
       'Bold Ridge brings the Catholic Calendar into the Dashboard Home, sharpens Paper status and citation views, and makes Hours labels safer to maintain over time.',
@@ -28,20 +28,20 @@ export const releases: ReleaseNote[] = [
         items: [
           'The Dashboard Home now gives the Catholic Calendar its own compact section using the standalone Calendar’s composed display style.',
           'Compact controls let the Academic Website turn its Calendar feature on or off and independently test unusually long displays.',
+          'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
         ],
       },
       {
         title: 'Public integration',
         items: [
           'Both Calendar controls are available through the Academic API without exposing private Dashboard settings.',
-          'Two public data feeds now share milestone and planning capacity information, including full Paper titles and FlowSavvy milestone tracking. Private Paper titles are intentionally public here, while internal notes and identifiers remain hidden.',
-          'Home is less repetitive after removing four summary mini-cards, and Teaching season now uses the same compact On/Off control style.',
-          'Conference records now support Guest lectures and use clearer coloured event labels.',
+          'Two public data feeds now share milestone and planning capacity information, including full Paper titles and FlowSavvy milestone tracking. Private Paper titles are intentionally public here, while internal notes and identifiers remain hidden; each Paper’s Milestones section now says so.',
         ],
       },
       {
         title: 'Papers and Hours',
         items: [
+          'Conference records now support Guest lectures and use clearer coloured event labels.',
           'Paper status cards now focus on the five main workflow groups; Paper milestones come before submission history, publication-index filters include Dataset, and Papers can be sorted by Google Scholar citations.',
           'Papers, Projects, Conferences and Teaching now have easier page navigation, with searches and relevant filters for browsing growing records.',
           'Working Hours now shows the matching Penguin Timeline state for the selected day, while activity and location labels use shorter paginated lists and can be safely consolidated; recorded sessions move to the new canonical activity or location and old labels remain read-only historical records.',
@@ -51,7 +51,8 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Reliability and maintenance',
         items: [
-          'Patched newly reported production dependency issues and re-ran the public-data, build, audit and secret-scanning checks successfully.',
+          'Patched newly reported production dependency issues, including critical Next.js security fixes, and re-ran the public-data, build, audit and secret-scanning checks successfully.',
+          'Tightened access checks so Coauthors cannot change a Paper’s language, and recorded explicitly that private Dashboard functions cannot be called anonymously.',
           'The known development-only linting advisory remains isolated from production rather than applying npm\'s breaking forced downgrade.',
         ],
       },
