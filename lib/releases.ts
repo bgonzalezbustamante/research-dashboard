@@ -15,9 +15,28 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.4',
+    codename: 'Velvet Torch',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.3',
+    summary:
+      'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues.',
+    sections: [
+      {
+        title: 'Access',
+        items: [
+          'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can edit just the public Website content, such as the citation and Key highlight, without access to the wider Dashboard.',
+          'Visibility, public addresses and Featured status stay with the Dashboard Owner, and every Website content edit by a colleague is recorded in the Access audit trail.',
+          'Existing Coauthor assignments carry over as Website Editor assignments, so nobody needs a new invitation.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.3',
     codename: 'Bold Ridge',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '3 Nov 2026',
     comparison: 'Changes since rc.2',
     summary:

@@ -26,10 +26,9 @@ type DashboardMemberRow = {
   role: string
 }
 
-type PaperMemberRow = {
+type WebsiteEditorRow = {
   paper_id: string
   user_id: string
-  role: string
 }
 
 type InvitationPaperRow = {
@@ -74,9 +73,15 @@ function auditEventLabel(
     case 'viewer_revoked':
       return 'Viewer access removed'
     case 'coauthor_granted':
-      return 'Coauthor access granted'
+      return 'Coauthor access granted (retired role)'
     case 'coauthor_revoked':
-      return 'Coauthor access removed'
+      return 'Coauthor access removed (retired role)'
+    case 'website_editor_granted':
+      return 'Website Editor access granted'
+    case 'website_editor_revoked':
+      return 'Website Editor access removed'
+    case 'website_content_updated':
+      return 'Website content updated'
     case 'invitation_created':
       return 'Invitation created'
     case 'invitation_sent':
@@ -141,7 +146,7 @@ export default async function AccessPage({
     profilesResult,
     dashboardMembersResult,
     papersResult,
-    paperMembersResult,
+    websiteEditorsResult,
     invitationsResult,
     invitationPapersResult,
     auditResult,
@@ -172,9 +177,8 @@ export default async function AccessPage({
       }),
 
     supabase
-      .from('paper_members')
-      .select('paper_id, user_id, role')
-      .eq('role', 'coauthor'),
+      .from('paper_website_editors')
+      .select('paper_id, user_id'),
 
     supabase
       .from('access_invitations')
@@ -227,9 +231,9 @@ export default async function AccessPage({
     )
   }
 
-  if (paperMembersResult.error) {
+  if (websiteEditorsResult.error) {
     throw new Error(
-      `Could not load paper memberships: ${paperMembersResult.error.message}`
+      `Could not load Website Editor assignments: ${websiteEditorsResult.error.message}`
     )
   }
 
@@ -260,8 +264,8 @@ export default async function AccessPage({
   const papers =
     (papersResult.data ?? []) as PaperRow[]
 
-  const paperMembers =
-    (paperMembersResult.data ?? []) as PaperMemberRow[]
+  const websiteEditors =
+    (websiteEditorsResult.data ?? []) as WebsiteEditorRow[]
 
   const invitations =
     (invitationsResult.data ?? []) as AccessInvitationRow[]
@@ -312,22 +316,18 @@ export default async function AccessPage({
         )
     )
 
-  const coauthorPaperIdsByUser =
+  const websiteEditorPaperIdsByUser =
     new Map<string, Set<string>>()
 
-  for (const member of paperMembers) {
-    if (member.role !== 'coauthor') {
-      continue
-    }
-
+  for (const member of websiteEditors) {
     const existing =
-      coauthorPaperIdsByUser.get(
+      websiteEditorPaperIdsByUser.get(
         member.user_id
       ) ?? new Set<string>()
 
     existing.add(member.paper_id)
 
-    coauthorPaperIdsByUser.set(
+    websiteEditorPaperIdsByUser.set(
       member.user_id,
       existing
     )
@@ -360,9 +360,9 @@ export default async function AccessPage({
       )
     )
 
-  const coauthorAccountIds =
+  const websiteEditorAccountIds =
     new Set(
-      [...coauthorPaperIdsByUser.entries()]
+      [...websiteEditorPaperIdsByUser.entries()]
         .filter(
           ([, paperIds]) =>
             paperIds.size > 0
@@ -374,7 +374,7 @@ export default async function AccessPage({
     accounts.filter(
       (profile) =>
         viewerIds.has(profile.id) &&
-        coauthorAccountIds.has(
+        websiteEditorAccountIds.has(
           profile.id
         )
     ).length
@@ -386,7 +386,7 @@ export default async function AccessPage({
     <div>
       <PageHeader
         title="Access management"
-        description="Manage existing collaborator accounts, then invite new Viewers and paper-scoped Coauthors."
+        description="Manage existing collaborator accounts, then invite new Viewers and paper-scoped Website Editors."
       />
 
       {!invitationStatus && params.notice && (
@@ -422,16 +422,16 @@ export default async function AccessPage({
 
         <Card>
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Coauthors
+            Website Editors
           </div>
           <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
-            {coauthorAccountIds.size}
+            {websiteEditorAccountIds.size}
           </div>
         </Card>
 
         <Card>
           <div className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
-            Viewer + Coauthor
+            Viewer + Website Editor
           </div>
           <div className="mt-1 font-serif text-2xl font-semibold text-oxford-blue">
             {combinedCount}
@@ -477,7 +477,7 @@ export default async function AccessPage({
           Accounts
         </h2>
         <p className="mt-1 text-sm leading-6 text-oxford-ash">
-          Edit account names, delete obsolete accounts, and manage dashboard-wide Viewer access and paper-scoped Coauthor assignments.
+          Edit account names, delete obsolete accounts, and manage dashboard-wide Viewer access and paper-scoped Website Editor assignments.
         </p>
       </div>
 
@@ -488,7 +488,7 @@ export default async function AccessPage({
               No active collaborator accounts
             </h3>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-oxford-ash">
-              Use the invitation form below to add a new Viewer, Coauthor, or combined account.
+              Use the invitation form below to add a new Viewer, Website Editor, or combined account.
             </p>
           </div>
         </Card>
@@ -503,7 +503,7 @@ export default async function AccessPage({
               }
               assignedPaperIds={[
                 ...(
-                  coauthorPaperIdsByUser.get(
+                  websiteEditorPaperIdsByUser.get(
                     profile.id
                   ) ?? new Set<string>()
                 ),
@@ -547,7 +547,7 @@ export default async function AccessPage({
               Pending invitations
             </h3>
             <p className="mt-1 text-sm leading-6 text-oxford-ash">
-              These accounts have not completed onboarding, so their Viewer and Coauthor permissions are not active yet.
+              These accounts have not completed onboarding, so their Viewer and Website Editor permissions are not active yet.
             </p>
           </div>
 

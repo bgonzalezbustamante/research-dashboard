@@ -5,6 +5,7 @@ import ListPagination from '@/components/ui/list-pagination'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 type PaperStatus =
@@ -667,6 +668,8 @@ function getLatestGoogleScholarCitations(
 export default async function PapersPage({
   searchParams,
 }: PapersPageProps) {
+  await requireDashboardAccess()
+
   const params =
     await searchParams
 

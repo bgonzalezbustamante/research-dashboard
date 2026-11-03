@@ -6,6 +6,20 @@
 
 - Started `v1.0.0-rc.4 "Velvet Torch"` to replace Coauthor access with a restricted Website Editor role and to let Projects publish relevant external research outputs through the Academic API.
 
+### Code changes
+
+`Access redesign: Website Editor`
+
+- Replaced the paper-scoped Coauthor role with a restricted **Website Editor** role. Website Editors see only their assigned Papers, with read-only title, authors, abstract and Website status, and can edit only the Website card content: publication index, citation, and Key highlight text, image filename, alt text and caption. Visibility, public slug and Featured remain Owner-only.
+- Added the `paper_website_editors` assignment table. No existing Paper, Dashboard or profile policy references it, so an assignment grants nothing beyond four dedicated RPCs: `list_my_website_editor_papers()`, `get_website_editor_paper(uuid)`, `update_paper_website_content(...)` (content columns only, re-checking the assignment and refusing archived Papers) and the Owner-only `set_website_editor_paper_assignments(uuid, uuid[])`. All four are closed to anonymous callers.
+- Added `website_editor_granted`, `website_editor_revoked` and `website_content_updated` audit events; Website content edits by colleagues now appear in the Access audit trail.
+- Added a dedicated Website area for editors at `/website` and `/website/[paperId]`, with a minimal navigation shell and a "Website Editor" badge. The Website content inputs are shared with the Owner's Website card through `components/papers/website-content-fields.tsx` and `lib/website/paper-content.ts`.
+- Confined accounts without Dashboard membership to `/website`, `/account` and `/onboarding` in the request proxy, and added server-side Dashboard guards to the Papers list and Paper workspaces, which previously relied on database policies alone.
+- Converted existing Coauthor assignments to Website Editor assignments, recorded with a `coauthor_conversion` audit source. Invitations, onboarding, account cards, account deletion and the Access summary now use Website Editor assignments.
+- Removed the Coauthor title and collaboration editor, the Coauthor paper shortcut and their server actions; Paper notes are Owner-only.
+- Staged the retirement of Coauthor access: the additive migration keeps the rc.3 app working, while `supabase/release-window/retire_coauthor_access.sql` replaces every collaborator write policy with an Owner-only policy, removes Coauthor rows, functions and the Coauthor field guard, and switches invitations to Website Editor only. It is applied in the rc.4 release window.
+- Added `supabase/tests/rc4_access_policies.sql`, a rolled-back SQL suite that impersonates QA accounts to verify Website Editor isolation, Viewer read-only access and the anonymous function and table surface.
+
 ## v1.0.0-rc.3 "Bold Ridge"
 
 Released 3 Nov 2026.

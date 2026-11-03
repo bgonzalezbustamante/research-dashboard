@@ -142,14 +142,14 @@ export async function completeOnboarding(
     (acceptanceData ?? {}) as AcceptanceResult
 
   const destination =
-    acceptance.destination === '/papers'
-      ? '/papers'
+    acceptance.destination === '/website'
+      ? '/website'
       : '/dashboard'
 
   revalidatePath('/', 'layout')
   revalidatePath('/dashboard/access')
   revalidatePath('/dashboard')
-  revalidatePath('/papers')
+  revalidatePath('/website')
 
   redirect(destination)
 }

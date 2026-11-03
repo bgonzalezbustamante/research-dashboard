@@ -5,16 +5,19 @@ import {
   type NextRequest,
 } from 'next/server'
 
-function isDashboardOnlyPath(
+// Accounts without Dashboard membership (Website Editors, and invitees who
+// have not finished onboarding) may only reach these protected paths.
+function isRestrictedAccountPath(
   pathname: string
 ) {
   return (
-    pathname === '/dashboard' ||
-    pathname.startsWith('/dashboard/') ||
-    pathname === '/hours' ||
-    pathname.startsWith('/hours/') ||
-    pathname === '/planning' ||
-    pathname.startsWith('/planning/')
+    pathname === '/website' ||
+    pathname.startsWith('/website/') ||
+    pathname === '/account' ||
+    pathname.startsWith('/account/') ||
+    pathname === '/onboarding' ||
+    pathname.startsWith('/onboarding/') ||
+    pathname === '/access-denied'
   )
 }
 
@@ -129,7 +132,10 @@ export async function updateSession(
 
   if (
     typeof userId === 'string' &&
-    isDashboardOnlyPath(
+    !isPublicPath(
+      request.nextUrl.pathname
+    ) &&
+    !isRestrictedAccountPath(
       request.nextUrl.pathname
     )
   ) {
@@ -153,7 +159,7 @@ export async function updateSession(
 
       return NextResponse.redirect(
         new URL(
-          '/papers',
+          '/website',
           siteUrl
         )
       )

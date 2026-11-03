@@ -64,7 +64,7 @@ export default async function OnboardingPage({
   if (!invitationData) {
     const [
       dashboardMembershipResult,
-      coauthorMembershipResult,
+      websiteEditorResult,
     ] = await Promise.all([
       supabase
         .from('dashboard_members')
@@ -73,10 +73,9 @@ export default async function OnboardingPage({
         .maybeSingle(),
 
       supabase
-        .from('paper_members')
+        .from('paper_website_editors')
         .select('paper_id')
         .eq('user_id', userId)
-        .eq('role', 'coauthor')
         .limit(1),
     ])
 
@@ -87,10 +86,10 @@ export default async function OnboardingPage({
     }
 
     if (
-      (coauthorMembershipResult.data ?? [])
+      (websiteEditorResult.data ?? [])
         .length > 0
     ) {
-      redirect('/papers')
+      redirect('/website')
     }
   }
 
@@ -161,7 +160,7 @@ export default async function OnboardingPage({
 
                     {invitation.papers.length > 0 && (
                       <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-                        Coauthor · {invitation.papers.length}{' '}
+                        Website Editor · {invitation.papers.length}{' '}
                         {invitation.papers.length === 1
                           ? 'paper'
                           : 'papers'}

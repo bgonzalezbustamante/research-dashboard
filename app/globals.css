@@ -70,19 +70,19 @@ select {
 
 /*
  * Non-owner accounts are read-only by default. GET forms remain
- * available for navigation and filtering. Paper-scoped coauthor forms
- * opt in with data-coauthor-editable="true"; personal account forms
+ * available for navigation and filtering. Website Editor forms
+ * opt in with data-website-editable="true"; personal account forms
  * opt in with data-self-service="true".
  */
-[data-app-read-only="true"] main form:not([method="get" i]):not([data-coauthor-editable="true"]):not([data-self-service="true"]),
-[data-app-read-only="true"] main details:has(form:not([method="get" i]):not([data-coauthor-editable="true"]):not([data-self-service="true"])),
+[data-app-read-only="true"] main form:not([method="get" i]):not([data-website-editable="true"]):not([data-self-service="true"]),
+[data-app-read-only="true"] main details:has(form:not([method="get" i]):not([data-website-editable="true"]):not([data-self-service="true"])),
 [data-app-read-only="true"] main a[href="/papers/new"],
 [data-app-read-only="true"] main a[href^="/papers/"][href$="/edit"] {
   display: none !important;
 }
 
 /*
- * Coauthor-only accounts do not have access to personal Hours data.
+ * Accounts without Dashboard membership do not have access to personal Hours data.
  * Hide dashboard-derived paper-hours displays rather than presenting
  * unavailable work-session rows as zero hours.
  */

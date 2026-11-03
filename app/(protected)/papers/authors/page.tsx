@@ -395,7 +395,7 @@ export default async function AuthorDirectoryPage({
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-oxford-charcoal">
-          Paper authors are bibliographic identities, not permissions. Renaming an author updates the displayed name everywhere that author is used. An author can be deleted only when no paper references the record. New paper and coauthor edits now reuse this dashboard-wide directory automatically.
+          Paper authors are bibliographic identities, not permissions. Renaming an author updates the displayed name everywhere that author is used. An author can be deleted only when no paper references the record. New paper edits reuse this dashboard-wide directory automatically.
         </p>
       </Card>
 
