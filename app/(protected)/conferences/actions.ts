@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 
 import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
+import { isValidHttpUrl } from '@/lib/validation/url'
 
 const allowedPresentationTypes =
   new Set([
@@ -103,22 +104,6 @@ function getOptionalDate(
   )
     ? value
     : null
-}
-
-function isValidHttpUrl(
-  value: string
-) {
-  try {
-    const url =
-      new URL(value)
-
-    return (
-      url.protocol === 'http:' ||
-      url.protocol === 'https:'
-    )
-  } catch {
-    return false
-  }
 }
 
 function conferencesRedirect(

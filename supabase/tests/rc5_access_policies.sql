@@ -1,4 +1,5 @@
--- Velvet Torch rc.4 access policy suite.
+-- Access policy suite, extended for Ancient Glacier rc.5 (first written for
+-- Velvet Torch rc.4).
 --
 -- Run the whole file in the Supabase SQL editor. It impersonates temporary QA
 -- accounts and always ends with ROLLBACK, so nothing it writes persists.
@@ -13,9 +14,8 @@
 --   paper_id      a Paper assigned to the editor (writes are rolled back)
 --   other_paper   any Paper NOT assigned to the editor
 --
--- Before the release-window migration retires Coauthor access, accepted
--- invitations also create legacy Coauthor rows; the suite removes the
--- editor's Coauthor rows inside the transaction to test the rc.4 state.
+-- Coauthor access was retired in rc.4; the suite still removes any legacy
+-- Coauthor rows for the editor inside the transaction, which is now a no-op.
 
 begin;
 
@@ -709,6 +709,211 @@ begin
 end;
 $$;
 
+-- rc.5: link URL rules on the older tables ------------------------------------------
+
+do $$
+begin
+  if exists (select 1 from public.paper_links) then
+    begin
+      update public.paper_links
+      set url = 'https://'
+      where id = (select id from public.paper_links limit 1);
+      raise exception 'A Paper link without a host was stored';
+    exception
+      when check_violation then
+        null;
+    end;
+  end if;
+
+  if exists (
+    select 1
+    from public.conference_presentations
+  ) then
+    begin
+      update public.conference_presentations
+      set url = 'https://example.org/a b'
+      where id = (select id from public.conference_presentations limit 1);
+      raise exception 'A conference URL containing whitespace was stored';
+    exception
+      when check_violation then
+        null;
+    end;
+  end if;
+
+  if exists (select 1 from public.software_items) then
+    begin
+      update public.software_items
+      set repository_url = 'javascript:alert(1)'
+      where id = (select id from public.software_items limit 1);
+      raise exception 'A non-HTTP(S) Software repository URL was stored';
+    exception
+      when check_violation then
+        null;
+    end;
+  end if;
+end;
+$$;
+
+-- rc.5: pending Website Editor suggestions are capped at 20 ------------------------
+
+do $$
+declare
+  v record;
+  v_pending integer;
+  i integer;
+begin
+  select * into v from pg_temp.rc4_qa;
+
+  perform set_config(
+    'request.jwt.claims',
+    json_build_object('sub', v.editor_id, 'role', 'authenticated')::text,
+    true
+  );
+  perform set_config('role', 'authenticated', true);
+
+  select count(*)::integer
+    into v_pending
+  from public.list_my_external_publications()
+  where visibility = 'private';
+
+  for i in 1 .. greatest(0, 20 - v_pending) loop
+    perform public.create_my_external_publication(
+      'rc.5 QA cap ' || i,
+      array['A. Partner'],
+      2025
+    );
+  end loop;
+
+  begin
+    perform public.create_my_external_publication(
+      'rc.5 QA over the cap',
+      array['A. Partner'],
+      2025
+    );
+    raise exception 'Editor exceeded the cap of 20 pending suggestions';
+  exception
+    when configuration_limit_exceeded then
+      null;
+  end;
+
+  perform set_config('role', 'none', true);
+end;
+$$;
+
+-- rc.5: the Owner's own publication changes are audited ----------------------------
+
+do $$
+declare
+  v_owner_id uuid;
+  v_id uuid;
+begin
+  select dm.owner_id
+    into v_owner_id
+  from public.dashboard_members dm
+  where dm.role = 'owner'
+    and dm.user_id = dm.owner_id
+  limit 1;
+
+  perform set_config(
+    'request.jwt.claims',
+    json_build_object('sub', v_owner_id, 'role', 'authenticated')::text,
+    true
+  );
+  perform set_config('role', 'authenticated', true);
+
+  v_id := public.create_external_publication(
+    'rc.5 QA Owner publication',
+    array['A. Partner'],
+    2025
+  );
+
+  -- A save that changes nothing records no event.
+  perform public.update_external_publication(
+    v_id,
+    'rc.5 QA Owner publication',
+    array['A. Partner'],
+    2025
+  );
+
+  perform public.update_external_publication(
+    v_id,
+    'rc.5 QA Owner publication (edited)',
+    array['A. Partner'],
+    2025,
+    null,
+    null,
+    'https://doi.org/10.1/rc5'
+  );
+
+  perform public.update_external_publication(
+    v_id,
+    'rc.5 QA Owner publication (edited)',
+    array['A. Partner'],
+    2025,
+    null,
+    null,
+    'https://doi.org/10.1/rc5',
+    null,
+    null,
+    'public',
+    'rc5-qa-owner-publication'
+  );
+
+  perform public.delete_external_publication(v_id);
+
+  perform set_config('role', 'none', true);
+
+  if (
+    select count(*)
+    from public.access_audit_log
+    where event_type = 'external_publication_created'
+      and actor_id = v_owner_id
+      and details ->> 'external_publication_id' = v_id::text
+  ) <> 1 then
+    raise exception 'Owner publication creation was not audited once';
+  end if;
+
+  if (
+    select count(*)
+    from public.access_audit_log
+    where event_type = 'external_publication_updated'
+      and details ->> 'external_publication_id' = v_id::text
+  ) <> 1
+  or not exists (
+    select 1
+    from public.access_audit_log
+    where event_type = 'external_publication_updated'
+      and details ->> 'external_publication_id' = v_id::text
+      and details -> 'changed_fields' ? 'title'
+      and details -> 'changed_fields' ? 'doi_url'
+      and details -> 'previous' ->> 'title' = 'rc.5 QA Owner publication'
+  ) then
+    raise exception 'Owner edits were not audited exactly once with their previous values';
+  end if;
+
+  if not exists (
+    select 1
+    from public.access_audit_log
+    where event_type = 'external_publication_published'
+      and details ->> 'external_publication_id' = v_id::text
+      and details -> 'changed_fields' ? 'visibility'
+      and details -> 'changed_fields' ? 'slug'
+  ) then
+    raise exception 'Owner publication was not audited as published';
+  end if;
+
+  if not exists (
+    select 1
+    from public.access_audit_log
+    where event_type = 'external_publication_deleted'
+      and details ->> 'external_publication_id' = v_id::text
+      and details -> 'previous' ->> 'title' = 'rc.5 QA Owner publication (edited)'
+  ) then
+    raise exception 'Owner deletion was not audited with the deleted values';
+  end if;
+end;
+$$;
+
 -- Anonymous surface ---------------------------------------------------------------------
 
 do $$
@@ -798,6 +1003,6 @@ begin
 end;
 $$;
 
-select 'rc.4 access policy suite passed' as result;
+select 'rc.5 access policy suite passed' as result;
 
 rollback;

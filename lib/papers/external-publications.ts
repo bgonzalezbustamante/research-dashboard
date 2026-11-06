@@ -1,3 +1,5 @@
+import { isValidHttpUrl } from '@/lib/validation/url'
+
 // Values mirror the external_publications_language_check constraint, which
 // reuses the Paper language vocabulary.
 export const externalPublicationLanguages = [
@@ -26,6 +28,10 @@ export type ExternalPublicationRow = {
   editor_edited_at?: string | null
   updated_at?: string | null
 }
+
+// Mirrors the cap in create_my_external_publication: a Website Editor may
+// have at most this many publications awaiting review.
+export const editorPendingPublicationLimit = 20
 
 export type ExternalPublicationCollectionRow = {
   id: string
@@ -102,34 +108,6 @@ function getOptionalText(
   return value.length > 0
     ? value
     : null
-}
-
-// Mirrors the external_publications URL constraints: an absolute HTTP(S)
-// URL with a host and no whitespace.
-const httpUrlPattern =
-  /^https?:\/\/[^\s/?#]+([/?#]\S*)?$/i
-
-function isValidHttpUrl(
-  value: string
-) {
-  if (
-    !httpUrlPattern.test(value)
-  ) {
-    return false
-  }
-
-  try {
-    const url =
-      new URL(value)
-
-    return (
-      (url.protocol === 'http:' ||
-        url.protocol === 'https:') &&
-      url.hostname.length > 0
-    )
-  } catch {
-    return false
-  }
 }
 
 function getUuidList(

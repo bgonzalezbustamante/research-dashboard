@@ -32,6 +32,14 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
+        title: 'Safeguards',
+        items: [
+          'Links on papers, conferences and software must now be complete web addresses, checked by the database as well as the forms.',
+          'Website Editors can have up to 20 suggestions awaiting review at a time, and see how many they have.',
+          'Your own changes to other people’s papers, including approvals and deletions, now appear in the Access audit trail, which also shows which details each edit changed.',
+        ],
+      },
+      {
         title: 'Look and feel',
         items: [
           'Page introductions, descriptions and messages now use the full width of the page, and the public release notes and Academic API pages match the Dashboard’s width.',
