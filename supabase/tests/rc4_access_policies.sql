@@ -77,6 +77,24 @@ begin
 end;
 $$;
 
+-- Snapshot Owner-only Website fields so the editor write can be compared.
+alter table pg_temp.rc4_qa
+  add column highlight_text_before text,
+  add column highlight_image_before text,
+  add column visibility_before text,
+  add column slug_before text,
+  add column featured_before boolean;
+
+update pg_temp.rc4_qa q
+set
+  highlight_text_before = m.highlight_text,
+  highlight_image_before = m.highlight_image_filename,
+  visibility_before = m.visibility,
+  slug_before = m.slug,
+  featured_before = m.featured
+from public.paper_public_metadata m
+where m.paper_id = q.paper_id;
+
 -- Website Editor isolation ----------------------------------------------------------
 
 do $$
@@ -212,26 +230,18 @@ begin
     raise exception 'get_website_editor_paper returned an unassigned paper';
   end if;
 
-  -- The content RPC works on the assigned Paper only.
+  -- The citation RPC works on the assigned Paper only.
   perform public.update_paper_website_content(
     v.paper_id,
     'Working paper',
-    'rc.4 QA citation',
-    'rc.4 QA highlight',
-    null,
-    null,
-    null
+    'rc.4 QA citation'
   );
 
   begin
     perform public.update_paper_website_content(
       v.other_paper,
       null,
-      'rc.4 QA citation',
-      null,
-      null,
-      null,
-      null
+      'rc.4 QA citation'
     );
     raise exception 'Editor updated an unassigned paper';
   exception
@@ -254,7 +264,7 @@ begin
 end;
 $$;
 
--- The content RPC changed only content fields -----------------------------------
+-- The citation RPC changed only the citation fields -----------------------------
 
 do $$
 declare
@@ -268,9 +278,16 @@ begin
   where paper_id = v.paper_id;
 
   if m.citation is distinct from 'rc.4 QA citation'
-     or m.highlight_text is distinct from 'rc.4 QA highlight'
      or m.publication_index is distinct from 'Working paper' then
-    raise exception 'Website content RPC did not store the content fields';
+    raise exception 'Website citation RPC did not store the citation fields';
+  end if;
+
+  if m.highlight_text is distinct from v.highlight_text_before
+     or m.highlight_image_filename is distinct from v.highlight_image_before
+     or m.visibility is distinct from v.visibility_before
+     or m.slug is distinct from v.slug_before
+     or m.featured is distinct from v.featured_before then
+    raise exception 'Website citation RPC changed Owner-only Website fields';
   end if;
 
   if not exists (
@@ -327,13 +344,159 @@ begin
     perform public.update_paper_website_content(
       v.paper_id,
       null,
-      'viewer write',
-      null,
-      null,
-      null,
-      null
+      'viewer write'
     );
     raise exception 'Viewer updated Website content';
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  begin
+    perform public.create_my_external_publication(
+      'Viewer submission',
+      array['A. Viewer'],
+      2026
+    );
+    raise exception 'Viewer submitted an external publication';
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  perform set_config('role', 'none', true);
+end;
+$$;
+
+-- Website Editor external publications ---------------------------------------------
+
+do $$
+declare
+  v record;
+  v_id uuid;
+  v_count bigint;
+  v_rows bigint;
+  e record;
+begin
+  select * into v from pg_temp.rc4_qa;
+
+  perform set_config(
+    'request.jwt.claims',
+    json_build_object('sub', v.editor_id, 'role', 'authenticated')::text,
+    true
+  );
+  perform set_config('role', 'authenticated', true);
+
+  v_id := public.create_my_external_publication(
+    'rc.4 QA external publication',
+    array['A. Partner', ' ', 'B. Partner'],
+    2025,
+    null,
+    'QA Venue',
+    null,
+    'https://example.org/rc4-qa',
+    'English'
+  );
+
+  select count(*) into v_count
+  from public.list_my_external_publications()
+  where id = v_id
+    and visibility = 'private'
+    and authors = array['A. Partner', 'B. Partner'];
+
+  if v_count <> 1 then
+    raise exception 'Editor publication was not stored Private with normalised authors';
+  end if;
+
+  -- No direct table writes or Project links.
+  begin
+    update public.external_publications
+    set visibility = 'public'
+    where id = v_id;
+    get diagnostics v_rows = row_count;
+  exception
+    when insufficient_privilege then
+      v_rows := 0;
+  end;
+
+  if v_rows <> 0 then
+    raise exception 'Editor published an external publication directly';
+  end if;
+
+  begin
+    insert into public.project_external_publications (
+      project_id,
+      external_publication_id
+    )
+    select p.id, v_id
+    from public.projects p
+    limit 1;
+    raise exception 'Editor linked an external publication to a Project';
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  perform public.update_my_external_publication(
+    v_id,
+    'rc.4 QA external publication (edited)',
+    array['A. Partner'],
+    2025
+  );
+
+  perform set_config('role', 'none', true);
+
+  select * into e
+  from public.external_publications
+  where id = v_id;
+
+  if e.created_by is distinct from v.editor_id
+     or e.visibility <> 'private'
+     or e.title <> 'rc.4 QA external publication (edited)' then
+    raise exception 'Editor publication has the wrong owner, visibility or title';
+  end if;
+
+  if exists (
+    select 1
+    from public.project_external_publications
+    where external_publication_id = v_id
+  ) then
+    raise exception 'Editor publication gained Project links';
+  end if;
+
+  if not exists (
+    select 1
+    from public.access_audit_log
+    where event_type = 'external_publication_submitted'
+      and target_user_id = v.editor_id
+      and details ->> 'external_publication_id' = v_id::text
+  ) then
+    raise exception 'Editor publication submission was not audited';
+  end if;
+
+  -- Once the Owner publishes it, the editor can no longer change it.
+  update public.external_publications
+  set visibility = 'public'
+  where id = v_id;
+
+  perform set_config('role', 'authenticated', true);
+
+  begin
+    perform public.update_my_external_publication(
+      v_id,
+      'Editor change after publication',
+      array['A. Partner'],
+      2025
+    );
+    raise exception 'Editor edited a published external publication';
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
+  begin
+    perform public.delete_my_external_publication(v_id);
+    raise exception 'Editor deleted a published external publication';
   exception
     when insufficient_privilege then
       null;

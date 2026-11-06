@@ -1,4 +1,7 @@
-import WebsiteContentFields from '@/components/papers/website-content-fields'
+import {
+  WebsiteCitationFields,
+  WebsiteHighlightFields,
+} from '@/components/papers/website-content-fields'
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
 
@@ -165,7 +168,11 @@ export default function WebsiteSection({
                 </label>
               </div>
 
-              <WebsiteContentFields
+              <WebsiteCitationFields
+                values={metadata}
+              />
+
+              <WebsiteHighlightFields
                 values={metadata}
                 slug={metadata.slug}
               />

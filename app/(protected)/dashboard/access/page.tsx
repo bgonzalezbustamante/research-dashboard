@@ -81,7 +81,13 @@ function auditEventLabel(
     case 'website_editor_revoked':
       return 'Website Editor access removed'
     case 'website_content_updated':
-      return 'Website content updated'
+      return 'Website citation updated'
+    case 'external_publication_submitted':
+      return 'Publication submitted for review'
+    case 'external_publication_updated':
+      return 'Submitted publication edited'
+    case 'external_publication_deleted':
+      return 'Submitted publication deleted'
     case 'invitation_created':
       return 'Invitation created'
     case 'invitation_sent':
@@ -114,7 +120,10 @@ function auditEventContext(
     typeof entry.details.paper_short_title ===
     'string'
       ? entry.details.paper_short_title
-      : null
+      : typeof entry.details.title ===
+          'string'
+        ? entry.details.title
+        : null
 
   if (subject && paper) {
     return `${subject} · ${paper}`

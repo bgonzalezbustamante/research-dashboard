@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import PageHeader from '@/components/page-header'
-import WebsiteContentFields from '@/components/papers/website-content-fields'
+import { WebsiteCitationFields } from '@/components/papers/website-content-fields'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
@@ -77,23 +77,24 @@ export default async function WebsiteEditorPaperPage({
           href="/website"
           variant="ghost"
         >
-          ← All assigned papers
+          ← Website
         </ButtonLink>
       </div>
 
       <PageHeader
         title={paper.short_title}
-        description="Edit the public Website content for this paper. Changes appear on the Academic Website only while the Dashboard Owner keeps the paper Public."
+        description="Edit how this paper is cited and classified on the Academic Website. Changes appear publicly only while the Dashboard Owner keeps the paper Public."
+        wide
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+      <div className="space-y-6">
         <Card>
           <h2 className="font-serif text-xl font-semibold text-oxford-blue">
             Paper
           </h2>
 
-          <dl className="mt-4 space-y-4 text-sm">
-            <div>
+          <dl className="mt-4 grid gap-x-8 gap-y-4 text-sm md:grid-cols-2">
+            <div className="md:col-span-2">
               <dt className="font-medium text-oxford-charcoal">
                 Title
               </dt>
@@ -115,17 +116,6 @@ export default async function WebsiteEditorPaperPage({
                   : 'Not specified'}
               </dd>
             </div>
-
-            {paper.abstract && (
-              <div>
-                <dt className="font-medium text-oxford-charcoal">
-                  Abstract
-                </dt>
-                <dd className="mt-1 whitespace-pre-line leading-6 text-oxford-ash">
-                  {paper.abstract}
-                </dd>
-              </div>
-            )}
 
             <div>
               <dt className="font-medium text-oxford-charcoal">
@@ -149,20 +139,31 @@ export default async function WebsiteEditorPaperPage({
                 )}
               </dd>
             </div>
+
+            {paper.abstract && (
+              <div className="md:col-span-2">
+                <dt className="font-medium text-oxford-charcoal">
+                  Abstract
+                </dt>
+                <dd className="mt-1 whitespace-pre-line leading-6 text-oxford-ash">
+                  {paper.abstract}
+                </dd>
+              </div>
+            )}
           </dl>
 
           <p className="mt-5 text-xs leading-5 text-oxford-ash">
             Title, authors, abstract,
-            visibility, slug and
-            Featured status are
-            managed by the Dashboard
-            Owner.
+            visibility, public slug,
+            Featured status and Key
+            highlight are managed by
+            the Dashboard Owner.
           </p>
         </Card>
 
         <Card>
           <h2 className="font-serif text-xl font-semibold text-oxford-blue">
-            Website content
+            Citation
           </h2>
 
           {saveError && (
@@ -173,7 +174,7 @@ export default async function WebsiteEditorPaperPage({
 
           {saved && (
             <div className="mt-5 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-              Website content saved.
+              Citation saved.
             </div>
           )}
 
@@ -198,15 +199,14 @@ export default async function WebsiteEditorPaperPage({
               />
 
               <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                <WebsiteContentFields
+                <WebsiteCitationFields
                   values={paper}
-                  slug={paper.slug}
                 />
               </div>
 
               <div className="mt-5">
                 <Button type="submit">
-                  Save Website content
+                  Save citation
                 </Button>
               </div>
             </form>

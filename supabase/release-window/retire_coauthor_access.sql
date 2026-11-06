@@ -6,6 +6,21 @@
 -- push it, then deploy the rc.4 app. The rc.3 app still depends on the
 -- Coauthor paths removed here.
 --
+-- Precheck (read-only, run in the SQL editor first). Every function listed
+-- must be one this migration drops or redefines; anything else must be
+-- redefined here before applying:
+--
+--   select n.nspname, p.proname
+--   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+--   where p.prosrc ~ '(can_collaborate_paper|is_paper_coauthor|has_coauthor_access|can_assign_paper_coauthor)'
+--   order by 1, 2;
+--
+-- Repository history accounts for (some may not appear):
+-- private.can_collaborate_paper, private.can_use_author_for_paper,
+-- private.enforce_coauthor_paper_title_only, private.resolve_author_for_paper,
+-- public.set_coauthor_paper_assignments and
+-- public.update_coauthor_paper_collaboration.
+--
 -- Coauthor assignments become Website Editor assignments (backfilled again
 -- here for any created since the additive migration). The collaborator write
 -- policies on Paper tables are replaced with Owner-only policies under their
@@ -215,7 +230,103 @@ alter table public.paper_members
   add constraint paper_members_role_check
   check (role in ('owner', 'viewer'));
 
--- 4. Remove the Coauthor write paths and helpers --------------------------------
+-- 4a. Repoint author helpers away from can_collaborate_paper -------------------
+--
+-- plpgsql/SQL bodies are not dependency-tracked, so these must be redefined
+-- before can_collaborate_paper is dropped: the Owner's create/update Paper
+-- RPCs and the Owner paper_authors policies above depend on them.
+
+create or replace function private.can_use_author_for_paper(
+  p_paper_id uuid,
+  p_author_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.papers p
+    join public.authors a
+      on a.id = p_author_id
+    where p.id = p_paper_id
+      and a.owner_id = p.owner_id
+      and private.can_edit_paper(p.id)
+  );
+$$;
+
+create or replace function private.resolve_author_for_paper(
+  p_paper_id uuid,
+  p_full_name text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_owner_id uuid;
+  v_name text := btrim(p_full_name);
+  v_author_id uuid;
+begin
+  if v_user_id is null then
+    raise exception 'Authentication required'
+      using errcode = '42501';
+  end if;
+
+  if v_name is null or char_length(v_name) = 0 then
+    raise exception 'Author name is required'
+      using errcode = '22023';
+  end if;
+
+  select p.owner_id
+    into v_owner_id
+  from public.papers p
+  where p.id = p_paper_id
+    and private.can_edit_paper(p.id);
+
+  if v_owner_id is null then
+    raise exception 'Paper owner access required'
+      using errcode = '42501';
+  end if;
+
+  perform pg_advisory_xact_lock(
+    hashtextextended(
+      v_owner_id::text || ':' || lower(v_name),
+      0
+    )
+  );
+
+  select a.id
+    into v_author_id
+  from public.authors a
+  where a.owner_id = v_owner_id
+    and lower(btrim(a.full_name)) = lower(v_name)
+  order by a.created_at, a.id
+  limit 1;
+
+  if v_author_id is null then
+    insert into public.authors (
+      owner_id,
+      full_name,
+      created_by
+    )
+    values (
+      v_owner_id,
+      v_name,
+      v_user_id
+    )
+    returning id into v_author_id;
+  end if;
+
+  return v_author_id;
+end;
+$$;
+
+-- 4b. Remove the Coauthor write paths and helpers -------------------------------
 
 drop trigger if exists enforce_coauthor_paper_title_only
   on public.papers;

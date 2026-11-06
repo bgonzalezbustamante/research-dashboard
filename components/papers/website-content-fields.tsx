@@ -15,14 +15,15 @@ const inputClass =
 const labelClass =
   'mb-1 block text-sm font-medium text-oxford-charcoal'
 
-// Grid children for the Website content fields. Render inside a grid with
-// md:grid-cols-2 xl:grid-cols-4.
-export default function WebsiteContentFields({
+// Grid children for the citation fields shared by Owners and Website
+// Editors. Render inside a grid with md:grid-cols-2 xl:grid-cols-4.
+export function WebsiteCitationFields({
   values,
-  slug,
 }: {
-  values: PaperWebsiteContentValues
-  slug: string | null
+  values: Pick<
+    PaperWebsiteContentValues,
+    'publication_index' | 'citation'
+  >
 }) {
   return (
     <>
@@ -80,7 +81,21 @@ export default function WebsiteContentFields({
           className={inputClass}
         />
       </div>
+    </>
+  )
+}
 
+// Grid children for the Owner-only Key highlight fields used by the
+// Academic Website.
+export function WebsiteHighlightFields({
+  values,
+  slug,
+}: {
+  values: PaperWebsiteContentValues
+  slug: string | null
+}) {
+  return (
+    <>
       <div className="md:col-span-2 xl:col-span-4 border-t border-oxford-stone pt-5">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-serif text-lg font-semibold text-oxford-blue">

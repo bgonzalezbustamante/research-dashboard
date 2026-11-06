@@ -8,7 +8,10 @@ import {
   requireWebsiteEditorAccess,
 } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
-import { readPaperWebsiteContent } from '@/lib/website/paper-content'
+import {
+  readPaperWebsiteCitation,
+  readPaperWebsiteContent,
+} from '@/lib/website/paper-content'
 
 const allowedVisibilities = new Set([
   'private',
@@ -231,27 +234,28 @@ export async function updatePaperWebsiteContent(
     redirect('/website')
   }
 
-  const contentResult =
-    readPaperWebsiteContent(
+  const citationResult =
+    readPaperWebsiteCitation(
       formData
     )
 
-  if (!contentResult.content) {
+  if (!citationResult.content) {
     websiteEditorRedirect(
       paperId,
       'error',
-      contentResult.error ??
-        "The Website content is invalid."
+      citationResult.error ??
+        'The Website citation is invalid.'
     )
   }
 
   const { content } =
-    contentResult
+    citationResult
 
   const supabase =
     await createClient()
 
-  // The RPC re-checks the assignment and writes only the content fields.
+  // The RPC re-checks the assignment and writes only the citation and
+  // publication index; Key highlight fields stay Owner-only.
   const { error } =
     await supabase.rpc(
       'update_paper_website_content',
@@ -261,14 +265,6 @@ export async function updatePaperWebsiteContent(
           content.publication_index,
         p_citation:
           content.citation,
-        p_highlight_text:
-          content.highlight_text,
-        p_highlight_image_filename:
-          content.highlight_image_filename,
-        p_highlight_image_alt:
-          content.highlight_image_alt,
-        p_highlight_image_caption:
-          content.highlight_image_caption,
       }
     )
 

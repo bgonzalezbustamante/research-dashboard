@@ -53,7 +53,7 @@ export default async function ProjectPublicationsPage({
     supabase
       .from('external_publications')
       .select(
-        'id, title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility'
+        'id, title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility, created_by'
       )
       .eq('owner_id', access.ownerId)
       .order('publication_year', {
@@ -96,8 +96,82 @@ export default async function ProjectPublicationsPage({
     )
   }
 
+  const isAwaitingReview = (
+    publication: ExternalPublicationRow
+  ) =>
+    publication.visibility ===
+      'private' &&
+    Boolean(
+      publication.created_by
+    ) &&
+    publication.created_by !==
+      access.ownerId
+
+  // Editor submissions awaiting review come first; order is otherwise kept.
   const publications =
-    (publicationsResult.data ?? []) as ExternalPublicationRow[]
+    [
+      ...((publicationsResult.data ??
+        []) as ExternalPublicationRow[]),
+    ].sort(
+      (left, right) =>
+        Number(
+          isAwaitingReview(right)
+        ) -
+        Number(
+          isAwaitingReview(left)
+        )
+    )
+
+  const contributorIds = [
+    ...new Set(
+      publications
+        .map(
+          (publication) =>
+            publication.created_by
+        )
+        .filter(
+          (id): id is string =>
+            Boolean(id) &&
+            id !== access.ownerId
+        )
+    ),
+  ]
+
+  const contributorsResult =
+    contributorIds.length > 0
+      ? await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', contributorIds)
+      : {
+          data: [],
+          error: null,
+        }
+
+  if (contributorsResult.error) {
+    throw new Error(
+      `Could not load contributors: ${contributorsResult.error.message}`
+    )
+  }
+
+  const contributorNameById =
+    new Map(
+      (
+        (contributorsResult.data ??
+          []) as {
+          id: string
+          full_name: string | null
+          email: string | null
+        }[]
+      ).map(
+        (profile) => [
+          profile.id,
+          profile.full_name?.trim() ||
+            profile.email?.trim() ||
+            'Former Website Editor',
+        ] as const
+      )
+    )
 
   const projects =
     (projectsResult.data ?? []) as ProjectOption[]
@@ -228,6 +302,18 @@ export default async function ProjectPublicationsPage({
                           : ''}
                       </p>
 
+                      {publication.created_by &&
+                        publication.created_by !==
+                          access.ownerId && (
+                          <p className="mt-2 text-xs text-oxford-ash">
+                            Added by{' '}
+                            {contributorNameById.get(
+                              publication.created_by
+                            ) ??
+                              'Former Website Editor'}
+                          </p>
+                        )}
+
                       <p className="mt-2 text-xs text-oxford-ash">
                         Projects:{' '}
                         {linkedProjectIds.length >
@@ -251,13 +337,21 @@ export default async function ProjectPublicationsPage({
                         publication.visibility ===
                         'public'
                           ? 'rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800'
-                          : 'rounded-full border border-gray-300 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700'
+                          : isAwaitingReview(
+                                publication
+                              )
+                            ? 'rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900'
+                            : 'rounded-full border border-gray-300 bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700'
                       }
                     >
                       {publication.visibility ===
                       'public'
                         ? 'Public'
-                        : 'Private'}
+                        : isAwaitingReview(
+                              publication
+                            )
+                          ? 'Awaiting review'
+                          : 'Private'}
                     </span>
                   </div>
 

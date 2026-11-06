@@ -22,6 +22,9 @@ export default function ExternalPublicationForm({
   publication,
   linkedProjectIds = [],
   submitLabel,
+  showVisibility = true,
+  showProjects = true,
+  websiteEditable = false,
 }: {
   action: (
     formData: FormData
@@ -30,6 +33,9 @@ export default function ExternalPublicationForm({
   publication?: ExternalPublicationRow
   linkedProjectIds?: string[]
   submitLabel: string
+  showVisibility?: boolean
+  showProjects?: boolean
+  websiteEditable?: boolean
 }) {
   const prefix =
     publication?.id ?? 'new'
@@ -40,6 +46,11 @@ export default function ExternalPublicationForm({
   return (
     <form
       action={action}
+      data-website-editable={
+        websiteEditable
+          ? 'true'
+          : undefined
+      }
       className="mt-5"
     >
       {publication && (
@@ -234,6 +245,7 @@ export default function ExternalPublicationForm({
           </select>
         </div>
 
+        {showVisibility && (
         <div>
           <label
             htmlFor={`${prefix}-visibility`}
@@ -259,7 +271,9 @@ export default function ExternalPublicationForm({
             </option>
           </select>
         </div>
+        )}
 
+        {showProjects && (
         <div className="md:col-span-2 xl:col-span-4">
           <span className={labelClass}>
             Projects
@@ -301,6 +315,7 @@ export default function ExternalPublicationForm({
             </div>
           )}
         </div>
+        )}
       </div>
 
       <div className="mt-5">

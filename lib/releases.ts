@@ -26,8 +26,8 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Access',
         items: [
-          'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can edit just the public Website content, such as the citation and Key highlight, without access to the wider Dashboard.',
-          'Visibility, public addresses and Featured status stay with the Dashboard Owner, and every Website content edit by a colleague is recorded in the Access audit trail.',
+          'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can keep their citations accurate on the Academic Website, without access to the wider Dashboard.',
+          'Titles, authors, visibility, public addresses, Featured status and Key highlights stay with the Dashboard Owner, and every change by a colleague is recorded in the Access audit trail.',
           'Existing Coauthor assignments carry over as Website Editor assignments, so nobody needs a new invitation.',
         ],
       },
@@ -35,6 +35,7 @@ export const releases: ReleaseNote[] = [
         title: 'Project publications',
         items: [
           'Projects can now list relevant publications by other authors alongside your own papers, kept separate from your Papers, Planning and analytics.',
+          'Website Editors can suggest such publications; each stays private until you review it, link it to projects and publish it.',
           'Each external publication stays Private until you make it Public, and a new public feed shares a Project’s own and external publications with the Academic Website without changing any existing public data.',
         ],
       },
