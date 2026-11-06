@@ -233,13 +233,22 @@ The exact values are maintained in the database constraints and mirrored in `lib
 
 ## Consumers
 
-Current downstream consumers include:
+The authoritative list is `consumers` in `lib/academic-api-contract.json`. Each entry records the RPCs the consumer calls, a `status` of `active` or `planned`, and an optional public `url`; private repositories are listed without one, so `/api` never links to a page visitors cannot open. `npm run check:public-api` validates the entries.
 
-- [Academic Website](https://github.com/bgonzalezbustamante/academic-website)
-- [Academic CV Studio](https://github.com/bgonzalezbustamante/academic-cv-studio)
-- [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline)
+Active consumers:
 
-These repositories consume the public interface but are not runtime dependencies of Research Dashboard.
+- [Academic Website](https://github.com/bgonzalezbustamante/academic-website): runtime supabase-js with ISR.
+- Academic CV Studio (private): client-side fetch, run locally.
+- [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline): runtime supabase-js.
+- Academic Signature Studio (private): runtime supabase-js.
+
+Planned consumers of the publication feeds, from rc.5: the OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites, and the organisation site template that several of them are built from. They select their publications by collection, and SUDAKAS and OBPEX also by Project.
+
+These repositories consume the public interface but are not runtime dependencies of Research Dashboard. Changes they need are proposed to them, not made from here.
+
+### Recommended integration
+
+New consumers use the published reference client, `@bgonzalezbustamante/academic-api-client`, with its dependency-free `createFetchTransport()` and the site's Supabase URL and publishable key. Sites built on Next.js fetch at request time with incremental static regeneration (`{ next: { revalidate } }` on the transport and a matching route `revalidate`), so a change in the Dashboard reaches them within the revalidation window without a rebuild or a deploy hook. Responses are validated before use, and a site that receives an invalid payload hides the section or keeps its last good render rather than showing unvalidated data. Research Dashboard triggers no downstream builds.
 
 
 ## Documentation responsibilities
