@@ -946,7 +946,7 @@ export default async function SoftwarePage({
                         )}
                       </div>
 
-                      <p className="mt-2 max-w-3xl text-sm leading-6 text-oxford-charcoal">
+                      <p className="mt-2 text-sm leading-6 text-oxford-charcoal">
                         {
                           item.short_description
                         }

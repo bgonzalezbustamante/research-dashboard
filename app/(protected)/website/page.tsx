@@ -68,7 +68,6 @@ export default async function WebsitePage() {
       <PageHeader
         title="Website"
         description="Keep the citations of your assigned papers accurate on the Academic Website, and suggest papers by other authors for it and related sites. The Dashboard Owner reviews suggestions and manages visibility, public addresses and where they appear."
-        wide
       />
 
       <section className="mb-10">

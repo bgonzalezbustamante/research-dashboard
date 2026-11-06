@@ -61,7 +61,7 @@ export default async function AccountPage({
         <h1 className="mt-2 font-serif text-3xl font-semibold text-oxford-blue">
           Account
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-oxford-ash">
+        <p className="mt-2 text-sm leading-6 text-oxford-ash">
           Manage your personal profile and sign-in credentials. These settings apply only to your own account and do not change dashboard or paper permissions.
         </p>
       </div>

@@ -103,7 +103,7 @@ export default function AcademicApiPage() {
   return (
     <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">
       <header className="border-b border-oxford-stone bg-white px-6 py-5">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/dashboard"
             className="flex items-center gap-4"
@@ -135,7 +135,7 @@ export default function AcademicApiPage() {
       </header>
 
       <main className="flex-1 px-6 py-10">
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-7xl">
           <section>
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
               Public Data Interface
@@ -386,7 +386,7 @@ export default function AcademicApiPage() {
                   key={resource.id}
                   className="scroll-mt-6"
                 >
-                  <div className="max-w-4xl">
+                  <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
                       Resource
                     </p>
@@ -414,13 +414,13 @@ export default function AcademicApiPage() {
                             className="rounded-xl border border-oxford-stone bg-white p-6 shadow-sm"
                           >
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                              <div>
+                              <div className="min-w-0 flex-1">
                                 <code className="text-sm font-semibold text-oxford-blue">
                                   {
                                     operation.signature
                                   }
                                 </code>
-                                <p className="mt-2 max-w-3xl text-sm leading-6 text-oxford-ash">
+                                <p className="mt-2 text-sm leading-6 text-oxford-ash">
                                   {
                                     operation.purpose
                                   }
@@ -627,7 +627,7 @@ export default function AcademicApiPage() {
             id="controlled-vocabularies"
             className="mt-12 scroll-mt-6"
           >
-            <div className="max-w-4xl">
+            <div>
               <p className="text-xs font-medium uppercase tracking-wide text-oxford-ash">
                 Contract rules
               </p>

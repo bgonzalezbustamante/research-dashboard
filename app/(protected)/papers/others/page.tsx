@@ -309,7 +309,6 @@ export default async function OtherPapersPage({
       <PageHeader
         title="Papers"
         description="Other people's papers: a curated library of publications by other authors for the Academic Website and related sites. They never appear among your own papers, Planning or analytics. Public ones need a stable slug and are listed by the Academic API, where sites filter them by collection and, optionally, by related project."
-        wide
       />
 
       <PapersTabs active="/papers/others" />

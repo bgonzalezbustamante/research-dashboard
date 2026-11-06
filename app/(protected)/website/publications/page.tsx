@@ -72,7 +72,6 @@ export default async function EditorPublicationsPage({
       <PageHeader
         title="Your publications"
         description="Suggest papers by you or other authors for the Academic Website and related sites. Each one stays private until the Dashboard Owner reviews and publishes it, choosing where it appears. You can edit your publications at any time, and delete them while they are awaiting review."
-        wide
       />
 
       {params.error && (
