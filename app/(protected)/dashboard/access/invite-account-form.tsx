@@ -62,10 +62,10 @@ export default function InviteAccountForm({
 
           <div>
             <h3 className="text-sm font-medium text-oxford-charcoal">
-              Paper Coauthor
+              Paper Website Editor
             </h3>
             <p className="mt-1 text-xs leading-5 text-oxford-ash">
-              Optionally select the papers this person may collaborate on. Viewer and Coauthor permissions can be combined.
+              Optionally select the papers whose public Website content this person may edit (publication index and citation only); Website Editors can also suggest other papers for review. Viewer and Website Editor permissions can be combined.
             </p>
 
             {papers.length === 0 ? (
@@ -111,7 +111,7 @@ export default function InviteAccountForm({
             )}
 
             <p className="mt-2 text-xs leading-5 text-oxford-ash">
-              Archived papers remain visible for reference but cannot receive new Coauthor invitations.
+              Archived papers remain visible for reference but cannot receive new Website Editor invitations.
             </p>
           </div>
         </div>

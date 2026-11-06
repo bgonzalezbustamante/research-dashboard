@@ -196,7 +196,7 @@ export async function createAccessInvitation(
   ) {
     redirectInvitationStatus(
       'error',
-      'Select Viewer access, at least one Coauthor paper, or both.'
+      'Select Viewer access, at least one Website Editor paper, or both.'
     )
   }
 
@@ -507,7 +507,7 @@ export async function setViewerAccess(
   )
 }
 
-export async function saveCoauthorAssignments(
+export async function saveWebsiteEditorAssignments(
   formData: FormData
 ) {
   const userId =
@@ -527,7 +527,7 @@ export async function saveCoauthorAssignments(
 
   const { error } =
     await supabase.rpc(
-      'set_coauthor_paper_assignments',
+      'set_website_editor_paper_assignments',
       {
         p_user_id: userId,
         p_paper_ids: paperIds,
@@ -536,7 +536,7 @@ export async function saveCoauthorAssignments(
 
   if (error) {
     console.error(
-      'Coauthor assignment update failed:',
+      'Website Editor assignment update failed:',
       error
     )
 
@@ -545,18 +545,18 @@ export async function saveCoauthorAssignments(
       error.message.includes(
         'unavailable'
       )
-        ? 'Archived papers cannot receive new Coauthor assignments.'
-        : 'Coauthor paper assignments could not be saved.'
+        ? 'Archived papers cannot receive new Website Editor assignments.'
+        : 'Website Editor paper assignments could not be saved.'
     )
   }
 
   revalidatePath('/dashboard/access')
-  revalidatePath('/papers')
+  revalidatePath('/website')
 
   redirectWithStatus(
     'notice',
     paperIds.length === 0
-      ? 'Coauthor access removed from all papers.'
-      : 'Coauthor paper assignments saved.'
+      ? 'Website Editor access removed from all papers.'
+      : 'Website Editor paper assignments saved.'
   )
 }

@@ -141,46 +141,21 @@ function getNotePayload(
   }
 }
 
-async function getPaperAccess(
-  paperId: string
-) {
+async function getPaperAccess() {
   const access =
     await requireAppAccess()
 
   const supabase =
     await createClient()
 
-  if (access.canEditDashboard) {
-    return {
-      access,
-      supabase,
-      canCollaborate: true,
-      canEditAllNotes: true,
-    }
-  }
-
-  const {
-    data: membership,
-    error: membershipError,
-  } = await supabase
-    .from('paper_members')
-    .select('role')
-    .eq('paper_id', paperId)
-    .eq('user_id', access.userId)
-    .maybeSingle()
-
-  if (membershipError) {
-    throw new Error(
-      `Could not load paper membership: ${membershipError.message}`
-    )
-  }
-
+  // Paper notes are Owner-only since Coauthor access was retired in rc.4.
   return {
     access,
     supabase,
     canCollaborate:
-      membership?.role === 'coauthor',
-    canEditAllNotes: false,
+      access.canEditDashboard,
+    canEditAllNotes:
+      access.canEditDashboard,
   }
 }
 
@@ -200,9 +175,7 @@ export async function createNote(
     access,
     supabase,
     canCollaborate,
-  } = await getPaperAccess(
-    paperId
-  )
+  } = await getPaperAccess()
 
   if (!canCollaborate) {
     redirectWithError(
@@ -284,9 +257,7 @@ export async function updateNote(
     supabase,
     canCollaborate,
     canEditAllNotes,
-  } = await getPaperAccess(
-    paperId
-  )
+  } = await getPaperAccess()
 
   if (!canCollaborate) {
     redirectWithError(
@@ -378,9 +349,7 @@ export async function deleteNote(
     supabase,
     canCollaborate,
     canEditAllNotes,
-  } = await getPaperAccess(
-    paperId
-  )
+  } = await getPaperAccess()
 
   if (!canCollaborate) {
     redirectWithError(

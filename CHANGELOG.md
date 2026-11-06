@@ -1,5 +1,68 @@
 # CHANGELOG
 
+## v1.0.0-rc.4 "Velvet Torch"
+
+Released 6 Nov 2026.
+
+### Summary
+
+- Started `v1.0.0-rc.4 "Velvet Torch"` to replace Coauthor access with a restricted Website Editor role.
+- Added an Other papers library of curated external publications, with stable public slugs, collections for consuming sites, optional Project links, Website Editor suggestions with an Owner approval step, and two new Public RPC v1 feeds.
+- Hardened the release with stricter publication input constraints, stale-save protection, server-side Owner checks across the older Dashboard actions, and a fix to the staged Coauthor retirement.
+- Replaced the horizontal Oxford wordmark with an affiliation strip: the Oxford square mark used as the Dashboard favicon, the Academic Website's affiliation marks, Empiria Lab and OBPEX.
+
+### Code changes
+
+`Access redesign: Website Editor`
+
+- Replaced the paper-scoped Coauthor role with a restricted **Website Editor** role. Papers are treated in two categories. For the Owner's own Papers, Website Editors see only their assigned Papers, with read-only title, authors, abstract and Website status, and can edit only the citation and publication index. Title, authors, abstract, visibility, public slug, Featured and the Key highlight remain Owner-only. For other people's papers, Website Editors can submit external publications for review (see Other people's papers).
+- Added the `paper_website_editors` assignment table. No existing Paper, Dashboard or profile policy references it, so an assignment grants nothing beyond four dedicated Paper RPCs and the editor publication RPCs described under Other people's papers: `list_my_website_editor_papers()`, `get_website_editor_paper(uuid)`, `update_paper_website_content(uuid, text, text)` (citation and publication index only, re-checking the assignment and refusing archived Papers) and the Owner-only `set_website_editor_paper_assignments(uuid, uuid[])`. All four are closed to anonymous callers.
+- Added `website_editor_granted`, `website_editor_revoked` and `website_content_updated` audit events; Website content edits by colleagues now appear in the Access audit trail.
+- Added a dedicated full-width Website area for editors at `/website`, `/website/[paperId]` and `/website/publications`, with a minimal navigation shell and a "Website Editor" badge. The citation inputs are shared with the Owner's Website card through `WebsiteCitationFields` and `readPaperWebsiteCitation()`; the Key highlight inputs (`WebsiteHighlightFields`, `readPaperWebsiteHighlight()`) appear only in the Owner's card.
+- Fixed the staged Coauthor retirement before release: `resolve_author_for_paper` and `can_use_author_for_paper` still called the Coauthor helper `can_collaborate_paper`, which the retirement drops, so they are now redefined to Owner-only checks first, and the release-window file carries a read-only precheck listing every function body that still references a dropped helper.
+- Confined accounts without Dashboard membership to `/website`, `/account` and `/onboarding` in the request proxy, and added server-side Dashboard guards to the Papers list and Paper workspaces, which previously relied on database policies alone.
+- Converted existing Coauthor assignments to Website Editor assignments, recorded with a `coauthor_conversion` audit source. Invitations, onboarding, account cards, account deletion and the Access summary now use Website Editor assignments.
+- Removed the Coauthor title and collaboration editor, the Coauthor paper shortcut and their server actions; Paper notes are Owner-only.
+- Staged the retirement of Coauthor access: the additive migration keeps the rc.3 app working, while `20261106132331_retire_coauthor_access.sql` replaces every collaborator write policy with an Owner-only policy, removes Coauthor rows, functions and the Coauthor field guard, and switches invitations to Website Editor only. It was held in `supabase/release-window/` and applied in the rc.4 release window, after a backup and a read-only precheck of every function and policy that still referenced a Coauthor helper.
+- Added `supabase/tests/rc4_access_policies.sql`, a rolled-back SQL suite that impersonates QA accounts to verify Website Editor isolation, Viewer read-only access and the anonymous function and table surface.
+
+`Other people's papers`
+
+- Added a library of other people's papers (external publications): publications by other authors that the Owner curates for the Academic Website and other sites that use the Academic API, related to his research Projects only sometimes. They live in their own tables (`external_publications`, `project_external_publications`, `external_publication_collections`, `external_publication_collection_items`), so Papers views, workflow statuses, Planning, analytics, Google Scholar citations, Hours and the existing Paper RPCs never see them.
+- Papers now has two tabs: **My papers** (the default, unchanged) and **Other papers** at `/papers/others`, where the Owner manages external publications and their collections; Viewers can read them.
+- External publications record title, authors, venue, publication year, an optional date in that year, DOI and publication URLs, language, a Private/Public visibility (Private by default) and a stable public slug that is required when Public. They can belong to Owner-defined **collections** (name, private description and public slug) that consuming sites filter by, and optionally to related Projects. The Owner manages them through `create_external_publication`, `update_external_publication` and `delete_external_publication`; collections use Owner-only RLS.
+- Website Editors can suggest external publications at `/website/publications` through `list_my_external_publications`, `create_my_external_publication`, `update_my_external_publication` and `delete_my_external_publication`. Suggestions are always Private, with no slug, collections or Projects. Editors can edit the bibliographic fields of their own publications at any time; once published, an edit goes live immediately, is audited, and flags the entry as "Edited by … since approval" on the Other papers tab (`external_publications.editor_edited_at`) until the Owner next saves it. Slug, visibility, collections and Projects stay Owner-only, and editors can delete a publication only while it is awaiting review. The Owner reviews them on the Other papers tab, where they show who added them and sort first as "Awaiting review" with an **Approve and publish** panel: a suggested slug (built from the title and year, editable), collection and optional Project choices, and one action that publishes the suggestion through `update_external_publication`. Rejecting a suggestion is a delete. Submissions, edits and deletions appear in the Access audit trail (`external_publication_submitted`, `_updated`, `_deleted`).
+- The Projects page lists each Project's linked external publications, linking to their entries on the Other papers tab.
+- Added two Public RPC v1 operations, for 16 in total:
+  - `list_public_external_publications()` returns every Public external publication with its slug, bibliographic fields, public `project_slugs` and `collection_slugs`.
+  - `list_public_project_publications()` returns, for each Public Project, its own Public Papers (`authorship = own`) and its Public external publications (`authorship = external`), each with `publication_slug`.
+  Existing RPC shapes are unchanged, and external publications never appear in `list_public_papers()` or `get_public_paper()`.
+- Added the `publication-authorship` controlled vocabulary, the `project-publications` and `external-publications` manifest resources, and reference-client `listPublicProjectPublications()` and `listPublicExternalPublications()` methods with strict validation (slug format and uniqueness, unique Project and collection slugs, year and date agreement, URL and language rules) and regression tests.
+- Added live compatibility checks: each Public Project's `own` rows must equal its `publication_slugs`; every `external` project row must match the external feed by slug and Project; external slugs and titles never collide with `list_public_papers()`; external rows reference only public Projects; and the new tables stay closed to anonymous callers.
+
+`Branding`
+
+- Replaced the horizontal Oxford wordmark (`components/oxford-logo.tsx`, `public/branding/oxford-logo.svg`) with an affiliation strip, `components/institution-strip.tsx`. It starts with the University of Oxford square mark used as the Dashboard favicon, then mirrors the Academic Website's header marks (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), followed by Empiria Lab and OBPEX. The marks are 128 px square WebP files in `public/branding/`, shown in grayscale until hover, in a `header` size for the Dashboard, release notes and `/api` headers and an `auth` size for sign-in, onboarding and access pages. `NOTICE` now lists them as third-party branding excluded from the MIT licence.
+
+`Pre-release hardening`
+
+- Tightened the external publication link constraints: DOI and publication URLs must be absolute HTTP(S) URLs with a host and no whitespace, matching the Project URL rule, and each author name must be 1–300 characters (`external_publications_author_length`). The forms check the same rules before saving.
+- Website Editor edits now record `changed_fields` and the `previous` values in the `external_publication_updated` audit event, so the Owner can see what a live edit changed after the "Edited since approval" flag is cleared. A save that changes nothing no longer raises the flag.
+- Approve and publish and the Owner's save on the Other papers tab now refuse to overwrite a publication that changed since the page was opened (for example, a Website Editor's edit made in the meantime), so the Owner never publishes text he has not reviewed.
+- Added server-side Owner checks to the Hours, Planning and Paper (details, citations, history and Milestones) actions, and a Dashboard guard to the Planning page. These writes were already blocked by database policies; the app now rejects other signed-in accounts before reaching them.
+- The request proxy now matches its public `/login` and `/auth` paths by whole path segment, so a future route such as `/authors` cannot become public by accident.
+- Fixed the staged Coauthor retirement: Author profile linking now considers Website Editor assignments as well as the Owner's own Papers, since it previously matched only Coauthor membership rows that the retirement removes. The release-window precheck also lists policies that still reference a dropped helper.
+- Corrected the Access page and invitation form, which still said Website Editors could edit the Key highlight.
+- Updated the development lint toolchain (`typescript-eslint` 8.72.1 and `zod` 4.6.7) to clear a high-severity development-only advisory; production dependencies were unaffected.
+
+### Security and validation
+
+- `npm audit --omit=dev` reported 0 production vulnerabilities. The remaining moderate `minimatch` advisory is development-only, through `eslint-config-next`, and is left in place rather than applying npm's breaking forced downgrade.
+- The full-history Gitleaks scan covered 804 commits (approximately 3.26 MB) with no leaks found.
+- `npm run lint`, `npx tsc --noEmit`, `npm run check:public-api` (16 anonymous RPCs, no anonymous table grants), `npm run check:academic-api-client` (20 tests), `npm run check:backups` (5 tests) and `npm run build` passed, and `npm run check:public-api:live` passed against production after every rc.4 migration.
+- `supabase/tests/rc4_access_policies.sql` passed against production after the hardening migration and again after the Coauthor retirement, each time inside a rolled-back transaction. The retirement was also rehearsed in full inside a rolled-back transaction before `db push`, and production migration history matches the repository (85/85).
+- A pre-release audit of the database, the app access layer and the documentation found no critical or high-severity issues; its findings are fixed under Pre-release hardening or recorded as rc.5 follow-ups.
+
 ## v1.0.0-rc.3 "Bold Ridge"
 
 Released 3 Nov 2026.

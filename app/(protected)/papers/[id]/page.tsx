@@ -14,7 +14,7 @@ import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import StatusBadge from '@/components/ui/status-badge'
 import {
-  requireAppAccess,
+  requireDashboardAccess,
 } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
@@ -220,7 +220,7 @@ export default async function PaperPage({
   } = await searchParams
 
   const access =
-    await requireAppAccess()
+    await requireDashboardAccess()
 
   const supabase =
     await createClient()
@@ -955,14 +955,12 @@ export default async function PaperPage({
               </p>
             </div>
 
-            {access.hasDashboardAccess && (
-              <ButtonLink
-                href="/projects"
-                variant="secondary"
-              >
-                Projects
-              </ButtonLink>
-            )}
+            <ButtonLink
+              href="/projects"
+              variant="secondary"
+            >
+              Projects
+            </ButtonLink>
           </div>
 
           {associatedProjects.length > 0 ? (
@@ -1122,7 +1120,7 @@ export default async function PaperPage({
         paperId={paper.id}
         metadata={publicMetadata}
         canEdit={
-          access.canEditDashboard
+          access.canEdit
         }
         error={websiteError}
         saved={

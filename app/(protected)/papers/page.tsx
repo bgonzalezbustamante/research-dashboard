@@ -1,10 +1,12 @@
 import Link from 'next/link'
 
 import PageHeader from '@/components/page-header'
+import PapersTabs from '@/components/papers/papers-tabs'
 import ListPagination from '@/components/ui/list-pagination'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 type PaperStatus =
@@ -667,6 +669,8 @@ function getLatestGoogleScholarCitations(
 export default async function PapersPage({
   searchParams,
 }: PapersPageProps) {
+  await requireDashboardAccess()
+
   const params =
     await searchParams
 
@@ -1331,6 +1335,8 @@ export default async function PapersPage({
           Add paper
         </ButtonLink>
       </div>
+
+      <PapersTabs active="/papers" />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Link

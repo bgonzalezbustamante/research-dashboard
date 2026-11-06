@@ -87,7 +87,7 @@ export default function InvitationCard({
 
           {papers.length > 0 && (
             <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-              Coauthor · {papers.length}{' '}
+              Website Editor · {papers.length}{' '}
               {papers.length === 1
                 ? 'paper'
                 : 'papers'}

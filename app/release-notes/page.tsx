@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import OxfordLogo from '@/components/oxford-logo'
+import InstitutionStrip from '@/components/institution-strip'
 import SiteFooter from '@/components/site-footer'
 import ButtonLink from '@/components/ui/button-link'
 import { releases } from '@/lib/releases'
@@ -77,7 +77,7 @@ export default async function ReleaseNotesPage({
             href="/dashboard"
             className="flex items-center gap-4"
           >
-            <OxfordLogo className="w-[190px]" />
+            <InstitutionStrip />
             <span className="font-serif text-xl font-semibold text-oxford-blue">
               Research Dashboard
             </span>

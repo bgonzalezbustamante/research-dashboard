@@ -3,7 +3,7 @@ import Card from '@/components/ui/card'
 
 import AccountIdentityControls from './account-identity-controls'
 import {
-  saveCoauthorAssignments,
+  saveWebsiteEditorAssignments,
   setViewerAccess,
 } from './actions'
 import type {
@@ -37,7 +37,7 @@ export default function AccountCard({
   const assigned =
     new Set(assignedPaperIds)
 
-  const isCoauthor =
+  const isWebsiteEditor =
     assigned.size > 0
 
   return (
@@ -62,16 +62,16 @@ export default function AccountCard({
             </span>
           )}
 
-          {isCoauthor && (
+          {isWebsiteEditor && (
             <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-              Coauthor · {assigned.size}{' '}
+              Website Editor · {assigned.size}{' '}
               {assigned.size === 1
                 ? 'paper'
                 : 'papers'}
             </span>
           )}
 
-          {!isViewer && !isCoauthor && (
+          {!isViewer && !isWebsiteEditor && (
             <span className="rounded-full border border-oxford-stone bg-oxford-shell px-2.5 py-1 text-xs font-medium text-oxford-ash">
               No access
             </span>
@@ -129,14 +129,14 @@ export default function AccountCard({
 
         <div>
           <h4 className="font-medium text-oxford-charcoal">
-            Paper Coauthor
+            Paper Website Editor
           </h4>
           <p className="mt-1 text-sm leading-6 text-oxford-ash">
-            Select the papers this account may collaborate on. Saving an empty selection removes all Coauthor assignments.
+            Select the papers whose public Website content this account may edit: publication index and citation only. Website Editors can also suggest other papers for review. Saving an empty selection removes all Website Editor assignments.
           </p>
 
           <form
-            action={saveCoauthorAssignments}
+            action={saveWebsiteEditorAssignments}
             className="mt-4"
           >
             <input
@@ -207,11 +207,11 @@ export default function AccountCard({
               className="mt-4"
               disabled={papers.length === 0}
             >
-              Save paper access
+              Save Website Editor papers
             </Button>
 
             <p className="mt-2 text-xs leading-5 text-oxford-ash">
-              Archived assignments may be removed, but archived papers cannot receive new Coauthor assignments.
+              Archived assignments may be removed, but archived papers cannot receive new Website Editor assignments.
             </p>
           </form>
         </div>

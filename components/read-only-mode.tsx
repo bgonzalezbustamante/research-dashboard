@@ -23,11 +23,11 @@ function isMutationForm(
   return method !== 'get'
 }
 
-function isCoauthorEditableForm(
+function isWebsiteEditableForm(
   form: HTMLFormElement
 ) {
   return (
-    form.dataset.coauthorEditable ===
+    form.dataset.websiteEditable ===
     'true'
   )
 }
@@ -46,7 +46,7 @@ function shouldHideForm(
 ) {
   return (
     isMutationForm(form) &&
-    !isCoauthorEditableForm(form) &&
+    !isWebsiteEditableForm(form) &&
     !isSelfServiceForm(form)
   )
 }
@@ -232,7 +232,7 @@ export default function ReadOnlyMode({
       subtree: true,
       attributes: true,
       attributeFilter: [
-        'data-coauthor-editable',
+        'data-website-editable',
         'data-self-service',
       ],
     })
