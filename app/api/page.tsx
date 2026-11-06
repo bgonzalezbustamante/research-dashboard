@@ -39,7 +39,8 @@ type ApiResource = {
 
 type ApiConsumer = {
   name: string
-  url: string
+  url?: string
+  status: 'active' | 'planned'
   rpcs: string[]
 }
 
@@ -84,6 +85,38 @@ function consumersFor(
       consumer.rpcs.includes(
         operationName
       )
+  )
+}
+
+// Private repositories are listed without a link, so visitors are never
+// sent to a page they cannot open.
+function ConsumerName({
+  consumer,
+}: {
+  consumer: ApiConsumer
+}) {
+  const label =
+    consumer.status === 'planned'
+      ? `${consumer.name} (planned)`
+      : consumer.name
+
+  if (!consumer.url) {
+    return (
+      <span className="font-medium text-oxford-charcoal">
+        {label}
+      </span>
+    )
+  }
+
+  return (
+    <a
+      href={consumer.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-medium text-oxford-blue underline-offset-4 hover:underline"
+    >
+      {label}
+    </a>
   )
 }
 
@@ -572,18 +605,11 @@ export default function AcademicApiPage() {
                                       {index >
                                         0 &&
                                         ', '}
-                                      <a
-                                        href={
-                                          consumer.url
+                                      <ConsumerName
+                                        consumer={
+                                          consumer
                                         }
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-medium text-oxford-blue underline-offset-4 hover:underline"
-                                      >
-                                        {
-                                          consumer.name
-                                        }
-                                      </a>
+                                      />
                                     </span>
                                   )
                                 )}
@@ -677,9 +703,10 @@ export default function AcademicApiPage() {
                 Consumers
               </h2>
               <p className="mt-3 text-sm leading-6 text-oxford-ash">
-                These applications consume
-                the public interface but are
-                not dependencies of Research
+                These applications consume,
+                or plan to consume, the
+                public interface but are not
+                dependencies of Research
                 Dashboard.
               </p>
 
@@ -689,14 +716,9 @@ export default function AcademicApiPage() {
                     <div
                       key={consumer.name}
                     >
-                      <a
-                        href={consumer.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-oxford-blue underline-offset-4 hover:underline"
-                      >
-                        {consumer.name}
-                      </a>
+                      <ConsumerName
+                        consumer={consumer}
+                      />
                       <p className="mt-1 text-xs leading-5 text-oxford-ash">
                         {
                           consumer.rpcs
@@ -707,7 +729,10 @@ export default function AcademicApiPage() {
                           .length === 1
                           ? ''
                           : 's'}{' '}
-                        in current use.
+                        {consumer.status ===
+                        'planned'
+                          ? 'planned, through the published client package.'
+                          : 'in current use.'}
                       </p>
                     </div>
                   )

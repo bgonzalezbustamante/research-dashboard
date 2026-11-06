@@ -184,6 +184,59 @@ export default async function OtherPapersPage({
     )
   }
 
+  // Public and Private item counts per collection: sites only receive the
+  // Public ones.
+  const visibilityByPublication =
+    new Map(
+      ((publicationsResult.data ??
+        []) as ExternalPublicationRow[]).map(
+        (publication) => [
+          publication.id,
+          publication.visibility,
+        ] as const
+      )
+    )
+
+  const countsByCollection =
+    new Map<
+      string,
+      {
+        public: number
+        private: number
+      }
+    >()
+
+  for (const [
+    publicationId,
+    collectionIds,
+  ] of collectionIdsByPublication) {
+    const visibility =
+      visibilityByPublication.get(
+        publicationId
+      )
+
+    for (const collectionId of collectionIds) {
+      const counts =
+        countsByCollection.get(
+          collectionId
+        ) ?? {
+          public: 0,
+          private: 0,
+        }
+
+      if (visibility === 'public') {
+        counts.public += 1
+      } else {
+        counts.private += 1
+      }
+
+      countsByCollection.set(
+        collectionId,
+        counts
+      )
+    }
+  }
+
   const isAwaitingReview = (
     publication: ExternalPublicationRow
   ) =>
@@ -696,7 +749,28 @@ export default async function OtherPapersPage({
                             : ''}
                         </p>
                       </div>
+
+                      <span className="rounded-full border border-oxford-stone bg-oxford-off-white px-2.5 py-1 text-xs font-medium text-oxford-charcoal">
+                        {countsByCollection.get(
+                          collection.id
+                        )?.public ?? 0}{' '}
+                        Public ·{' '}
+                        {countsByCollection.get(
+                          collection.id
+                        )?.private ?? 0}{' '}
+                        Private
+                      </span>
                     </div>
+
+                    <p className="mt-3 text-xs leading-5 text-oxford-ash">
+                      Sites show its Public
+                      publications with{' '}
+                      <code>
+                        {`filterExternalPublicationsByCollection(rows, '${collection.slug}')`}
+                      </code>{' '}
+                      from the Academic API
+                      client.
+                    </p>
 
                     <details className="mt-4 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
                       <summary className="cursor-pointer text-sm font-medium text-oxford-blue">

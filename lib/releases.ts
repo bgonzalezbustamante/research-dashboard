@@ -24,6 +24,14 @@ export const releases: ReleaseNote[] = [
       'Ancient Glacier helps the sites that use the Academic API adopt the curated publication feeds, and tightens several safeguards found in the rc.4 review.',
     sections: [
       {
+        title: 'Sharing publications with other sites',
+        items: [
+          'A ready-made Academic API package lets your other websites show curated publications and keep them up to date automatically, without copying data by hand.',
+          'Each collection on the Other papers tab shows how many of its publications are public, and how a site displays them.',
+          'The Academic API page lists every site that uses it, including the sites planned to show publications next.',
+        ],
+      },
+      {
         title: 'Look and feel',
         items: [
           'Page introductions, descriptions and messages now use the full width of the page, and the public release notes and Academic API pages match the Dashboard’s width.',
