@@ -21,7 +21,7 @@
 - Confined accounts without Dashboard membership to `/website`, `/account` and `/onboarding` in the request proxy, and added server-side Dashboard guards to the Papers list and Paper workspaces, which previously relied on database policies alone.
 - Converted existing Coauthor assignments to Website Editor assignments, recorded with a `coauthor_conversion` audit source. Invitations, onboarding, account cards, account deletion and the Access summary now use Website Editor assignments.
 - Removed the Coauthor title and collaboration editor, the Coauthor paper shortcut and their server actions; Paper notes are Owner-only.
-- Staged the retirement of Coauthor access: the additive migration keeps the rc.3 app working, while `supabase/release-window/retire_coauthor_access.sql` replaces every collaborator write policy with an Owner-only policy, removes Coauthor rows, functions and the Coauthor field guard, and switches invitations to Website Editor only. It is applied in the rc.4 release window.
+- Staged the retirement of Coauthor access: the additive migration keeps the rc.3 app working, while `20261106132331_retire_coauthor_access.sql` replaces every collaborator write policy with an Owner-only policy, removes Coauthor rows, functions and the Coauthor field guard, and switches invitations to Website Editor only. It was held in `supabase/release-window/` and applied in the rc.4 release window, after a backup and a read-only precheck of every function and policy that still referenced a Coauthor helper.
 - Added `supabase/tests/rc4_access_policies.sql`, a rolled-back SQL suite that impersonates QA accounts to verify Website Editor isolation, Viewer read-only access and the anonymous function and table surface.
 
 `Other people's papers`

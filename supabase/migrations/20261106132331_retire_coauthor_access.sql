@@ -1,34 +1,69 @@
 -- Velvet Torch rc.4: retire Coauthor access (contract phase).
 --
--- Held outside supabase/migrations so `supabase db push` cannot apply it
--- early. In the rc.4 release window, after a /backups run: move it to
--- supabase/migrations/<fresh UTC timestamp>_retire_coauthor_access.sql,
--- push it, then deploy the rc.4 app. The rc.3 app still depends on the
--- Coauthor paths removed here.
+-- Applied in the rc.4 release window, after a /backups run and before the
+-- rc.4 app was deployed: the rc.3 app still depended on the Coauthor paths
+-- removed here. It was held in supabase/release-window/ until then so that
+-- `supabase db push` could not apply it early.
 --
--- Precheck (read-only, run in the SQL editor first). Every function listed
--- must be one this migration drops or redefines; anything else must be
--- redefined here before applying:
+-- Precheck (read-only, run in the SQL editor first; it returned no rows).
+-- plpgsql/SQL bodies and policy expressions are not dependency-tracked, so it
+-- lists any function or policy that still references a dropped Coauthor
+-- helper, excluding the objects this migration itself drops or redefines.
+-- Any row must be redefined here before applying:
 --
---   select n.nspname, p.proname
---   from pg_proc p join pg_namespace n on n.oid = p.pronamespace
---   where p.prosrc ~ '(can_collaborate_paper|is_paper_coauthor|has_coauthor_access|can_assign_paper_coauthor)'
+--   with pattern as (
+--     select '(can_collaborate_paper|is_paper_coauthor|has_coauthor_access|can_assign_paper_coauthor)'::text as re
+--   ),
+--   handled_functions(schema_name, function_name) as (
+--     values
+--       ('private', 'can_use_author_for_paper'),
+--       ('private', 'resolve_author_for_paper'),
+--       ('private', 'enforce_coauthor_paper_title_only'),
+--       ('public',  'update_coauthor_paper_collaboration'),
+--       ('public',  'set_coauthor_paper_assignments'),
+--       ('private', 'can_collaborate_paper'),
+--       ('private', 'can_assign_paper_coauthor'),
+--       ('private', 'has_coauthor_access'),
+--       ('private', 'is_paper_coauthor'),
+--       ('private', 'accept_access_invitation'),
+--       ('private', 'get_managed_account_deletion_plan'),
+--       ('private', 'finalize_managed_account_deletion'),
+--       ('private', 'try_link_author_profile'),
+--       ('private', 'sync_author_profile_from_paper_member'),
+--       ('private', 'sync_author_profile_from_website_editor'),
+--       ('private', 'sync_author_profiles_from_paper_author')
+--   ),
+--   dropped_policies(table_name, policy_name) as (
+--     values
+--       ('papers', 'Owners and coauthors can update accessible papers'),
+--       ('paper_authors', 'Paper collaborators can add paper authors'),
+--       ('paper_authors', 'Paper collaborators can update paper authors'),
+--       ('paper_authors', 'Paper collaborators can remove paper authors'),
+--       ('paper_links', 'Paper collaborators can create paper links'),
+--       ('paper_links', 'Paper collaborators can update paper links'),
+--       ('paper_links', 'Paper collaborators can delete paper links'),
+--       ('paper_milestones', 'Paper collaborators can create paper milestones'),
+--       ('paper_milestones', 'Paper collaborators can update paper milestones'),
+--       ('paper_milestones', 'Paper collaborators can delete paper milestones'),
+--       ('paper_notes', 'Paper collaborators can create attributed notes'),
+--       ('paper_notes', 'Owners and note authors can update notes'),
+--       ('paper_notes', 'Owners and note authors can delete notes'),
+--       ('paper_members', 'Owners can assign paper coauthors'),
+--       ('paper_members', 'Owners can remove paper coauthors')
+--   )
+--   select 'function' as kind, n.nspname || '.' || p.proname as object_name
+--   from pg_proc p
+--   join pg_namespace n on n.oid = p.pronamespace
+--   cross join pattern
+--   where p.prosrc ~ pattern.re
+--     and (n.nspname, p.proname) not in (select schema_name, function_name from handled_functions)
+--   union all
+--   select 'policy', pol.schemaname || '.' || pol.tablename || ': ' || pol.policyname
+--   from pg_policies pol
+--   cross join pattern
+--   where coalesce(pol.qual, '') || coalesce(pol.with_check, '') ~ pattern.re
+--     and (pol.tablename, pol.policyname) not in (select table_name, policy_name from dropped_policies)
 --   order by 1, 2;
---
--- Policies are not function bodies, and a leftover one would make the DROP
--- FUNCTION statements below abort mid-release. This must return no rows:
---
---   select schemaname, tablename, policyname
---   from pg_policies
---   where coalesce(qual, '') || coalesce(with_check, '')
---     ~ '(can_collaborate_paper|is_paper_coauthor|has_coauthor_access|can_assign_paper_coauthor)'
---   order by 1, 2, 3;
---
--- Repository history accounts for (some may not appear):
--- private.can_collaborate_paper, private.can_use_author_for_paper,
--- private.enforce_coauthor_paper_title_only, private.resolve_author_for_paper,
--- public.set_coauthor_paper_assignments and
--- public.update_coauthor_paper_collaboration.
 --
 -- Coauthor assignments become Website Editor assignments (backfilled again
 -- here for any created since the additive migration). The collaborator write
