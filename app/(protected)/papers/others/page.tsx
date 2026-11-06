@@ -1,16 +1,19 @@
 import PageHeader from '@/components/page-header'
+import ApproveExternalPublicationForm from '@/components/papers/approve-external-publication-form'
 import ExternalPublicationForm from '@/components/papers/external-publication-form'
 import PapersTabs from '@/components/papers/papers-tabs'
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
 import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
-import type {
-  ExternalPublicationCollectionRow,
-  ExternalPublicationRow,
+import {
+  suggestExternalPublicationSlug,
+  type ExternalPublicationCollectionRow,
+  type ExternalPublicationRow,
 } from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 
 import {
+  approveExternalPublication,
   createExternalPublication,
   createExternalPublicationCollection,
   deleteExternalPublication,
@@ -31,6 +34,7 @@ type OtherPapersPageProps = {
     created?: string
     saved?: string
     deleted?: string
+    approved?: string
     collection?: 'created' | 'saved' | 'deleted'
   }>
 }
@@ -288,7 +292,9 @@ export default async function OtherPapersPage({
   }
 
   const notice =
-    params.created
+    params.approved
+      ? 'External publication approved and published.'
+      : params.created
       ? 'External publication created.'
       : params.saved
         ? 'External publication saved.'
@@ -461,6 +467,28 @@ export default async function OtherPapersPage({
                           : 'Private'}
                     </span>
                   </div>
+
+                  {access.canEdit &&
+                    isAwaitingReview(
+                      publication
+                    ) && (
+                      <ApproveExternalPublicationForm
+                        action={
+                          approveExternalPublication
+                        }
+                        publicationId={
+                          publication.id
+                        }
+                        suggestedSlug={suggestExternalPublicationSlug(
+                          publication.title,
+                          publication.publication_year
+                        )}
+                        collections={
+                          collections
+                        }
+                        projects={projects}
+                      />
+                    )}
 
                   {access.canEdit && (
                     <details className="mt-5 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">

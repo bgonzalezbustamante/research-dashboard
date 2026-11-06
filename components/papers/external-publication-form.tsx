@@ -5,7 +5,7 @@ import {
   type ExternalPublicationRow,
 } from '@/lib/papers/external-publications'
 
-type ProjectOption = {
+export type ProjectOption = {
   id: string
   short_title: string
   title: string
@@ -47,11 +47,6 @@ export default function ExternalPublicationForm({
   const prefix =
     publication?.id ?? 'new'
 
-  const linked =
-    new Set(linkedProjectIds)
-
-  const linkedCollections =
-    new Set(linkedCollectionIds)
 
   return (
     <form
@@ -316,95 +311,21 @@ export default function ExternalPublicationForm({
         )}
 
         {showCollections && (
-        <div className="md:col-span-2 xl:col-span-4">
-          <span className={labelClass}>
-            Collections
-          </span>
-
-          {collections.length === 0 ? (
-            <p className="text-sm text-oxford-ash">
-              No collections yet. Create
-              one below to group
-              publications for a site.
-            </p>
-          ) : (
-            <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3 md:grid-cols-2">
-              {collections.map(
-                (collection) => (
-                  <label
-                    key={collection.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2 text-sm transition hover:bg-oxford-shell"
-                  >
-                    <input
-                      type="checkbox"
-                      name="collection_id"
-                      value={collection.id}
-                      defaultChecked={linkedCollections.has(
-                        collection.id
-                      )}
-                      className="mt-1 h-4 w-4 accent-oxford-blue"
-                    />
-
-                    <span className="min-w-0">
-                      <span className="font-medium text-oxford-charcoal">
-                        {collection.name}
-                      </span>
-                      <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
-                        <code>
-                          {collection.slug}
-                        </code>
-                      </span>
-                    </span>
-                  </label>
-                )
-              )}
-            </div>
-          )}
-        </div>
+          <CollectionCheckboxes
+            collections={collections}
+            linkedCollectionIds={
+              linkedCollectionIds
+            }
+          />
         )}
 
         {showProjects && (
-        <div className="md:col-span-2 xl:col-span-4">
-          <span className={labelClass}>
-            Related projects (optional)
-          </span>
-
-          {projects.length === 0 ? (
-            <p className="text-sm text-oxford-ash">
-              No projects yet.
-            </p>
-          ) : (
-            <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3 md:grid-cols-2">
-              {projects.map(
-                (project) => (
-                  <label
-                    key={project.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2 text-sm transition hover:bg-oxford-shell"
-                  >
-                    <input
-                      type="checkbox"
-                      name="project_id"
-                      value={project.id}
-                      defaultChecked={linked.has(
-                        project.id
-                      )}
-                      className="mt-1 h-4 w-4 accent-oxford-blue"
-                    />
-
-                    <span className="min-w-0">
-                      <span className="font-medium text-oxford-charcoal">
-                        {project.short_title}
-                      </span>
-                      <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
-                        {project.title}
-                      </span>
-                    </span>
-                  </label>
-                )
-              )}
-            </div>
-          )}
-        </div>
+          <ProjectCheckboxes
+            projects={projects}
+            linkedProjectIds={
+              linkedProjectIds
+            }
+          />
         )}
       </div>
 
@@ -414,5 +335,119 @@ export default function ExternalPublicationForm({
         </Button>
       </div>
     </form>
+  )
+}
+
+export function CollectionCheckboxes({
+  collections,
+  linkedCollectionIds = [],
+}: {
+  collections: ExternalPublicationCollectionRow[]
+  linkedCollectionIds?: string[]
+}) {
+  const linked =
+    new Set(linkedCollectionIds)
+
+  return (
+    <div className="md:col-span-2 xl:col-span-4">
+      <span className={labelClass}>
+        Collections
+      </span>
+
+      {collections.length === 0 ? (
+        <p className="text-sm text-oxford-ash">
+          No collections yet. Create
+          one below to group
+          publications for a site.
+        </p>
+      ) : (
+        <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3 md:grid-cols-2">
+          {collections.map(
+            (collection) => (
+              <label
+                key={collection.id}
+                className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2 text-sm transition hover:bg-oxford-shell"
+              >
+                <input
+                  type="checkbox"
+                  name="collection_id"
+                  value={collection.id}
+                  defaultChecked={linked.has(
+                    collection.id
+                  )}
+                  className="mt-1 h-4 w-4 accent-oxford-blue"
+                />
+
+                <span className="min-w-0">
+                  <span className="font-medium text-oxford-charcoal">
+                    {collection.name}
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
+                    <code>
+                      {collection.slug}
+                    </code>
+                  </span>
+                </span>
+              </label>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function ProjectCheckboxes({
+  projects,
+  linkedProjectIds = [],
+}: {
+  projects: ProjectOption[]
+  linkedProjectIds?: string[]
+}) {
+  const linked =
+    new Set(linkedProjectIds)
+
+  return (
+    <div className="md:col-span-2 xl:col-span-4">
+      <span className={labelClass}>
+        Related projects (optional)
+      </span>
+
+      {projects.length === 0 ? (
+        <p className="text-sm text-oxford-ash">
+          No projects yet.
+        </p>
+      ) : (
+        <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3 md:grid-cols-2">
+          {projects.map(
+            (project) => (
+              <label
+                key={project.id}
+                className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2 text-sm transition hover:bg-oxford-shell"
+              >
+                <input
+                  type="checkbox"
+                  name="project_id"
+                  value={project.id}
+                  defaultChecked={linked.has(
+                    project.id
+                  )}
+                  className="mt-1 h-4 w-4 accent-oxford-blue"
+                />
+
+                <span className="min-w-0">
+                  <span className="font-medium text-oxford-charcoal">
+                    {project.short_title}
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
+                    {project.title}
+                  </span>
+                </span>
+              </label>
+            )
+          )}
+        </div>
+      )}
+    </div>
   )
 }

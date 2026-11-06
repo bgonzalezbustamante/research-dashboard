@@ -35,6 +35,40 @@ export type ExternalPublicationCollectionRow = {
 export const publicSlugPattern =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
+// Suggests a public slug such as "partner-study-on-voting-2025" from a title
+// and year: accents removed, lowercase, single hyphens, about 80 characters.
+export function suggestExternalPublicationSlug(
+  title: string,
+  year: number
+) {
+  const words =
+    title
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+
+  const kept: string[] = []
+
+  for (const word of words) {
+    if (
+      [...kept, word].join('-').length > 80
+    ) {
+      break
+    }
+
+    kept.push(word)
+  }
+
+  return [
+    ...kept,
+    String(year),
+  ].join('-')
+}
+
 const allowedLanguages =
   new Set<string>(
     externalPublicationLanguages

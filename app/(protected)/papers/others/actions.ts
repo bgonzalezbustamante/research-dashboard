@@ -39,6 +39,7 @@ function otherPapersRedirect(
     | 'created'
     | 'saved'
     | 'deleted'
+    | 'approved'
     | 'collection',
   value: string
 ): never {
@@ -224,6 +225,151 @@ export async function deleteExternalPublication(
 
   otherPapersRedirect(
     'deleted',
+    '1'
+  )
+}
+
+function getUuidList(
+  formData: FormData,
+  name: string
+) {
+  return formData
+    .getAll(name)
+    .filter(
+      (value):
+        value is string =>
+        typeof value ===
+        'string'
+    )
+    .map((value) =>
+      value.trim()
+    )
+    .filter(Boolean)
+}
+
+export async function approveExternalPublication(
+  formData: FormData
+) {
+  const access =
+    await requireDashboardOwner()
+
+  const id =
+    getRequiredText(
+      formData,
+      'id'
+    )
+
+  if (!id) {
+    otherPapersRedirect(
+      'error',
+      'External publication ID is required.'
+    )
+  }
+
+  const slug =
+    getRequiredText(
+      formData,
+      'slug'
+    ).toLowerCase()
+
+  if (
+    slug.length === 0 ||
+    slug.length > 200 ||
+    !publicSlugPattern.test(slug)
+  ) {
+    otherPapersRedirect(
+      'error',
+      'A public slug is required: lowercase letters, numbers, and single hyphens only.'
+    )
+  }
+
+  const supabase =
+    await createClient()
+
+  const {
+    data: publication,
+    error: loadError,
+  } = await supabase
+    .from('external_publications')
+    .select(
+      'title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility'
+    )
+    .eq('id', id)
+    .eq('owner_id', access.ownerId)
+    .maybeSingle()
+
+  if (loadError || !publication) {
+    otherPapersRedirect(
+      'error',
+      'That external publication was not found.'
+    )
+  }
+
+  if (
+    publication.visibility !==
+    'private'
+  ) {
+    otherPapersRedirect(
+      'error',
+      'That external publication is already published.'
+    )
+  }
+
+  // Publishing reuses the Owner update RPC so visibility, slug, collections
+  // and Projects change together in one transaction.
+  const { error } =
+    await supabase.rpc(
+      'update_external_publication',
+      {
+        p_id: id,
+        p_title: publication.title,
+        p_authors: publication.authors,
+        p_publication_year:
+          publication.publication_year,
+        p_published_on:
+          publication.published_on,
+        p_venue: publication.venue,
+        p_doi_url: publication.doi_url,
+        p_publication_url:
+          publication.publication_url,
+        p_language: publication.language,
+        p_visibility: 'public',
+        p_slug: slug,
+        p_project_ids:
+          getUuidList(
+            formData,
+            'project_id'
+          ),
+        p_collection_ids:
+          getUuidList(
+            formData,
+            'collection_id'
+          ),
+      }
+    )
+
+  if (error) {
+    console.error(
+      'External publication approval failed:',
+      error
+    )
+
+    otherPapersRedirect(
+      'error',
+      publicationErrorMessage(
+        error.code,
+        'The external publication could not be published.'
+      )
+    )
+  }
+
+  revalidateOtherPapers()
+  revalidatePath(
+    '/website/publications'
+  )
+
+  otherPapersRedirect(
+    'approved',
     '1'
   )
 }
