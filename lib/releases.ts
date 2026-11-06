@@ -15,6 +15,16 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.5',
+    codename: 'Ancient Glacier',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.4',
+    summary:
+      'Ancient Glacier helps the sites that use the Academic API adopt the curated publication feeds, and tightens several safeguards found in the rc.4 review.',
+    sections: [],
+  },
+  {
     version: 'v1.0.0-rc.4',
     codename: 'Velvet Torch',
     status: 'Release candidate',
