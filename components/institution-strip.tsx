@@ -54,8 +54,8 @@ type InstitutionStripProps = {
   size?: keyof typeof sizes
 }
 
-// Grayscale marks that take their colours on hover, as on the Academic
-// Website. Wrap the strip in a link where it should navigate.
+// Marks shown in their normal colours. Wrap the strip in a link where it
+// should navigate.
 export default function InstitutionStrip({
   size = 'header',
 }: InstitutionStripProps) {
@@ -71,14 +71,14 @@ export default function InstitutionStrip({
             affiliation.name
         )
         .join(', ')}
-      className="group/strip inline-flex items-center gap-1.5"
+      className="inline-flex items-center gap-1.5"
     >
       {affiliations.map(
         (affiliation) => (
           <span
             key={affiliation.id}
             title={affiliation.name}
-            className={`group/mark inline-flex ${dimensions.box} items-center justify-center overflow-hidden rounded-md border border-transparent transition group-hover/strip:border-oxford-stone group-hover/strip:bg-oxford-off-white`}
+            className={`inline-flex ${dimensions.box} items-center justify-center overflow-hidden rounded-md`}
           >
             <Image
               src={affiliation.src}
@@ -87,7 +87,7 @@ export default function InstitutionStrip({
               height={dimensions.pixels}
               unoptimized
               priority
-              className={`${dimensions.image} object-contain contrast-105 grayscale transition group-hover/mark:contrast-100 group-hover/mark:grayscale-0`}
+              className={`${dimensions.image} object-contain`}
             />
           </span>
         )

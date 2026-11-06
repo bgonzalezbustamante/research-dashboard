@@ -40,7 +40,7 @@
 
 `Branding`
 
-- Replaced the horizontal Oxford wordmark (`components/oxford-logo.tsx`, `public/branding/oxford-logo.svg`) with an affiliation strip, `components/institution-strip.tsx`. It starts with the University of Oxford square mark used as the Dashboard favicon, then mirrors the Academic Website's header marks (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), followed by Empiria Lab and OBPEX. The marks are 128 px square WebP files in `public/branding/`, shown in grayscale until hover, in a `header` size for the Dashboard, release notes and `/api` headers and an `auth` size for sign-in, onboarding and access pages. `NOTICE` now lists them as third-party branding excluded from the MIT licence.
+- Replaced the horizontal Oxford wordmark (`components/oxford-logo.tsx`, `public/branding/oxford-logo.svg`) with an affiliation strip, `components/institution-strip.tsx`. It starts with the University of Oxford square mark used as the Dashboard favicon, then mirrors the Academic Website's header marks (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), followed by Empiria Lab and OBPEX. The marks are 128 px square WebP files in `public/branding/`, shown in their normal colours, in a `header` size for the Dashboard, release notes and `/api` headers and an `auth` size for sign-in, onboarding and access pages. `NOTICE` now lists them as third-party branding excluded from the MIT licence.
 
 `Pre-release hardening`
 
