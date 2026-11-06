@@ -26,7 +26,7 @@ export const releases: ReleaseNote[] = [
       {
         title: 'Access',
         items: [
-          'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can keep their citations accurate on the Academic Website, without access to the wider Dashboard.',
+          'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can keep their citations and publication index accurate on the Academic Website, without access to the wider Dashboard.',
           'Titles, authors, visibility, public addresses, Featured status and Key highlights stay with the Dashboard Owner, and every change by a colleague is recorded in the Access audit trail.',
           'Existing Coauthor assignments carry over as Website Editor assignments, so nobody needs a new invitation.',
         ],
@@ -36,13 +36,21 @@ export const releases: ReleaseNote[] = [
         items: [
           'Papers now has an Other papers tab: a library of publications by other authors for the Academic Website and related sites, kept separate from your own papers, Planning and analytics.',
           'Each publication stays private until you publish it with a stable public address, and you can group publications into collections so each site shows its own selection, with optional links to related projects.',
-          'Website Editors can suggest publications for review, and new public data feeds share them without changing any existing public data.',
+          'Website Editors can suggest publications for review and keep their own entries up to date after you publish them; you see which entries they changed, and the public address, collections and visibility stay with you.',
+          'New public data feeds share these publications, and each Project’s related publications, without changing any existing public data.',
         ],
       },
       {
         title: 'Look and feel',
         items: [
           'The Dashboard header and sign-in pages now show the same affiliation marks as the Academic Website (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), together with Empiria Lab and OBPEX. They appear in grey and take their colours on hover.',
+        ],
+      },
+      {
+        title: 'Reliability and maintenance',
+        items: [
+          'A pre-release review found no serious issues and tightened several safeguards: publication links and author names are checked more strictly, approving or saving a publication no longer overwrites a colleague’s newer edit, and older Dashboard actions now check for the Owner before saving.',
+          'The public-data, build, audit and secret-scanning checks were re-run successfully, and a development-only tooling advisory was patched without affecting the live Dashboard.',
         ],
       },
     ],

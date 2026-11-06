@@ -6,6 +6,16 @@ Research Dashboard is the canonical administrative source for the structured aca
 
 Authenticated Dashboard modules may read and write the underlying Supabase tables according to the application permission model.
 
+### Access roles
+
+Row Level Security policies and `SECURITY DEFINER` RPC checks in `supabase/migrations` enforce three roles; the application's page and action guards (`lib/auth/dashboard-access.ts`, `lib/supabase/proxy.ts`) mirror them for convenience only.
+
+- **Owner** (`dashboard_members.role = 'owner'`) has full read and write access.
+- **Viewer** (`dashboard_members.role = 'viewer'`) has Dashboard-wide read-only access.
+- **Website Editor** is paper-scoped through `paper_website_editors` and has no Dashboard membership or table access. Website Editors work only at `/website`, `/account` and `/onboarding`, through dedicated RPCs: they read their assigned Papers, edit only the citation and publication index of those Papers (`update_paper_website_content`), and add and edit their own external publication suggestions (`create_my_external_publication`, `update_my_external_publication`), which stay Private until the Owner approves and publishes them. Slug, visibility, collections and Project links stay Owner-only; editors may delete a suggestion only while it awaits review. Every editor write is recorded in the Owner-only access audit log.
+
+The Coauthor role used before rc.4 is retired: assignments were converted to Website Editor assignments, and the collaborator write policies were replaced with Owner-only policies.
+
 ### Source-backed Planning
 
 Biweekly Planning is a derived view rather than the canonical store for new commitments. Its authoritative sources are:
@@ -80,6 +90,8 @@ The current publicly callable function surface is (with explicit Paper-title dis
 - `list_public_availability(year)`
 - `list_public_paper_milestones()`
 - `list_public_planning_allocations()`
+- `list_public_project_publications()`
+- `list_public_external_publications()`
 
 The milestones endpoint deliberately publishes milestone titles and the full titles of associated Papers, including otherwise private Papers, while concealing private Paper slugs, IDs and notes. The planning-allocation endpoint lists stored manual/legacy allocations and fortnight dates rather than all source-backed Planning commitments. Consumers must avoid counting legacy allocations marked as superseded alongside milestone commitments.
 
@@ -126,6 +138,8 @@ Work-analytics validation follows the strict rules first exercised in `weekly-pe
 
 Software validation enforces the controlled category, development-stage, status, and repository-visibility vocabularies, valid HTTP(S) URLs, valid lifecycle years with `end_year >= start_year` when both exist, and the privacy invariant that a Private repository cannot return a public `repository_url`. Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
 
+External and project publication validation checks slug format and uniqueness, unique Project and collection slugs per row, a publication date that falls in the publication year, HTTP(S) URLs, the controlled language and authorship vocabularies, and, in the live check, that each public Project's `own` rows equal its `publication_slugs`, that every `external` row matches the external feed, that external slugs and titles never collide with `list_public_papers()`, and that no row references a non-public Project.
+
 These layers complement one another. The reference client does not replace `lib/academic-api-contract.json`, the producer-side migration checks, or the Supabase RPC transport.
 
 ## Privacy and access model
@@ -147,9 +161,17 @@ Only papers explicitly marked public with a public slug appear in the **publicat
 
 Only the latest stored Google Scholar citation snapshot is exposed, as a count and capture date. Snapshot IDs, historical snapshots, citation source metadata, and other citation sources remain private.
 
+### External publications
+
+External publications are publications by other authors that the Owner curates for the Academic Website and related sites. They live in their own tables (`external_publications` and its collection and Project link tables), so they never appear in `list_public_papers()`, `get_public_paper()`, Planning, analytics or Hours.
+
+`list_public_external_publications()` returns only Public rows. Each Public row must carry a unique, stable slug, enforced by a check constraint and a unique index. A row exposes its bibliographic fields, DOI and publication URLs (absolute HTTP(S) with a host and no whitespace), language, the slugs of related public Projects and the slugs of its collections. Collections let each consuming site filter its own selection; their slugs become public once a collection holds a Public publication, while collection names and descriptions stay private. Internal IDs, `created_by`, editor flags and audit details are never exposed, and Website Editor suggestions remain invisible until the Owner publishes them.
+
 ### Projects
 
-Only explicitly public projects appear in the project list/detail contracts. Associated publications are represented only by slugs of papers that are themselves public. Activity-label relationships, tracked project hours, owner/internal IDs, and private paper associations remain unavailable.
+Only explicitly public projects appear in the project list/detail contracts. Associated publications are represented only by slugs of papers that are themselves public.
+
+`list_public_project_publications()` lists, for each public Project, its own Public Papers (`authorship = own`, matching the Project's `publication_slugs`) and its Public external publications (`authorship = external`, matching `list_public_external_publications()` by slug), each with a `publication_slug`. Activity-label relationships, tracked project hours, owner/internal IDs, and private paper associations remain unavailable.
 
 ### Conference presentations
 
@@ -205,6 +227,7 @@ Public RPC v1 currently constrains:
 - Software status
 - Repository visibility
 - Public availability type
+- Publication authorship (`own`, `external`)
 
 The exact values are maintained in the database constraints and mirrored in `lib/academic-api-contract.json`; `npm run check:public-api` fails if they drift.
 
