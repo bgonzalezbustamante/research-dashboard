@@ -77,7 +77,7 @@ export default async function OtherPapersPage({
     supabase
       .from('external_publications')
       .select(
-        'id, title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility, slug, created_by'
+        'id, title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility, slug, created_by, editor_edited_at'
       )
       .eq('owner_id', access.ownerId)
       .order('publication_year', {
@@ -398,6 +398,34 @@ export default async function OtherPapersPage({
                               publication.created_by
                             ) ??
                               'Former Website Editor'}
+                          </p>
+                        )}
+
+                      {publication.visibility ===
+                        'public' &&
+                        publication.editor_edited_at &&
+                        publication.created_by && (
+                          <p className="mt-2 text-xs font-medium text-amber-900">
+                            Edited by{' '}
+                            {contributorNameById.get(
+                              publication.created_by
+                            ) ??
+                              'Former Website Editor'}{' '}
+                            since approval ·{' '}
+                            {new Intl.DateTimeFormat(
+                              'en-GB',
+                              {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                timeZone:
+                                  'Europe/Amsterdam',
+                              }
+                            ).format(
+                              new Date(
+                                publication.editor_edited_at
+                              )
+                            )}
                           </p>
                         )}
 

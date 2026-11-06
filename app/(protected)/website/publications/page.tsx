@@ -71,7 +71,7 @@ export default async function EditorPublicationsPage({
 
       <PageHeader
         title="Your publications"
-        description="Suggest papers by you or other authors for the Academic Website and related sites. Each one stays private until the Dashboard Owner reviews and publishes it, choosing where it appears. You can edit or delete a publication while it is awaiting review."
+        description="Suggest papers by you or other authors for the Academic Website and related sites. Each one stays private until the Dashboard Owner reviews and publishes it, choosing where it appears. You can edit your publications at any time, and delete them while they are awaiting review."
         wide
       />
 
@@ -155,33 +155,44 @@ export default async function EditorPublicationsPage({
                     </span>
                   </div>
 
-                  {awaitingReview ? (
-                    <details className="mt-5 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
-                      <summary className="cursor-pointer text-sm font-medium text-oxford-blue">
-                        Edit publication
-                      </summary>
+                  <details className="mt-5 rounded-lg border border-oxford-stone bg-oxford-off-white p-4">
+                    <summary className="cursor-pointer text-sm font-medium text-oxford-blue">
+                      Edit publication
+                    </summary>
 
-                      <ExternalPublicationForm
-                          action={
-                            updateMyExternalPublication
-                          }
-                          projects={[]}
-                          publication={
-                            publication
-                          }
-                          showVisibility={
-                            false
-                          }
-                          showProjects={
-                            false
-                          }
-                          showCollections={
-                            false
-                          }
-                          websiteEditable
-                          submitLabel="Save publication"
-                        />
+                    {!awaitingReview && (
+                      <p className="mt-3 text-xs text-oxford-ash">
+                        Changes appear on the
+                        sites immediately. The
+                        Dashboard Owner manages
+                        its public address,
+                        collections and
+                        visibility.
+                      </p>
+                    )}
 
+                    <ExternalPublicationForm
+                      action={
+                        updateMyExternalPublication
+                      }
+                      projects={[]}
+                      publication={
+                        publication
+                      }
+                      showVisibility={
+                        false
+                      }
+                      showProjects={
+                        false
+                      }
+                      showCollections={
+                        false
+                      }
+                      websiteEditable
+                      submitLabel="Save publication"
+                    />
+
+                    {awaitingReview ? (
                       <form
                         action={
                           deleteMyExternalPublication
@@ -204,15 +215,14 @@ export default async function EditorPublicationsPage({
                           Delete publication
                         </Button>
                       </form>
-                    </details>
-                  ) : (
-                    <p className="mt-4 text-xs text-oxford-ash">
-                      Published by the
-                      Dashboard Owner. Ask
-                      them to unpublish it if
-                      it needs changes.
-                    </p>
-                  )}
+                    ) : (
+                      <p className="mt-5 border-t border-oxford-stone pt-4 text-xs text-oxford-ash">
+                        Published entries can
+                        only be removed by the
+                        Dashboard Owner.
+                      </p>
+                    )}
+                  </details>
                 </Card>
               )
             }

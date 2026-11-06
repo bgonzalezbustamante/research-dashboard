@@ -6,9 +6,11 @@
 -- a single row: 'rc.4 access policy suite passed'.
 --
 -- Before running, replace the four placeholder UUIDs below:
---   editor_id     a temporary Website Editor account (assigned to paper_id)
---   viewer_id     a temporary Viewer account
---   paper_id      a disposable test Paper assigned to the editor
+--   editor_id     a test Website Editor account (assigned to paper_id)
+--   viewer_id     a test Viewer account, or the editor_id again: the suite
+--                 then grants that account Viewer access inside the
+--                 rolled-back transaction for the Viewer checks
+--   paper_id      a Paper assigned to the editor (writes are rolled back)
 --   other_paper   any Paper NOT assigned to the editor
 --
 -- Before the release-window migration retires Coauthor access, accepted
@@ -62,13 +64,14 @@ begin
     raise exception 'Precondition: editor_id must not have Dashboard membership';
   end if;
 
-  if not exists (
-    select 1
-    from public.dashboard_members
-    where user_id = v.viewer_id
-      and role = 'viewer'
-  ) then
-    raise exception 'Precondition: viewer_id must be a Dashboard Viewer';
+  if v.viewer_id <> v.editor_id
+     and not exists (
+       select 1
+       from public.dashboard_members
+       where user_id = v.viewer_id
+         and role = 'viewer'
+     ) then
+    raise exception 'Precondition: viewer_id must be a Dashboard Viewer, or equal editor_id';
   end if;
 
   delete from public.paper_members
@@ -311,8 +314,28 @@ declare
   v record;
   v_count bigint;
   v_rows bigint;
+  v_single_account boolean;
 begin
   select * into v from pg_temp.rc4_qa;
+
+  v_single_account := v.viewer_id = v.editor_id;
+
+  -- One test account: grant it Viewer access for this block only.
+  if v_single_account then
+    insert into public.dashboard_members (
+      owner_id,
+      user_id,
+      role
+    )
+    select
+      dm.owner_id,
+      v.viewer_id,
+      'viewer'
+    from public.dashboard_members dm
+    where dm.role = 'owner'
+      and dm.user_id = dm.owner_id
+    limit 1;
+  end if;
 
   perform set_config(
     'request.jwt.claims',
@@ -342,9 +365,10 @@ begin
     raise exception 'Viewer updated papers';
   end if;
 
+  -- Viewer access never grants Website writes (other_paper is unassigned).
   begin
     perform public.update_paper_website_content(
-      v.paper_id,
+      v.other_paper,
       null,
       'viewer write'
     );
@@ -354,19 +378,29 @@ begin
       null;
   end;
 
-  begin
-    perform public.create_my_external_publication(
-      'Viewer submission',
-      array['A. Viewer'],
-      2026
-    );
-    raise exception 'Viewer submitted an external publication';
-  exception
-    when insufficient_privilege then
-      null;
-  end;
+  -- A pure Viewer cannot suggest publications; a Viewer who is also a
+  -- Website Editor legitimately can, so skip this in single-account mode.
+  if not v_single_account then
+    begin
+      perform public.create_my_external_publication(
+        'Viewer submission',
+        array['A. Viewer'],
+        2026
+      );
+      raise exception 'Viewer submitted an external publication';
+    exception
+      when insufficient_privilege then
+        null;
+    end;
+  end if;
 
   perform set_config('role', 'none', true);
+
+  if v_single_account then
+    delete from public.dashboard_members
+    where user_id = v.viewer_id
+      and role = 'viewer';
+  end if;
 end;
 $$;
 
@@ -503,7 +537,8 @@ begin
     raise exception 'Editor publication submission was not audited';
   end if;
 
-  -- Once the Owner publishes it, the editor can no longer change it.
+  -- Once the Owner publishes it, the editor may still correct the
+  -- bibliographic fields (live, flagged) but cannot delete it.
   update public.external_publications
   set visibility = 'public',
       slug = 'rc4-qa-external-publication'
@@ -511,18 +546,12 @@ begin
 
   perform set_config('role', 'authenticated', true);
 
-  begin
-    perform public.update_my_external_publication(
-      v_id,
-      'Editor change after publication',
-      array['A. Partner'],
-      2025
-    );
-    raise exception 'Editor edited a published external publication';
-  exception
-    when insufficient_privilege then
-      null;
-  end;
+  perform public.update_my_external_publication(
+    v_id,
+    'Editor change after publication',
+    array['A. Partner'],
+    2025
+  );
 
   begin
     perform public.delete_my_external_publication(v_id);
@@ -533,6 +562,73 @@ begin
   end;
 
   perform set_config('role', 'none', true);
+
+  select * into e
+  from public.external_publications
+  where id = v_id;
+
+  if e.title <> 'Editor change after publication'
+     or e.editor_edited_at is null
+     or e.visibility <> 'public'
+     or e.slug is distinct from 'rc4-qa-external-publication' then
+    raise exception 'Editor edit after approval was not stored live and flagged, or changed Owner-only fields';
+  end if;
+
+  if exists (
+    select 1
+    from public.external_publication_collection_items
+    where external_publication_id = v_id
+  ) or exists (
+    select 1
+    from public.project_external_publications
+    where external_publication_id = v_id
+  ) then
+    raise exception 'Editor edit after approval changed collections or Projects';
+  end if;
+
+  -- The Owner's next save clears the editor flag.
+  perform set_config(
+    'request.jwt.claims',
+    json_build_object(
+      'sub',
+      (
+        select dm.owner_id
+        from public.dashboard_members dm
+        where dm.role = 'owner'
+          and dm.user_id = dm.owner_id
+        limit 1
+      ),
+      'role',
+      'authenticated'
+    )::text,
+    true
+  );
+  perform set_config('role', 'authenticated', true);
+
+  perform public.update_external_publication(
+    v_id,
+    e.title,
+    e.authors,
+    e.publication_year,
+    e.published_on,
+    e.venue,
+    e.doi_url,
+    e.publication_url,
+    e.language,
+    'public',
+    e.slug
+  );
+
+  perform set_config('role', 'none', true);
+
+  if exists (
+    select 1
+    from public.external_publications
+    where id = v_id
+      and editor_edited_at is not null
+  ) then
+    raise exception 'Owner save did not clear the editor edit flag';
+  end if;
 end;
 $$;
 

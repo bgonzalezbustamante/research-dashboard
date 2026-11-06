@@ -158,7 +158,7 @@ export async function updateMyExternalPublication(
     editorPublicationsRedirect(
       'error',
       error.code === '42501'
-        ? 'Only your own publications can be edited, and only while they are awaiting review.'
+        ? 'Only your own publications can be edited.'
         : 'The publication could not be saved.'
     )
   }

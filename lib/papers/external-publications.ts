@@ -23,6 +23,7 @@ export type ExternalPublicationRow = {
   visibility: 'private' | 'public'
   slug?: string | null
   created_by?: string | null
+  editor_edited_at?: string | null
 }
 
 export type ExternalPublicationCollectionRow = {
