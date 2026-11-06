@@ -77,7 +77,7 @@ export default async function OtherPapersPage({
     supabase
       .from('external_publications')
       .select(
-        'id, title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility, slug, created_by, editor_edited_at'
+        'id, title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility, slug, created_by, editor_edited_at, updated_at'
       )
       .eq('owner_id', access.ownerId)
       .order('publication_year', {
@@ -507,6 +507,10 @@ export default async function OtherPapersPage({
                         publicationId={
                           publication.id
                         }
+                        expectedUpdatedAt={
+                          publication.updated_at ??
+                          ''
+                        }
                         suggestedSlug={suggestExternalPublicationSlug(
                           publication.title,
                           publication.publication_year
@@ -589,9 +593,11 @@ export default async function OtherPapersPage({
             for the sites that use the
             Academic API. Sites filter
             the external publications
-            feed by collection slug;
-            names and descriptions stay
-            private.
+            feed by collection slug, so
+            slugs are public once a
+            collection holds a Public
+            publication; names and
+            descriptions stay private.
           </p>
 
           <Card className="mt-5">

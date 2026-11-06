@@ -24,9 +24,12 @@ function isRestrictedAccountPath(
 function isPublicPath(
   pathname: string
 ) {
+  // Match whole segments so a future route such as /authors is not public.
   return (
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/auth') ||
+    pathname === '/login' ||
+    pathname.startsWith('/login/') ||
+    pathname === '/auth' ||
+    pathname.startsWith('/auth/') ||
     pathname === '/release-notes' ||
     pathname === '/api'
   )

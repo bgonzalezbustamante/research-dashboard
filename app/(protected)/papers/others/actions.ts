@@ -55,6 +55,49 @@ function revalidateOtherPapers() {
   revalidatePath('/projects')
 }
 
+const stalePublicationMessage =
+  'This publication changed since you opened the page. Review the latest version and try again.'
+
+// Guards Owner saves against lost updates: a Website Editor may edit their
+// own publication while the Owner has the page open, so the form carries the
+// updated_at it was rendered from and the save is refused if it moved on.
+async function assertPublicationUnchanged(
+  supabase: Awaited<
+    ReturnType<typeof createClient>
+  >,
+  ownerId: string,
+  id: string,
+  expectedUpdatedAt: string | null
+) {
+  const {
+    data,
+    error,
+  } = await supabase
+    .from('external_publications')
+    .select('updated_at')
+    .eq('id', id)
+    .eq('owner_id', ownerId)
+    .maybeSingle()
+
+  if (error || !data) {
+    otherPapersRedirect(
+      'error',
+      'That external publication was not found.'
+    )
+  }
+
+  if (
+    !expectedUpdatedAt ||
+    data.updated_at !==
+      expectedUpdatedAt
+  ) {
+    otherPapersRedirect(
+      'error',
+      stalePublicationMessage
+    )
+  }
+}
+
 function publicationErrorMessage(
   code: string | undefined,
   fallback: string
@@ -117,7 +160,8 @@ export async function createExternalPublication(
 export async function updateExternalPublication(
   formData: FormData
 ) {
-  await requireDashboardOwner()
+  const access =
+    await requireDashboardOwner()
 
   const id =
     getRequiredText(
@@ -147,6 +191,16 @@ export async function updateExternalPublication(
 
   const supabase =
     await createClient()
+
+  await assertPublicationUnchanged(
+    supabase,
+    access.ownerId,
+    id,
+    getOptionalText(
+      formData,
+      'expected_updated_at'
+    )
+  )
 
   const { error } =
     await supabase.rpc(
@@ -292,7 +346,7 @@ export async function approveExternalPublication(
   } = await supabase
     .from('external_publications')
     .select(
-      'title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility'
+      'title, authors, venue, publication_year, published_on, doi_url, publication_url, language, visibility, updated_at'
     )
     .eq('id', id)
     .eq('owner_id', access.ownerId)
@@ -312,6 +366,20 @@ export async function approveExternalPublication(
     otherPapersRedirect(
       'error',
       'That external publication is already published.'
+    )
+  }
+
+  // Approve publishes exactly the version the Owner reviewed.
+  if (
+    publication.updated_at !==
+    getOptionalText(
+      formData,
+      'expected_updated_at'
+    )
+  ) {
+    otherPapersRedirect(
+      'error',
+      stalePublicationMessage
     )
   }
 

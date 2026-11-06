@@ -132,7 +132,7 @@ export default function AccountCard({
             Paper Website Editor
           </h4>
           <p className="mt-1 text-sm leading-6 text-oxford-ash">
-            Select the papers whose public Website content this account may edit: publication index, citation and Key highlight only. Saving an empty selection removes all Website Editor assignments.
+            Select the papers whose public Website content this account may edit: publication index and citation only. Website Editors can also suggest other papers for review. Saving an empty selection removes all Website Editor assignments.
           </p>
 
           <form

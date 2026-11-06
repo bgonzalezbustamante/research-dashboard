@@ -34,6 +34,17 @@
 - Added the `publication-authorship` controlled vocabulary, the `project-publications` and `external-publications` manifest resources, and reference-client `listPublicProjectPublications()` and `listPublicExternalPublications()` methods with strict validation (slug format and uniqueness, unique Project and collection slugs, year and date agreement, URL and language rules) and regression tests.
 - Added live compatibility checks: each Public Project's `own` rows must equal its `publication_slugs`; every `external` project row must match the external feed by slug and Project; external slugs and titles never collide with `list_public_papers()`; external rows reference only public Projects; and the new tables stay closed to anonymous callers.
 
+`Pre-release hardening`
+
+- Tightened the external publication link constraints: DOI and publication URLs must be absolute HTTP(S) URLs with a host and no whitespace, matching the Project URL rule, and each author name must be 1–300 characters (`external_publications_author_length`). The forms check the same rules before saving.
+- Website Editor edits now record `changed_fields` and the `previous` values in the `external_publication_updated` audit event, so the Owner can see what a live edit changed after the "Edited since approval" flag is cleared. A save that changes nothing no longer raises the flag.
+- Approve and publish and the Owner's save on the Other papers tab now refuse to overwrite a publication that changed since the page was opened (for example, a Website Editor's edit made in the meantime), so the Owner never publishes text he has not reviewed.
+- Added server-side Owner checks to the Hours, Planning and Paper (details, citations, history and Milestones) actions, and a Dashboard guard to the Planning page. These writes were already blocked by database policies; the app now rejects other signed-in accounts before reaching them.
+- The request proxy now matches its public `/login` and `/auth` paths by whole path segment, so a future route such as `/authors` cannot become public by accident.
+- Fixed the staged Coauthor retirement: Author profile linking now considers Website Editor assignments as well as the Owner's own Papers, since it previously matched only Coauthor membership rows that the retirement removes. The release-window precheck also lists policies that still reference a dropped helper.
+- Corrected the Access page and invitation form, which still said Website Editors could edit the Key highlight.
+- Updated the development lint toolchain (`typescript-eslint` 8.72.1 and `zod` 4.6.7) to clear a high-severity development-only advisory; production dependencies were unaffected.
+
 ## v1.0.0-rc.3 "Bold Ridge"
 
 Released 3 Nov 2026.

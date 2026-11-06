@@ -24,6 +24,7 @@ export type ExternalPublicationRow = {
   slug?: string | null
   created_by?: string | null
   editor_edited_at?: string | null
+  updated_at?: string | null
 }
 
 export type ExternalPublicationCollectionRow = {
@@ -103,16 +104,28 @@ function getOptionalText(
     : null
 }
 
+// Mirrors the external_publications URL constraints: an absolute HTTP(S)
+// URL with a host and no whitespace.
+const httpUrlPattern =
+  /^https?:\/\/[^\s/?#]+([/?#]\S*)?$/i
+
 function isValidHttpUrl(
   value: string
 ) {
+  if (
+    !httpUrlPattern.test(value)
+  ) {
+    return false
+  }
+
   try {
     const url =
       new URL(value)
 
     return (
-      url.protocol === 'http:' ||
-      url.protocol === 'https:'
+      (url.protocol === 'http:' ||
+        url.protocol === 'https:') &&
+      url.hostname.length > 0
     )
   } catch {
     return false
@@ -197,6 +210,18 @@ export function readExternalPublicationFields(
     return {
       error:
         'Enter between 1 and 100 authors, one per line.',
+    }
+  }
+
+  if (
+    authors.some(
+      (author) =>
+        author.length > 300
+    )
+  ) {
+    return {
+      error:
+        'Each author name must be 300 characters or fewer.',
     }
   }
 

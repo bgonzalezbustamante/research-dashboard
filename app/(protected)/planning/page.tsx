@@ -6,6 +6,7 @@ import PlanningWorkspace from '@/components/planning/planning-workspace'
 import StandbyPapersCard from '@/components/planning/standby-papers-card'
 import PageHeader from '@/components/page-header'
 import ButtonLink from '@/components/ui/button-link'
+import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
 import {
   aggregateMilestonesByPaperAndPeriod,
   getPlanningPeriodEnd,
@@ -296,6 +297,8 @@ function getSessionDuration(
 export default async function PlanningPage({
   searchParams,
 }: PlanningPageProps) {
+  await requireDashboardAccess()
+
   const params =
     await searchParams
 
