@@ -66,6 +66,16 @@ export default function ExternalPublicationForm({
         />
       )}
 
+      {publication?.updated_at && (
+        <input
+          type="hidden"
+          name="expected_updated_at"
+          value={
+            publication.updated_at
+          }
+        />
+      )}
+
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         <div className="md:col-span-2 xl:col-span-4">
           <label

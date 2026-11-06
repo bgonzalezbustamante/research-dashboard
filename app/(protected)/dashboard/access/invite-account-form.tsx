@@ -65,7 +65,7 @@ export default function InviteAccountForm({
               Paper Website Editor
             </h3>
             <p className="mt-1 text-xs leading-5 text-oxford-ash">
-              Optionally select the papers whose public Website content this person may edit (publication index, citation and Key highlight only). Viewer and Website Editor permissions can be combined.
+              Optionally select the papers whose public Website content this person may edit (publication index and citation only); Website Editors can also suggest other papers for review. Viewer and Website Editor permissions can be combined.
             </p>
 
             {papers.length === 0 ? (

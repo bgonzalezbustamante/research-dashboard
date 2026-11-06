@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
 
 const MAX_COFFEE_COUNT = 32767
@@ -198,6 +199,10 @@ function getCoffeeCount(
 }
 
 async function requireAuth() {
+  // Owner-only writes: RLS enforces this too, but signed-in Viewers and
+  // Website Editors should not reach these actions at all.
+  await requireDashboardOwner()
+
   const supabase =
     await createClient()
 

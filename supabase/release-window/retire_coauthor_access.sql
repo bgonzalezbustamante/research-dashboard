@@ -15,6 +15,15 @@
 --   where p.prosrc ~ '(can_collaborate_paper|is_paper_coauthor|has_coauthor_access|can_assign_paper_coauthor)'
 --   order by 1, 2;
 --
+-- Policies are not function bodies, and a leftover one would make the DROP
+-- FUNCTION statements below abort mid-release. This must return no rows:
+--
+--   select schemaname, tablename, policyname
+--   from pg_policies
+--   where coalesce(qual, '') || coalesce(with_check, '')
+--     ~ '(can_collaborate_paper|is_paper_coauthor|has_coauthor_access|can_assign_paper_coauthor)'
+--   order by 1, 2, 3;
+--
 -- Repository history accounts for (some may not appear):
 -- private.can_collaborate_paper, private.can_use_author_for_paper,
 -- private.enforce_coauthor_paper_title_only, private.resolve_author_for_paper,
@@ -665,6 +674,129 @@ end;
 $$;
 
 -- 7. Author profile links follow Website Editor assignments ---------------------
+
+-- Candidate authors now come from the Owner's own Papers or the Papers a
+-- Website Editor is assigned to. The previous body matched only
+-- paper_members rows with role owner or coauthor, so after the coauthor rows
+-- are deleted above, the editor sync triggers below would link nothing.
+create or replace function private.try_link_author_profile(
+  p_owner_id uuid,
+  p_user_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_candidate_count integer := 0;
+  v_author_id uuid;
+begin
+  if p_owner_id is null
+     or p_user_id is null then
+    return;
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles pr
+    where pr.id = p_user_id
+      and pr.deactivated_at is null
+  ) then
+    return;
+  end if;
+
+  if exists (
+    select 1
+    from public.authors a
+    where a.owner_id = p_owner_id
+      and a.profile_id = p_user_id
+  ) then
+    return;
+  end if;
+
+  select
+    count(*)::integer,
+    (
+      array_agg(
+        candidates.author_id
+        order by candidates.author_id
+      )
+    )[1]
+    into
+      v_candidate_count,
+      v_author_id
+  from (
+    select distinct
+      a.id as author_id
+    from public.authors a
+    join public.paper_authors pa
+      on pa.author_id = a.id
+    join public.papers p
+      on p.id = pa.paper_id
+     and p.owner_id = p_owner_id
+    join public.profiles pr
+      on pr.id = p_user_id
+     and pr.deactivated_at is null
+    where a.owner_id = p_owner_id
+      and a.profile_id is null
+      and (
+        exists (
+          select 1
+          from public.paper_members pm
+          where pm.paper_id = p.id
+            and pm.user_id = p_user_id
+            and pm.role = 'owner'
+        )
+        or exists (
+          select 1
+          from public.paper_website_editors pwe
+          where pwe.paper_id = p.id
+            and pwe.user_id = p_user_id
+        )
+      )
+      and (
+        (
+          pr.full_name is not null
+          and btrim(pr.full_name) <> ''
+          and lower(btrim(a.full_name)) =
+              lower(btrim(pr.full_name))
+        )
+        or (
+          a.email is not null
+          and pr.email is not null
+          and btrim(a.email) <> ''
+          and btrim(pr.email) <> ''
+          and lower(btrim(a.email)) =
+              lower(btrim(pr.email))
+        )
+      )
+  ) candidates;
+
+  if v_candidate_count <> 1
+     or v_author_id is null then
+    return;
+  end if;
+
+  update public.authors a
+  set
+    profile_id = p_user_id,
+    updated_at = now()
+  where a.id = v_author_id
+    and a.owner_id = p_owner_id
+    and a.profile_id is null
+    and not exists (
+      select 1
+      from public.authors linked
+      where linked.profile_id = p_user_id
+        and linked.id <> a.id
+    );
+end;
+$;
+
+revoke all
+  on function private.try_link_author_profile(uuid, uuid)
+  from public, anon, authenticated;
 
 create or replace function private.sync_author_profile_from_paper_member()
 returns trigger

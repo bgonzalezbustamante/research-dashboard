@@ -553,6 +553,40 @@ begin
     2025
   );
 
+  -- Input hardening: links need a host and no whitespace, and author names
+  -- are at most 300 characters.
+  begin
+    perform public.create_my_external_publication(
+      'rc.4 QA bad link', array['A. Partner'], 2025,
+      null, null, null, 'https://', null
+    );
+    raise exception 'Editor stored a publication link without a host';
+  exception
+    when check_violation then
+      null;
+  end;
+
+  begin
+    perform public.create_my_external_publication(
+      'rc.4 QA bad link', array['A. Partner'], 2025,
+      null, null, 'https://doi.org/10.1/a b', null, null
+    );
+    raise exception 'Editor stored a DOI link containing whitespace';
+  exception
+    when check_violation then
+      null;
+  end;
+
+  begin
+    perform public.create_my_external_publication(
+      'rc.4 QA long author', array[repeat('x', 301)], 2025
+    );
+    raise exception 'Editor stored an author name over 300 characters';
+  exception
+    when check_violation then
+      null;
+  end;
+
   begin
     perform public.delete_my_external_publication(v_id);
     raise exception 'Editor deleted a published external publication';
@@ -584,6 +618,18 @@ begin
     where external_publication_id = v_id
   ) then
     raise exception 'Editor edit after approval changed collections or Projects';
+  end if;
+
+  if not exists (
+    select 1
+    from public.access_audit_log
+    where event_type = 'external_publication_updated'
+      and details ->> 'external_publication_id' = v_id::text
+      and (details ->> 'published')::boolean
+      and details -> 'changed_fields' ? 'title'
+      and details -> 'previous' ->> 'title' = 'rc.4 QA external publication (edited)'
+  ) then
+    raise exception 'Editor edit after approval was not audited with its previous values';
   end if;
 
   -- The Owner's next save clears the editor flag.
@@ -628,6 +674,37 @@ begin
       and editor_edited_at is not null
   ) then
     raise exception 'Owner save did not clear the editor edit flag';
+  end if;
+
+  -- An editor save that changes nothing does not raise the flag again.
+  perform set_config(
+    'request.jwt.claims',
+    json_build_object('sub', v.editor_id, 'role', 'authenticated')::text,
+    true
+  );
+  perform set_config('role', 'authenticated', true);
+
+  perform public.update_my_external_publication(
+    v_id,
+    e.title,
+    e.authors,
+    e.publication_year,
+    e.published_on,
+    e.venue,
+    e.doi_url,
+    e.publication_url,
+    e.language
+  );
+
+  perform set_config('role', 'none', true);
+
+  if exists (
+    select 1
+    from public.external_publications
+    where id = v_id
+      and editor_edited_at is not null
+  ) then
+    raise exception 'An unchanged editor save flagged the publication as edited';
   end if;
 end;
 $$;
