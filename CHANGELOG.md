@@ -9,6 +9,15 @@
 
 ### Code changes
 
+`Downstream adoption`
+
+- Prepared the reference client for npm as `@bgonzalezbustamante/academic-api-client` `0.1.0-beta.1` (MIT, `beta` tag). It builds to `packages/academic-api-client/dist` through `npm run build:academic-api-client:package` and `prepack`, and ships only `dist`, the README and the licence. The existing check build and `check:academic-api-client` are unchanged.
+- Added `createFetchTransport()`, a dependency-free transport that POSTs to the Data API's `/rest/v1/rpc/<name>` with the publishable key and passes fetch options through, including Next.js `{ next: { revalidate } }` for ISR. It rejects non-HTTP(S) URLs, missing keys and invalid RPC names, and reports PostgREST and network errors as RPC errors. A supabase-js client remains a valid transport.
+- Added pure helpers for consuming sites: `filterExternalPublicationsByCollection()`, `filterProjectPublications()` and `sortPublicationsByDate()`, with 6 new tests (26 in total). A packed tarball was installed in a scratch project and validated the live production feeds.
+- Rewrote the client README for npm users: install, quick start, Next.js ISR on Netlify, collections and Project publications, failing closed on validation errors, and the package versioning policy.
+- Corrected the manifest's consumer list against each repository's code. The Academic Website also uses the Software, Teaching settings and availability RPCs, the Weekly Penguin Timeline also uses conference presentations and Teaching settings, and Academic Signature Studio is added. Consumers now carry `status` (`active` or `planned`) and an optional `url`. The OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites and the organisation site template are listed as planned consumers of the publication feeds. `check:public-api` validates both fields, and `/api` marks planned consumers and names private repositories without a link, which also fixes a link to the private Academic CV Studio repository that visitors could not open.
+- Each collection on the Other papers tab now shows its Public and Private item counts and the client call a site uses to show it.
+
 `Layout`
 
 - Page descriptions, card introductions, item summaries and empty-state messages now use the full width of the content column. `PageHeader` no longer caps its description at `max-w-3xl`, so its rc.4 `wide` option is removed. The public `/api` and release-notes pages now use the same `max-w-7xl` column as the Dashboard instead of `max-w-5xl`. Sign-in and onboarding cards, form inputs and Papers table columns keep their deliberate widths.

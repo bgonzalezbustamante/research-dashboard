@@ -4,9 +4,9 @@
 
 - [x] **[Claude]** Open `release/v1.0.0-rc.5-ancient-glacier` and the start commit
 - [x] **[Claude]** Full-width page text: `PageHeader`, card intros, empty states, and the `/api` and release-notes columns
-- [ ] **[Claude]** Prepare `@bgonzalezbustamante/academic-api-client` for npm: package build, fetch transport, collection helpers, README, tests ~3h
-- [ ] **[Claude]** Update the manifest consumers (Signature Studio, missing RPCs, planned sites) and the `/api` consumer list ~1h
-- [ ] **[Claude]** Show Public and awaiting-review counts on each collection in Other papers ~30m
+- [x] **[Claude]** Prepare `@bgonzalezbustamante/academic-api-client` for npm: package build, fetch transport, collection helpers, README, tests
+- [x] **[Claude]** Update the manifest consumers (Signature Studio, missing RPCs, planned sites) and the `/api` consumer list
+- [x] **[Claude]** Show Public and Private counts on each collection in Other papers
 - [ ] **[Bastián]** Create the collections `obpex`, `sudakas`, `empiria-lab` and `carla-cisternas` in Papers → Other papers ~10m
 - [ ] **[Claude]** Migration: database URL rules for `paper_links.url`, `conference_presentations.url` and the three Software URLs, with a precheck ~2h
 - [ ] **[Claude]** Migration: cap pending Website Editor suggestions at 20 ~1h
