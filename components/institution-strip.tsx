@@ -1,9 +1,15 @@
 import Image from 'next/image'
 
-// Current affiliations, in the Academic Website's order (Leiden, UDP, OCPSG)
-// followed by Empiria Lab and OBPEX. Files live in public/branding as
-// 128 px square WebP marks.
+// Current affiliations: the University of Oxford square mark (the Dashboard
+// favicon), the Academic Website's marks in its order (Leiden, UDP, OCPSG),
+// then Empiria Lab and OBPEX. Files live in public/branding as 128 px square
+// WebP marks.
 const affiliations = [
+  {
+    id: 'oxford',
+    name: 'University of Oxford',
+    src: '/branding/oxford.webp',
+  },
   {
     id: 'leiden',
     name: 'Leiden University',

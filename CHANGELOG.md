@@ -7,7 +7,7 @@
 - Started `v1.0.0-rc.4 "Velvet Torch"` to replace Coauthor access with a restricted Website Editor role.
 - Added an Other papers library of curated external publications, with stable public slugs, collections for consuming sites, optional Project links, Website Editor suggestions with an Owner approval step, and two new Public RPC v1 feeds.
 - Hardened the release with stricter publication input constraints, stale-save protection, server-side Owner checks across the older Dashboard actions, and a fix to the staged Coauthor retirement.
-- Replaced the Oxford wordmark with the Academic Website's affiliation marks plus Empiria Lab and OBPEX.
+- Replaced the horizontal Oxford wordmark with an affiliation strip: the Oxford square mark used as the Dashboard favicon, the Academic Website's affiliation marks, Empiria Lab and OBPEX.
 
 ### Code changes
 
@@ -40,7 +40,7 @@
 
 `Branding`
 
-- Replaced the Oxford wordmark (`components/oxford-logo.tsx`, `public/branding/oxford-logo.svg`) with an affiliation strip, `components/institution-strip.tsx`, that mirrors the Academic Website's header marks: Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group, followed by Empiria Lab and OBPEX. The marks are 128 px square WebP files in `public/branding/`, shown in grayscale until hover, in a `header` size for the Dashboard, release notes and `/api` headers and an `auth` size for sign-in, onboarding and access pages. `NOTICE` now lists them as third-party branding excluded from the MIT licence.
+- Replaced the horizontal Oxford wordmark (`components/oxford-logo.tsx`, `public/branding/oxford-logo.svg`) with an affiliation strip, `components/institution-strip.tsx`. It starts with the University of Oxford square mark used as the Dashboard favicon, then mirrors the Academic Website's header marks (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), followed by Empiria Lab and OBPEX. The marks are 128 px square WebP files in `public/branding/`, shown in grayscale until hover, in a `header` size for the Dashboard, release notes and `/api` headers and an `auth` size for sign-in, onboarding and access pages. `NOTICE` now lists them as third-party branding excluded from the MIT licence.
 
 `Pre-release hardening`
 
