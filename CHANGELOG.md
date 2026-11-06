@@ -34,6 +34,10 @@
 - Added the `publication-authorship` controlled vocabulary, the `project-publications` and `external-publications` manifest resources, and reference-client `listPublicProjectPublications()` and `listPublicExternalPublications()` methods with strict validation (slug format and uniqueness, unique Project and collection slugs, year and date agreement, URL and language rules) and regression tests.
 - Added live compatibility checks: each Public Project's `own` rows must equal its `publication_slugs`; every `external` project row must match the external feed by slug and Project; external slugs and titles never collide with `list_public_papers()`; external rows reference only public Projects; and the new tables stay closed to anonymous callers.
 
+`Branding`
+
+- Replaced the Oxford wordmark (`components/oxford-logo.tsx`, `public/branding/oxford-logo.svg`) with an affiliation strip, `components/institution-strip.tsx`, that mirrors the Academic Website's header marks: Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group, followed by Empiria Lab and OBPEX. The marks are 128 px square WebP files in `public/branding/`, shown in grayscale until hover, in a `header` size for the Dashboard, release notes and `/api` headers and an `auth` size for sign-in, onboarding and access pages. `NOTICE` now lists them as third-party branding excluded from the MIT licence.
+
 `Pre-release hardening`
 
 - Tightened the external publication link constraints: DOI and publication URLs must be absolute HTTP(S) URLs with a host and no whitespace, matching the Project URL rule, and each author name must be 1–300 characters (`external_publications_author_length`). The forms check the same rules before saving.

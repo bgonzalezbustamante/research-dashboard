@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import AppNavigation from '@/components/app-navigation'
-import OxfordLogo from '@/components/oxford-logo'
+import InstitutionStrip from '@/components/institution-strip'
 import OwnerUtilityNavigation from '@/components/owner-utility-navigation'
 import FormattingHints from '@/components/papers/formatting-hints'
 import ResearchTextEnhancer from '@/components/papers/research-text-enhancer'
@@ -109,7 +109,7 @@ export default async function ProtectedLayout({
                 }
                 className="inline-flex"
               >
-                <OxfordLogo className="w-[190px]" />
+                <InstitutionStrip />
               </Link>
 
               <div className="hidden h-10 w-px bg-oxford-stone sm:block" />

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import OxfordLogo from '@/components/oxford-logo'
+import InstitutionStrip from '@/components/institution-strip'
 import SiteFooter from '@/components/site-footer'
 import academicApiContract from '@/lib/academic-api-contract.json'
 
@@ -108,7 +108,7 @@ export default function AcademicApiPage() {
             href="/dashboard"
             className="flex items-center gap-4"
           >
-            <OxfordLogo className="w-[190px]" />
+            <InstitutionStrip />
             <span className="font-serif text-xl font-semibold text-oxford-blue">
               Research Dashboard
             </span>
