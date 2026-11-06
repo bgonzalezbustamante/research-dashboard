@@ -722,7 +722,7 @@ returns void
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_candidate_count integer := 0;
   v_author_id uuid;
@@ -827,7 +827,7 @@ begin
         and linked.id <> a.id
     );
 end;
-$;
+$$;
 
 revoke all
   on function private.try_link_author_profile(uuid, uuid)
