@@ -1,9 +1,8 @@
 import Link from 'next/link'
 
 import AppNavigation from '@/components/app-navigation'
-import OxfordLogo from '@/components/oxford-logo'
+import InstitutionStrip from '@/components/institution-strip'
 import OwnerUtilityNavigation from '@/components/owner-utility-navigation'
-import CoauthorPaperShortcut from '@/components/papers/coauthor-paper-shortcut'
 import FormattingHints from '@/components/papers/formatting-hints'
 import ResearchTextEnhancer from '@/components/papers/research-text-enhancer'
 import ReadOnlyMode from '@/components/read-only-mode'
@@ -47,28 +46,29 @@ export default async function ProtectedLayout({
   const isViewer =
     access.dashboardRole === 'viewer'
 
-  const isCoauthor =
-    access.hasCoauthorAccess
+  const isWebsiteEditor =
+    !isOwner &&
+    access.hasWebsiteEditorAccess
 
   const homeHref =
     access.hasDashboardAccess
       ? '/dashboard'
-      : '/papers'
+      : '/website'
 
   const readOnlyByDefault =
     !isOwner
 
   let accessMessage = ''
 
-  if (isViewer && isCoauthor) {
+  if (isViewer && isWebsiteEditor) {
     accessMessage =
-      'Viewer + Coauthor access. Dashboard-wide access is read-only; assigned papers allow permitted coauthor edits.'
+      'Viewer + Website Editor access. Dashboard-wide access is read-only; under Website you can edit the public Website content of assigned papers.'
   } else if (isViewer) {
     accessMessage =
       'Read-only access. You can browse Dashboard, Hours, Planning, and Papers, but changes are disabled.'
-  } else if (isCoauthor) {
+  } else if (isWebsiteEditor) {
     accessMessage =
-      'Coauthor access. You can browse assigned papers and edit permitted paper fields.'
+      'Website Editor access. You can edit the public Website content of the papers assigned to you.'
   }
 
   return (
@@ -85,7 +85,7 @@ export default async function ProtectedLayout({
       }
       data-dashboard-role={
         access.dashboardRole ??
-        'coauthor'
+        'website-editor'
       }
       className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal"
     >
@@ -105,11 +105,11 @@ export default async function ProtectedLayout({
                 aria-label={
                   access.hasDashboardAccess
                     ? 'Go to dashboard'
-                    : 'Go to papers'
+                    : 'Go to website editing'
                 }
                 className="inline-flex"
               >
-                <OxfordLogo className="w-[190px]" />
+                <InstitutionStrip />
               </Link>
 
               <div className="hidden h-10 w-px bg-oxford-stone sm:block" />
@@ -127,9 +127,12 @@ export default async function ProtectedLayout({
                 showDashboardModules={
                   access.hasDashboardAccess
                 }
+                showWebsiteEditor={
+                  isWebsiteEditor
+                }
               />
 
-              {(isViewer || isCoauthor) && (
+              {(isViewer || isWebsiteEditor) && (
                 <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                   {isViewer && (
                     <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900">
@@ -137,9 +140,9 @@ export default async function ProtectedLayout({
                     </span>
                   )}
 
-                  {isCoauthor && (
+                  {isWebsiteEditor && (
                     <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-                      Coauthor
+                      Website Editor
                     </span>
                   )}
                 </div>
@@ -159,10 +162,6 @@ export default async function ProtectedLayout({
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-6 py-8">
-          {isCoauthor && (
-            <CoauthorPaperShortcut />
-          )}
-
           {children}
         </div>
       </main>

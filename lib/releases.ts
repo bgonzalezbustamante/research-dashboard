@@ -15,9 +15,50 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.4',
+    codename: 'Velvet Torch',
+    status: 'Release candidate',
+    releasedOn: '6 Nov 2026',
+    comparison: 'Changes since rc.3',
+    summary:
+      'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues and adds a curated library of other people’s papers for the Academic Website and related sites.',
+    sections: [
+      {
+        title: 'Access',
+        items: [
+          'Invited colleagues can now be Website Editors: they see only the papers assigned to them and can keep their citations and publication index accurate on the Academic Website, without access to the wider Dashboard.',
+          'Titles, authors, visibility, public addresses, Featured status and Key highlights stay with the Dashboard Owner, and every change by a colleague is recorded in the Access audit trail.',
+          'Existing Coauthor assignments carry over as Website Editor assignments, so nobody needs a new invitation.',
+        ],
+      },
+      {
+        title: 'Other people’s papers',
+        items: [
+          'Papers now has an Other papers tab: a library of publications by other authors for the Academic Website and related sites, kept separate from your own papers, Planning and analytics.',
+          'Each publication stays private until you publish it with a stable public address, and you can group publications into collections so each site shows its own selection, with optional links to related projects.',
+          'Website Editors can suggest publications for review and keep their own entries up to date after you publish them; you see which entries they changed, and the public address, collections and visibility stay with you.',
+          'New public data feeds share these publications, and each Project’s related publications, without changing any existing public data.',
+        ],
+      },
+      {
+        title: 'Look and feel',
+        items: [
+          'The Dashboard header and sign-in pages now show the University of Oxford mark from the Dashboard icon, the same affiliation marks as the Academic Website (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), Empiria Lab and OBPEX. They appear in grey and take their colours on hover.',
+        ],
+      },
+      {
+        title: 'Reliability and maintenance',
+        items: [
+          'A pre-release review found no serious issues and tightened several safeguards: publication links and author names are checked more strictly, approving or saving a publication no longer overwrites a colleague’s newer edit, and older Dashboard actions now check for the Owner before saving.',
+          'The public-data, build, audit and secret-scanning checks were re-run successfully, and a development-only tooling advisory was patched without affecting the live Dashboard.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.3',
     codename: 'Bold Ridge',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '3 Nov 2026',
     comparison: 'Changes since rc.2',
     summary:

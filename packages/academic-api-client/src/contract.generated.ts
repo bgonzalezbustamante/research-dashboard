@@ -85,6 +85,32 @@ export const RPC_FIELDS = {
     "publication_slugs",
     "conference_presentations"
   ],
+  "list_public_project_publications": [
+    "project_slug",
+    "authorship",
+    "publication_slug",
+    "title",
+    "authors",
+    "venue",
+    "publication_date",
+    "publication_year",
+    "doi_url",
+    "publication_url",
+    "language"
+  ],
+  "list_public_external_publications": [
+    "slug",
+    "title",
+    "authors",
+    "venue",
+    "publication_date",
+    "publication_year",
+    "doi_url",
+    "publication_url",
+    "language",
+    "project_slugs",
+    "collection_slugs"
+  ],
   "list_public_conference_presentations": [
     "event_name",
     "event_short_name",
@@ -195,6 +221,8 @@ export const RPC_PARAMETERS = {
   "get_public_project": [
     "p_slug"
   ],
+  "list_public_project_publications": [],
+  "list_public_external_publications": [],
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
   "get_public_teaching_settings": [],
@@ -294,6 +322,10 @@ export const CONTROLLED_VOCABULARIES = {
   "repository-visibility": [
     "public",
     "private"
+  ],
+  "publication-authorship": [
+    "own",
+    "external"
   ]
 } as const
 

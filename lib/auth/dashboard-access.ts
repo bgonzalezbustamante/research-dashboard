@@ -12,8 +12,8 @@ export type AppAccess = {
   dashboardRole: DashboardRole | null
   hasDashboardAccess: boolean
   canEditDashboard: boolean
-  hasPaperAccess: boolean
-  hasCoauthorAccess: boolean
+  hasWebsiteEditorAccess: boolean
+  isWebsiteEditorOnly: boolean
 }
 
 export type DashboardAccess = {
@@ -54,8 +54,7 @@ export async function requireAppAccess(): Promise<AppAccess> {
 
   const [
     dashboardResult,
-    paperResult,
-    coauthorResult,
+    websiteEditorResult,
   ] = await Promise.all([
     supabase
       .from('dashboard_members')
@@ -64,16 +63,9 @@ export async function requireAppAccess(): Promise<AppAccess> {
       .maybeSingle(),
 
     supabase
-      .from('paper_members')
+      .from('paper_website_editors')
       .select('paper_id')
       .eq('user_id', userId)
-      .limit(1),
-
-    supabase
-      .from('paper_members')
-      .select('paper_id')
-      .eq('user_id', userId)
-      .eq('role', 'coauthor')
       .limit(1),
   ])
 
@@ -83,15 +75,9 @@ export async function requireAppAccess(): Promise<AppAccess> {
     )
   }
 
-  if (paperResult.error) {
+  if (websiteEditorResult.error) {
     throw new Error(
-      `Could not load paper access: ${paperResult.error.message}`
-    )
-  }
-
-  if (coauthorResult.error) {
-    throw new Error(
-      `Could not load coauthor access: ${coauthorResult.error.message}`
+      `Could not load Website Editor access: ${websiteEditorResult.error.message}`
     )
   }
 
@@ -106,15 +92,13 @@ export async function requireAppAccess(): Promise<AppAccess> {
       ? (dashboardMembership.role as DashboardRole)
       : null
 
-  const hasPaperAccess =
-    (paperResult.data ?? []).length > 0
-
-  const hasCoauthorAccess =
-    (coauthorResult.data ?? []).length > 0
+  const hasWebsiteEditorAccess =
+    (websiteEditorResult.data ?? [])
+      .length > 0
 
   if (
     !dashboardRole &&
-    !hasPaperAccess
+    !hasWebsiteEditorAccess
   ) {
     redirect('/access-denied')
   }
@@ -129,8 +113,10 @@ export async function requireAppAccess(): Promise<AppAccess> {
       dashboardRole !== null,
     canEditDashboard:
       dashboardRole === 'owner',
-    hasPaperAccess,
-    hasCoauthorAccess,
+    hasWebsiteEditorAccess,
+    isWebsiteEditorOnly:
+      dashboardRole === null &&
+      hasWebsiteEditorAccess,
   }
 }
 
@@ -142,7 +128,7 @@ export async function requireDashboardAccess(): Promise<DashboardAccess> {
     !access.dashboardRole ||
     !access.dashboardOwnerId
   ) {
-    redirect('/papers')
+    redirect('/website')
   }
 
   return {
@@ -162,6 +148,21 @@ export async function requireDashboardOwner() {
 
   if (!access.canEdit) {
     redirect('/dashboard')
+  }
+
+  return access
+}
+
+export async function requireWebsiteEditorAccess() {
+  const access =
+    await requireAppAccess()
+
+  if (!access.hasWebsiteEditorAccess) {
+    redirect(
+      access.canEditDashboard
+        ? '/papers'
+        : '/dashboard'
+    )
   }
 
   return access

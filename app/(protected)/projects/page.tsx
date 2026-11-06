@@ -112,6 +112,21 @@ type ProjectHoursRow = {
   session_count: number | string
 }
 
+type ProjectExternalPublication = {
+  id: string
+  title: string
+  publication_year: number
+  visibility: 'private' | 'public'
+}
+
+type ProjectExternalLinkRow = {
+  project_id: string
+  external_publications:
+    | ProjectExternalPublication
+    | ProjectExternalPublication[]
+    | null
+}
+
 const inputClass =
   'w-full rounded-md border border-oxford-stone bg-white px-3 py-2 text-sm text-oxford-charcoal outline-none transition focus:border-oxford-blue focus:ring-1 focus:ring-oxford-blue'
 
@@ -280,6 +295,7 @@ export default async function ProjectsPage({
     presentationsResult,
     labelsResult,
     hoursResult,
+    externalLinksResult,
   ] = await Promise.all([
     supabase
       .from('projects')
@@ -420,6 +436,14 @@ export default async function ProjectsPage({
     supabase.rpc(
       'get_project_hours'
     ),
+
+    supabase
+      .from(
+        'project_external_publications'
+      )
+      .select(
+        'project_id, external_publications(id, title, publication_year, visibility)'
+      ),
   ])
 
   for (const [
@@ -453,6 +477,10 @@ export default async function ProjectsPage({
       labelsResult,
     ],
     ['project hours', hoursResult],
+    [
+      'project external publications',
+      externalLinksResult,
+    ],
   ] as const) {
     if (result.error) {
       throw new Error(
@@ -496,6 +524,38 @@ export default async function ProjectsPage({
   const hoursRows =
     (hoursResult.data ??
       []) as ProjectHoursRow[]
+
+  const externalPublicationsByProject =
+    new Map<
+      string,
+      ProjectExternalPublication[]
+    >()
+
+  for (const row of (externalLinksResult.data ??
+    []) as unknown as ProjectExternalLinkRow[]) {
+    const publication =
+      Array.isArray(
+        row.external_publications
+      )
+        ? row.external_publications[0]
+        : row.external_publications
+
+    if (!publication) {
+      continue
+    }
+
+    const existing =
+      externalPublicationsByProject.get(
+        row.project_id
+      ) ?? []
+
+    existing.push(publication)
+
+    externalPublicationsByProject.set(
+      row.project_id,
+      existing
+    )
+  }
 
   const metadataByProject =
     new Map(
@@ -1622,6 +1682,59 @@ export default async function ProjectsPage({
                             <p className="mt-2 text-sm text-oxford-ash">
                               No linked
                               papers.
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <h3 className="font-serif text-lg font-semibold text-oxford-blue">
+                            External
+                            publications
+                          </h3>
+
+                          {(externalPublicationsByProject.get(
+                            project.id
+                          ) ?? []).length >
+                          0 ? (
+                            <ul className="mt-2 space-y-2 text-sm">
+                              {(externalPublicationsByProject.get(
+                                project.id
+                              ) ?? []).map(
+                                (
+                                  publication
+                                ) => (
+                                  <li
+                                    key={
+                                      publication.id
+                                    }
+                                  >
+                                    <Link
+                                      href={`/papers/others#external-publication-${publication.id}`}
+                                      className="font-medium text-oxford-blue hover:underline"
+                                    >
+                                      {
+                                        publication.title
+                                      }
+                                    </Link>
+                                    <span className="text-oxford-ash">
+                                      {' '}
+                                      ·{' '}
+                                      {
+                                        publication.publication_year
+                                      }
+                                      {publication.visibility ===
+                                      'public'
+                                        ? ''
+                                        : ' · Private'}
+                                    </span>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          ) : (
+                            <p className="mt-2 text-sm text-oxford-ash">
+                              No external
+                              publications.
                             </p>
                           )}
                         </div>

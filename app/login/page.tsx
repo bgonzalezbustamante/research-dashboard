@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { login } from './actions'
-import OxfordLogo from '@/components/oxford-logo'
+import InstitutionStrip from '@/components/institution-strip'
 import SiteFooter from '@/components/site-footer'
 import Button from '@/components/ui/button'
 
@@ -22,7 +22,7 @@ export default async function LoginPage({
       <main className="flex flex-1 items-center justify-center px-6 py-10">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex justify-center">
-            <OxfordLogo className="w-[220px]" />
+            <InstitutionStrip size="auth" />
           </div>
 
           <div className="rounded-lg border border-oxford-stone bg-white p-8 shadow-sm">

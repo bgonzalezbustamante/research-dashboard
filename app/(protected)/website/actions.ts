@@ -3,25 +3,20 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-import { requireDashboardOwner } from '@/lib/auth/dashboard-access'
+import {
+  requireDashboardOwner,
+  requireWebsiteEditorAccess,
+} from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
+import {
+  readPaperWebsiteCitation,
+  readPaperWebsiteContent,
+} from '@/lib/website/paper-content'
 
 const allowedVisibilities = new Set([
   'private',
   'public',
 ])
-
-const allowedPublicationIndexes =
-  new Set([
-    'WoS-SSCI',
-    'Scopus',
-    'WoS-ESCI',
-    'Book chapter',
-    'SciELO/Latindex',
-    'Working paper',
-    'Preprint',
-    'Dataset',
-  ])
 
 const slugPattern =
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -64,8 +59,20 @@ function paperWebsiteRedirect(
   )
 }
 
-const assetFilenamePattern =
-  /^[A-Za-z0-9][A-Za-z0-9._-]*\.(png|webp|jpg|jpeg)$/i
+function websiteEditorRedirect(
+  paperId: string,
+  key: 'error' | 'saved',
+  value: string
+): never {
+  const params =
+    new URLSearchParams({
+      [key]: value,
+    })
+
+  redirect(
+    `/website/${paperId}?${params.toString()}`
+  )
+}
 
 export async function updatePublicPaperMetadata(
   formData: FormData
@@ -136,134 +143,19 @@ export async function updatePublicPaperMetadata(
     )
   }
 
-  const publicationIndex =
-    getOptionalText(
-      formData,
-      'publication_index'
+  const contentResult =
+    readPaperWebsiteContent(
+      formData
     )
 
-  if (
-    publicationIndex &&
-    !allowedPublicationIndexes.has(
-      publicationIndex
-    )
-  ) {
+  if (!contentResult.content) {
     paperWebsiteRedirect(
       paperId,
       'websiteError',
-      'Invalid publication index category.'
+      contentResult.error ??
+        "The Website content is invalid."
     )
   }
-
-  const citation =
-    getOptionalText(
-      formData,
-      'citation'
-    )
-
-  const highlightText =
-    getOptionalText(
-      formData,
-      'highlight_text'
-    )
-
-  const highlightImageFilename =
-    getOptionalText(
-      formData,
-      'highlight_image_filename'
-    )
-
-  const rawHighlightImageAlt =
-    getOptionalText(
-      formData,
-      'highlight_image_alt'
-    )
-
-  const rawHighlightImageCaption =
-    getOptionalText(
-      formData,
-      'highlight_image_caption'
-    )
-
-  if (
-    citation &&
-    citation.length > 2000
-  ) {
-    paperWebsiteRedirect(
-      paperId,
-      'websiteError',
-      'Citation must be 2,000 characters or fewer.'
-    )
-  }
-
-  if (
-    highlightText &&
-    highlightText.length > 2000
-  ) {
-    paperWebsiteRedirect(
-      paperId,
-      'websiteError',
-      'Key highlight text must be 2,000 characters or fewer.'
-    )
-  }
-
-  if (
-    highlightImageFilename &&
-    !assetFilenamePattern.test(
-      highlightImageFilename
-    )
-  ) {
-    paperWebsiteRedirect(
-      paperId,
-      'websiteError',
-      'Key highlight image must be a single PNG, WebP, JPG, or JPEG filename without folders.'
-    )
-  }
-
-  if (
-    highlightImageFilename &&
-    !rawHighlightImageAlt
-  ) {
-    paperWebsiteRedirect(
-      paperId,
-      'websiteError',
-      'Image alt text is required when a Key highlight image filename is configured.'
-    )
-  }
-
-  if (
-    rawHighlightImageAlt &&
-    rawHighlightImageAlt.length >
-      500
-  ) {
-    paperWebsiteRedirect(
-      paperId,
-      'websiteError',
-      'Image alt text must be 500 characters or fewer.'
-    )
-  }
-
-  if (
-    rawHighlightImageCaption &&
-    rawHighlightImageCaption.length >
-      500
-  ) {
-    paperWebsiteRedirect(
-      paperId,
-      'websiteError',
-      'Image caption must be 500 characters or fewer.'
-    )
-  }
-
-  const highlightImageAlt =
-    highlightImageFilename
-      ? rawHighlightImageAlt
-      : null
-
-  const highlightImageCaption =
-    highlightImageFilename
-      ? rawHighlightImageCaption
-      : null
 
   const supabase =
     await createClient()
@@ -281,17 +173,7 @@ export async function updatePublicPaperMetadata(
       featured:
         formData.get('featured') ===
         'on',
-      publication_index:
-        publicationIndex,
-      citation,
-      highlight_text:
-        highlightText,
-      highlight_image_filename:
-        highlightImageFilename,
-      highlight_image_alt:
-        highlightImageAlt,
-      highlight_image_caption:
-        highlightImageCaption,
+      ...contentResult.content,
     })
     .eq('paper_id', paperId)
     .select('paper_id')
@@ -333,6 +215,82 @@ export async function updatePublicPaperMetadata(
   paperWebsiteRedirect(
     paperId,
     'websiteSaved',
+    '1'
+  )
+}
+
+export async function updatePaperWebsiteContent(
+  formData: FormData
+) {
+  await requireWebsiteEditorAccess()
+
+  const paperId =
+    getRequiredText(
+      formData,
+      'paper_id'
+    )
+
+  if (!paperId) {
+    redirect('/website')
+  }
+
+  const citationResult =
+    readPaperWebsiteCitation(
+      formData
+    )
+
+  if (!citationResult.content) {
+    websiteEditorRedirect(
+      paperId,
+      'error',
+      citationResult.error ??
+        'The Website citation is invalid.'
+    )
+  }
+
+  const { content } =
+    citationResult
+
+  const supabase =
+    await createClient()
+
+  // The RPC re-checks the assignment and writes only the citation and
+  // publication index; Key highlight fields stay Owner-only.
+  const { error } =
+    await supabase.rpc(
+      'update_paper_website_content',
+      {
+        p_paper_id: paperId,
+        p_publication_index:
+          content.publication_index,
+        p_citation:
+          content.citation,
+      }
+    )
+
+  if (error) {
+    console.error(
+      'Website content update failed:',
+      error
+    )
+
+    websiteEditorRedirect(
+      paperId,
+      'error',
+      error.code === '42501'
+        ? 'You can no longer edit this paper. It may have been archived or unassigned.'
+        : 'The Website content could not be saved.'
+    )
+  }
+
+  revalidatePath('/website')
+  revalidatePath(
+    `/website/${paperId}`
+  )
+
+  websiteEditorRedirect(
+    paperId,
+    'saved',
     '1'
   )
 }

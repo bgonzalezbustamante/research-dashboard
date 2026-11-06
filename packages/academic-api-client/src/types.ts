@@ -27,6 +27,8 @@ export type SoftwareStatus =
   (typeof CONTROLLED_VOCABULARIES)['software-status'][number]
 export type RepositoryVisibility =
   (typeof CONTROLLED_VOCABULARIES)['repository-visibility'][number]
+export type PublicationAuthorship =
+  (typeof CONTROLLED_VOCABULARIES)['publication-authorship'][number]
 
 export type PublicPaper = {
   slug: string
@@ -131,6 +133,34 @@ export type PublicSoftwareItem = {
   start_year: number | null
   end_year: number | null
   featured: boolean
+}
+
+export type PublicProjectPublication = {
+  project_slug: string
+  authorship: PublicationAuthorship
+  publication_slug: string
+  title: string
+  authors: string[]
+  venue: string | null
+  publication_date: string | null
+  publication_year: number | null
+  doi_url: string | null
+  publication_url: string | null
+  language: PaperLanguage | null
+}
+
+export type PublicExternalPublication = {
+  slug: string
+  title: string
+  authors: string[]
+  venue: string | null
+  publication_date: string | null
+  publication_year: number
+  doi_url: string | null
+  publication_url: string | null
+  language: PaperLanguage | null
+  project_slugs: string[]
+  collection_slugs: string[]
 }
 
 export type PublicPaperMilestone = {
@@ -247,6 +277,20 @@ export type PublicSoftwareDetailContractKeysMatch = Assert<
   KeysEqual<
     PublicSoftwareItem,
     typeof RPC_FIELDS.get_public_software
+  >
+>
+
+export type PublicProjectPublicationContractKeysMatch = Assert<
+  KeysEqual<
+    PublicProjectPublication,
+    typeof RPC_FIELDS.list_public_project_publications
+  >
+>
+
+export type PublicExternalPublicationContractKeysMatch = Assert<
+  KeysEqual<
+    PublicExternalPublication,
+    typeof RPC_FIELDS.list_public_external_publications
   >
 >
 

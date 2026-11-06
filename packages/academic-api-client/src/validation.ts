@@ -21,6 +21,8 @@ import type {
   PublicPaper,
   PublicPaperDetail,
   PublicProject,
+  PublicExternalPublication,
+  PublicProjectPublication,
   PublicSoftwareItem,
   PublicTeachingItem,
   PublicTeachingSettings,
@@ -861,6 +863,286 @@ export function parsePublicProjectDetailResponse(
   }
 
   return rows[0] ?? null
+}
+
+function parsePublicProjectPublication(
+  value: unknown,
+  path: string
+): PublicProjectPublication {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    RPC_FIELDS.list_public_project_publications,
+    path
+  )
+
+  assertString(
+    value.project_slug,
+    `${path}.project_slug`
+  )
+
+  assertControlledValue(
+    value.authorship,
+    CONTROLLED_VOCABULARIES[
+      'publication-authorship'
+    ],
+    `${path}.authorship`
+  )
+
+  assertString(
+    value.publication_slug,
+    `${path}.publication_slug`
+  )
+
+  assertString(
+    value.title,
+    `${path}.title`
+  )
+
+  assertStringArray(
+    value.authors,
+    `${path}.authors`,
+    {
+      minLength: 1,
+    }
+  )
+
+  assertNullableString(
+    value.venue,
+    `${path}.venue`
+  )
+
+  assertNullableIsoDate(
+    value.publication_date,
+    `${path}.publication_date`
+  )
+
+  assertNullableInteger(
+    value.publication_year,
+    `${path}.publication_year`
+  )
+
+  if (
+    value.authorship ===
+      'external' &&
+    value.publication_year === null
+  ) {
+    fail(
+      `${path}.publication_year`,
+      'required for external publications'
+    )
+  }
+
+  if (
+    value.publication_date !== null &&
+    value.publication_year !==
+      Number(
+        value.publication_date.slice(
+          0,
+          4
+        )
+      )
+  ) {
+    fail(
+      `${path}.publication_year`,
+      'must match the publication_date year'
+    )
+  }
+
+  if (
+    value.authorship === 'own' &&
+    value.publication_date === null &&
+    value.publication_year !== null
+  ) {
+    fail(
+      `${path}.publication_year`,
+      'must be null when an own publication has no publication_date'
+    )
+  }
+
+  assertNullableHttpUrl(
+    value.doi_url,
+    `${path}.doi_url`
+  )
+
+  assertNullableHttpUrl(
+    value.publication_url,
+    `${path}.publication_url`
+  )
+
+  assertNullableControlledValue(
+    value.language,
+    CONTROLLED_VOCABULARIES[
+      'paper-language'
+    ],
+    `${path}.language`
+  )
+
+  return value as unknown as PublicProjectPublication
+}
+
+export function parsePublicProjectPublicationList(
+  payload: unknown
+): PublicProjectPublication[] {
+  return parseArray(
+    payload,
+    'list_public_project_publications response',
+    parsePublicProjectPublication
+  )
+}
+
+const publicSlugPattern =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+function assertPublicSlug(
+  value: unknown,
+  path: string
+): asserts value is string {
+  assertString(value, path)
+
+  if (
+    !publicSlugPattern.test(
+      value
+    )
+  ) {
+    fail(
+      path,
+      'expected a lowercase hyphenated slug'
+    )
+  }
+}
+
+function parsePublicExternalPublication(
+  value: unknown,
+  path: string
+): PublicExternalPublication {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    RPC_FIELDS.list_public_external_publications,
+    path
+  )
+
+  assertPublicSlug(
+    value.slug,
+    `${path}.slug`
+  )
+
+  assertString(
+    value.title,
+    `${path}.title`
+  )
+
+  assertStringArray(
+    value.authors,
+    `${path}.authors`,
+    {
+      minLength: 1,
+    }
+  )
+
+  assertNullableString(
+    value.venue,
+    `${path}.venue`
+  )
+
+  assertNullableIsoDate(
+    value.publication_date,
+    `${path}.publication_date`
+  )
+
+  assertInteger(
+    value.publication_year,
+    `${path}.publication_year`
+  )
+
+  if (
+    value.publication_date !== null &&
+    value.publication_year !==
+      Number(
+        value.publication_date.slice(
+          0,
+          4
+        )
+      )
+  ) {
+    fail(
+      `${path}.publication_year`,
+      'must match the publication_date year'
+    )
+  }
+
+  assertNullableHttpUrl(
+    value.doi_url,
+    `${path}.doi_url`
+  )
+
+  assertNullableHttpUrl(
+    value.publication_url,
+    `${path}.publication_url`
+  )
+
+  assertNullableControlledValue(
+    value.language,
+    CONTROLLED_VOCABULARIES[
+      'paper-language'
+    ],
+    `${path}.language`
+  )
+
+  assertStringArray(
+    value.project_slugs,
+    `${path}.project_slugs`,
+    {
+      unique: true,
+    }
+  )
+
+  assertStringArray(
+    value.collection_slugs,
+    `${path}.collection_slugs`,
+    {
+      unique: true,
+    }
+  )
+
+  value.collection_slugs.forEach(
+    (slug, index) =>
+      assertPublicSlug(
+        slug,
+        `${path}.collection_slugs[${index}]`
+      )
+  )
+
+  return value as unknown as PublicExternalPublication
+}
+
+export function parsePublicExternalPublicationList(
+  payload: unknown
+): PublicExternalPublication[] {
+  const rows =
+    parseArray(
+      payload,
+      'list_public_external_publications response',
+      parsePublicExternalPublication
+    )
+
+  const slugs =
+    rows.map(
+      (row) => row.slug
+    )
+
+  if (
+    new Set(slugs).size !==
+    slugs.length
+  ) {
+    fail(
+      'list_public_external_publications response',
+      'expected unique slugs'
+    )
+  }
+
+  return rows
 }
 
 function parsePublicTeachingItem(
