@@ -17,8 +17,8 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.4',
     codename: 'Velvet Torch',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
+    status: 'Release candidate',
+    releasedOn: '6 Nov 2026',
     comparison: 'Changes since rc.3',
     summary:
       'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues and adds a curated library of other people’s papers for the Academic Website and related sites.',

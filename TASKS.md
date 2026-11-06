@@ -11,8 +11,9 @@
 - [x] **[Claude]** Release-prep docs: README, ARCHITECTURE, CHANGELOG, `lib/releases.ts`, `/api` page, client README, local CLAUDE.md ~1.5h
 - [x] **[Claude]** Open the rc.4 PR as a draft (#62) and wait for CI
 - [x] **[Bastián]** Release window: `/backups` run
-- [ ] **[Bastián]** Release window: Migration C function and policy prechecks, move Migration C into `supabase/migrations/` with a fresh timestamp and `db push` ~1h
-- [ ] **[Bastián]** Re-run the rc.4 access policy suite after Migration C ~10m
+- [x] **[Bastián]** Release window: Migration C function and policy prechecks, rehearsal and `db push` (`20261106132331_retire_coauthor_access.sql`)
+- [x] **[Bastián]** Re-run the rc.4 access policy suite after Migration C
+- [ ] **[Bastián]** Delete `C:\Users\Admin\Documents\rc4_access_policies_filled.sql` and `rc4_migration_c_rehearsal.sql` ~5m
 - [ ] **[Claude]** Merge with a merge commit, tag `v1.0.0-rc.4` and create the GitHub pre-release mirroring `lib/releases.ts` ~30m
 - [ ] **[Bastián]** Tell the former Coauthor (now a Website Editor) about the brief access change ~10m
 
