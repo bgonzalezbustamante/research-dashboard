@@ -10,7 +10,7 @@ The package provides:
 
 - canonical TypeScript resource types;
 - strict runtime validators with field-level diagnostics;
-- a transport-agnostic client for the eleven Public RPC v1 operations;
+- a transport-agnostic client for the sixteen Public RPC v1 operations;
 - generated contract metadata derived from `lib/academic-api-contract.json`.
 
 The public transport remains the Supabase Data API / RPC layer. The reference client sits above that transport and validates responses before returning typed values.
@@ -45,6 +45,8 @@ Teaching settings validate the singleton owner-level `teaching_season_active` bo
 Software validation enforces controlled metadata values, valid start/end lifecycle years, and the privacy invariant that `repository_url` must be null when `repository_visibility` is `private`, even when the software profile itself is public.
 
 Public availability uses the same fail-closed philosophy: ranges must be real dates within the requested year, use a controlled type, have a valid start/end order, avoid duplicate identical ranges, and preserve the privacy rule that Sick records are exposed only as generic `unavailable` periods.
+
+External and project publication validation requires lowercase hyphenated slugs, unique Project and collection slugs per row, a publication date in the publication year, HTTP(S) URLs, and the controlled language and `publication-authorship` (`own`, `external`) values. External publication slugs must also be unique within the `list_public_external_publications()` response, and each project publication row must carry a valid `publication_slug`; the live producer check cross-checks those rows against the Paper and external publication feeds.
 
 ## Portability
 

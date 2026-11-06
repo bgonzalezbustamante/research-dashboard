@@ -6,8 +6,8 @@
 - [x] **[Bastián]** Run the hardening prechecks and `db push` for `20261106120853_harden_external_publication_inputs.sql`
 - [x] **[Bastián]** Re-run the rc.4 access policy suite after the hardening migration
 - [ ] **[Bastián]** Delete `C:\Users\Admin\Documents\rc4_access_policies_filled.sql` and restore Viewer access for `soporte@empirialab.cl` if wanted ~5m
-- [ ] **[Claude]** Finish the affiliation logo strip (Leiden, UDP, OCPSG, Empiria Lab, OBPEX): build, CHANGELOG and release-notes lines, commit ~30m
-- [ ] **[Claude]** Release-prep docs: README, ARCHITECTURE, CHANGELOG, `lib/releases.ts`, `/api` page, client README, local CLAUDE.md ~1.5h
+- [x] **[Claude]** Finish the affiliation logo strip (Leiden, UDP, OCPSG, Empiria Lab, OBPEX): build, CHANGELOG and release-notes lines, commit ~30m
+- [x] **[Claude]** Release-prep docs: README, ARCHITECTURE, CHANGELOG, `lib/releases.ts`, `/api` page, client README, local CLAUDE.md ~1.5h
 - [ ] **[Bastián]** Push the branch and open the rc.4 PR, then wait for CI ~15m
 - [ ] **[Bastián]** Release window: `/backups` run, Migration C function and policy prechecks, move Migration C into `supabase/migrations/` with a fresh timestamp and `db push` ~1h
 - [ ] **[Bastián]** Re-run the rc.4 access policy suite after Migration C ~10m

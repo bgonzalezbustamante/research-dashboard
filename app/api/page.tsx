@@ -220,10 +220,14 @@ export default function AcademicApiPage() {
                   Public boundary
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-oxford-ash">
-                  Papers, projects and
-                  teaching portfolio items
-                  apply their explicit
-                  public visibility rules.
+                  Papers, projects, external
+                  publications and teaching
+                  portfolio items apply
+                  their explicit public
+                  visibility rules; external
+                  publications appear only
+                  after the Owner publishes
+                  them.
                   Conferences expose the
                   documented presentation
                   shape for all stored
@@ -245,7 +249,7 @@ export default function AcademicApiPage() {
                     href="/release-notes"
                     className="font-medium text-oxford-blue underline-offset-4 hover:underline"
                   >
-                    Distant Forge
+                    Velvet Torch
                   </Link>
                   . Contract
                   changes are recorded in
