@@ -302,7 +302,7 @@ test('reference client fetches and validates project publications', async () => 
           data: [{
             project_slug: 'time-use',
             authorship: 'external',
-            paper_slug: null,
+            publication_slug: 'partner-report',
             title: 'Partner report',
             authors: ['A. Partner'],
             venue: null,
@@ -315,14 +315,35 @@ test('reference client fetches and validates project publications', async () => 
           error: null,
         }
       }
+      if (name === 'list_public_external_publications') {
+        return {
+          data: [{
+            slug: 'partner-report',
+            title: 'Partner report',
+            authors: ['A. Partner'],
+            venue: null,
+            publication_date: null,
+            publication_year: 2025,
+            doi_url: null,
+            publication_url: 'https://example.org/report',
+            language: null,
+            project_slugs: ['time-use'],
+            collection_slugs: ['lab-website'],
+          }],
+          error: null,
+        }
+      }
       throw new Error('Unexpected RPC')
     },
   })
 
   const publications = await api.listPublicProjectPublications()
+  const library = await api.listPublicExternalPublications()
 
   assert.equal(publications[0].authorship, 'external')
+  assert.equal(library[0].slug, publications[0].publication_slug)
   assert.deepEqual(calls, [
     { name: 'list_public_project_publications', args: undefined },
+    { name: 'list_public_external_publications', args: undefined },
   ])
 })

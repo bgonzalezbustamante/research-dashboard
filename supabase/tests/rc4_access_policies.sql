@@ -128,6 +128,8 @@ begin
     'project_papers',
     'external_publications',
     'project_external_publications',
+    'external_publication_collections',
+    'external_publication_collection_items',
     'conference_presentations',
     'teaching_portfolio',
     'software_items',
@@ -437,6 +439,24 @@ begin
       null;
   end;
 
+  -- Collections are Owner-only.
+  begin
+    insert into public.external_publication_collections (
+      owner_id,
+      slug,
+      name
+    )
+    values (
+      private.website_editor_owner_id(),
+      'rc4-qa-editor-collection',
+      'Editor collection'
+    );
+    raise exception 'Editor created a collection';
+  exception
+    when insufficient_privilege then
+      null;
+  end;
+
   perform public.update_my_external_publication(
     v_id,
     'rc.4 QA external publication (edited)',
@@ -452,8 +472,17 @@ begin
 
   if e.created_by is distinct from v.editor_id
      or e.visibility <> 'private'
+     or e.slug is not null
      or e.title <> 'rc.4 QA external publication (edited)' then
-    raise exception 'Editor publication has the wrong owner, visibility or title';
+    raise exception 'Editor publication has the wrong owner, visibility, slug or title';
+  end if;
+
+  if exists (
+    select 1
+    from public.external_publication_collection_items
+    where external_publication_id = v_id
+  ) then
+    raise exception 'Editor publication gained collections';
   end if;
 
   if exists (
@@ -476,7 +505,8 @@ begin
 
   -- Once the Owner publishes it, the editor can no longer change it.
   update public.external_publications
-  set visibility = 'public'
+  set visibility = 'public',
+      slug = 'rc4-qa-external-publication'
   where id = v_id;
 
   perform set_config('role', 'authenticated', true);
@@ -519,6 +549,7 @@ declare
     'get_public_work_analytics',
     'list_public_availability',
     'list_public_conference_presentations',
+    'list_public_external_publications',
     'list_public_paper_milestones',
     'list_public_papers',
     'list_public_planning_allocations',

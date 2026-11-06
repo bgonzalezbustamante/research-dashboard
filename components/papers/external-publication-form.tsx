@@ -1,8 +1,9 @@
 import Button from '@/components/ui/button'
 import {
   externalPublicationLanguages,
+  type ExternalPublicationCollectionRow,
   type ExternalPublicationRow,
-} from '@/lib/projects/external-publications'
+} from '@/lib/papers/external-publications'
 
 type ProjectOption = {
   id: string
@@ -24,6 +25,9 @@ export default function ExternalPublicationForm({
   submitLabel,
   showVisibility = true,
   showProjects = true,
+  showCollections = true,
+  collections = [],
+  linkedCollectionIds = [],
   websiteEditable = false,
 }: {
   action: (
@@ -35,6 +39,9 @@ export default function ExternalPublicationForm({
   submitLabel: string
   showVisibility?: boolean
   showProjects?: boolean
+  showCollections?: boolean
+  collections?: ExternalPublicationCollectionRow[]
+  linkedCollectionIds?: string[]
   websiteEditable?: boolean
 }) {
   const prefix =
@@ -42,6 +49,9 @@ export default function ExternalPublicationForm({
 
   const linked =
     new Set(linkedProjectIds)
+
+  const linkedCollections =
+    new Set(linkedCollectionIds)
 
   return (
     <form
@@ -273,10 +283,90 @@ export default function ExternalPublicationForm({
         </div>
         )}
 
+        {showVisibility && (
+        <div className="md:col-span-2 xl:col-span-3">
+          <label
+            htmlFor={`${prefix}-slug`}
+            className={labelClass}
+          >
+            Public slug
+          </label>
+
+          <input
+            id={`${prefix}-slug`}
+            name="slug"
+            type="text"
+            maxLength={200}
+            autoCapitalize="none"
+            spellCheck={false}
+            defaultValue={
+              publication?.slug ?? ''
+            }
+            placeholder="stable-publication-slug"
+            className={inputClass}
+          />
+
+          <p className="mt-1 text-xs text-oxford-ash">
+            Required when Public. A
+            stable public ID for
+            consuming sites: lowercase
+            letters, numbers, hyphens.
+          </p>
+        </div>
+        )}
+
+        {showCollections && (
+        <div className="md:col-span-2 xl:col-span-4">
+          <span className={labelClass}>
+            Collections
+          </span>
+
+          {collections.length === 0 ? (
+            <p className="text-sm text-oxford-ash">
+              No collections yet. Create
+              one below to group
+              publications for a site.
+            </p>
+          ) : (
+            <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3 md:grid-cols-2">
+              {collections.map(
+                (collection) => (
+                  <label
+                    key={collection.id}
+                    className="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2 text-sm transition hover:bg-oxford-shell"
+                  >
+                    <input
+                      type="checkbox"
+                      name="collection_id"
+                      value={collection.id}
+                      defaultChecked={linkedCollections.has(
+                        collection.id
+                      )}
+                      className="mt-1 h-4 w-4 accent-oxford-blue"
+                    />
+
+                    <span className="min-w-0">
+                      <span className="font-medium text-oxford-charcoal">
+                        {collection.name}
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-5 text-oxford-ash">
+                        <code>
+                          {collection.slug}
+                        </code>
+                      </span>
+                    </span>
+                  </label>
+                )
+              )}
+            </div>
+          )}
+        </div>
+        )}
+
         {showProjects && (
         <div className="md:col-span-2 xl:col-span-4">
           <span className={labelClass}>
-            Projects
+            Related projects (optional)
           </span>
 
           {projects.length === 0 ? (

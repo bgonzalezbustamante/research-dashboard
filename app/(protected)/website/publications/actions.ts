@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { requireWebsiteEditorAccess } from '@/lib/auth/dashboard-access'
-import { readExternalPublicationFields } from '@/lib/projects/external-publications'
+import { readExternalPublicationFields } from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 
 function getRequiredText(

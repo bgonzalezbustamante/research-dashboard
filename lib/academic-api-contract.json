@@ -473,7 +473,7 @@
     {
       "id": "project-publications",
       "title": "Project publications",
-      "summary": "Publications relevant to each explicitly public project: the owner’s own explicitly public Papers and curated external publications by other authors.",
+      "summary": "Publications relevant to each explicitly public project: the owner’s own explicitly public Papers and public external publications linked to the project.",
       "notExposed": [
         "Internal project, Paper, external publication and owner IDs",
         "Private Papers and private external publications",
@@ -506,7 +506,7 @@
               "type": "text"
             },
             {
-              "name": "paper_slug",
+              "name": "publication_slug",
               "type": "text"
             },
             {
@@ -545,10 +545,98 @@
           "detailOnly": [],
           "listingOnly": [],
           "notes": [
-            "authorship is own for the owner’s explicitly public Papers and external for publications by other authors. Own rows match each project’s publication_slugs exactly and carry the Paper slug; external rows always have paper_slug null.",
+            "authorship is own for the owner’s explicitly public Papers and external for public publications by other authors. publication_slug is the Paper slug for own rows and the external publication slug for external rows; it is never null.",
+            "Own rows match each project’s publication_slugs exactly. External rows match list_public_external_publications() by slug.",
             "External publications never appear in list_public_papers() or get_public_paper(), so consumers that list the owner’s own publications are unaffected.",
             "External rows always have a publication_year; publication_date is optional and, when present, falls in that year. Own rows derive publication_year from publication_date and may have both null.",
             "Rows are ordered by project_slug, then most recent publication first, then title."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "external-publications",
+      "title": "External publications",
+      "summary": "Curated publications by other authors, published by the owner for consuming sites. Each may belong to collections and, optionally, to public projects.",
+      "notExposed": [
+        "Internal publication, collection, project and owner IDs",
+        "Private external publications, including Website Editor submissions awaiting review",
+        "Who added each publication, visibility settings and timestamps",
+        "Collection names and descriptions (only collection slugs are public)"
+      ],
+      "forbiddenFields": [
+        "id",
+        "owner_id",
+        "created_by",
+        "visibility",
+        "external_publication_id",
+        "collection_id",
+        "collection_ids",
+        "project_id",
+        "project_ids",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_external_publications",
+          "signature": "list_public_external_publications()",
+          "kind": "Listing",
+          "purpose": "Lists every public external publication with its stable slug, public project slugs and collection slugs.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "authors",
+              "type": "text[]"
+            },
+            {
+              "name": "venue",
+              "type": "text"
+            },
+            {
+              "name": "publication_date",
+              "type": "date"
+            },
+            {
+              "name": "publication_year",
+              "type": "integer"
+            },
+            {
+              "name": "doi_url",
+              "type": "text"
+            },
+            {
+              "name": "publication_url",
+              "type": "text"
+            },
+            {
+              "name": "language",
+              "type": "text"
+            },
+            {
+              "name": "project_slugs",
+              "type": "text[]"
+            },
+            {
+              "name": "collection_slugs",
+              "type": "text[]"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "slug is stable and unique across external publications; consumers can use it for detail pages and deduplication.",
+            "collection_slugs lets each consuming site select its own subset. project_slugs contains only public projects and is empty when the publication is unrelated to any public project.",
+            "External publications never appear in list_public_papers() or get_public_paper().",
+            "publication_year is always present; publication_date is optional and, when present, falls in that year. Rows are ordered by most recent publication first, then title."
           ]
         }
       ]

@@ -5,7 +5,7 @@ import PageHeader from '@/components/page-header'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import { requireAppAccess } from '@/lib/auth/dashboard-access'
-import type { ExternalPublicationRow } from '@/lib/projects/external-publications'
+import type { ExternalPublicationRow } from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 import type { WebsiteEditorPaper } from '@/lib/website/editor-papers'
 
@@ -67,7 +67,7 @@ export default async function WebsitePage() {
     <div>
       <PageHeader
         title="Website"
-        description="Keep the citations of your assigned papers accurate on the Academic Website, and add publications relevant to its research projects. The Dashboard Owner manages visibility, public addresses and project links."
+        description="Keep the citations of your assigned papers accurate on the Academic Website, and suggest papers by other authors for it and related sites. The Dashboard Owner reviews suggestions and manages visibility, public addresses and where they appear."
         wide
       />
 

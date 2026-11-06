@@ -21,8 +21,19 @@ export type ExternalPublicationRow = {
   publication_url: string | null
   language: string | null
   visibility: 'private' | 'public'
+  slug?: string | null
   created_by?: string | null
 }
+
+export type ExternalPublicationCollectionRow = {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+}
+
+export const publicSlugPattern =
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const allowedLanguages =
   new Set<string>(
@@ -101,7 +112,9 @@ export type ExternalPublicationFields = {
   p_publication_url: string | null
   p_language: string | null
   p_visibility: string
+  p_slug: string | null
   p_project_ids: string[]
+  p_collection_ids: string[]
 }
 
 export function readExternalPublicationFields(
@@ -274,6 +287,37 @@ export function readExternalPublicationFields(
     }
   }
 
+  const rawSlug =
+    getOptionalText(
+      formData,
+      'slug'
+    )
+
+  const slug =
+    rawSlug?.toLowerCase() ??
+    null
+
+  if (
+    slug &&
+    (slug.length > 200 ||
+      !publicSlugPattern.test(slug))
+  ) {
+    return {
+      error:
+        'Slug must use lowercase letters, numbers, and single hyphens only.',
+    }
+  }
+
+  if (
+    visibility === 'public' &&
+    !slug
+  ) {
+    return {
+      error:
+        'Public external publications require a slug.',
+    }
+  }
+
   return {
     fields: {
       p_title: title,
@@ -288,10 +332,16 @@ export function readExternalPublicationFields(
         publicationUrl,
       p_language: language,
       p_visibility: visibility,
+      p_slug: slug,
       p_project_ids:
         getUuidList(
           formData,
           'project_id'
+        ),
+      p_collection_ids:
+        getUuidList(
+          formData,
+          'collection_id'
         ),
     },
   }

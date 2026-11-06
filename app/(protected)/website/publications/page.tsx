@@ -1,10 +1,10 @@
 import PageHeader from '@/components/page-header'
-import ExternalPublicationForm from '@/components/projects/external-publication-form'
+import ExternalPublicationForm from '@/components/papers/external-publication-form'
 import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import { requireWebsiteEditorAccess } from '@/lib/auth/dashboard-access'
-import type { ExternalPublicationRow } from '@/lib/projects/external-publications'
+import type { ExternalPublicationRow } from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -71,7 +71,7 @@ export default async function EditorPublicationsPage({
 
       <PageHeader
         title="Your publications"
-        description="Add papers by you or other authors that are relevant to the research projects on the Academic Website. Each one stays private until the Dashboard Owner reviews it, links it to the relevant projects and publishes it. You can edit or delete a publication while it is awaiting review."
+        description="Suggest papers by you or other authors for the Academic Website and related sites. Each one stays private until the Dashboard Owner reviews and publishes it, choosing where it appears. You can edit or delete a publication while it is awaiting review."
         wide
       />
 
@@ -99,6 +99,7 @@ export default async function EditorPublicationsPage({
           projects={[]}
           showVisibility={false}
           showProjects={false}
+          showCollections={false}
           websiteEditable
           submitLabel="Add publication"
         />
@@ -172,6 +173,9 @@ export default async function EditorPublicationsPage({
                             false
                           }
                           showProjects={
+                            false
+                          }
+                          showCollections={
                             false
                           }
                           websiteEditable

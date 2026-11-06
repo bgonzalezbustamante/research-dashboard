@@ -234,6 +234,7 @@ function assertManifest(contract) {
     'list_public_paper_milestones',
     'list_public_planning_allocations',
     'list_public_project_publications',
+    'list_public_external_publications',
   ]
 
   const operations = contract.resources.flatMap((resource) =>
@@ -734,7 +735,7 @@ async function liveCheck() {
               'own'
         )
         .map(
-          (row) => row.paper_slug
+          (row) => row.publication_slug
         )
         .sort()
 
@@ -787,17 +788,88 @@ async function liveCheck() {
       )
     )
 
+  const externalPublications =
+    await api.listPublicExternalPublications()
+
+  const externalBySlug =
+    new Map(
+      externalPublications.map(
+        (row) => [
+          row.slug,
+          row,
+        ]
+      )
+    )
+
+  for (const row of externalPublications) {
+    if (
+      publicPaperSlugs.has(
+        row.slug
+      )
+    ) {
+      fail(
+        'External publication slug collides with a public paper slug: ' +
+          row.slug
+      )
+    }
+
+    if (
+      publicPaperTitles.has(
+        row.title
+      )
+    ) {
+      fail(
+        'An external publication title also appears in list_public_papers(): ' +
+          row.title
+      )
+    }
+
+    const unknownProject =
+      row.project_slugs.find(
+        (slug) =>
+          !publicProjectSlugs.has(
+            slug
+          )
+      )
+
+    if (unknownProject) {
+      fail(
+        'list_public_external_publications() references a non-public project: ' +
+          unknownProject
+      )
+    }
+  }
+
   for (const row of projectPublications) {
     if (
       row.authorship === 'own' &&
       !publicPaperSlugs.has(
-        row.paper_slug
+        row.publication_slug
       )
     ) {
       fail(
         'list_public_project_publications() own row is not a public paper: ' +
-          row.paper_slug
+          row.publication_slug
       )
+    }
+
+    if (row.authorship === 'external') {
+      const externalRow =
+        externalBySlug.get(
+          row.publication_slug
+        )
+
+      if (
+        !externalRow ||
+        !externalRow.project_slugs.includes(
+          row.project_slug
+        )
+      ) {
+        fail(
+          'Project feed external row does not match list_public_external_publications(): ' +
+            row.publication_slug
+        )
+      }
     }
 
     if (
@@ -934,6 +1006,8 @@ async function liveCheck() {
     'project_papers',
     'external_publications',
     'project_external_publications',
+    'external_publication_collections',
+    'external_publication_collection_items',
     'profiles',
     'dashboard_members',
     'access_invitations',

@@ -88,7 +88,7 @@ export const RPC_FIELDS = {
   "list_public_project_publications": [
     "project_slug",
     "authorship",
-    "paper_slug",
+    "publication_slug",
     "title",
     "authors",
     "venue",
@@ -97,6 +97,19 @@ export const RPC_FIELDS = {
     "doi_url",
     "publication_url",
     "language"
+  ],
+  "list_public_external_publications": [
+    "slug",
+    "title",
+    "authors",
+    "venue",
+    "publication_date",
+    "publication_year",
+    "doi_url",
+    "publication_url",
+    "language",
+    "project_slugs",
+    "collection_slugs"
   ],
   "list_public_conference_presentations": [
     "event_name",
@@ -209,6 +222,7 @@ export const RPC_PARAMETERS = {
     "p_slug"
   ],
   "list_public_project_publications": [],
+  "list_public_external_publications": [],
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
   "get_public_teaching_settings": [],

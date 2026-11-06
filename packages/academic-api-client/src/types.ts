@@ -138,7 +138,7 @@ export type PublicSoftwareItem = {
 export type PublicProjectPublication = {
   project_slug: string
   authorship: PublicationAuthorship
-  paper_slug: string | null
+  publication_slug: string
   title: string
   authors: string[]
   venue: string | null
@@ -147,6 +147,20 @@ export type PublicProjectPublication = {
   doi_url: string | null
   publication_url: string | null
   language: PaperLanguage | null
+}
+
+export type PublicExternalPublication = {
+  slug: string
+  title: string
+  authors: string[]
+  venue: string | null
+  publication_date: string | null
+  publication_year: number
+  doi_url: string | null
+  publication_url: string | null
+  language: PaperLanguage | null
+  project_slugs: string[]
+  collection_slugs: string[]
 }
 
 export type PublicPaperMilestone = {
@@ -270,6 +284,13 @@ export type PublicProjectPublicationContractKeysMatch = Assert<
   KeysEqual<
     PublicProjectPublication,
     typeof RPC_FIELDS.list_public_project_publications
+  >
+>
+
+export type PublicExternalPublicationContractKeysMatch = Assert<
+  KeysEqual<
+    PublicExternalPublication,
+    typeof RPC_FIELDS.list_public_external_publications
   >
 >
 

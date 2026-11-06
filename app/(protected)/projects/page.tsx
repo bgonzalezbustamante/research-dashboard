@@ -751,15 +751,6 @@ export default async function ProjectsPage({
         description="Manage funded and research projects, public presentation, associated papers and conference presentations, and Dashboard-only activity tracking."
       />
 
-      <div className="-mt-4 mb-6">
-        <ButtonLink
-          href="/projects/publications"
-          variant="secondary"
-        >
-          Project publications
-        </ButtonLink>
-      </div>
-
       {params.error && (
         <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {params.error}
@@ -1718,7 +1709,7 @@ export default async function ProjectsPage({
                                     }
                                   >
                                     <Link
-                                      href={`/projects/publications#external-publication-${publication.id}`}
+                                      href={`/papers/others#external-publication-${publication.id}`}
                                       className="font-medium text-oxford-blue hover:underline"
                                     >
                                       {

@@ -21,7 +21,7 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.3',
     summary:
-      'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues and lets Projects present relevant work by other authors.',
+      'Velvet Torch replaces Coauthor access with a focused Website Editor role for colleagues and adds a curated library of other people’s papers for the Academic Website and related sites.',
     sections: [
       {
         title: 'Access',
@@ -32,11 +32,11 @@ export const releases: ReleaseNote[] = [
         ],
       },
       {
-        title: 'Project publications',
+        title: 'Other people’s papers',
         items: [
-          'Projects can now list relevant publications by other authors alongside your own papers, kept separate from your Papers, Planning and analytics.',
-          'Website Editors can suggest such publications; each stays private until you review it, link it to projects and publish it.',
-          'Each external publication stays Private until you make it Public, and a new public feed shares a Project’s own and external publications with the Academic Website without changing any existing public data.',
+          'Papers now has an Other papers tab: a library of publications by other authors for the Academic Website and related sites, kept separate from your own papers, Planning and analytics.',
+          'Each publication stays private until you publish it with a stable public address, and you can group publications into collections so each site shows its own selection, with optional links to related projects.',
+          'Website Editors can suggest publications for review, and new public data feeds share them without changing any existing public data.',
         ],
       },
     ],

@@ -10,6 +10,7 @@ import {
   parsePublicPaperMilestoneList,
   parsePublicPlanningAllocationList,
   parsePublicProjectList,
+  parsePublicExternalPublicationList,
   parsePublicProjectPublicationList,
   parsePublicSoftwareList,
   parsePublicTeachingList,
@@ -608,7 +609,7 @@ test('accepts Guest lecture as a controlled Conference presentation type', () =>
 const ownProjectPublication = {
   project_slug: 'time-use',
   authorship: 'own',
-  paper_slug: 'public-paper',
+  publication_slug: 'public-paper',
   title: 'Public paper',
   authors: ['Bastián González-Bustamante'],
   venue: 'Journal',
@@ -622,7 +623,7 @@ const ownProjectPublication = {
 const externalProjectPublication = {
   ...ownProjectPublication,
   authorship: 'external',
-  paper_slug: null,
+  publication_slug: 'partner-study',
   title: 'Related study by project partners',
   authors: ['A. Partner', 'B. Partner'],
   publication_date: null,
@@ -638,7 +639,7 @@ test('validates own and external project publications', () => {
     externalProjectPublication,
     {
       ...ownProjectPublication,
-      paper_slug: 'working-paper',
+      publication_slug: 'working-paper',
       publication_date: null,
       publication_year: null,
     },
@@ -652,8 +653,8 @@ test('validates own and external project publications', () => {
 
 test('rejects project publications that break the own/external contract', () => {
   const invalid = [
-    [{ ...externalProjectPublication, paper_slug: 'leaked-slug' }, /paper_slug/],
-    [{ ...ownProjectPublication, paper_slug: null }, /paper_slug/],
+    [{ ...externalProjectPublication, publication_slug: null }, /publication_slug/],
+    [{ ...ownProjectPublication, publication_slug: null }, /publication_slug/],
     [{ ...externalProjectPublication, publication_year: null }, /publication_year/],
     [{ ...ownProjectPublication, publication_year: 2025 }, /publication_year/],
     [{ ...ownProjectPublication, publication_date: null }, /publication_year/],
@@ -667,6 +668,61 @@ test('rejects project publications that break the own/external contract', () => 
   for (const [row, pattern] of invalid) {
     assert.throws(
       () => parsePublicProjectPublicationList([row]),
+      (error) =>
+        error instanceof AcademicApiValidationError &&
+        pattern.test(error.message)
+    )
+  }
+})
+
+const externalPublication = {
+  slug: 'partner-study',
+  title: 'Related study by project partners',
+  authors: ['A. Partner', 'B. Partner'],
+  venue: 'Journal',
+  publication_date: null,
+  publication_year: 2025,
+  doi_url: null,
+  publication_url: 'https://example.org/report',
+  language: 'English',
+  project_slugs: [],
+  collection_slugs: ['lab-website', 'reading-list'],
+}
+
+test('validates the external publication library feed', () => {
+  const rows = parsePublicExternalPublicationList([
+    externalPublication,
+    {
+      ...externalPublication,
+      slug: 'dated-study',
+      publication_date: '2024-05-02',
+      publication_year: 2024,
+      project_slugs: ['time-use'],
+      collection_slugs: [],
+    },
+  ])
+
+  assert.deepEqual(
+    rows.map((row) => row.slug),
+    ['partner-study', 'dated-study']
+  )
+})
+
+test('rejects malformed external publication library rows', () => {
+  const invalid = [
+    [[{ ...externalPublication, slug: 'Not A Slug' }], /slug/],
+    [[{ ...externalPublication, publication_year: null }], /publication_year/],
+    [[{ ...externalPublication, publication_date: '2026-01-01' }], /publication_year/],
+    [[{ ...externalPublication, collection_slugs: ['a', 'a'] }], /collection_slugs/],
+    [[{ ...externalPublication, collection_slugs: ['Bad Slug'] }], /collection_slugs/],
+    [[{ ...externalPublication, project_slugs: ['x', 'x'] }], /project_slugs/],
+    [[externalPublication, externalPublication], /unique slugs/],
+    [[{ ...externalPublication, visibility: 'public' }], /unexpected object shape/],
+  ]
+
+  for (const [rows, pattern] of invalid) {
+    assert.throws(
+      () => parsePublicExternalPublicationList(rows),
       (error) =>
         error instanceof AcademicApiValidationError &&
         pattern.test(error.message)
