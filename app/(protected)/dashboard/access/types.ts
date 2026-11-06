@@ -41,6 +41,8 @@ export type AccessAuditRow = {
     | 'website_editor_revoked'
     | 'website_content_updated'
     | 'external_publication_submitted'
+    | 'external_publication_created'
+    | 'external_publication_published'
     | 'external_publication_updated'
     | 'external_publication_deleted'
     | 'invitation_created'

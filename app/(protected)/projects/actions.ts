@@ -7,6 +7,7 @@ import {
   requireDashboardOwner,
 } from '@/lib/auth/dashboard-access'
 import { createClient } from '@/lib/supabase/server'
+import { isValidHttpUrl } from '@/lib/validation/url'
 
 const allowedStatuses = new Set([
   'active',
@@ -80,22 +81,6 @@ function getOptionalYear(
     value,
     10
   )
-}
-
-function isValidHttpUrl(
-  value: string
-) {
-  try {
-    const url =
-      new URL(value)
-
-    return (
-      url.protocol === 'http:' ||
-      url.protocol === 'https:'
-    )
-  } catch {
-    return false
-  }
 }
 
 function getUuidList(

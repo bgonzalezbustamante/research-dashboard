@@ -4,7 +4,10 @@ import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
 import { requireWebsiteEditorAccess } from '@/lib/auth/dashboard-access'
-import type { ExternalPublicationRow } from '@/lib/papers/external-publications'
+import {
+  editorPendingPublicationLimit,
+  type ExternalPublicationRow,
+} from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -49,6 +52,17 @@ export default async function EditorPublicationsPage({
   const publications =
     (data ?? []) as ExternalPublicationRow[]
 
+  const pendingCount =
+    publications.filter(
+      (publication) =>
+        publication.visibility ===
+        'private'
+    ).length
+
+  const atPendingLimit =
+    pendingCount >=
+    editorPendingPublicationLimit
+
   const notice =
     params.created
       ? 'Publication added. It is awaiting review by the Dashboard Owner.'
@@ -87,21 +101,45 @@ export default async function EditorPublicationsPage({
       )}
 
       <Card className="mb-8">
-        <h2 className="font-serif text-xl font-semibold text-oxford-blue">
-          Add a publication
-        </h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="font-serif text-xl font-semibold text-oxford-blue">
+            Add a publication
+          </h2>
 
-        <ExternalPublicationForm
-          action={
-            createMyExternalPublication
-          }
-          projects={[]}
-          showVisibility={false}
-          showProjects={false}
-          showCollections={false}
-          websiteEditable
-          submitLabel="Add publication"
-        />
+          <p className="text-sm text-oxford-ash">
+            {pendingCount} of{' '}
+            {
+              editorPendingPublicationLimit
+            }{' '}
+            awaiting review
+          </p>
+        </div>
+
+        {atPendingLimit ? (
+          <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            You have{' '}
+            {
+              editorPendingPublicationLimit
+            }{' '}
+            publications awaiting review.
+            You can add more once the
+            Dashboard Owner has reviewed
+            some of them; you can still
+            edit the ones below.
+          </p>
+        ) : (
+          <ExternalPublicationForm
+            action={
+              createMyExternalPublication
+            }
+            projects={[]}
+            showVisibility={false}
+            showProjects={false}
+            showCollections={false}
+            websiteEditable
+            submitLabel="Add publication"
+          />
+        )}
       </Card>
 
       {publications.length === 0 ? (

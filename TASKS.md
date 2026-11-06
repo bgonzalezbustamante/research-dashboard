@@ -8,9 +8,9 @@
 - [x] **[Claude]** Update the manifest consumers (Signature Studio, missing RPCs, planned sites) and the `/api` consumer list
 - [x] **[Claude]** Show Public and Private counts on each collection in Other papers
 - [ ] **[Bastián]** Create the collections `obpex`, `sudakas`, `empiria-lab` and `carla-cisternas` in Papers → Other papers ~10m
-- [ ] **[Claude]** Migration: database URL rules for `paper_links.url`, `conference_presentations.url` and the three Software URLs, with a precheck ~2h
-- [ ] **[Claude]** Migration: cap pending Website Editor suggestions at 20 ~1h
-- [ ] **[Claude]** Migration: audit the Owner's own external publication changes and approvals ~2h
+- [x] **[Claude]** Migration: database URL rules for `paper_links.url`, `conference_presentations.url` and the three Software URLs, with a precheck
+- [x] **[Claude]** Migration: cap pending Website Editor suggestions at 20
+- [x] **[Claude]** Migration: audit the Owner's own external publication changes and approvals
 - [ ] **[Bastián]** Run the prechecks, rehearsals and `db push` for the rc.5 migrations, then the access suite ~45m
 - [ ] **[Claude]** Tooling: Next.js and `eslint-config-next` 16.4.5, Supabase CLI 3.0.0 parity check, recheck the `minimatch` advisory ~1h
 - [ ] **[Claude]** Handoff briefs for organisation-site-template, empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site ~2h
