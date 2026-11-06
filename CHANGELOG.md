@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## v1.0.0-rc.4 "Velvet Torch" (in development)
+## v1.0.0-rc.4 "Velvet Torch"
+
+Released 6 Nov 2026.
 
 ### Summary
 
@@ -58,7 +60,7 @@
 - `npm audit --omit=dev` reported 0 production vulnerabilities. The remaining moderate `minimatch` advisory is development-only, through `eslint-config-next`, and is left in place rather than applying npm's breaking forced downgrade.
 - The full-history Gitleaks scan covered 804 commits (approximately 3.26 MB) with no leaks found.
 - `npm run lint`, `npx tsc --noEmit`, `npm run check:public-api` (16 anonymous RPCs, no anonymous table grants), `npm run check:academic-api-client` (20 tests), `npm run check:backups` (5 tests) and `npm run build` passed, and `npm run check:public-api:live` passed against production after every rc.4 migration.
-- `supabase/tests/rc4_access_policies.sql` passed against production after the hardening migration, inside a rolled-back transaction.
+- `supabase/tests/rc4_access_policies.sql` passed against production after the hardening migration and again after the Coauthor retirement, each time inside a rolled-back transaction. The retirement was also rehearsed in full inside a rolled-back transaction before `db push`, and production migration history matches the repository (85/85).
 - A pre-release audit of the database, the app access layer and the documentation found no critical or high-severity issues; its findings are fixed under Pre-release hardening or recorded as rc.5 follow-ups.
 
 ## v1.0.0-rc.3 "Bold Ridge"
