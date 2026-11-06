@@ -39,6 +39,12 @@ export const releases: ReleaseNote[] = [
           'Website Editors can suggest publications for review, and new public data feeds share them without changing any existing public data.',
         ],
       },
+      {
+        title: 'Look and feel',
+        items: [
+          'The Dashboard header and sign-in pages now show the same affiliation marks as the Academic Website (Leiden University, Universidad Diego Portales and the Oxford Computational Political Science Group), together with Empiria Lab and OBPEX. They appear in grey and take their colours on hover.',
+        ],
+      },
     ],
   },
   {
