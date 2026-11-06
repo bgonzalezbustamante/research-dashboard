@@ -1596,7 +1596,7 @@ export default async function ProjectsPage({
                       </p>
 
                       {project.funder_note && (
-                        <p className="mt-1 max-w-3xl whitespace-pre-wrap text-sm leading-6 text-oxford-ash">
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-oxford-ash">
                           {
                             project.funder_note
                           }

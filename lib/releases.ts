@@ -22,7 +22,14 @@ export const releases: ReleaseNote[] = [
     comparison: 'Changes since rc.4',
     summary:
       'Ancient Glacier helps the sites that use the Academic API adopt the curated publication feeds, and tightens several safeguards found in the rc.4 review.',
-    sections: [],
+    sections: [
+      {
+        title: 'Look and feel',
+        items: [
+          'Page introductions, descriptions and messages now use the full width of the page, and the public release notes and Academic API pages match the Dashboard’s width.',
+        ],
+      },
+    ],
   },
   {
     version: 'v1.0.0-rc.4',

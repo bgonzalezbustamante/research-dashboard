@@ -7,6 +7,12 @@
 - Started `v1.0.0-rc.5 "Ancient Glacier"` to help downstream sites adopt the rc.4 publication feeds: a publishable Academic API client with a dependency-free fetch transport and collection helpers, an accurate consumer list, and ready-to-apply integration briefs for OBPEX, SUDAKAS, Empiria Lab, the organisation site template and Carla Cisternas' future website.
 - Planned follow-ups from the rc.4 audit: database URL rules for older link fields, a cap on pending Website Editor suggestions, an audit trail for the Owner's own publication changes, tooling upgrades and full-width page text.
 
+### Code changes
+
+`Layout`
+
+- Page descriptions, card introductions, item summaries and empty-state messages now use the full width of the content column. `PageHeader` no longer caps its description at `max-w-3xl`, so its rc.4 `wide` option is removed. The public `/api` and release-notes pages now use the same `max-w-7xl` column as the Dashboard instead of `max-w-5xl`. Sign-in and onboarding cards, form inputs and Papers table columns keep their deliberate widths.
+
 ## v1.0.0-rc.4 "Velvet Torch"
 
 Released 6 Nov 2026.

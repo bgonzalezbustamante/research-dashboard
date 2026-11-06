@@ -496,7 +496,7 @@ export default async function AccessPage({
             <h3 className="font-serif text-lg font-semibold text-oxford-blue">
               No active collaborator accounts
             </h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-oxford-ash">
+            <p className="mt-2 text-sm leading-6 text-oxford-ash">
               Use the invitation form below to add a new Viewer, Website Editor, or combined account.
             </p>
           </div>

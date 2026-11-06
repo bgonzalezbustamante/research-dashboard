@@ -718,7 +718,7 @@ export default async function LocationLabelsSection({
             Danger zone
           </h2>
 
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-red-800">
+          <p className="mt-1 text-sm leading-6 text-red-800">
             Consolidation creates a new canonical label, moves the relevant managed relationships, and keeps both source labels as immutable inactive provenance records. This cannot be reversed in the interface.
           </p>
         </div>

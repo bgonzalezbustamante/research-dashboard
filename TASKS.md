@@ -3,7 +3,7 @@
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 - [x] **[Claude]** Open `release/v1.0.0-rc.5-ancient-glacier` and the start commit
-- [ ] **[Claude]** Full-width page text: `PageHeader`, card intros, empty states, and the `/api` and release-notes columns ~1h
+- [x] **[Claude]** Full-width page text: `PageHeader`, card intros, empty states, and the `/api` and release-notes columns
 - [ ] **[Claude]** Prepare `@bgonzalezbustamante/academic-api-client` for npm: package build, fetch transport, collection helpers, README, tests ~3h
 - [ ] **[Claude]** Update the manifest consumers (Signature Studio, missing RPCs, planned sites) and the `/api` consumer list ~1h
 - [ ] **[Claude]** Show Public and awaiting-review counts on each collection in Other papers ~30m
