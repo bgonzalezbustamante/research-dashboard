@@ -13,7 +13,7 @@
 - [x] **[Claude]** Migration: audit the Owner's own external publication changes and approvals
 - [ ] **[Bastián]** Run the prechecks, rehearsals and `db push` for the rc.5 migrations, then the access suite ~45m
 - [ ] **[Claude]** Tooling: Next.js and `eslint-config-next` 16.4.5, Supabase CLI 3.0.0 parity check, recheck the `minimatch` advisory ~1h
-- [ ] **[Claude]** Handoff briefs for organisation-site-template, empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site ~2h
+- [x] **[Claude]** Handoff briefs for organisation-site-template, empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site
 - [ ] **[Claude]** Release docs, draft PR and CI ~1.5h
 - [ ] **[Bastián]** Publish the client package to npm (`npm publish --tag beta`) ~15m
 - [ ] **[Claude]** Merge with a merge commit, tag `v1.0.0-rc.5` and create the GitHub pre-release ~30m

@@ -17,6 +17,8 @@
 - Rewrote the client README for npm users: install, quick start, Next.js ISR on Netlify, collections and Project publications, failing closed on validation errors, and the package versioning policy.
 - Corrected the manifest's consumer list against each repository's code. The Academic Website also uses the Software, Teaching settings and availability RPCs, the Weekly Penguin Timeline also uses conference presentations and Teaching settings, and Academic Signature Studio is added. Consumers now carry `status` (`active` or `planned`) and an optional `url`. The OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites and the organisation site template are listed as planned consumers of the publication feeds. `check:public-api` validates both fields, and `/api` marks planned consumers and names private repositories without a link, which also fixes a link to the private Academic CV Studio repository that visitors could not open.
 - Each collection on the Other papers tab now shows its Public and Private item counts and the client call a site uses to show it.
+- ARCHITECTURE.md now documents the consumer list, the planned publication consumers and the recommended integration: the published client, `createFetchTransport()` and ISR, with no downstream build triggers.
+- Wrote ready-to-apply handoff briefs, outside this repository, for organisation-site-template (an optional feed keyed by `publicationsCollection`), empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site, plus a shared adapter whose code was typechecked against the packed package. Sibling repositories are changed in their own sessions.
 
 `Safeguards from the rc.4 review`
 
@@ -24,6 +26,11 @@
 - Capped pending Website Editor suggestions at 20 per editor (`20261106145430_cap_pending_editor_suggestions.sql`). Published entries do not count, a per-editor advisory lock prevents concurrent submissions from passing the count together, and the limit raises SQLSTATE 53400. `/website/publications` shows how many suggestions await review and replaces the form with a notice at the limit.
 - The Owner's own external publication changes are now audited (`20261106145431_audit_owner_external_publication_changes.sql`): `external_publication_created`, `external_publication_published` (a Private publication made Public, including Approve and publish), `external_publication_updated` with `changed_fields` and `previous` values covering visibility, slug, Projects and collections, and `external_publication_deleted` with the deleted values. A save that changes nothing records no event. The Access audit trail labels the new events and lists which fields each edit changed, for Owner and Website Editor edits alike.
 - Renamed the rolled-back SQL suite to `supabase/tests/rc5_access_policies.sql` and added checks for the link URL rules, the suggestion cap and the Owner audit trail.
+
+`Tooling`
+
+- Upgraded `next` and `eslint-config-next` to 16.4.5. `npm audit --omit=dev` still reports 0 vulnerabilities, and the moderate development-only `minimatch` advisory remains blocked upstream: the latest `@typescript-eslint/typescript-estree` still requires `minimatch ^10`.
+- Verified Supabase CLI 3.0.0 against production with read-only commands: `migration list` and `db push --dry-run` match 2.115.0. In 3.0.0, `db push` targets the local database unless given `--remote` (`--linked` is a deprecated alias), and `supabase/config.toml`'s `auth.email.enable_signup` and `auth.sms.enable_signup` are deprecated in favour of `enabled`.
 
 `Layout`
 
