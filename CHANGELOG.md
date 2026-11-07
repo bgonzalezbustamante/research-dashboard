@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.0.0-rc.6 "Steady Orchard" (in development)
+
+### Summary
+
+- Started `v1.0.0-rc.6 "Steady Orchard"`, a maintenance release: routine dependency updates, Catholic Calendar 0.1.0-beta.2, the development-only `minimatch` advisory, safer links in paper text, security headers and documentation corrections. No database changes.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.

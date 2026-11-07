@@ -15,6 +15,16 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.6',
+    codename: 'Steady Orchard',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.5',
+    summary:
+      'Steady Orchard keeps the Dashboard up to date and adds a few safeguards: newer libraries and calendar data, safer links in paper text, and protection against the Dashboard being shown inside other websites.',
+    sections: [],
+  },
+  {
     version: 'v1.0.0-rc.5',
     codename: 'Ancient Glacier',
     status: 'Release candidate',
