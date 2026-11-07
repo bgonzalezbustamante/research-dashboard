@@ -30,6 +30,14 @@ export const releases: ReleaseNote[] = [
           'Each collection on the Other papers tab lists your papers in it and how many of them are public.',
         ],
       },
+      {
+        title: 'Fixes',
+        items: [
+          'Hours and citation totals on Papers and the Home page now count every record, however many there are.',
+          'Editing a paper keeps all its links, including ones the form does not show.',
+          'Editing a citation snapshot can no longer save your changes onto a different snapshot.',
+        ],
+      },
     ],
   },
   {

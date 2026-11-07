@@ -19,6 +19,12 @@
 - The manifest adds the `collection-publications` resource, and the planned OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites and the organisation site template now list the collection feed in place of the external feed. `check:public-api` expects the new RPC, treats `paper_collection_items` as row-free for anonymous callers and, live, checks own rows against `list_public_papers()`, external rows against the external feed and uniqueness within each collection.
 - `@bgonzalezbustamante/academic-api-client` `0.2.0-beta.1` adds `listPublicCollectionPublications()`, `parsePublicCollectionPublicationList()`, the `PublicCollectionPublication` type and `filterCollectionPublications()`. The Project and collection parsers share their row rules. Tests: 30, up from 26.
 
+`Audit fixes`
+
+- Hours per Paper and citation totals no longer stop at 1000 rows. The Data API returns at most 1000 rows per request without an error, and the Papers list, each Paper page and the Home cross-module analytics read work sessions, citation snapshots and the Papers list's history with no paging or date range. With 269 worked days in 2026, the sessions linked to Papers were at or past that limit. A new `selectAllRows()` helper (`lib/supabase/select-all-rows.ts`) reads those queries in 1000-row pages with a stable order, as the Hours page already did.
+- Editing a Paper no longer deletes links the edit form cannot show. `update_paper_with_details` replaces every link, and the form edits seven types with one "DOI / publication" field, so an `other` link, or a legacy `doi` link next to a `publication` link, was lost on the next save. `updatePaper` now re-sends those links unchanged. A lone `doi` link is still shown in the DOI / publication field and saved from there.
+- The citation snapshot history resets its edit and delete forms for each snapshot. Values typed into "Edit snapshot" were kept when paging, while the hidden snapshot ID changed, so saving could overwrite another snapshot.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.
