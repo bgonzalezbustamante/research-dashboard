@@ -17,6 +17,7 @@ import {
   requireDashboardAccess,
 } from '@/lib/auth/dashboard-access'
 import type { ExternalPublicationCollectionRow } from '@/lib/papers/external-publications'
+import { selectAllRows } from '@/lib/supabase/select-all-rows'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -331,35 +332,49 @@ export default async function PaperPage({
       `)
       .eq('paper_id', id),
 
-    supabase
-      .from('citation_snapshots')
-      .select(`
-        id,
-        source,
-        citation_count,
-        captured_on,
-        created_at
-      `)
-      .eq('paper_id', id)
-      .order('captured_on', {
-        ascending: true,
-      })
-      .order('created_at', {
-        ascending: true,
-      }),
+    selectAllRows(
+      (from, to) =>
+        supabase
+          .from('citation_snapshots')
+          .select(`
+            id,
+            source,
+            citation_count,
+            captured_on,
+            created_at
+          `)
+          .eq('paper_id', id)
+          .order('captured_on', {
+            ascending: true,
+          })
+          .order('created_at', {
+            ascending: true,
+          })
+          .order('id', {
+            ascending: true,
+          })
+          .range(from, to)
+    ),
 
-    supabase
-      .from('work_sessions')
-      .select(`
-        id,
-        activity_label_id,
-        start_time,
-        end_time,
-        daily_logs (
-          log_date
-        )
-      `)
-      .eq('paper_id', id),
+    selectAllRows(
+      (from, to) =>
+        supabase
+          .from('work_sessions')
+          .select(`
+            id,
+            activity_label_id,
+            start_time,
+            end_time,
+            daily_logs (
+              log_date
+            )
+          `)
+          .eq('paper_id', id)
+          .order('id', {
+            ascending: true,
+          })
+          .range(from, to)
+    ),
 
     supabase.rpc(
       'list_paper_conference_presentations',

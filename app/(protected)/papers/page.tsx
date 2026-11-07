@@ -7,6 +7,7 @@ import Button from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link'
 import StatusBadge from '@/components/ui/status-badge'
 import { requireDashboardAccess } from '@/lib/auth/dashboard-access'
+import { selectAllRows } from '@/lib/supabase/select-all-rows'
 import { createClient } from '@/lib/supabase/server'
 
 type PaperStatus =
@@ -785,39 +786,53 @@ export default async function PapersPage({
       workSessionResult,
       publicationMetadataResult,
     ] = await Promise.all([
-      supabase
-        .from(
-          'citation_snapshots'
-        )
-        .select(`
-          paper_id,
-          citation_count,
-          captured_on,
-          source,
-          created_at
-        `)
-        .in(
-          'paper_id',
-          paperIds
-        ),
+      selectAllRows(
+        (from, to) =>
+          supabase
+            .from(
+              'citation_snapshots'
+            )
+            .select(`
+              paper_id,
+              citation_count,
+              captured_on,
+              source,
+              created_at
+            `)
+            .in(
+              'paper_id',
+              paperIds
+            )
+            .order('id', {
+              ascending: true,
+            })
+            .range(from, to)
+      ),
 
-      supabase
-        .from(
-          'paper_history'
-        )
-        .select(`
-          paper_id,
-          event_date,
-          event_type,
-          venue,
-          round_number,
-          decision,
-          created_at
-        `)
-        .in(
-          'paper_id',
-          paperIds
-        ),
+      selectAllRows(
+        (from, to) =>
+          supabase
+            .from(
+              'paper_history'
+            )
+            .select(`
+              paper_id,
+              event_date,
+              event_type,
+              venue,
+              round_number,
+              decision,
+              created_at
+            `)
+            .in(
+              'paper_id',
+              paperIds
+            )
+            .order('id', {
+              ascending: true,
+            })
+            .range(from, to)
+      ),
 
       supabase
         .from(
@@ -841,23 +856,30 @@ export default async function PapersPage({
           }
         ),
 
-      supabase
-        .from(
-          'work_sessions'
-        )
-        .select(`
-          paper_id,
-          activity_label_id,
-          start_time,
-          end_time,
-          daily_logs (
-            log_date
-          )
-        `)
-        .in(
-          'paper_id',
-          paperIds
-        ),
+      selectAllRows(
+        (from, to) =>
+          supabase
+            .from(
+              'work_sessions'
+            )
+            .select(`
+              paper_id,
+              activity_label_id,
+              start_time,
+              end_time,
+              daily_logs (
+                log_date
+              )
+            `)
+            .in(
+              'paper_id',
+              paperIds
+            )
+            .order('id', {
+              ascending: true,
+            })
+            .range(from, to)
+      ),
       supabase
         .from('paper_public_metadata')
         .select('paper_id, publication_index')
