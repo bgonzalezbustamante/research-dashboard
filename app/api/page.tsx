@@ -75,6 +75,14 @@ export const metadata: Metadata = {
     'Academic API | Research Dashboard',
   description:
     'Public RPC v1 documentation for the Research Dashboard Academic API.',
+  // The only page search engines may list (the root layout sets noindex).
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: '/api',
+  },
 }
 
 function consumersFor(

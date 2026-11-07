@@ -36,6 +36,7 @@ export const releases: ReleaseNote[] = [
           'Hours and citation totals on Papers and the Home page now count every record, however many there are.',
           'Editing a paper keeps all its links, including ones the form does not show.',
           'Editing a citation snapshot can no longer save your changes onto a different snapshot.',
+          'Search engines can now list only the Academic API page; the sign-in page, release notes and everything behind sign-in stay out of search results.',
         ],
       },
     ],

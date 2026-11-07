@@ -31,7 +31,9 @@ function isPublicPath(
     pathname === '/auth' ||
     pathname.startsWith('/auth/') ||
     pathname === '/release-notes' ||
-    pathname === '/api'
+    pathname === '/api' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml'
   )
 }
 
