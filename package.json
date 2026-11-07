@@ -19,7 +19,7 @@
     "check:backups": "npm run test:backups"
   },
   "dependencies": {
-    "@bgonzalezbustamante/catholic-calendar": "0.1.0-beta.1",
+    "@bgonzalezbustamante/catholic-calendar": "0.1.0-beta.2",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "next": "16.4.5",
