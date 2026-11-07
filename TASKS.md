@@ -7,7 +7,7 @@
 - [x] **[Claude]** Prepare `@bgonzalezbustamante/academic-api-client` for npm: package build, fetch transport, collection helpers, README, tests
 - [x] **[Claude]** Update the manifest consumers (Signature Studio, missing RPCs, planned sites) and the `/api` consumer list
 - [x] **[Claude]** Show Public and Private counts on each collection in Other papers
-- [ ] **[Bastián]** Create the collections `obpex`, `sudakas`, `empiria-lab` and `carla-cisternas` in Papers → Other papers ~10m
+- [x] **[Bastián]** Create the collections `obpex`, `sudakas`, `empiria-lab` and `carla-cisternas` in Papers → Other papers
 - [x] **[Claude]** Migration: database URL rules for `paper_links.url`, `conference_presentations.url` and the three Software URLs, with a precheck
 - [x] **[Claude]** Migration: cap pending Website Editor suggestions at 20
 - [x] **[Claude]** Migration: audit the Owner's own external publication changes and approvals
@@ -16,7 +16,7 @@
 - [x] **[Claude]** After the rc.5 `db push`: switch to Supabase CLI 3 (`enabled` keys in `supabase/config.toml`, `db push --remote`)
 - [x] **[Claude]** Handoff briefs for organisation-site-template, empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site
 - [x] **[Claude]** Release docs, draft PR (#63) and CI
-- [ ] **[Bastián]** Publish the client package to npm (`npm publish --tag beta`) ~15m
+- [x] **[Bastián]** Publish the client package to npm (`npm publish --tag beta`) and delete the rc.5 SQL files from Documents
 - [ ] **[Claude]** Merge with a merge commit, tag `v1.0.0-rc.5` and create the GitHub pre-release ~30m
 
 ## v1.0.0-rc.4 "Velvet Torch" leftovers

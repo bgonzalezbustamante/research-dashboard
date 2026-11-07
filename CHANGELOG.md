@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## v1.0.0-rc.5 "Ancient Glacier" (in development)
+## v1.0.0-rc.5 "Ancient Glacier"
+
+Released 7 Nov 2026.
 
 ### Summary
 
@@ -11,7 +13,7 @@
 
 `Downstream adoption`
 
-- Prepared the reference client for npm as `@bgonzalezbustamante/academic-api-client` `0.1.0-beta.1` (MIT, `beta` tag). It builds to `packages/academic-api-client/dist` through `npm run build:academic-api-client:package` and `prepack`, and ships only `dist`, the README and the licence. The existing check build and `check:academic-api-client` are unchanged.
+- Published the reference client to npm as `@bgonzalezbustamante/academic-api-client` `0.1.0-beta.1` (MIT, `beta` tag; as the first release it is also `latest`). An install from the registry validated the live production feeds. It builds to `packages/academic-api-client/dist` through `npm run build:academic-api-client:package` and `prepack`, and ships only `dist`, the README and the licence. The existing check build and `check:academic-api-client` are unchanged.
 - Added `createFetchTransport()`, a dependency-free transport that POSTs to the Data API's `/rest/v1/rpc/<name>` with the publishable key and passes fetch options through, including Next.js `{ next: { revalidate } }` for ISR. It rejects non-HTTP(S) URLs, missing keys and invalid RPC names, and reports PostgREST and network errors as RPC errors. A supabase-js client remains a valid transport.
 - Added pure helpers for consuming sites: `filterExternalPublicationsByCollection()`, `filterProjectPublications()` and `sortPublicationsByDate()`, with 6 new tests (26 in total). A packed tarball was installed in a scratch project and validated the live production feeds.
 - Rewrote the client README for npm users: install, quick start, Next.js ISR on Netlify, collections and Project publications, failing closed on validation errors, and the package versioning policy.
