@@ -15,7 +15,7 @@
 - [x] **[Claude]** Tooling: Next.js and `eslint-config-next` 16.4.5, Supabase CLI 3.0.0 parity check, recheck the `minimatch` advisory
 - [x] **[Claude]** After the rc.5 `db push`: switch to Supabase CLI 3 (`enabled` keys in `supabase/config.toml`, `db push --remote`)
 - [x] **[Claude]** Handoff briefs for organisation-site-template, empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site
-- [ ] **[Claude]** Release docs, draft PR and CI ~1.5h
+- [x] **[Claude]** Release docs, draft PR (#63) and CI
 - [ ] **[Bastián]** Publish the client package to npm (`npm publish --tag beta`) ~15m
 - [ ] **[Claude]** Merge with a merge commit, tag `v1.0.0-rc.5` and create the GitHub pre-release ~30m
 
