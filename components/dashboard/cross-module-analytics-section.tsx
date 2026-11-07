@@ -3,6 +3,7 @@ import Link from 'next/link'
 import ActivityOverTimeCard from '@/components/dashboard/activity-over-time-card'
 import ButtonLink from '@/components/ui/button-link'
 import Card from '@/components/ui/card'
+import { selectAllRows } from '@/lib/supabase/select-all-rows'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -355,41 +356,55 @@ export default async function CrossModuleAnalyticsSection({
         ascending: true,
       }),
 
-    supabase
-      .from('citation_snapshots')
-      .select(`
-        paper_id,
-        source,
-        citation_count,
-        captured_on,
-        created_at
-      `)
-      .eq(
-        'source',
-        'Google Scholar'
-      )
-      .order('captured_on', {
-        ascending: false,
-      })
-      .order('created_at', {
-        ascending: false,
-      }),
+    selectAllRows(
+      (from, to) =>
+        supabase
+          .from('citation_snapshots')
+          .select(`
+            paper_id,
+            source,
+            citation_count,
+            captured_on,
+            created_at
+          `)
+          .eq(
+            'source',
+            'Google Scholar'
+          )
+          .order('captured_on', {
+            ascending: false,
+          })
+          .order('created_at', {
+            ascending: false,
+          })
+          .order('id', {
+            ascending: true,
+          })
+          .range(from, to)
+    ),
 
-    supabase
-      .from('work_sessions')
-      .select(`
-        paper_id,
-        start_time,
-        end_time,
-        activity_labels (
-          is_break
-        )
-      `)
-      .not(
-        'paper_id',
-        'is',
-        null
-      ),
+    selectAllRows(
+      (from, to) =>
+        supabase
+          .from('work_sessions')
+          .select(`
+            paper_id,
+            start_time,
+            end_time,
+            activity_labels (
+              is_break
+            )
+          `)
+          .not(
+            'paper_id',
+            'is',
+            null
+          )
+          .order('id', {
+            ascending: true,
+          })
+          .range(from, to)
+    ),
 
     supabase
       .from('paper_milestones')
