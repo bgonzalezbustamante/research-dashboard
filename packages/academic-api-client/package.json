@@ -1,6 +1,6 @@
 {
   "name": "@bgonzalezbustamante/academic-api-client",
-  "version": "0.1.0-beta.1",
+  "version": "0.2.0-beta.1",
   "description": "Typed client, dependency-free fetch transport and strict runtime validators for the Research Dashboard Academic API (Public RPC v1).",
   "license": "MIT",
   "author": "Bastián González-Bustamante",

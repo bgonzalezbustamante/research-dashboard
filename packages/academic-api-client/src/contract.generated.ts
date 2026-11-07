@@ -111,6 +111,19 @@ export const RPC_FIELDS = {
     "project_slugs",
     "collection_slugs"
   ],
+  "list_public_collection_publications": [
+    "collection_slug",
+    "authorship",
+    "publication_slug",
+    "title",
+    "authors",
+    "venue",
+    "publication_date",
+    "publication_year",
+    "doi_url",
+    "publication_url",
+    "language"
+  ],
   "list_public_conference_presentations": [
     "event_name",
     "event_short_name",
@@ -223,6 +236,7 @@ export const RPC_PARAMETERS = {
   ],
   "list_public_project_publications": [],
   "list_public_external_publications": [],
+  "list_public_collection_publications": [],
   "list_public_conference_presentations": [],
   "list_public_teaching": [],
   "get_public_teaching_settings": [],

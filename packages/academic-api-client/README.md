@@ -30,7 +30,7 @@ const academicApi = createAcademicApiClient(
 const papers = await academicApi.listPublicPapers()
 ```
 
-Use the Research Dashboard project URL and its **publishable** key, never a secret or service-role key. Anonymous callers can only execute the sixteen Public RPC v1 functions.
+Use the Research Dashboard project URL and its **publishable** key, never a secret or service-role key. Anonymous callers can only execute the seventeen Public RPC v1 functions.
 
 `createFetchTransport` POSTs to `<url>/rest/v1/rpc/<name>` with the publishable key, so a site does not need `@supabase/supabase-js`. A supabase-js client also works as a transport, because it exposes the same `rpc()` method:
 
@@ -67,19 +67,21 @@ A change in the Dashboard then appears on the site within the revalidation windo
 
 ## Collections and Project publications
 
-`list_public_external_publications()` returns every Public external publication, the papers by other authors that the Dashboard Owner curates. Each site keeps its own selection through a **collection** slug:
+Each site keeps its own selection of publications through a **collection** slug. `list_public_collection_publications()` lists every collection's publications: the Owner's own Public Papers (`authorship = 'own'`) and the Public external publications by other authors that the Owner curates (`authorship = 'external'`). A publication appears once for each collection it belongs to:
 
 ```ts
 import {
-  filterExternalPublicationsByCollection,
+  filterCollectionPublications,
   sortPublicationsByDate,
 } from '@bgonzalezbustamante/academic-api-client'
 
-const rows = await academicApi.listPublicExternalPublications()
+const rows = await academicApi.listPublicCollectionPublications()
 const publications = sortPublicationsByDate(
-  filterExternalPublicationsByCollection(rows, 'obpex')
+  filterCollectionPublications(rows, 'obpex')
 )
 ```
+
+Pass `'own'` or `'external'` as a third argument to keep one authorship only. `list_public_external_publications()` still returns every Public external publication with its `collection_slugs`, and `filterExternalPublicationsByCollection()` selects from it, for sites that show only other people's papers.
 
 For a Project page, `list_public_project_publications()` lists the Owner's own Public Papers (`authorship = 'own'`) and the Public external publications linked to each public Project (`authorship = 'external'`):
 
@@ -102,7 +104,7 @@ The package provides:
 
 - canonical TypeScript resource types;
 - strict runtime validators with field-level diagnostics;
-- a transport-agnostic client for the sixteen Public RPC v1 operations, plus a dependency-free fetch transport;
+- a transport-agnostic client for the seventeen Public RPC v1 operations, plus a dependency-free fetch transport;
 - pure helpers for filtering by collection or Project and sorting by date;
 - generated contract metadata derived from `lib/academic-api-contract.json`.
 

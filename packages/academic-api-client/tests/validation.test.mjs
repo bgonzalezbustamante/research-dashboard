@@ -5,6 +5,7 @@ import {
   AcademicApiValidationError,
   parsePublicAvailabilityList,
   parsePublicCalendarSettingsResponse,
+  parsePublicCollectionPublicationList,
   parsePublicConferenceList,
   parsePublicPaperList,
   parsePublicPaperMilestoneList,
@@ -723,6 +724,57 @@ test('rejects malformed external publication library rows', () => {
   for (const [rows, pattern] of invalid) {
     assert.throws(
       () => parsePublicExternalPublicationList(rows),
+      (error) =>
+        error instanceof AcademicApiValidationError &&
+        pattern.test(error.message)
+    )
+  }
+})
+
+const ownCollectionPublication = {
+  ...ownProjectPublication,
+  project_slug: undefined,
+  collection_slug: 'obpex',
+}
+delete ownCollectionPublication.project_slug
+
+const externalCollectionPublication = {
+  ...externalProjectPublication,
+  project_slug: undefined,
+  collection_slug: 'obpex',
+}
+delete externalCollectionPublication.project_slug
+
+test('validates own and external collection publications', () => {
+  const rows = parsePublicCollectionPublicationList([
+    ownCollectionPublication,
+    externalCollectionPublication,
+    {
+      ...ownCollectionPublication,
+      collection_slug: 'sudakas',
+    },
+  ])
+
+  assert.deepEqual(
+    rows.map((row) => `${row.collection_slug}:${row.authorship}`),
+    ['obpex:own', 'obpex:external', 'sudakas:own']
+  )
+})
+
+test('rejects malformed collection publication rows', () => {
+  const invalid = [
+    [[{ ...ownCollectionPublication, collection_slug: 'Not A Slug' }], /collection_slug/],
+    [[{ ...externalCollectionPublication, publication_year: null }], /publication_year/],
+    [[{ ...ownCollectionPublication, publication_year: 2025 }], /publication_year/],
+    [[{ ...externalCollectionPublication, authorship: 'coauthored' }], /authorship/],
+    [[{ ...externalCollectionPublication, publication_url: 'javascript:alert(1)' }], /publication_url/],
+    [[{ ...ownCollectionPublication, project_slug: 'time-use' }], /unexpected object shape/],
+    [[ownCollectionPublication, ownCollectionPublication], /once per collection/],
+  ]
+
+  for (const [rows, pattern] of invalid) {
+    assert.throws(
+      () => parsePublicCollectionPublicationList(rows),
       (error) =>
         error instanceof AcademicApiValidationError &&
         pattern.test(error.message)

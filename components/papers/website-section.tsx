@@ -1,9 +1,11 @@
+import { CollectionCheckboxes } from '@/components/papers/external-publication-form'
 import {
   WebsiteCitationFields,
   WebsiteHighlightFields,
 } from '@/components/papers/website-content-fields'
 import Button from '@/components/ui/button'
 import Card from '@/components/ui/card'
+import type { ExternalPublicationCollectionRow } from '@/lib/papers/external-publications'
 
 export type PaperPublicMetadata = {
   visibility: 'public' | 'private'
@@ -26,6 +28,9 @@ const labelClass =
 export default function WebsiteSection({
   paperId,
   metadata,
+  collections,
+  linkedCollectionIds,
+  collectionsAvailable,
   canEdit,
   error,
   saved,
@@ -33,6 +38,9 @@ export default function WebsiteSection({
 }: {
   paperId: string
   metadata: PaperPublicMetadata
+  collections: ExternalPublicationCollectionRow[]
+  linkedCollectionIds: string[]
+  collectionsAvailable: boolean
   canEdit: boolean
   error?: string
   saved?: boolean
@@ -40,6 +48,15 @@ export default function WebsiteSection({
     formData: FormData
   ) => Promise<void>
 }) {
+  const linked =
+    new Set(linkedCollectionIds)
+
+  const selectedCollections =
+    collections.filter(
+      (collection) =>
+        linked.has(collection.id)
+    )
+
   return (
     <section
       id="website"
@@ -176,7 +193,33 @@ export default function WebsiteSection({
                 values={metadata}
                 slug={metadata.slug}
               />
+
+              {collectionsAvailable && (
+                <div className="md:col-span-2 xl:col-span-4">
+                  <CollectionCheckboxes
+                    collections={collections}
+                    linkedCollectionIds={
+                      linkedCollectionIds
+                    }
+                    emptyMessage="No collections yet. Create them in Papers, Other papers."
+                  />
+
+                  <p className="mt-1 text-xs text-oxford-ash">
+                    Only Public papers
+                    with a slug appear in
+                    collection feeds.
+                  </p>
+                </div>
+              )}
             </div>
+
+            {collectionsAvailable && (
+              <input
+                type="hidden"
+                name="collections_submitted"
+                value="1"
+              />
+            )}
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Button type="submit">
@@ -195,9 +238,24 @@ export default function WebsiteSection({
           </form>
         ) : (
           <div className="mt-5 text-sm leading-6 text-oxford-ash">
-            Website presentation
-            settings are managed by the
-            Dashboard Owner.
+            <p>
+              Website presentation
+              settings are managed by
+              the Dashboard Owner.
+            </p>
+
+            {selectedCollections.length >
+              0 && (
+              <p className="mt-2">
+                Collections:{' '}
+                {selectedCollections
+                  .map(
+                    (collection) =>
+                      collection.name
+                  )
+                  .join(', ')}
+              </p>
+            )}
           </div>
         )}
       </Card>

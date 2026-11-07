@@ -92,6 +92,7 @@ The current publicly callable function surface is (with explicit Paper-title dis
 - `list_public_planning_allocations()`
 - `list_public_project_publications()`
 - `list_public_external_publications()`
+- `list_public_collection_publications()`
 
 The milestones endpoint deliberately publishes milestone titles and the full titles of associated Papers, including otherwise private Papers, while concealing private Paper slugs, IDs and notes. The planning-allocation endpoint lists stored manual/legacy allocations and fortnight dates rather than all source-backed Planning commitments. Consumers must avoid counting legacy allocations marked as superseded alongside milestone commitments.
 
@@ -138,7 +139,7 @@ Work-analytics validation follows the strict rules first exercised in `weekly-pe
 
 Software validation enforces the controlled category, development-stage, status, and repository-visibility vocabularies, valid HTTP(S) URLs, valid lifecycle years with `end_year >= start_year` when both exist, and the privacy invariant that a Private repository cannot return a public `repository_url`. Availability validation is also strict: the requested year is bounded, ranges must use real ISO dates clipped to that year, `start_date <= end_date`, types must match the controlled public vocabulary, duplicate identical ranges are rejected, and generic unavailable ranges may not disclose an underlying sickness label.
 
-External and project publication validation checks slug format and uniqueness, unique Project and collection slugs per row, a publication date that falls in the publication year, HTTP(S) URLs, the controlled language and authorship vocabularies, and, in the live check, that each public Project's `own` rows equal its `publication_slugs`, that every `external` row matches the external feed, that external slugs and titles never collide with `list_public_papers()`, and that no row references a non-public Project.
+External and project publication validation checks slug format and uniqueness, unique Project and collection slugs per row, a publication date that falls in the publication year, HTTP(S) URLs, the controlled language and authorship vocabularies, and, in the live check, that each public Project's `own` rows equal its `publication_slugs`, that every `external` row matches the external feed, that external slugs and titles never collide with `list_public_papers()`, and that no row references a non-public Project. Collection publication validation adds a slug check on `collection_slug` and uniqueness of each publication within a collection; the live check also requires every `own` row to be a public Paper and every collection of a Public external publication to list it.
 
 These layers complement one another. The reference client does not replace `lib/academic-api-contract.json`, the producer-side migration checks, or the Supabase RPC transport.
 
@@ -166,6 +167,12 @@ Only the latest stored Google Scholar citation snapshot is exposed, as a count a
 External publications are publications by other authors that the Owner curates for the Academic Website and related sites. They live in their own tables (`external_publications` and its collection and Project link tables), so they never appear in `list_public_papers()`, `get_public_paper()`, Planning, analytics or Hours.
 
 `list_public_external_publications()` returns only Public rows. Each Public row must carry a unique, stable slug, enforced by a check constraint and a unique index. A row exposes its bibliographic fields, DOI and publication URLs (absolute HTTP(S) with a host and no whitespace, the same database rule that applies to Paper links, conference presentation URLs and Software URLs since rc.5), language, the slugs of related public Projects and the slugs of its collections. Collections let each consuming site filter its own selection; their slugs become public once a collection holds a Public publication, while collection names and descriptions stay private. Internal IDs, `created_by`, editor flags and audit details are never exposed, and Website Editor suggestions remain invisible until the Owner publishes them.
+
+### Collection publications
+
+Since rc.6, collections can also hold the Owner's own Papers. `paper_collection_items` links a Paper to a collection; a trigger requires both to belong to the same Owner, Dashboard members can read the links, and only the Owner writes them, through `set_paper_collections()` from the Paper's Website settings. A Paper's collections are independent of its visibility, but only Public Papers with a slug reach a feed.
+
+`list_public_collection_publications()` lists, for each collection, its Public Papers (`authorship = own`, matching `list_public_papers()` by slug) and its Public external publications (`authorship = external`, matching `list_public_external_publications()` by slug and `collection_slugs`), each with a `publication_slug`. A publication appears once per collection it belongs to. It is the recommended feed for sites that select publications by collection; the external feed and its `collection_slugs` are unchanged.
 
 ### Projects
 
@@ -242,7 +249,7 @@ Active consumers:
 - [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline): runtime supabase-js.
 - Academic Signature Studio (private): runtime supabase-js.
 
-Planned consumers of the publication feeds, from rc.5: the OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites, and the organisation site template that several of them are built from. They select their publications by collection, and SUDAKAS and OBPEX also by Project.
+Planned consumers of the publication feeds, from rc.5: the OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites, and the organisation site template that several of them are built from. They select their publications by collection through `list_public_collection_publications()`, which since rc.6 includes the Owner's own Papers, and SUDAKAS and OBPEX also by Project.
 
 These repositories consume the public interface but are not runtime dependencies of Research Dashboard. Changes they need are proposed to them, not made from here.
 

@@ -208,6 +208,60 @@ export async function updatePublicPaperMetadata(
     )
   }
 
+  // The form carries collections only when they loaded; otherwise an
+  // empty list must not clear the Paper's existing collections.
+  if (
+    formData.get(
+      'collections_submitted'
+    ) === '1'
+  ) {
+    const collectionIds =
+      formData
+        .getAll('collection_id')
+        .filter(
+          (value):
+            value is string =>
+            typeof value ===
+            'string'
+        )
+        .map((value) =>
+          value.trim()
+        )
+        .filter(Boolean)
+
+    const {
+      error: collectionsError,
+    } = await supabase.rpc(
+      'set_paper_collections',
+      {
+        p_paper_id: paperId,
+        p_collection_ids:
+          collectionIds,
+      }
+    )
+
+    if (collectionsError) {
+      console.error(
+        'Paper collections update failed:',
+        collectionsError
+      )
+
+      revalidatePath(
+        `/papers/${paperId}`
+      )
+
+      paperWebsiteRedirect(
+        paperId,
+        'websiteError',
+        'The website settings were saved, but the collections could not be updated.'
+      )
+    }
+
+    revalidatePath(
+      '/papers/others'
+    )
+  }
+
   revalidatePath(
     `/papers/${paperId}`
   )

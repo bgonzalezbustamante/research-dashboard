@@ -15,6 +15,24 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.6',
+    codename: 'Steady Orchard',
+    status: 'In development',
+    releasedOn: 'Release date TBC',
+    comparison: 'Changes since rc.5',
+    summary:
+      'Steady Orchard lets your own papers join collections, keeps the Dashboard up to date and adds a few safeguards.',
+    sections: [
+      {
+        title: 'Sharing publications with other sites',
+        items: [
+          'Your own papers can join collections, so partner sites show them alongside other people’s papers. Choose a paper’s collections in its Website settings.',
+          'Each collection on the Other papers tab lists your papers in it and how many of them are public.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.5',
     codename: 'Ancient Glacier',
     status: 'Release candidate',

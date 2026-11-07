@@ -64,7 +64,7 @@
       "url": "https://obpex.com",
       "status": "planned",
       "rpcs": [
-        "list_public_external_publications",
+        "list_public_collection_publications",
         "list_public_project_publications"
       ]
     },
@@ -73,7 +73,7 @@
       "url": "https://sudakas.org",
       "status": "planned",
       "rpcs": [
-        "list_public_external_publications",
+        "list_public_collection_publications",
         "list_public_project_publications"
       ]
     },
@@ -82,14 +82,14 @@
       "url": "https://empirialab.cl",
       "status": "planned",
       "rpcs": [
-        "list_public_external_publications"
+        "list_public_collection_publications"
       ]
     },
     {
       "name": "Organisation site template",
       "status": "planned",
       "rpcs": [
-        "list_public_external_publications"
+        "list_public_collection_publications"
       ]
     },
     {
@@ -97,7 +97,7 @@
       "url": "https://carlacisternas.com",
       "status": "planned",
       "rpcs": [
-        "list_public_external_publications"
+        "list_public_collection_publications"
       ]
     }
   ],
@@ -694,6 +694,91 @@
             "collection_slugs lets each consuming site select its own subset. project_slugs contains only public projects and is empty when the publication is unrelated to any public project.",
             "External publications never appear in list_public_papers() or get_public_paper().",
             "publication_year is always present; publication_date is optional and, when present, falls in that year. Rows are ordered by most recent publication first, then title."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "collection-publications",
+      "title": "Collection publications",
+      "summary": "Publications in each owner-defined collection: the owner’s own explicitly public Papers and public external publications, for the sites that select publications by collection.",
+      "notExposed": [
+        "Internal collection, Paper, external publication and owner IDs",
+        "Private Papers and private external publications, including Website Editor submissions awaiting review",
+        "Collection names and descriptions (only collection slugs are public)",
+        "Internal association-row IDs, visibility settings and timestamps"
+      ],
+      "forbiddenFields": [
+        "id",
+        "collection_id",
+        "paper_id",
+        "external_publication_id",
+        "owner_id",
+        "visibility",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "list_public_collection_publications",
+          "signature": "list_public_collection_publications()",
+          "kind": "Listing",
+          "purpose": "Lists the publications of every collection, distinguishing the owner’s own Papers from external publications.",
+          "parameters": [],
+          "fields": [
+            {
+              "name": "collection_slug",
+              "type": "text"
+            },
+            {
+              "name": "authorship",
+              "type": "text"
+            },
+            {
+              "name": "publication_slug",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "authors",
+              "type": "text[]"
+            },
+            {
+              "name": "venue",
+              "type": "text"
+            },
+            {
+              "name": "publication_date",
+              "type": "date"
+            },
+            {
+              "name": "publication_year",
+              "type": "integer"
+            },
+            {
+              "name": "doi_url",
+              "type": "text"
+            },
+            {
+              "name": "publication_url",
+              "type": "text"
+            },
+            {
+              "name": "language",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "authorship is own for the owner’s explicitly public Papers and external for public publications by other authors. publication_slug is the Paper slug for own rows and the external publication slug for external rows; it is never null.",
+            "Own rows match list_public_papers() by slug. External rows match list_public_external_publications() by slug, and their collection_slug is among that row’s collection_slugs.",
+            "A publication appears once per collection it belongs to; collection_slug, authorship and publication_slug together are unique.",
+            "External rows always have a publication_year; publication_date is optional and, when present, falls in that year. Own rows derive publication_year from publication_date and may have both null.",
+            "Rows are ordered by collection_slug, then most recent publication first, then title."
           ]
         }
       ]

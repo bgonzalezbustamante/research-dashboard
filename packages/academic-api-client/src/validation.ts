@@ -22,6 +22,7 @@ import type {
   PublicPaperDetail,
   PublicProject,
   PublicExternalPublication,
+  PublicCollectionPublication,
   PublicProjectPublication,
   PublicSoftwareItem,
   PublicTeachingItem,
@@ -865,22 +866,12 @@ export function parsePublicProjectDetailResponse(
   return rows[0] ?? null
 }
 
-function parsePublicProjectPublication(
-  value: unknown,
+// Row rules shared by the Project and collection publication feeds: every
+// field except the grouping slug (project_slug or collection_slug).
+function assertGroupedPublicationFields(
+  value: Record<string, unknown>,
   path: string
-): PublicProjectPublication {
-  assertRecord(value, path)
-  assertExactKeys(
-    value,
-    RPC_FIELDS.list_public_project_publications,
-    path
-  )
-
-  assertString(
-    value.project_slug,
-    `${path}.project_slug`
-  )
-
+) {
   assertControlledValue(
     value.authorship,
     CONTROLLED_VOCABULARIES[
@@ -976,6 +967,28 @@ function parsePublicProjectPublication(
       'paper-language'
     ],
     `${path}.language`
+  )
+}
+
+function parsePublicProjectPublication(
+  value: unknown,
+  path: string
+): PublicProjectPublication {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    RPC_FIELDS.list_public_project_publications,
+    path
+  )
+
+  assertString(
+    value.project_slug,
+    `${path}.project_slug`
+  )
+
+  assertGroupedPublicationFields(
+    value,
+    path
   )
 
   return value as unknown as PublicProjectPublication
@@ -1139,6 +1152,59 @@ export function parsePublicExternalPublicationList(
     fail(
       'list_public_external_publications response',
       'expected unique slugs'
+    )
+  }
+
+  return rows
+}
+
+function parsePublicCollectionPublication(
+  value: unknown,
+  path: string
+): PublicCollectionPublication {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    RPC_FIELDS.list_public_collection_publications,
+    path
+  )
+
+  assertPublicSlug(
+    value.collection_slug,
+    `${path}.collection_slug`
+  )
+
+  assertGroupedPublicationFields(
+    value,
+    path
+  )
+
+  return value as unknown as PublicCollectionPublication
+}
+
+export function parsePublicCollectionPublicationList(
+  payload: unknown
+): PublicCollectionPublication[] {
+  const rows =
+    parseArray(
+      payload,
+      'list_public_collection_publications response',
+      parsePublicCollectionPublication
+    )
+
+  const keys =
+    rows.map(
+      (row) =>
+        `${row.collection_slug}\u0000${row.authorship}\u0000${row.publication_slug}`
+    )
+
+  if (
+    new Set(keys).size !==
+    keys.length
+  ) {
+    fail(
+      'list_public_collection_publications response',
+      'expected each publication once per collection'
     )
   }
 

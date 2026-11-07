@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import PageHeader from '@/components/page-header'
 import ApproveExternalPublicationForm from '@/components/papers/approve-external-publication-form'
 import ExternalPublicationForm from '@/components/papers/external-publication-form'
@@ -50,6 +52,29 @@ type ProjectLinkRow = {
   external_publication_id: string
 }
 
+type PaperCollectionItemRow = {
+  collection_id: string
+  paper_id: string
+  papers: {
+    short_title: string | null
+    title: string
+    paper_public_metadata:
+      | {
+          visibility: string
+        }
+      | {
+          visibility: string
+        }[]
+      | null
+  } | null
+}
+
+type CollectionPaper = {
+  id: string
+  label: string
+  visibility: 'public' | 'private'
+}
+
 type CollectionItemRow = {
   collection_id: string
   external_publication_id: string
@@ -73,6 +98,7 @@ export default async function OtherPapersPage({
     linksResult,
     collectionsResult,
     collectionItemsResult,
+    paperCollectionItemsResult,
   ] = await Promise.all([
     supabase
       .from('external_publications')
@@ -120,6 +146,22 @@ export default async function OtherPapersPage({
       .select(
         'collection_id, external_publication_id'
       ),
+
+    supabase
+      .from(
+        'paper_collection_items'
+      )
+      .select(`
+        collection_id,
+        paper_id,
+        papers (
+          short_title,
+          title,
+          paper_public_metadata (
+            visibility
+          )
+        )
+      `),
   ])
 
   if (publicationsResult.error) {
@@ -235,6 +277,64 @@ export default async function OtherPapersPage({
         counts
       )
     }
+  }
+
+  // The Owner's own Papers in each collection. A load error (for example
+  // before the collections migration is applied) shows none.
+  if (paperCollectionItemsResult.error) {
+    console.error(
+      'Could not load paper collection items:',
+      paperCollectionItemsResult.error
+    )
+  }
+
+  const papersByCollection =
+    new Map<string, CollectionPaper[]>()
+
+  for (const item of (paperCollectionItemsResult.error
+    ? []
+    : paperCollectionItemsResult.data ??
+      []) as unknown as PaperCollectionItemRow[]) {
+    const metadata =
+      Array.isArray(
+        item.papers
+          ?.paper_public_metadata
+      )
+        ? item.papers
+            ?.paper_public_metadata[0]
+        : item.papers
+            ?.paper_public_metadata
+
+    const existing =
+      papersByCollection.get(
+        item.collection_id
+      ) ?? []
+
+    existing.push({
+      id: item.paper_id,
+      label:
+        item.papers?.short_title ||
+        item.papers?.title ||
+        'Untitled paper',
+      visibility:
+        metadata?.visibility ===
+        'public'
+          ? 'public'
+          : 'private',
+    })
+
+    papersByCollection.set(
+      item.collection_id,
+      existing
+    )
+  }
+
+  for (const papers of papersByCollection.values()) {
+    papers.sort((a, b) =>
+      a.label.localeCompare(
+        b.label
+      )
+    )
   }
 
   const isAwaitingReview = (
@@ -361,7 +461,7 @@ export default async function OtherPapersPage({
     <div>
       <PageHeader
         title="Papers"
-        description="Other people's papers: a curated library of publications by other authors for the Academic Website and related sites. They never appear among your own papers, Planning or analytics. Public ones need a stable slug and are listed by the Academic API, where sites filter them by collection and, optionally, by related project."
+        description="Other people's papers: a curated library of publications by other authors for the Academic Website and related sites. They never appear among your own papers, Planning or analytics. Public ones need a stable slug and are listed by the Academic API, where sites filter them by collection and, optionally, by related project. Collections can also hold your own papers, chosen on each paper's page."
       />
 
       <PapersTabs active="/papers/others" />
@@ -641,10 +741,14 @@ export default async function OtherPapersPage({
           </h2>
 
           <p className="mt-1 text-sm leading-6 text-oxford-ash">
-            Group external publications
-            for the sites that use the
-            Academic API. Sites filter
-            the external publications
+            Group publications for the
+            sites that use the Academic
+            API: other people&apos;s
+            papers here, and your own
+            papers from each
+            paper&apos;s Website
+            settings. Sites read the
+            collection publications
             feed by collection slug, so
             slugs are public once a
             collection holds a Public
@@ -758,15 +862,29 @@ export default async function OtherPapersPage({
                         {countsByCollection.get(
                           collection.id
                         )?.private ?? 0}{' '}
-                        Private
+                        Private other papers
                       </span>
                     </div>
 
+                    <CollectionOwnPapers
+                      papers={
+                        papersByCollection.get(
+                          collection.id
+                        ) ?? []
+                      }
+                    />
+
                     <p className="mt-3 text-xs leading-5 text-oxford-ash">
                       Sites show its Public
-                      publications with{' '}
+                      publications, yours and
+                      other people&apos;s,
+                      with{' '}
                       <code>
-                        {`filterExternalPublicationsByCollection(rows, '${collection.slug}')`}
+                        {`filterCollectionPublications(rows, '${collection.slug}')`}
+                      </code>{' '}
+                      on{' '}
+                      <code>
+                        listPublicCollectionPublications()
                       </code>{' '}
                       from the Academic API
                       client.
@@ -899,6 +1017,49 @@ export default async function OtherPapersPage({
             </div>
           )}
         </section>
+      )}
+    </div>
+  )
+}
+
+function CollectionOwnPapers({
+  papers,
+}: {
+  papers: CollectionPaper[]
+}) {
+  const publicCount =
+    papers.filter(
+      (paper) =>
+        paper.visibility ===
+        'public'
+    ).length
+
+  return (
+    <div className="mt-3 text-sm leading-6 text-oxford-charcoal">
+      <p className="text-xs text-oxford-ash">
+        {papers.length} of your papers
+        ({publicCount} Public,{' '}
+        {papers.length - publicCount}{' '}
+        Private)
+      </p>
+
+      {papers.length > 0 && (
+        <ul className="mt-1 flex flex-wrap gap-2">
+          {papers.map((paper) => (
+            <li key={paper.id}>
+              <Link
+                href={`/papers/${paper.id}#website`}
+                className="inline-block rounded-full border border-oxford-stone bg-white px-2.5 py-1 text-xs font-medium text-oxford-blue hover:bg-oxford-shell"
+              >
+                {paper.label}
+                {paper.visibility ===
+                'public'
+                  ? ''
+                  : ' (Private)'}
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )

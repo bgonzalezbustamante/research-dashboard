@@ -235,6 +235,7 @@ function assertManifest(contract) {
     'list_public_planning_allocations',
     'list_public_project_publications',
     'list_public_external_publications',
+    'list_public_collection_publications',
   ]
 
   const operations = contract.resources.flatMap((resource) =>
@@ -911,6 +912,78 @@ async function liveCheck() {
     }
   }
 
+  // Collection publications: own rows are public Papers, external rows match
+  // the external feed, and each publication appears once per collection.
+  const collectionPublications =
+    await api.listPublicCollectionPublications()
+
+  const collectionRowKeys =
+    new Set()
+
+  for (const row of collectionPublications) {
+    const key =
+      `${row.collection_slug}\u0000${row.authorship}\u0000${row.publication_slug}`
+
+    if (
+      collectionRowKeys.has(key)
+    ) {
+      fail(
+        'list_public_collection_publications() repeats a publication in a collection: ' +
+          row.publication_slug
+      )
+    }
+
+    collectionRowKeys.add(key)
+
+    if (
+      row.authorship === 'own' &&
+      !publicPaperSlugs.has(
+        row.publication_slug
+      )
+    ) {
+      fail(
+        'list_public_collection_publications() own row is not a public paper: ' +
+          row.publication_slug
+      )
+    }
+
+    if (row.authorship === 'external') {
+      const externalRow =
+        externalBySlug.get(
+          row.publication_slug
+        )
+
+      if (
+        !externalRow ||
+        !externalRow.collection_slugs.includes(
+          row.collection_slug
+        )
+      ) {
+        fail(
+          'Collection feed external row does not match list_public_external_publications(): ' +
+            row.publication_slug
+        )
+      }
+    }
+  }
+
+  for (const row of externalPublications) {
+    for (const collectionSlug of row.collection_slugs) {
+      if (
+        !collectionRowKeys.has(
+          `${collectionSlug}\u0000external\u0000${row.slug}`
+        )
+      ) {
+        fail(
+          'list_public_collection_publications() is missing an external publication of collection ' +
+            collectionSlug +
+            ': ' +
+            row.slug
+        )
+      }
+    }
+  }
+
   const software =
     await api.listPublicSoftware()
 
@@ -1033,6 +1106,7 @@ async function liveCheck() {
     'project_external_publications',
     'external_publication_collections',
     'external_publication_collection_items',
+    'paper_collection_items',
     'profiles',
     'dashboard_members',
     'access_invitations',

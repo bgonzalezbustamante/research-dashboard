@@ -16,6 +16,7 @@ import StatusBadge from '@/components/ui/status-badge'
 import {
   requireDashboardAccess,
 } from '@/lib/auth/dashboard-access'
+import type { ExternalPublicationCollectionRow } from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -265,6 +266,8 @@ export default async function PaperPage({
     conferencePresentationsResult,
     projectsResult,
     publicMetadataResult,
+    collectionsResult,
+    paperCollectionsResult,
   ] = await Promise.all([
     supabase
       .from('paper_authors')
@@ -397,6 +400,28 @@ export default async function PaperPage({
       `)
       .eq('paper_id', id)
       .maybeSingle(),
+
+    supabase
+      .from(
+        'external_publication_collections'
+      )
+      .select(
+        'id, slug, name, description'
+      )
+      .eq(
+        'owner_id',
+        access.ownerId
+      )
+      .order('name', {
+        ascending: true,
+      }),
+
+    supabase
+      .from(
+        'paper_collection_items'
+      )
+      .select('collection_id')
+      .eq('paper_id', id),
   ])
 
   if (authorResult.error) {
@@ -496,6 +521,35 @@ export default async function PaperPage({
           b.short_title
         )
       )
+
+  // Collections are optional on this page: a load error (for example before
+  // the collections migration is applied) shows none instead of failing.
+  if (collectionsResult.error) {
+    console.error(
+      'Could not load collections:',
+      collectionsResult.error
+    )
+  }
+
+  if (paperCollectionsResult.error) {
+    console.error(
+      'Could not load paper collections:',
+      paperCollectionsResult.error
+    )
+  }
+
+  const collections =
+    collectionsResult.error
+      ? []
+      : (collectionsResult.data ?? []) as ExternalPublicationCollectionRow[]
+
+  const linkedCollectionIds =
+    paperCollectionsResult.error
+      ? []
+      : (paperCollectionsResult.data ?? []).map(
+          (item) =>
+            item.collection_id as string
+        )
 
   const publicMetadata =
     (publicMetadataResult.data ?? {
@@ -1119,6 +1173,14 @@ export default async function PaperPage({
       <WebsiteSection
         paperId={paper.id}
         metadata={publicMetadata}
+        collections={collections}
+        linkedCollectionIds={
+          linkedCollectionIds
+        }
+        collectionsAvailable={
+          !collectionsResult.error &&
+          !paperCollectionsResult.error
+        }
         canEdit={
           access.canEdit
         }

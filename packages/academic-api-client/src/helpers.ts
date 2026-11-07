@@ -1,5 +1,6 @@
 import type {
   PublicationAuthorship,
+  PublicCollectionPublication,
   PublicExternalPublication,
   PublicProjectPublication,
 } from './types.js'
@@ -17,6 +18,24 @@ export function filterExternalPublicationsByCollection(
       row.collection_slugs.includes(
         collectionSlug
       )
+  )
+}
+
+// Rows of one collection from list_public_collection_publications(): the
+// owner's own Public Papers and Public external publications, optionally
+// only one authorship.
+export function filterCollectionPublications(
+  rows: readonly PublicCollectionPublication[],
+  collectionSlug: string,
+  authorship?: PublicationAuthorship
+): PublicCollectionPublication[] {
+  return rows.filter(
+    (row) =>
+      row.collection_slug ===
+        collectionSlug &&
+      (authorship === undefined ||
+        row.authorship ===
+          authorship)
   )
 }
 

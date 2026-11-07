@@ -6,6 +6,7 @@ import type {
   PublicPaperDetail,
   PublicPaperMilestone,
   PublicExternalPublication,
+  PublicCollectionPublication,
   PublicProjectPublication,
   PublicPlanningAllocation,
   PublicProject,
@@ -22,6 +23,7 @@ import {
   parsePublicPaperList,
   parsePublicPaperMilestoneList,
   parsePublicExternalPublicationList,
+  parsePublicCollectionPublicationList,
   parsePublicProjectPublicationList,
   parsePublicPlanningAllocationList,
   parsePublicProjectDetailResponse,
@@ -125,6 +127,9 @@ export type AcademicApiClient = {
   >
   listPublicExternalPublications(): Promise<
     PublicExternalPublication[]
+  >
+  listPublicCollectionPublications(): Promise<
+    PublicCollectionPublication[]
   >
   listPublicPaperMilestones(): Promise<
     PublicPaperMilestone[]
@@ -271,6 +276,12 @@ export function createAcademicApiClient(
     async listPublicExternalPublications() {
       return parsePublicExternalPublicationList(
         await callRpc(transport, 'list_public_external_publications')
+      )
+    },
+
+    async listPublicCollectionPublications() {
+      return parsePublicCollectionPublicationList(
+        await callRpc(transport, 'list_public_collection_publications')
       )
     },
 

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import {
   createAcademicApiClient,
   createFetchTransport,
+  filterCollectionPublications,
   filterExternalPublicationsByCollection,
   filterProjectPublications,
   sortPublicationsByDate,
@@ -355,5 +356,66 @@ test('sortPublicationsByDate orders newest first without mutating its input', ()
   assert.deepEqual(
     rows.map((row) => row.title),
     snapshot
+  )
+})
+
+test('collection publication filter keeps one collection and authorship', () => {
+  const rows = [
+    {
+      collection_slug: 'obpex',
+      authorship: 'own',
+      publication_slug: 'own-paper',
+      title: 'Own',
+      authors: ['B. G.'],
+      venue: null,
+      publication_date: null,
+      publication_year: null,
+      doi_url: null,
+      publication_url: null,
+      language: null,
+    },
+    {
+      collection_slug: 'obpex',
+      authorship: 'external',
+      publication_slug: 'partner-study-2025',
+      title: 'Partner study',
+      authors: ['A. Partner'],
+      venue: null,
+      publication_date: '2025-03-01',
+      publication_year: 2025,
+      doi_url: null,
+      publication_url: null,
+      language: null,
+    },
+    {
+      collection_slug: 'sudakas',
+      authorship: 'own',
+      publication_slug: 'own-paper',
+      title: 'Own',
+      authors: ['B. G.'],
+      venue: null,
+      publication_date: null,
+      publication_year: null,
+      doi_url: null,
+      publication_url: null,
+      language: null,
+    },
+  ]
+
+  assert.deepEqual(
+    filterCollectionPublications(
+      rows,
+      'obpex'
+    ).map((row) => row.publication_slug),
+    ['own-paper', 'partner-study-2025']
+  )
+
+  assert.deepEqual(
+    filterCollectionPublications(
+      rows,
+      'obpex',
+      'own'
+    ).map((row) => row.publication_slug),
+    ['own-paper']
   )
 })
