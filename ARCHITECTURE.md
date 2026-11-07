@@ -39,10 +39,10 @@ The Dashboard keeps one typed server-side application registry containing the al
 
 Backup health uses four states:
 
-- **Healthy** — a successful backup exists and is no more than eight days old;
-- **Running** — the latest workflow attempt is queued or in progress;
-- **Attention** — no successful release exists, or a failed/cancelled attempt is newer than the latest successful release;
-- **Stale** — the latest successful backup is more than eight days old.
+- **Healthy**: a successful backup exists and is no more than eight days old;
+- **Running**: the latest workflow attempt is queued or in progress;
+- **Attention**: no successful release exists, or a failed/cancelled attempt is newer than the latest successful release;
+- **Stale**: the latest successful backup is more than eight days old.
 
 Manual dispatch is exposed only through the authenticated server-side `POST /api/backups/[app]/run` endpoint. The application key is validated against the registry, the caller must have editable Dashboard access, the request must be same-origin, and dispatch is rejected while that application's workflow already has a queued or in-progress run. The endpoint dispatches only the configured workflow on `main`, polls the private Actions API briefly until the new manual run is discovered and progresses beyond queued where possible, revalidates `/backups`, and returns only a small operational response.
 
@@ -125,13 +125,13 @@ Contract metadata for RPC names, fields, parameters, and controlled vocabularies
 
 The architecture therefore has three complementary checks:
 
-1. **Static producer contract — `npm run check:public-api`**  
+1. **Static producer contract: `npm run check:public-api`**  
    Verifies the manifest against migration/function definitions, controlled database vocabularies, and forbidden-field boundaries.
 
-2. **Client/schema compatibility — `npm run check:academic-api-client`**  
+2. **Client/schema compatibility: `npm run check:academic-api-client`**  
    Verifies generated client metadata against the manifest, compiles the canonical TypeScript types/reference client, and runs strict runtime-validator regression tests.
 
-3. **Live response validation — `npm run check:public-api:live`**  
+3. **Live response validation: `npm run check:public-api:live`**  
    Calls the real anonymous-safe RPCs with the publishable key, validates responses through the same reference-client parsers available to downstream consumers, and separately confirms that anonymous direct table access remains blocked.
 
 Work-analytics validation follows the strict rules first exercised in `weekly-penguin-timeline`: requested-year equality, real ISO calendar dates, unique daily rows, non-negative integer daily metrics, and complete 365/366-day coverage.

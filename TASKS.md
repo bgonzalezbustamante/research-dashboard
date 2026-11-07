@@ -18,7 +18,7 @@
 - [x] **[Claude]** Release docs, draft PR (#63) and CI
 - [x] **[Bastián]** Publish the client package to npm (`npm publish --tag beta`) and delete the rc.5 SQL files from Documents
 - [x] **[Claude]** Adopt the sibling repos' security setup: Dependabot alerts and updates, secret scanning, push protection, hardened Verify workflow
-- [ ] **[Claude]** Merge with a merge commit, tag `v1.0.0-rc.5` and create the GitHub pre-release ~30m
+- [x] **[Claude]** Merge PR #63 with a merge commit, tag `v1.0.0-rc.5` and create the GitHub pre-release
 
 ## Next release (rc.6)
 
