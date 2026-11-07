@@ -351,9 +351,11 @@ export default function ExternalPublicationForm({
 export function CollectionCheckboxes({
   collections,
   linkedCollectionIds = [],
+  emptyMessage = 'No collections yet. Create one below to group publications for a site.',
 }: {
   collections: ExternalPublicationCollectionRow[]
   linkedCollectionIds?: string[]
+  emptyMessage?: string
 }) {
   const linked =
     new Set(linkedCollectionIds)
@@ -366,9 +368,7 @@ export function CollectionCheckboxes({
 
       {collections.length === 0 ? (
         <p className="text-sm text-oxford-ash">
-          No collections yet. Create
-          one below to group
-          publications for a site.
+          {emptyMessage}
         </p>
       ) : (
         <div className="grid max-h-56 gap-2 overflow-y-auto rounded-md border border-oxford-stone bg-oxford-off-white p-3 md:grid-cols-2">
