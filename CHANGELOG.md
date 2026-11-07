@@ -31,6 +31,7 @@
 
 - Upgraded `next` and `eslint-config-next` to 16.4.5. `npm audit --omit=dev` still reports 0 vulnerabilities, and the moderate development-only `minimatch` advisory remains blocked upstream: the latest `@typescript-eslint/typescript-estree` still requires `minimatch ^10`.
 - Moved the migration route to Supabase CLI 3.0.0 after verifying it against production with read-only commands. In 3.0.0, `db push` targets the local database unless given `--remote` (`--linked` is a deprecated alias), so production pushes now use `npx supabase@3.0.0 db push --remote`, which also names the target project and environment before acting. `supabase/config.toml` now uses `auth.email.enabled` and `auth.sms.enabled` instead of the deprecated `enable_signup` keys.
+- `npm audit --omit=dev` reported 0 production vulnerabilities, and the full-history Gitleaks scan covered 820 commits (approximately 3.36 MB) with no leaks found.
 - The three rc.5 migrations were prechecked (no existing link broke the new rule), rehearsed in a rolled-back transaction and applied with `db push`. `supabase/tests/rc5_access_policies.sql` then passed against production, `check:public-api:live` passed, and migration history matches the repository (88/88).
 
 `Layout`
