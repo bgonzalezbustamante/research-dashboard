@@ -117,7 +117,12 @@ export default function CitationSnapshotHistory({
         )}
       </div>
 
-      <div className="mt-3 border-y border-oxford-stone py-4">
+      {/* Keyed by snapshot so the edit and delete forms reset when paging;
+          otherwise typed values would be saved onto the next snapshot. */}
+      <div
+        key={snapshot.id}
+        className="mt-3 border-y border-oxford-stone py-4"
+      >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex flex-wrap items-baseline gap-3">
