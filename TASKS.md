@@ -17,7 +17,13 @@
 - [x] **[Claude]** Handoff briefs for organisation-site-template, empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site
 - [x] **[Claude]** Release docs, draft PR (#63) and CI
 - [x] **[Bastián]** Publish the client package to npm (`npm publish --tag beta`) and delete the rc.5 SQL files from Documents
+- [x] **[Claude]** Adopt the sibling repos' security setup: Dependabot alerts and updates, secret scanning, push protection, hardened Verify workflow
 - [ ] **[Claude]** Merge with a merge commit, tag `v1.0.0-rc.5` and create the GitHub pre-release ~30m
+
+## Next release (rc.6)
+
+- [ ] **[Claude]** Routine dependency updates: `@supabase/supabase-js` 2.119, `@supabase/ssr` 0.12.7, Tailwind CSS 4.3.5, catholic-calendar beta.2, React 19.3.1 (or merge the grouped Dependabot pull request) ~1h
+- [ ] **[Claude]** Clear the development-only `minimatch` advisory once `typescript-eslint` allows `minimatch` 11 ~30m
 
 ## v1.0.0-rc.4 "Velvet Torch" leftovers
 
