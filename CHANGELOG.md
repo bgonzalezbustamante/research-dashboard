@@ -408,7 +408,7 @@ Released 5 Oct 2026.
 
 `academic API`
 
-- Added the public `/api` documentation page and established the current anonymous-safe Supabase interface as **Academic API — Public RPC v1**.
+- Added the public `/api` documentation page and established the current anonymous-safe Supabase interface as **Academic API (Public RPC v1)**.
 - Added `lib/academic-api-contract.json` as the canonical repository manifest for public fields, controlled vocabularies, privacy exclusions, and downstream consumers; the page renders from this manifest rather than duplicating contract data in UI code.
 - Documented and validated the current publication, project, conference, teaching, and work-analytics RPC surface while preserving the existing architecture: Supabase Data API/RPC with a publishable key, no direct anonymous table access, and no parallel `/api/v1/*` REST façade.
 - Added `npm run check:public-api` for migration/contract comparison and optional live boundary validation; added the Node 24 verification workflow for pull requests and `main` covering install, lint, API-contract validation, and production build.
