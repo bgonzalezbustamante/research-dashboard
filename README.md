@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.4 "Velvet Torch"**
+**v1.0.0-rc.5 "Ancient Glacier"**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, software, working hours, planning, collaboration, and cross-module analytics. It is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
@@ -22,7 +22,7 @@ Research Dashboard is the administrative system of record. Public consumers use 
 
 The human-readable contract is documented on the [Academic API](https://dashboard.bgonzalezbustamante.com/api) page. Public RPC v1 now documents sixteen curated operations in `lib/academic-api-contract.json`, including `list_public_paper_milestones()`, `list_public_planning_allocations()`, and, since rc.4, `list_public_external_publications()` and `list_public_project_publications()`. External publications are returned only once the Owner publishes them, never appear in the Paper RPCs, and expose slugs rather than internal IDs or contributor identities. Milestone records deliberately disclose the milestone title and full associated Paper title even for private Papers; private Paper slugs, IDs and notes remain hidden. FlowSavvy state and timestamp are provided for milestones. The allocation endpoint returns historical/manual records, not the complete derived Planning view. Both are supported by the reference client and strict validation checks.
 
-A portable TypeScript reference client and strict runtime validators live in `packages/academic-api-client/`. For the public/private boundary, validation model, and versioning rules, see [ARCHITECTURE.md](ARCHITECTURE.md).
+A portable TypeScript reference client, a dependency-free fetch transport and strict runtime validators live in `packages/academic-api-client/`, prepared for npm as [`@bgonzalezbustamante/academic-api-client`](packages/academic-api-client/README.md). New downstream sites use it with incremental static regeneration and select their publications by collection; the consumer list, including the planned OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites, is part of the manifest. For the public/private boundary, validation model, and versioning rules, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Stack
 
@@ -63,4 +63,4 @@ npm audit --omit=dev
 gitleaks git .
 ```
 
-For rc.4, the production dependency audit reported zero vulnerabilities, and the full-history Gitleaks scan covered 804 commits (approximately 3.26 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
+For rc.5, the production dependency audit reported zero vulnerabilities on Next.js 16.4.5, and the full-history Gitleaks scan covered 820 commits (approximately 3.36 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
