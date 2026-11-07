@@ -458,6 +458,64 @@ export async function updatePaper(
 
   const payload = result.payload
 
+  // update_paper_with_details replaces every link, but the form edits only
+  // some types. Keep the ones it cannot show: any `other` link, and a legacy
+  // `doi` link when a `publication` link also exists. (A lone `doi` link is
+  // shown in the DOI / publication field and saved from there.)
+  const {
+    data: existingLinks,
+    error: existingLinksError,
+  } = await supabase
+    .from('paper_links')
+    .select(
+      'link_type, label, url, sort_order'
+    )
+    .eq('paper_id', paperId)
+    .order('sort_order', {
+      ascending: true,
+    })
+
+  if (existingLinksError) {
+    console.error(
+      'Paper links could not be loaded before the update:',
+      existingLinksError
+    )
+
+    redirect(
+      `/papers/${paperId}/edit?error=The paper could not be updated. Please try again.`
+    )
+  }
+
+  const hasPublicationLink =
+    (existingLinks ?? []).some(
+      (link) =>
+        link.link_type ===
+        'publication'
+    )
+
+  const preservedLinks =
+    (existingLinks ?? [])
+      .filter(
+        (link) =>
+          link.link_type ===
+            'other' ||
+          (link.link_type ===
+            'doi' &&
+            hasPublicationLink)
+      )
+      .map(
+        (link, index) => ({
+          link_type:
+            link.link_type,
+          label: link.label,
+          url: link.url,
+          sort_order:
+            payload.links.length +
+            index +
+            1,
+        })
+      )
+
   const {
     data: updatedPaperId,
     error,
@@ -487,8 +545,10 @@ export async function updatePaper(
         payload.publishedOn,
       p_authors:
         payload.authors,
-      p_links:
-        payload.links,
+      p_links: [
+        ...payload.links,
+        ...preservedLinks,
+      ],
     }
   )
 
