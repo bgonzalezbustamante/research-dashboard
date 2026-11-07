@@ -25,6 +25,11 @@
 - Editing a Paper no longer deletes links the edit form cannot show. `update_paper_with_details` replaces every link, and the form edits seven types with one "DOI / publication" field, so an `other` link, or a legacy `doi` link next to a `publication` link, was lost on the next save. `updatePaper` now re-sends those links unchanged. A lone `doi` link is still shown in the DOI / publication field and saved from there.
 - The citation snapshot history resets its edit and delete forms for each snapshot. Values typed into "Edit snapshot" were kept when paging, while the hidden snapshot ID changed, so saving could overwrite another snapshot.
 
+`Search indexing`
+
+- Only the public Academic API page (`/api`) may appear in search results. The root layout now sets `robots: noindex, nofollow` and a `metadataBase`; `/api` overrides it with `index, follow` and a canonical URL. Before, `/login`, `/release-notes` and `/api` carried no robots tag, and `/robots.txt` redirected to `/login`, so crawlers saw no rules.
+- Added `app/robots.ts` (crawling allowed, so the `noindex` tags can be read; a `Disallow` would let a bare URL be listed) and `app/sitemap.ts` (only `/api`). `lib/supabase/proxy.ts` treats `/robots.txt` and `/sitemap.xml` as public paths. Private pages already redirected anonymous visitors to `/login`.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.
