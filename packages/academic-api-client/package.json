@@ -1,7 +1,50 @@
 {
   "name": "@bgonzalezbustamante/academic-api-client",
-  "version": "0.0.0-private",
-  "private": true,
+  "version": "0.1.0-beta.1",
+  "description": "Typed client, dependency-free fetch transport and strict runtime validators for the Research Dashboard Academic API (Public RPC v1).",
+  "license": "MIT",
+  "author": "Bastián González-Bustamante",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bgonzalezbustamante/research-dashboard.git",
+    "directory": "packages/academic-api-client"
+  },
+  "homepage": "https://dashboard.bgonzalezbustamante.com/api",
+  "bugs": {
+    "url": "https://github.com/bgonzalezbustamante/research-dashboard/issues"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "type": "module",
-  "description": "Portable reference client and strict runtime validators for Research Dashboard Academic API Public RPC v1"
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "academic",
+    "research",
+    "publications",
+    "supabase",
+    "api-client",
+    "typescript"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
+  "scripts": {
+    "prepack": "npm --prefix ../.. run build:academic-api-client:package"
+  }
 }

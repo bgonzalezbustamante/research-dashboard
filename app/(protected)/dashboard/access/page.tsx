@@ -84,10 +84,14 @@ function auditEventLabel(
       return 'Website citation updated'
     case 'external_publication_submitted':
       return 'Publication submitted for review'
+    case 'external_publication_created':
+      return 'External publication added'
+    case 'external_publication_published':
+      return 'External publication published'
     case 'external_publication_updated':
-      return 'Submitted publication edited'
+      return 'External publication edited'
     case 'external_publication_deleted':
-      return 'Submitted publication deleted'
+      return 'External publication deleted'
     case 'invitation_created':
       return 'Invitation created'
     case 'invitation_sent':
@@ -107,7 +111,66 @@ function auditEventLabel(
   }
 }
 
+const auditFieldLabels: Record<
+  string,
+  string
+> = {
+  title: 'title',
+  authors: 'authors',
+  venue: 'venue',
+  publication_year: 'year',
+  published_on: 'date',
+  doi_url: 'DOI',
+  publication_url: 'link',
+  language: 'language',
+  visibility: 'visibility',
+  slug: 'slug',
+  project_ids: 'Projects',
+  collection_ids: 'collections',
+}
+
+// "changed title, DOI" for publication edits that record changed_fields.
+function auditChangedFields(
+  entry: AccessAuditRow
+) {
+  const fields =
+    entry.details.changed_fields
+
+  if (
+    !Array.isArray(fields) ||
+    fields.length === 0
+  ) {
+    return null
+  }
+
+  return `changed ${fields
+    .filter(
+      (field): field is string =>
+        typeof field === 'string'
+    )
+    .map(
+      (field) =>
+        auditFieldLabels[field] ??
+        field
+    )
+    .join(', ')}`
+}
+
 function auditEventContext(
+  entry: AccessAuditRow
+) {
+  const context =
+    auditEventBaseContext(entry)
+
+  const changes =
+    auditChangedFields(entry)
+
+  return changes
+    ? `${context} · ${changes}`
+    : context
+}
+
+function auditEventBaseContext(
   entry: AccessAuditRow
 ) {
   const subject =
@@ -496,7 +559,7 @@ export default async function AccessPage({
             <h3 className="font-serif text-lg font-semibold text-oxford-blue">
               No active collaborator accounts
             </h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-oxford-ash">
+            <p className="mt-2 text-sm leading-6 text-oxford-ash">
               Use the invitation form below to add a new Viewer, Website Editor, or combined account.
             </p>
           </div>

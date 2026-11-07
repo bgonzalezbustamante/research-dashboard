@@ -1549,7 +1549,7 @@ export default async function TeachingPage({
                       </div>
                     </div>
 
-                    <p className="mt-4 max-w-4xl whitespace-pre-wrap text-sm leading-6 text-oxford-charcoal">
+                    <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-oxford-charcoal">
                       {item.summary}
                     </p>
 

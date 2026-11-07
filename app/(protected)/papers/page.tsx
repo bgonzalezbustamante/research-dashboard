@@ -1585,7 +1585,7 @@ export default async function PapersPage({
                 No papers yet
               </h2>
 
-              <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-oxford-ash">
+              <p className="mt-2 text-sm leading-6 text-oxford-ash">
                 Add your first paper
                 to start tracking its
                 status, submission and

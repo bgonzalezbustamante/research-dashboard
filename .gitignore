@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# academic-api-client package build output
+/packages/academic-api-client/dist/

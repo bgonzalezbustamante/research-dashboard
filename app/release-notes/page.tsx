@@ -72,7 +72,7 @@ export default async function ReleaseNotesPage({
   return (
     <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">
       <header className="border-b border-oxford-stone bg-white px-6 py-5">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/dashboard"
             className="flex items-center gap-4"
@@ -104,7 +104,7 @@ export default async function ReleaseNotesPage({
       </header>
 
       <main className="flex-1 px-6 py-10">
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-7xl">
           <div>
             <p className="text-sm font-medium uppercase tracking-wide text-oxford-ash">
               Release notes
@@ -149,7 +149,7 @@ export default async function ReleaseNotesPage({
                     </div>
                   </div>
 
-                  <p className="mt-5 max-w-4xl text-sm leading-6 text-oxford-ash">
+                  <p className="mt-5 text-sm leading-6 text-oxford-ash">
                     {release.summary}
                   </p>
 
