@@ -6,12 +6,13 @@
 
 - Started `v1.0.0-rc.6 "Steady Orchard"`, a maintenance release: routine dependency updates, Catholic Calendar 0.1.0-beta.2, the development-only `minimatch` advisory, safer links in paper text, security headers and documentation corrections.
 - The Owner's own Papers can join collections, so the sites that select publications by collection show them alongside other people's papers.
+- Part one (own Papers in collections) was merged on 7 Nov 2026 so the collection picker is live; the rest of rc.6 continues on a continuation branch, and rc.6 closes in December.
 
 ### Code changes
 
 `Own Papers in collections`
 
-- Added `paper_collection_items` (migration `20261107191338_add_paper_collections.sql`): a Paper can belong to any of the Owner's collections. A trigger requires the collection and the Paper to share an Owner, Dashboard members can read the links under RLS, and only the Owner writes them, through the new `set_paper_collections(uuid, uuid[])` RPC.
+- Added `paper_collection_items` (migration `20261107191338_add_paper_collections.sql`): a Paper can belong to any of the Owner's collections. A trigger requires the collection and the Paper to share an Owner, Dashboard members can read the links under RLS, and only the Owner writes them, through the new `set_paper_collections(uuid, uuid[])` RPC. The migration was prechecked, rehearsed in a rolled-back transaction and applied with `db push`; the new `supabase/tests/rc6_collection_policies.sql` (no test accounts needed) and `check:public-api:live` then passed against production.
 - Added `list_public_collection_publications()` to Public RPC v1 (seventeen operations). For each collection it lists the Owner's Public Papers with a slug (`authorship = own`) and Public external publications (`authorship = external`), with the same fields as `list_public_project_publications()` and `collection_slug` in place of `project_slug`. Existing feeds are unchanged.
 - The Paper page's Website settings now include the collection checkboxes, with a note that only Public papers with a slug appear in collection feeds; Viewers see the selected collections. A failed collection update is reported separately from the Website settings.
 - Each collection on the Other papers tab now lists the Owner's own Papers in it, with their Public and Private counts, and names the collection feed and `filterCollectionPublications()` as the way sites show it.
