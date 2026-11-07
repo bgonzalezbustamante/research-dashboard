@@ -12,6 +12,7 @@
     {
       "name": "Academic Website",
       "url": "https://github.com/bgonzalezbustamante/academic-website",
+      "status": "active",
       "rpcs": [
         "list_public_papers",
         "get_public_paper",
@@ -19,13 +20,17 @@
         "get_public_project",
         "list_public_conference_presentations",
         "list_public_teaching",
+        "get_public_teaching_settings",
+        "get_public_calendar_settings",
+        "list_public_software",
+        "get_public_software",
         "get_public_work_analytics",
-        "get_public_calendar_settings"
+        "list_public_availability"
       ]
     },
     {
       "name": "Academic CV Studio",
-      "url": "https://github.com/bgonzalezbustamante/academic-cv-studio",
+      "status": "active",
       "rpcs": [
         "list_public_papers",
         "get_public_paper",
@@ -38,9 +43,61 @@
     {
       "name": "Weekly Penguin Timeline",
       "url": "https://github.com/bgonzalezbustamante/weekly-penguin-timeline",
+      "status": "active",
       "rpcs": [
         "get_public_work_analytics",
-        "list_public_availability"
+        "list_public_availability",
+        "list_public_conference_presentations",
+        "get_public_teaching_settings"
+      ]
+    },
+    {
+      "name": "Academic Signature Studio",
+      "status": "active",
+      "rpcs": [
+        "list_public_papers",
+        "get_public_paper"
+      ]
+    },
+    {
+      "name": "OBPEX website",
+      "url": "https://obpex.com",
+      "status": "planned",
+      "rpcs": [
+        "list_public_external_publications",
+        "list_public_project_publications"
+      ]
+    },
+    {
+      "name": "SUDAKAS website",
+      "url": "https://sudakas.org",
+      "status": "planned",
+      "rpcs": [
+        "list_public_external_publications",
+        "list_public_project_publications"
+      ]
+    },
+    {
+      "name": "Empiria Lab website",
+      "url": "https://empirialab.cl",
+      "status": "planned",
+      "rpcs": [
+        "list_public_external_publications"
+      ]
+    },
+    {
+      "name": "Organisation site template",
+      "status": "planned",
+      "rpcs": [
+        "list_public_external_publications"
+      ]
+    },
+    {
+      "name": "Carla Cisternas website",
+      "url": "https://carlacisternas.com",
+      "status": "planned",
+      "rpcs": [
+        "list_public_external_publications"
       ]
     }
   ],

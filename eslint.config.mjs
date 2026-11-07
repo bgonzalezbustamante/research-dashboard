@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated npm package output of the Academic API client.
+    "packages/academic-api-client/dist/**",
   ]),
 ]);
 

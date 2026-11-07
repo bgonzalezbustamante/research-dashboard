@@ -15,9 +15,42 @@ export type ReleaseNote = {
 
 export const releases: ReleaseNote[] = [
   {
+    version: 'v1.0.0-rc.5',
+    codename: 'Ancient Glacier',
+    status: 'Release candidate',
+    releasedOn: '7 Nov 2026',
+    comparison: 'Changes since rc.4',
+    summary:
+      'Ancient Glacier helps the sites that use the Academic API adopt the curated publication feeds, and tightens several safeguards found in the rc.4 review.',
+    sections: [
+      {
+        title: 'Sharing publications with other sites',
+        items: [
+          'A ready-made Academic API package lets your other websites show curated publications and keep them up to date automatically, without copying data by hand.',
+          'Each collection on the Other papers tab shows how many of its publications are public, and how a site displays them.',
+          'The Academic API page lists every site that uses it, including the sites planned to show publications next.',
+        ],
+      },
+      {
+        title: 'Safeguards',
+        items: [
+          'Links on papers, conferences and software must now be complete web addresses, checked by the database as well as the forms.',
+          'Website Editors can have up to 20 suggestions awaiting review at a time, and see how many they have.',
+          'Your own changes to other people’s papers, including approvals and deletions, now appear in the Access audit trail, which also shows which details each edit changed.',
+        ],
+      },
+      {
+        title: 'Look and feel',
+        items: [
+          'Page introductions, descriptions and messages now use the full width of the page, and the public release notes and Academic API pages match the Dashboard’s width.',
+        ],
+      },
+    ],
+  },
+  {
     version: 'v1.0.0-rc.4',
     codename: 'Velvet Torch',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '6 Nov 2026',
     comparison: 'Changes since rc.3',
     summary:

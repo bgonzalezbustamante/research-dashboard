@@ -282,7 +282,7 @@ export default async function BackupsPage() {
               Three managed applications
             </h2>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-oxford-ash">
+            <p className="mt-2 text-sm leading-6 text-oxford-ash">
               Healthy backups are no
               more than eight days old.
               Running attempts take

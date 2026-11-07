@@ -84,7 +84,6 @@ export default async function WebsiteEditorPaperPage({
       <PageHeader
         title={paper.short_title}
         description="Edit how this paper is cited and classified on the Academic Website. Changes appear publicly only while the Dashboard Owner keeps the paper Public."
-        wide
       />
 
       <div className="space-y-6">

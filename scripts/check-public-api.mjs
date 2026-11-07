@@ -277,6 +277,31 @@ function assertManifest(contract) {
   }
 
   for (const consumer of contract.consumers) {
+    if (
+      !['active', 'planned'].includes(
+        consumer.status
+      )
+    ) {
+      fail(
+        consumer.name +
+          ' must have status active or planned'
+      )
+    }
+
+    // A link is optional: private repositories are named without one so
+    // the public /api page never links to a page visitors cannot open.
+    if (
+      consumer.url !== undefined &&
+      !/^https:\/\/[^\s/?#]+(?:[/?#]\S*)?$/.test(
+        consumer.url
+      )
+    ) {
+      fail(
+        consumer.name +
+          ' url must be an absolute HTTPS URL'
+      )
+    }
+
     for (const rpc of consumer.rpcs) {
       if (!rpcNames.includes(rpc)) {
         fail(

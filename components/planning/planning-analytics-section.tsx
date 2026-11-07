@@ -475,12 +475,12 @@ export default function PlanningAnalyticsSection({
       <div className="space-y-6">
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <h3 className="font-serif text-xl font-semibold text-oxford-blue">
                 Annual timeline
               </h3>
 
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-oxford-ash">
+              <p className="mt-1 text-sm leading-6 text-oxford-ash">
                 Click any date to open
                 its 1–15 or 16–end
                 Planning period.

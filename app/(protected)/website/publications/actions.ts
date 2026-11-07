@@ -4,7 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { requireWebsiteEditorAccess } from '@/lib/auth/dashboard-access'
-import { readExternalPublicationFields } from '@/lib/papers/external-publications'
+import {
+  editorPendingPublicationLimit,
+  readExternalPublicationFields,
+} from '@/lib/papers/external-publications'
 import { createClient } from '@/lib/supabase/server'
 
 function getRequiredText(
@@ -102,7 +105,9 @@ export async function createMyExternalPublication(
 
     editorPublicationsRedirect(
       'error',
-      'The publication could not be added.'
+      error.code === '53400'
+        ? `You already have ${editorPendingPublicationLimit} publications awaiting review. Add more once the Dashboard Owner has reviewed some of them.`
+        : 'The publication could not be added.'
     )
   }
 

@@ -17,6 +17,21 @@ export type {
 } from './client.js'
 
 export {
+  createFetchTransport,
+} from './transport.js'
+
+export type {
+  AcademicApiFetchInit,
+  AcademicApiFetchTransportOptions,
+} from './transport.js'
+
+export {
+  filterExternalPublicationsByCollection,
+  filterProjectPublications,
+  sortPublicationsByDate,
+} from './helpers.js'
+
+export {
   AcademicApiValidationError,
   parsePublicAvailabilityList,
   parsePublicCalendarSettingsResponse,

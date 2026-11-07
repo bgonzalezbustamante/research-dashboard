@@ -12,7 +12,7 @@ Row Level Security policies and `SECURITY DEFINER` RPC checks in `supabase/migra
 
 - **Owner** (`dashboard_members.role = 'owner'`) has full read and write access.
 - **Viewer** (`dashboard_members.role = 'viewer'`) has Dashboard-wide read-only access.
-- **Website Editor** is paper-scoped through `paper_website_editors` and has no Dashboard membership or table access. Website Editors work only at `/website`, `/account` and `/onboarding`, through dedicated RPCs: they read their assigned Papers, edit only the citation and publication index of those Papers (`update_paper_website_content`), and add and edit their own external publication suggestions (`create_my_external_publication`, `update_my_external_publication`), which stay Private until the Owner approves and publishes them. Slug, visibility, collections and Project links stay Owner-only; editors may delete a suggestion only while it awaits review. Every editor write is recorded in the Owner-only access audit log.
+- **Website Editor** is paper-scoped through `paper_website_editors` and has no Dashboard membership or table access. Website Editors work only at `/website`, `/account` and `/onboarding`, through dedicated RPCs: they read their assigned Papers, edit only the citation and publication index of those Papers (`update_paper_website_content`), and add and edit their own external publication suggestions (`create_my_external_publication`, `update_my_external_publication`), which stay Private until the Owner approves and publishes them. Slug, visibility, collections and Project links stay Owner-only; editors may delete a suggestion only while it awaits review, and may have at most 20 suggestions awaiting review at a time. Every editor write, and every Owner change to an external publication (create, edit, publish, delete, with the changed fields and previous values), is recorded in the Owner-only access audit log.
 
 The Coauthor role used before rc.4 is retired: assignments were converted to Website Editor assignments, and the collaborator write policies were replaced with Owner-only policies.
 
@@ -165,7 +165,7 @@ Only the latest stored Google Scholar citation snapshot is exposed, as a count a
 
 External publications are publications by other authors that the Owner curates for the Academic Website and related sites. They live in their own tables (`external_publications` and its collection and Project link tables), so they never appear in `list_public_papers()`, `get_public_paper()`, Planning, analytics or Hours.
 
-`list_public_external_publications()` returns only Public rows. Each Public row must carry a unique, stable slug, enforced by a check constraint and a unique index. A row exposes its bibliographic fields, DOI and publication URLs (absolute HTTP(S) with a host and no whitespace), language, the slugs of related public Projects and the slugs of its collections. Collections let each consuming site filter its own selection; their slugs become public once a collection holds a Public publication, while collection names and descriptions stay private. Internal IDs, `created_by`, editor flags and audit details are never exposed, and Website Editor suggestions remain invisible until the Owner publishes them.
+`list_public_external_publications()` returns only Public rows. Each Public row must carry a unique, stable slug, enforced by a check constraint and a unique index. A row exposes its bibliographic fields, DOI and publication URLs (absolute HTTP(S) with a host and no whitespace, the same database rule that applies to Paper links, conference presentation URLs and Software URLs since rc.5), language, the slugs of related public Projects and the slugs of its collections. Collections let each consuming site filter its own selection; their slugs become public once a collection holds a Public publication, while collection names and descriptions stay private. Internal IDs, `created_by`, editor flags and audit details are never exposed, and Website Editor suggestions remain invisible until the Owner publishes them.
 
 ### Projects
 
@@ -233,13 +233,22 @@ The exact values are maintained in the database constraints and mirrored in `lib
 
 ## Consumers
 
-Current downstream consumers include:
+The authoritative list is `consumers` in `lib/academic-api-contract.json`. Each entry records the RPCs the consumer calls, a `status` of `active` or `planned`, and an optional public `url`; private repositories are listed without one, so `/api` never links to a page visitors cannot open. `npm run check:public-api` validates the entries.
 
-- [Academic Website](https://github.com/bgonzalezbustamante/academic-website)
-- [Academic CV Studio](https://github.com/bgonzalezbustamante/academic-cv-studio)
-- [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline)
+Active consumers:
 
-These repositories consume the public interface but are not runtime dependencies of Research Dashboard.
+- [Academic Website](https://github.com/bgonzalezbustamante/academic-website): runtime supabase-js with ISR.
+- Academic CV Studio (private): client-side fetch, run locally.
+- [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline): runtime supabase-js.
+- Academic Signature Studio (private): runtime supabase-js.
+
+Planned consumers of the publication feeds, from rc.5: the OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites, and the organisation site template that several of them are built from. They select their publications by collection, and SUDAKAS and OBPEX also by Project.
+
+These repositories consume the public interface but are not runtime dependencies of Research Dashboard. Changes they need are proposed to them, not made from here.
+
+### Recommended integration
+
+New consumers use the published reference client, `@bgonzalezbustamante/academic-api-client`, with its dependency-free `createFetchTransport()` and the site's Supabase URL and publishable key. Sites built on Next.js fetch at request time with incremental static regeneration (`{ next: { revalidate } }` on the transport and a matching route `revalidate`), so a change in the Dashboard reaches them within the revalidation window without a rebuild or a deploy hook. Responses are validated before use, and a site that receives an invalid payload hides the section or keeps its last good render rather than showing unvalidated data. Research Dashboard triggers no downstream builds.
 
 
 ## Documentation responsibilities

@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## v1.0.0-rc.5 "Ancient Glacier"
+
+Released 7 Nov 2026.
+
+### Summary
+
+- Started `v1.0.0-rc.5 "Ancient Glacier"` to help downstream sites adopt the rc.4 publication feeds: a publishable Academic API client with a dependency-free fetch transport and collection helpers, an accurate consumer list, and ready-to-apply integration briefs for OBPEX, SUDAKAS, Empiria Lab, the organisation site template and Carla Cisternas' future website.
+- Planned follow-ups from the rc.4 audit: database URL rules for older link fields, a cap on pending Website Editor suggestions, an audit trail for the Owner's own publication changes, tooling upgrades and full-width page text.
+
+### Code changes
+
+`Downstream adoption`
+
+- Published the reference client to npm as `@bgonzalezbustamante/academic-api-client` `0.1.0-beta.1` (MIT, `beta` tag; as the first release it is also `latest`). An install from the registry validated the live production feeds. It builds to `packages/academic-api-client/dist` through `npm run build:academic-api-client:package` and `prepack`, and ships only `dist`, the README and the licence. The existing check build and `check:academic-api-client` are unchanged.
+- Added `createFetchTransport()`, a dependency-free transport that POSTs to the Data API's `/rest/v1/rpc/<name>` with the publishable key and passes fetch options through, including Next.js `{ next: { revalidate } }` for ISR. It rejects non-HTTP(S) URLs, missing keys and invalid RPC names, and reports PostgREST and network errors as RPC errors. A supabase-js client remains a valid transport.
+- Added pure helpers for consuming sites: `filterExternalPublicationsByCollection()`, `filterProjectPublications()` and `sortPublicationsByDate()`, with 6 new tests (26 in total). A packed tarball was installed in a scratch project and validated the live production feeds.
+- Rewrote the client README for npm users: install, quick start, Next.js ISR on Netlify, collections and Project publications, failing closed on validation errors, and the package versioning policy.
+- Corrected the manifest's consumer list against each repository's code. The Academic Website also uses the Software, Teaching settings and availability RPCs, the Weekly Penguin Timeline also uses conference presentations and Teaching settings, and Academic Signature Studio is added. Consumers now carry `status` (`active` or `planned`) and an optional `url`. The OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites and the organisation site template are listed as planned consumers of the publication feeds. `check:public-api` validates both fields, and `/api` marks planned consumers and names private repositories without a link, which also fixes a link to the private Academic CV Studio repository that visitors could not open.
+- Each collection on the Other papers tab now shows its Public and Private item counts and the client call a site uses to show it.
+- ARCHITECTURE.md now documents the consumer list, the planned publication consumers and the recommended integration: the published client, `createFetchTransport()` and ISR, with no downstream build triggers.
+- Wrote ready-to-apply handoff briefs, outside this repository, for organisation-site-template (an optional feed keyed by `publicationsCollection`), empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site, plus a shared adapter whose code was typechecked against the packed package. Sibling repositories are changed in their own sessions.
+
+`Safeguards from the rc.4 review`
+
+- Added database URL rules to the older link fields: `paper_links.url`, `conference_presentations.url` and the Software `repository_url`, `production_url` and `documentation_url` must be absolute HTTP(S) URLs with a host, no whitespace and at most 2,048 characters (`20261106145429_constrain_legacy_link_urls.sql`). Paper links feed the public Paper RPCs, and before rc.4 Coauthors could insert them directly. Each constraint is added `not valid` and then validated against existing rows. The Paper, Project, Conference, Software and external publication forms now share one validator, `lib/validation/url.ts`, with the same rule.
+- Capped pending Website Editor suggestions at 20 per editor (`20261106145430_cap_pending_editor_suggestions.sql`). Published entries do not count, a per-editor advisory lock prevents concurrent submissions from passing the count together, and the limit raises SQLSTATE 53400. `/website/publications` shows how many suggestions await review and replaces the form with a notice at the limit.
+- The Owner's own external publication changes are now audited (`20261106145431_audit_owner_external_publication_changes.sql`): `external_publication_created`, `external_publication_published` (a Private publication made Public, including Approve and publish), `external_publication_updated` with `changed_fields` and `previous` values covering visibility, slug, Projects and collections, and `external_publication_deleted` with the deleted values. A save that changes nothing records no event. The Access audit trail labels the new events and lists which fields each edit changed, for Owner and Website Editor edits alike.
+- Renamed the rolled-back SQL suite to `supabase/tests/rc5_access_policies.sql` and added checks for the link URL rules, the suggestion cap and the Owner audit trail.
+
+`Tooling`
+
+- Upgraded `next` and `eslint-config-next` to 16.4.5. `npm audit --omit=dev` still reports 0 vulnerabilities, and the moderate development-only `minimatch` advisory remains blocked upstream: the latest `@typescript-eslint/typescript-estree` still requires `minimatch ^10`.
+- Moved the migration route to Supabase CLI 3.0.0 after verifying it against production with read-only commands. In 3.0.0, `db push` targets the local database unless given `--remote` (`--linked` is a deprecated alias), so production pushes now use `npx supabase@3.0.0 db push --remote`, which also names the target project and environment before acting. `supabase/config.toml` now uses `auth.email.enabled` and `auth.sms.enabled` instead of the deprecated `enable_signup` keys.
+- `npm audit --omit=dev` reported 0 production vulnerabilities, and the full-history Gitleaks scan covered 820 commits (approximately 3.36 MB) with no leaks found.
+- Adopted the security setup of the sibling repositories (academic-website, catholic-calendar, weekly-penguin-timeline):
+  - Dependabot alerts, Dependabot security updates, secret scanning and push protection are now enabled.
+  - `.github/dependabot.yml` schedules weekly npm updates (at most 2 open pull requests, minor and patch updates grouped, majors left for planned releases, security fixes grouped into one pull request) and monthly GitHub Actions updates. Every Dependabot commit carries `[skip netlify]`.
+  - The Verify workflow now runs with read-only `contents` permission, cancels superseded runs, times out after 15 minutes and tests Node 22 and 24. It pins `actions/checkout` v7.0.1 and `actions/setup-node` v7.1.0 to commit SHAs and npm to 11.21.0, gates on `npm audit --omit=dev --audit-level=high`, and typechecks with `tsc --noEmit`.
+- After the settings were enabled, Dependabot reported one alert, the development-only `minimatch` advisory (GHSA-g3hv-75wg-m249, moderate). Its fix, 11.0.1, needs a major version that `typescript-eslint` does not yet allow. Secret scanning reported none. A review against the GitHub Advisory Database found no advisory affecting Next.js 16.4.5, React 19.2.8, the Supabase clients, Tailwind CSS or the pinned GitHub Actions.
+- The three rc.5 migrations were prechecked (no existing link broke the new rule), rehearsed in a rolled-back transaction and applied with `db push`. `supabase/tests/rc5_access_policies.sql` then passed against production, `check:public-api:live` passed, and migration history matches the repository (88/88).
+
+`Layout`
+
+- Page descriptions, card introductions, item summaries and empty-state messages now use the full width of the content column. `PageHeader` no longer caps its description at `max-w-3xl`, so its rc.4 `wide` option is removed. The public `/api` and release-notes pages now use the same `max-w-7xl` column as the Dashboard instead of `max-w-5xl`. Sign-in and onboarding cards, form inputs and Papers table columns keep their deliberate widths.
+
 ## v1.0.0-rc.4 "Velvet Torch"
 
 Released 6 Nov 2026.

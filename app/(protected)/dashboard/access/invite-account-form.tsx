@@ -16,7 +16,7 @@ export default function InviteAccountForm({
       <h2 className="font-serif text-2xl font-semibold text-oxford-blue">
         Invite account
       </h2>
-      <p className="mt-1 max-w-3xl text-sm leading-6 text-oxford-ash">
+      <p className="mt-1 text-sm leading-6 text-oxford-ash">
         Send a new collaborator an invitation by email. The selected permissions remain inactive until the recipient accepts the email, creates a password and completes onboarding.
       </p>
 
