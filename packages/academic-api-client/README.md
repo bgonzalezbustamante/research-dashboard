@@ -1,6 +1,6 @@
 # @bgonzalezbustamante/academic-api-client
 
-Typed client, dependency-free fetch transport and strict runtime validators for the **Research Dashboard Academic API — Public RPC v1**: the curated, anonymous Supabase RPCs documented at [dashboard.bgonzalezbustamante.com/api](https://dashboard.bgonzalezbustamante.com/api).
+Typed client, dependency-free fetch transport and strict runtime validators for the **Research Dashboard Academic API (Public RPC v1)**: the curated, anonymous Supabase RPCs documented at [dashboard.bgonzalezbustamante.com/api](https://dashboard.bgonzalezbustamante.com/api).
 
 The package is developed inside Research Dashboard (`packages/academic-api-client/`) and published to npm for downstream sites. Authenticated Dashboard pages must not use it to access their own database.
 

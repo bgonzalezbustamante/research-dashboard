@@ -10,11 +10,11 @@ A personal research-management dashboard for papers, projects, conferences, teac
 ## Core capabilities
 
 - **Research records**. Paper workflows, milestones, revision history and citations, with publication-index filtering (including Dataset), Google Scholar citation sorting, and milestone-first Paper workspaces; an Other papers library of curated external publications with stable public slugs and collections for downstream sites; searchable Projects, Conferences and Teaching Portfolio with dedicated filters and consistent top/bottom pagination.
-- **Work and planning**. manual work logs with a locally resolved and locally served Penguin Timeline state for the selected day, day/week/month/year analytics including major-activity breakdowns, a read-only Activity relationships map for Project/Teaching assignments and observed Paper usage, paginated activity/location label management with provenance-preserving consolidation, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
+- **Work and planning**. Manual work logs with a locally resolved and locally served Penguin Timeline state for the selected day, day/week/month/year analytics including major-activity breakdowns, a read-only Activity relationships map for Project/Teaching assignments and observed Paper usage, paginated activity/location label management with provenance-preserving consolidation, and source-backed biweekly Planning from Paper Milestones, conference attendance and trips, recurring Teaching schedules, and dated blocked events.
 - **Collaboration and access**. Dashboard-wide Viewer access, a restricted paper-scoped Website Editor role (citation and publication index of assigned Papers, plus external publication suggestions that stay private until the Owner approves and publishes them), and Owner-only administrative controls.
-- **Software and operations**. a Software Ecosystem registry plus protected backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances.
-- **Public data**. curated public academic, software, analytics, Calendar and availability RPCs for downstream consumers, including project publication and external publication feeds, with explicitly documented publication of full Paper titles in the milestone feed.
-- **Cross-module analytics**. workload, research activity, planning, Google Scholar citation snapshots, and citation-yield indicators.
+- **Software and operations**. A Software Ecosystem registry plus protected backup health and manual workflow dispatch for Research Dashboard, Supervision Portal, and Household Finances.
+- **Public data**. Curated public academic, software, analytics, Calendar and availability RPCs for downstream consumers, including project publication and external publication feeds, with explicitly documented publication of full Paper titles in the milestone feed.
+- **Cross-module analytics**. Workload, research activity, planning, Google Scholar citation snapshots, and citation-yield indicators.
 
 ## Public data interface
 
