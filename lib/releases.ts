@@ -21,8 +21,16 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.5',
     summary:
-      'Steady Orchard keeps the Dashboard up to date and adds a few safeguards: newer libraries and calendar data, safer links in paper text, and protection against the Dashboard being shown inside other websites.',
-    sections: [],
+      'Steady Orchard lets your own papers join collections, keeps the Dashboard up to date and adds a few safeguards.',
+    sections: [
+      {
+        title: 'Sharing publications with other sites',
+        items: [
+          'Your own papers can join collections, so partner sites show them alongside other people’s papers. Choose a paper’s collections in its Website settings.',
+          'Each collection on the Other papers tab lists your papers in it and how many of them are public.',
+        ],
+      },
+    ],
   },
   {
     version: 'v1.0.0-rc.5',

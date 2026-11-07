@@ -163,6 +163,20 @@ export type PublicExternalPublication = {
   collection_slugs: string[]
 }
 
+export type PublicCollectionPublication = {
+  collection_slug: string
+  authorship: PublicationAuthorship
+  publication_slug: string
+  title: string
+  authors: string[]
+  venue: string | null
+  publication_date: string | null
+  publication_year: number | null
+  doi_url: string | null
+  publication_url: string | null
+  language: PaperLanguage | null
+}
+
 export type PublicPaperMilestone = {
   target_date: string | null
   completed_on: string | null
@@ -291,6 +305,13 @@ export type PublicExternalPublicationContractKeysMatch = Assert<
   KeysEqual<
     PublicExternalPublication,
     typeof RPC_FIELDS.list_public_external_publications
+  >
+>
+
+export type PublicCollectionPublicationContractKeysMatch = Assert<
+  KeysEqual<
+    PublicCollectionPublication,
+    typeof RPC_FIELDS.list_public_collection_publications
   >
 >
 

@@ -347,3 +347,38 @@ test('reference client fetches and validates project publications', async () => 
     { name: 'list_public_external_publications', args: undefined },
   ])
 })
+
+test('reference client fetches and validates collection publications', async () => {
+  const calls = []
+  const api = createAcademicApiClient({
+    async rpc(name, args) {
+      calls.push({ name, args })
+      if (name === 'list_public_collection_publications') {
+        return {
+          data: [{
+            collection_slug: 'obpex',
+            authorship: 'own',
+            publication_slug: 'own-paper',
+            title: 'Own paper',
+            authors: ['B. G.'],
+            venue: null,
+            publication_date: '2025-04-01',
+            publication_year: 2025,
+            doi_url: null,
+            publication_url: null,
+            language: null,
+          }],
+          error: null,
+        }
+      }
+      throw new Error('Unexpected RPC')
+    },
+  })
+
+  const publications = await api.listPublicCollectionPublications()
+
+  assert.equal(publications[0].collection_slug, 'obpex')
+  assert.deepEqual(calls, [
+    { name: 'list_public_collection_publications', args: undefined },
+  ])
+})

@@ -26,6 +26,7 @@ export type {
 } from './transport.js'
 
 export {
+  filterCollectionPublications,
   filterExternalPublicationsByCollection,
   filterProjectPublications,
   sortPublicationsByDate,
@@ -43,6 +44,7 @@ export {
   parsePublicPlanningAllocationList,
   parsePublicProjectDetailResponse,
   parsePublicProjectList,
+  parsePublicCollectionPublicationList,
   parsePublicExternalPublicationList,
   parsePublicProjectPublicationList,
   parsePublicSoftwareDetailResponse,
@@ -70,6 +72,7 @@ export type {
   PublicPaperMilestone,
   PublicPlanningAllocation,
   PublicProject,
+  PublicCollectionPublication,
   PublicExternalPublication,
   PublicProjectPublication,
   PublicSoftwareItem,
