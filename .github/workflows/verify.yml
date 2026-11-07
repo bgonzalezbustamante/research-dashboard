@@ -6,9 +6,24 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# check:public-api:live needs the real Supabase environment, so it stays in
+# the local release gate.
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 is the oldest Node the published Academic API client supports.
+        node-version: [22, 24]
 
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
@@ -16,20 +31,29 @@ jobs:
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
+      - name: Update npm
+        run: npm install --global npm@11.21.0
+
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Lint
         run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
 
       - name: Check Academic API contract
         run: npm run check:public-api

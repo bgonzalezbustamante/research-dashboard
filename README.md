@@ -63,4 +63,4 @@ npm audit --omit=dev
 gitleaks git .
 ```
 
-For rc.5, the production dependency audit reported zero vulnerabilities on Next.js 16.4.5, and the full-history Gitleaks scan covered 820 commits (approximately 3.36 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
+Dependabot alerts and security updates, secret scanning and push protection watch the repository; `.github/dependabot.yml` groups weekly npm and monthly GitHub Actions updates, and the Verify workflow gates on `npm audit --omit=dev --audit-level=high`. For rc.5, the production dependency audit reported zero vulnerabilities on Next.js 16.4.5, and the full-history Gitleaks scan covered 820 commits (approximately 3.36 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
