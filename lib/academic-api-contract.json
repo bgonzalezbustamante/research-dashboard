@@ -99,6 +99,15 @@
       "rpcs": [
         "list_public_collection_publications"
       ]
+    },
+    {
+      "name": "Document verification site",
+      "url": "https://verify.bgonzalezbustamante.com",
+      "status": "active",
+      "rpcs": [
+        "get_public_signed_document",
+        "get_public_legacy_document"
+      ]
     }
   ],
   "resources": [
@@ -1441,6 +1450,122 @@
           ]
         }
       ]
+    },
+    {
+      "id": "documents",
+      "title": "Document registry",
+      "summary": "Documents issued and signed by the Owner with the signing tool, and the historical document records first published at bgonzalezbustamante.com/validation/docs/, looked up one at a time for verification.",
+      "notExposed": [
+        "Internal document and owner IDs",
+        "Any listing of codes or slugs; each record is returned only to a caller who already has its code or slug",
+        "Internal created/updated timestamps"
+      ],
+      "forbiddenFields": [
+        "id",
+        "owner_id",
+        "created_at",
+        "updated_at"
+      ],
+      "operations": [
+        {
+          "name": "get_public_signed_document",
+          "signature": "get_public_signed_document(text)",
+          "kind": "Detail",
+          "purpose": "Returns one registered or revoked signed document by its 32-character code, as printed in its QR code.",
+          "parameters": [
+            {
+              "name": "p_code",
+              "type": "text"
+            }
+          ],
+          "fields": [
+            {
+              "name": "code",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "issued_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "sha256",
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "registered_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "revoked_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "revocation_note",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Unknown codes return no row; there is no listing operation.",
+            "sha256 is the SHA-256 of the final PDF bytes, so a consumer can compare a PDF the visitor holds.",
+            "revoked_at and revocation_note are null unless status is revoked."
+          ]
+        },
+        {
+          "name": "get_public_legacy_document",
+          "signature": "get_public_legacy_document(text)",
+          "kind": "Detail",
+          "purpose": "Returns one historical document record by its slug, the last segment of its original /validation/docs/ address.",
+          "parameters": [
+            {
+              "name": "p_slug",
+              "type": "text"
+            }
+          ],
+          "fields": [
+            {
+              "name": "slug",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "issued_at",
+              "type": "text"
+            },
+            {
+              "name": "fingerprint",
+              "type": "text"
+            },
+            {
+              "name": "fingerprint_algorithm",
+              "type": "text"
+            },
+            {
+              "name": "original_url",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Unknown slugs return no row; there is no listing operation.",
+            "issued_at is the original timestamp text, with its original UTC offset.",
+            "fingerprint is shown as first published; fingerprint_algorithm is always unconfirmed-32-hex because the original algorithm is not confirmed."
+          ]
+        }
+      ]
     }
   ],
   "controlledVocabularies": [
@@ -1592,6 +1717,23 @@
       "values": [
         "own",
         "external"
+      ]
+    },
+    {
+      "id": "document-status",
+      "label": "Signed document status",
+      "constraint": "signed_documents_status_check",
+      "values": [
+        "registered",
+        "revoked"
+      ]
+    },
+    {
+      "id": "legacy-fingerprint-algorithm",
+      "label": "Historical fingerprint algorithm",
+      "sourceFunction": "get_public_legacy_document",
+      "values": [
+        "unconfirmed-32-hex"
       ]
     }
   ]

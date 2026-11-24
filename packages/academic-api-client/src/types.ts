@@ -27,6 +27,10 @@ export type SoftwareStatus =
   (typeof CONTROLLED_VOCABULARIES)['software-status'][number]
 export type RepositoryVisibility =
   (typeof CONTROLLED_VOCABULARIES)['repository-visibility'][number]
+export type SignedDocumentStatus =
+  (typeof CONTROLLED_VOCABULARIES)['document-status'][number]
+export type LegacyFingerprintAlgorithm =
+  (typeof CONTROLLED_VOCABULARIES)['legacy-fingerprint-algorithm'][number]
 export type PublicationAuthorship =
   (typeof CONTROLLED_VOCABULARIES)['publication-authorship'][number]
 
@@ -133,6 +137,26 @@ export type PublicSoftwareItem = {
   start_year: number | null
   end_year: number | null
   featured: boolean
+}
+
+export type PublicSignedDocument = {
+  code: string
+  title: string
+  issued_at: string
+  sha256: string
+  status: SignedDocumentStatus
+  registered_at: string
+  revoked_at: string | null
+  revocation_note: string | null
+}
+
+export type PublicLegacyDocument = {
+  slug: string
+  title: string
+  issued_at: string
+  fingerprint: string
+  fingerprint_algorithm: LegacyFingerprintAlgorithm
+  original_url: string
 }
 
 export type PublicProjectPublication = {
@@ -291,6 +315,20 @@ export type PublicSoftwareDetailContractKeysMatch = Assert<
   KeysEqual<
     PublicSoftwareItem,
     typeof RPC_FIELDS.get_public_software
+  >
+>
+
+export type PublicSignedDocumentContractKeysMatch = Assert<
+  KeysEqual<
+    PublicSignedDocument,
+    typeof RPC_FIELDS.get_public_signed_document
+  >
+>
+
+export type PublicLegacyDocumentContractKeysMatch = Assert<
+  KeysEqual<
+    PublicLegacyDocument,
+    typeof RPC_FIELDS.get_public_legacy_document
   >
 >
 

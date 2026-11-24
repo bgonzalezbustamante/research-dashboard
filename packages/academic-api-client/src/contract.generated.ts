@@ -222,6 +222,24 @@ export const RPC_FIELDS = {
     "committed_days",
     "paper_slug",
     "superseded_by_milestone"
+  ],
+  "get_public_signed_document": [
+    "code",
+    "title",
+    "issued_at",
+    "sha256",
+    "status",
+    "registered_at",
+    "revoked_at",
+    "revocation_note"
+  ],
+  "get_public_legacy_document": [
+    "slug",
+    "title",
+    "issued_at",
+    "fingerprint",
+    "fingerprint_algorithm",
+    "original_url"
   ]
 } as const
 
@@ -252,7 +270,13 @@ export const RPC_PARAMETERS = {
     "p_year"
   ],
   "list_public_paper_milestones": [],
-  "list_public_planning_allocations": []
+  "list_public_planning_allocations": [],
+  "get_public_signed_document": [
+    "p_code"
+  ],
+  "get_public_legacy_document": [
+    "p_slug"
+  ]
 } as const
 
 export const CONTROLLED_VOCABULARIES = {
@@ -340,6 +364,13 @@ export const CONTROLLED_VOCABULARIES = {
   "publication-authorship": [
     "own",
     "external"
+  ],
+  "document-status": [
+    "registered",
+    "revoked"
+  ],
+  "legacy-fingerprint-algorithm": [
+    "unconfirmed-32-hex"
   ]
 } as const
 

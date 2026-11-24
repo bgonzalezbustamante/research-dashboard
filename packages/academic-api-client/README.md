@@ -30,7 +30,7 @@ const academicApi = createAcademicApiClient(
 const papers = await academicApi.listPublicPapers()
 ```
 
-Use the Research Dashboard project URL and its **publishable** key, never a secret or service-role key. Anonymous callers can only execute the seventeen Public RPC v1 functions.
+Use the Research Dashboard project URL and its **publishable** key, never a secret or service-role key. Anonymous callers can only execute the nineteen Public RPC v1 functions.
 
 `createFetchTransport` POSTs to `<url>/rest/v1/rpc/<name>` with the publishable key, so a site does not need `@supabase/supabase-js`. A supabase-js client also works as a transport, because it exposes the same `rpc()` method:
 
@@ -94,6 +94,20 @@ const external = filterProjectPublications(rows, 'project-slug', 'external')
 
 Collection slugs become public once a collection holds a Public publication; collection names and descriptions stay private, so each site labels its own section.
 
+## Document verification
+
+The document registry answers one record at a time, for a caller that already has the identifier: there is no listing. `getPublicSignedDocument(code)` returns a document signed with the signing tool by the 32-character code printed in its QR code, and `getPublicLegacyDocument(slug)` returns a historical record by the last segment of its original `/validation/docs/` address. Both return `null` for an unknown code or slug.
+
+```ts
+const document = await academicApi.getPublicSignedDocument(code)
+
+if (document?.status === 'revoked') {
+  // show the revocation date and note instead of a valid record
+}
+```
+
+`sha256` is the SHA-256 of the final PDF bytes, so a site can compare a PDF the visitor holds without uploading it. A verification page should not cache these lookups for long, so that a revocation shows at once: pass `init: { cache: 'no-store' }` to `createFetchTransport()`.
+
 ## Versioning
 
 The package version is independent of the Dashboard's. While Public RPC v1 is the contract, releases are `0.x` on the `beta` tag. A new field or controlled value is a minor release. A breaking contract change is a new Public RPC version and a new major release. `PUBLIC_RPC_VERSION` exports the contract version the package validates against.
@@ -104,7 +118,7 @@ The package provides:
 
 - canonical TypeScript resource types;
 - strict runtime validators with field-level diagnostics;
-- a transport-agnostic client for the seventeen Public RPC v1 operations, plus a dependency-free fetch transport;
+- a transport-agnostic client for the nineteen Public RPC v1 operations, plus a dependency-free fetch transport;
 - pure helpers for filtering by collection or Project and sorting by date;
 - generated contract metadata derived from `lib/academic-api-contract.json`.
 

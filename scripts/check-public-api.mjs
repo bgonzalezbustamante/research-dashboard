@@ -236,6 +236,8 @@ function assertManifest(contract) {
     'list_public_project_publications',
     'list_public_external_publications',
     'list_public_collection_publications',
+    'get_public_signed_document',
+    'get_public_legacy_document',
   ]
 
   const operations = contract.resources.flatMap((resource) =>
@@ -1015,6 +1017,35 @@ async function liveCheck() {
     )
   }
 
+  // Document registry: detail lookups only, with no listing to resolve a known
+  // code or slug from, so the live check confirms that unknown inputs return no
+  // row and that the response shape validates.
+  const missingSignedDocument =
+    await api.getPublicSignedDocument(
+      '00000000000000000000000000000000'
+    )
+
+  if (
+    missingSignedDocument !== null
+  ) {
+    fail(
+      'get_public_signed_document(text) must return no row for an unknown code.'
+    )
+  }
+
+  const missingLegacyDocument =
+    await api.getPublicLegacyDocument(
+      '1900-01-01-document'
+    )
+
+  if (
+    missingLegacyDocument !== null
+  ) {
+    fail(
+      'get_public_legacy_document(text) must return no row for an unknown slug.'
+    )
+  }
+
   await api
     .listPublicConferencePresentations()
 
@@ -1074,6 +1105,8 @@ async function liveCheck() {
     'work_sessions',
     'planning_blocked_events',
     'planning_source_period_states',
+    'signed_documents',
+    'legacy_documents',
   ]
 
   for (
