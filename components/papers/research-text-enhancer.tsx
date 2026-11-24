@@ -6,7 +6,6 @@ import { useEffect } from 'react'
 const richTextSelector = [
   '#overview p.whitespace-pre-line',
   '#milestones p.whitespace-pre-line',
-  '#notes p.whitespace-pre-line',
   '#conferences p.whitespace-pre-line',
 ].join(', ')
 
