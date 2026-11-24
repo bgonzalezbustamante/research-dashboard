@@ -35,6 +35,7 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       day: '2-digit',
       month: 'short',
       year: 'numeric',

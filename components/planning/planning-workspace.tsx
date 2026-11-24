@@ -154,6 +154,7 @@ function formatDate(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -265,6 +266,7 @@ function formatPeriodOption(
     new Intl.DateTimeFormat(
       'en-GB',
       {
+        timeZone: 'UTC',
         month: 'long',
         year: 'numeric',
       }

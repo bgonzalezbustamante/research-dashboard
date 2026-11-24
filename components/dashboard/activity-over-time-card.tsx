@@ -46,6 +46,7 @@ function formatFullDate(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       weekday: 'short',
       day: 'numeric',
       month: 'short',
@@ -243,6 +244,7 @@ function getMonthMarkers(
           new Intl.DateTimeFormat(
             'en-GB',
             {
+              timeZone: 'UTC',
               month: 'short',
             }
           ).format(

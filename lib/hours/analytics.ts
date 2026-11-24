@@ -311,6 +311,7 @@ export function formatPeriodLabel(
     return new Intl.DateTimeFormat(
       'en-GB',
       {
+        timeZone: 'UTC',
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -335,6 +336,7 @@ export function formatPeriodLabel(
       new Intl.DateTimeFormat(
         'en-GB',
         {
+          timeZone: 'UTC',
           day: 'numeric',
           month: 'short',
         }
@@ -344,6 +346,7 @@ export function formatPeriodLabel(
       new Intl.DateTimeFormat(
         'en-GB',
         {
+          timeZone: 'UTC',
           day: 'numeric',
           month: 'short',
           year: 'numeric',
@@ -365,6 +368,7 @@ export function formatPeriodLabel(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       month: 'long',
       year: 'numeric',
     }
