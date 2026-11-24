@@ -200,6 +200,104 @@ export function parseSignerManifest(
   }
 }
 
+const registrationFragmentPattern =
+  /^#?register=([A-Za-z0-9_-]+)$/
+
+const maxRegistrationPayload =
+  8000
+
+export type RegistrationFragment = {
+  text: string
+  value: SignedDocumentInput
+}
+
+/**
+ * The signing tool's "Register on the Dashboard" link opens
+ * /documents#register=<payload>, where the payload is the manifest as
+ * UTF-8 JSON in base64url. Browsers never send the fragment to the server,
+ * so it is read on the page and the manifest text is then submitted to
+ * registerSignedDocument, which validates it again. Returns null when the
+ * address has no registration fragment.
+ */
+export function readRegistrationFragment(
+  hash: string
+): ParseResult<RegistrationFragment> | null {
+  if (
+    !hash.replace(/^#/, '').startsWith(
+      'register='
+    )
+  ) {
+    return null
+  }
+
+  const match =
+    hash.match(
+      registrationFragmentPattern
+    )
+
+  if (
+    !match ||
+    match[1].length >
+      maxRegistrationPayload
+  ) {
+    return {
+      ok: false,
+      error: 'The registration link is incomplete or damaged. Open it again from the signing tool.',
+    }
+  }
+
+  let text: string
+
+  try {
+    const base64 =
+      match[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+
+    const binary =
+      atob(
+        base64.padEnd(
+          Math.ceil(
+            base64.length / 4
+          ) * 4,
+          '='
+        )
+      )
+
+    text =
+      new TextDecoder(
+        'utf-8',
+        {
+          fatal: true,
+        }
+      ).decode(
+        Uint8Array.from(
+          binary,
+          (character) =>
+            character.charCodeAt(0)
+        )
+      )
+  } catch {
+    return {
+      ok: false,
+      error: 'The registration link is incomplete or damaged. Open it again from the signing tool.',
+    }
+  }
+
+  const manifest =
+    parseSignerManifest(text)
+
+  return manifest.ok
+    ? {
+        ok: true,
+        value: {
+          text,
+          value: manifest.value,
+        },
+      }
+    : manifest
+}
+
 function legacySlugFromUrl(
   value: string
 ) {

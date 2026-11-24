@@ -16,7 +16,8 @@
     "check:academic-api-client": "npm run test:academic-api-client",
     "build:backups-core": "tsc -p tsconfig.backups.json",
     "test:backups": "npm run build:backups-core && node --test tests/backups/*.test.mjs",
-    "check:backups": "npm run test:backups"
+    "check:backups": "npm run test:backups",
+    "test:documents": "node --test tests/documents/*.test.mjs"
   },
   "dependencies": {
     "@bgonzalezbustamante/catholic-calendar": "0.1.0-beta.2",
