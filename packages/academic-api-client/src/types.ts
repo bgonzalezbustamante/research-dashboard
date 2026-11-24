@@ -325,6 +325,14 @@ export type PublicSignedDocumentContractKeysMatch = Assert<
   >
 >
 
+// The hash lookup reuses the signed-document parser, so its fields must stay identical.
+export type PublicSignedDocumentBySha256ContractKeysMatch = Assert<
+  KeysEqual<
+    PublicSignedDocument,
+    typeof RPC_FIELDS.get_public_signed_document_by_sha256
+  >
+>
+
 export type PublicLegacyDocumentContractKeysMatch = Assert<
   KeysEqual<
     PublicLegacyDocument,

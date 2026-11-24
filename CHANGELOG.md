@@ -40,6 +40,17 @@
 - The manifest adds the `documents` resource and the verification site as a consumer. `check:public-api` expects the two RPCs, treats both tables as private for anonymous callers and, live, checks that unknown codes and slugs return no row. The new `supabase/tests/rc6_document_policies.sql` (rolled back, no test accounts needed) covers the Owner RPCs, the audit events, unknown users, Viewers, anonymous lookups and the anonymous EXECUTE set.
 - `@bgonzalezbustamante/academic-api-client` `0.3.0-beta.1` adds `getPublicSignedDocument()`, `getPublicLegacyDocument()`, their parsers and the `PublicSignedDocument` and `PublicLegacyDocument` types. Tests: 35, up from 30.
 
+`Signed-document lookup by PDF hash`
+
+- Added `get_public_signed_document_by_sha256(text)` to Public RPC v1 (twenty operations, migration `20261124115048_add_signed_document_hash_lookup.sql`) for the verification site's PDF check: the visitor's browser hashes the PDF and sends only the hash. It returns the same fields as `get_public_signed_document(text)` for a known hash and no row for an unknown or malformed one, with no listing.
+- A unique index on `signed_documents(sha256)` registers each PDF at most once. `register_signed_document` now rejects a second registration of the same PDF with "This PDF is already registered", which the Documents page shows.
+- The manifest lists the new operation for the verification site. `check:public-api` expects it and, live, checks that an unknown hash returns no row. `supabase/tests/rc6_document_policies.sql` covers the anonymous lookup, unknown and malformed hashes, and the duplicate-PDF rejection.
+- `@bgonzalezbustamante/academic-api-client` `0.4.0-beta.1` adds `getPublicSignedDocumentBySha256()`, which normalises the hash, throws for a malformed one before any request, and checks that a returned record carries the requested hash, plus `parsePublicSignedDocumentBySha256Response()`. Tests: 37, up from 35.
+
+`Reference client versioning`
+
+- The reference client README states its beta numbering (each release takes the next minor with `-beta.1`) and that it follows the Dashboard's policy from release candidates on. No published version changes.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.

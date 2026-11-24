@@ -106,6 +106,7 @@
       "status": "active",
       "rpcs": [
         "get_public_signed_document",
+        "get_public_signed_document_by_sha256",
         "get_public_legacy_document"
       ]
     }
@@ -1518,6 +1519,61 @@
             "Unknown codes return no row; there is no listing operation.",
             "sha256 is the SHA-256 of the final PDF bytes, so a consumer can compare a PDF the visitor holds.",
             "revoked_at and revocation_note are null unless status is revoked."
+          ]
+        },
+        {
+          "name": "get_public_signed_document_by_sha256",
+          "signature": "get_public_signed_document_by_sha256(text)",
+          "kind": "Detail",
+          "purpose": "Returns one registered or revoked signed document by the SHA-256 of its final PDF, for a visitor who holds the file but not its code.",
+          "parameters": [
+            {
+              "name": "p_sha256",
+              "type": "text",
+              "note": "64 hexadecimal characters; surrounding spaces and upper case are accepted"
+            }
+          ],
+          "fields": [
+            {
+              "name": "code",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "issued_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "sha256",
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "registered_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "revoked_at",
+              "type": "timestamptz"
+            },
+            {
+              "name": "revocation_note",
+              "type": "text"
+            }
+          ],
+          "detailOnly": [],
+          "listingOnly": [],
+          "notes": [
+            "Returns the same fields as get_public_signed_document(text).",
+            "Unknown or malformed hashes return no row; there is no listing operation.",
+            "Each PDF hash is registered at most once, so a hash identifies at most one document.",
+            "Hash the PDF on the visitor's device and send only the hash."
           ]
         },
         {

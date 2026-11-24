@@ -1,7 +1,8 @@
 -- Document registry suite for Steady Orchard rc.6.
 --
 -- Run the whole file in the Supabase SQL editor after the
--- 20261124103453_add_document_registry.sql migration. It needs no test
+-- 20261124103453_add_document_registry.sql and
+-- 20261124115048_add_signed_document_hash_lookup.sql migrations. It needs no test
 -- accounts and no placeholders: it acts as the Dashboard Owner, as an
 -- unknown signed-in user and as anonymous, and uses an existing Viewer only
 -- if one exists. It registers a synthetic document and a synthetic historical
@@ -89,6 +90,22 @@ begin
   exception
     when unique_violation then
       null;
+  end;
+
+  -- Since 20261124115048_add_signed_document_hash_lookup.sql: one registration per PDF.
+  begin
+    perform public.register_signed_document(
+      'fedcba9876543210fedcba9876543210',
+      'rc.6 QA duplicate PDF',
+      '2026-11-22T10:00:00Z',
+      ' ' || repeat('A', 64) || ' '
+    );
+    raise exception 'A second document with the same PDF hash was accepted';
+  exception
+    when unique_violation then
+      if sqlerrm <> 'This PDF is already registered' then
+        raise;
+      end if;
   end;
 
   begin
@@ -364,6 +381,32 @@ begin
 
   select count(*)
     into v_count
+  from public.get_public_signed_document_by_sha256(' ' || repeat('A', 64) || ' ') d
+  where d.code = '0123456789abcdef0123456789abcdef'
+    and d.title = 'rc.6 QA document';
+
+  if v_count <> 1 then
+    raise exception 'get_public_signed_document_by_sha256 did not return the registered document';
+  end if;
+
+  select count(*)
+    into v_count
+  from public.get_public_signed_document_by_sha256(repeat('e', 64));
+
+  if v_count <> 0 then
+    raise exception 'get_public_signed_document_by_sha256 returned a row for an unknown hash';
+  end if;
+
+  select count(*)
+    into v_count
+  from public.get_public_signed_document_by_sha256(repeat('a', 63) || '%');
+
+  if v_count <> 0 then
+    raise exception 'get_public_signed_document_by_sha256 returned a row for a malformed hash';
+  end if;
+
+  select count(*)
+    into v_count
   from public.get_public_legacy_document('1900-01-02-document') l
   where l.fingerprint_algorithm = 'unconfirmed-32-hex'
     and l.issued_at = '1900-01-02T10:00:00+01:00';
@@ -427,6 +470,7 @@ declare
     'get_public_paper',
     'get_public_project',
     'get_public_signed_document',
+    'get_public_signed_document_by_sha256',
     'get_public_software',
     'get_public_teaching_settings',
     'get_public_work_analytics',
