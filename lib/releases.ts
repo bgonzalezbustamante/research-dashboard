@@ -17,11 +17,11 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.6',
     codename: 'Steady Orchard',
-    status: 'In development',
-    releasedOn: 'Release date TBC',
+    status: 'Release candidate',
+    releasedOn: '24 Nov 2026',
     comparison: 'Changes since rc.5',
     summary:
-      'Steady Orchard lets your own papers join collections, adds the document registry behind the verification site, keeps the Dashboard up to date and adds a few safeguards.',
+      'Steady Orchard lets your own papers join collections, adds the document registry behind the verification site, and tightens security and accuracy across the Dashboard.',
     sections: [
       {
         title: 'Sharing publications with other sites',
@@ -34,6 +34,7 @@ export const releases: ReleaseNote[] = [
         title: 'Document registry',
         items: [
           'A new Documents page registers documents you sign, so their QR codes resolve on the verification site straight away.',
+          'The signing tool’s Register on the Dashboard button opens the Documents page with the document’s details filled in, ready to confirm.',
           'You can revoke a document with a short public note, and the 12 historical validation records live here too.',
           'The verification site can find a signed document from the PDF itself, and the same PDF can no longer be registered twice.',
         ],
@@ -57,7 +58,7 @@ export const releases: ReleaseNote[] = [
   {
     version: 'v1.0.0-rc.5',
     codename: 'Ancient Glacier',
-    status: 'Release candidate',
+    status: 'Previous release candidate',
     releasedOn: '7 Nov 2026',
     comparison: 'Changes since rc.4',
     summary:

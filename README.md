@@ -1,6 +1,6 @@
 # Research Dashboard
 
-**v1.0.0-rc.5 "Ancient Glacier"**
+**v1.0.0-rc.6 "Steady Orchard"**
 
 A personal research-management dashboard for papers, projects, conferences, teaching, software, working hours, planning, collaboration, and cross-module analytics. It is also the canonical administrative source for selected academic metadata used by public downstream applications.
 
@@ -63,4 +63,4 @@ npm audit --omit=dev
 gitleaks git .
 ```
 
-Dependabot alerts and security updates, secret scanning and push protection watch the repository; `.github/dependabot.yml` groups weekly npm and monthly GitHub Actions updates, and the Verify workflow gates on `npm audit --omit=dev --audit-level=high`. For rc.5, the production dependency audit reported zero vulnerabilities on Next.js 16.4.5, and the full-history Gitleaks scan covered 820 commits (approximately 3.36 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.
+Dependabot alerts and security updates, secret scanning and push protection watch the repository; `.github/dependabot.yml` groups weekly npm and monthly GitHub Actions updates, and the Verify workflow gates on `npm audit --omit=dev --audit-level=high`. For rc.6, `npm audit` reported zero vulnerabilities on Next.js 16.4.6, development tooling included, and the full-history Gitleaks scan covered 848 commits (approximately 3.62 MB) with no leaks found. See [NOTICE](NOTICE) for the licensing boundary around third-party logos, trademarks, and institutional branding.

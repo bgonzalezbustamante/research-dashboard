@@ -1,13 +1,17 @@
 # CHANGELOG
 
-## v1.0.0-rc.6 "Steady Orchard" (in development)
+## v1.0.0-rc.6 "Steady Orchard"
+
+Released 24 Nov 2026.
 
 ### Summary
 
-- Started `v1.0.0-rc.6 "Steady Orchard"`, a maintenance release: routine dependency updates, Catholic Calendar 0.1.0-beta.2, the development-only `minimatch` advisory, safer links in paper text, security headers and documentation corrections.
+- Started `v1.0.0-rc.6 "Steady Orchard"` as a maintenance release: routine dependency updates, Catholic Calendar 0.1.0-beta.2, the development-only `minimatch` advisory, safer links in paper text, security headers and documentation corrections.
 - The Owner's own Papers can join collections, so the sites that select publications by collection show them alongside other people's papers.
-- The Dashboard becomes the registry for signed documents and for the historical document records, which the verification site (verify.bgonzalezbustamante.com) reads one at a time through Public RPC v1.
-- Part one (own Papers in collections) was merged on 7 Nov 2026 so the collection picker is live; the rest of rc.6 continues on a continuation branch, and rc.6 closes in December.
+- The Dashboard becomes the registry for signed documents and for the historical document records, which the verification site (verify.bgonzalezbustamante.com) reads one at a time through Public RPC v1, by code, slug or PDF hash.
+- A review of the whole Dashboard led to a database hardening migration, security headers and same-origin checks, Edge Function hardening, correctness fixes for dates, session queries and partial saves, and a signature-level check of who may execute each RPC.
+- The work was merged in eight pull requests between 7 and 24 Nov 2026 (#68 to #70 and #72 to #76, without tags) so each piece went live as soon as it was ready; this release closes rc.6.
+- `npm audit` reports no vulnerabilities, development tooling included, and the full-history Gitleaks scan covered 848 commits with no leaks found.
 
 ### Code changes
 
