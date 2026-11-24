@@ -11,6 +11,7 @@ import {
   removeSignedDocument,
   revokeSignedDocument,
 } from './actions'
+import RegisterFromLink from './register-from-link'
 
 type DocumentsPageProps = {
   searchParams: Promise<{
@@ -178,6 +179,8 @@ export default async function DocumentsPage({
         </div>
       )}
 
+      <RegisterFromLink />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="font-serif text-xl font-semibold text-oxford-blue">
@@ -185,7 +188,9 @@ export default async function DocumentsPage({
           </h2>
 
           <p className="mt-2 text-sm leading-6 text-oxford-ash">
-            Use the{' '}
+            The signing tool&apos;s Register on the Dashboard button opens
+            this page with the document&apos;s details filled in, ready to
+            confirm. Otherwise, use the{' '}
             <code>
               .manifest.json
             </code>{' '}
