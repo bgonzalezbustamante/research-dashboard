@@ -12,6 +12,10 @@ import type {
   SoftwareCategory,
   SoftwareDevelopmentStage,
   SoftwareStatus,
+  LegacyFingerprintAlgorithm,
+  SignedDocumentStatus,
+  PublicLegacyDocument,
+  PublicSignedDocument,
   PublicAvailabilityItem,
   PublicPaperMilestone,
   PublicPlanningAllocation,
@@ -1525,6 +1529,245 @@ export function parsePublicSoftwareDetailResponse(
   if (rows.length > 1) {
     fail(
       'get_public_software response',
+      'expected zero or one row'
+    )
+  }
+
+  return rows[0] ?? null
+}
+
+const signedDocumentCodePattern =
+  /^[0-9a-f]{32}$/
+
+const sha256Pattern =
+  /^[0-9a-f]{64}$/
+
+const legacyDocumentSlugPattern =
+  /^\d{4}-\d{2}-\d{2}-document$/
+
+const legacyIssuedAtPattern =
+  /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))?$/
+
+function assertPattern(
+  value: unknown,
+  pattern: RegExp,
+  path: string,
+  message: string
+): asserts value is string {
+  assertString(value, path)
+
+  if (
+    !pattern.test(
+      value
+    )
+  ) {
+    fail(
+      path,
+      message
+    )
+  }
+}
+
+function assertIsoTimestamp(
+  value: unknown,
+  path: string
+): asserts value is string {
+  if (value === null) {
+    fail(
+      path,
+      'expected an ISO timestamp with a timezone'
+    )
+  }
+
+  assertNullableIsoTimestamp(
+    value,
+    path
+  )
+}
+
+function parsePublicSignedDocument(
+  value: unknown,
+  path: string
+): PublicSignedDocument {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    RPC_FIELDS.get_public_signed_document,
+    path
+  )
+
+  assertPattern(
+    value.code,
+    signedDocumentCodePattern,
+    `${path}.code`,
+    'expected 32 lowercase hexadecimal characters'
+  )
+
+  assertString(
+    value.title,
+    `${path}.title`
+  )
+
+  assertIsoTimestamp(
+    value.issued_at,
+    `${path}.issued_at`
+  )
+
+  assertPattern(
+    value.sha256,
+    sha256Pattern,
+    `${path}.sha256`,
+    'expected 64 lowercase hexadecimal characters'
+  )
+
+  assertControlledValue<SignedDocumentStatus>(
+    value.status,
+    CONTROLLED_VOCABULARIES[
+      'document-status'
+    ],
+    `${path}.status`
+  )
+
+  assertIsoTimestamp(
+    value.registered_at,
+    `${path}.registered_at`
+  )
+
+  assertNullableIsoTimestamp(
+    value.revoked_at,
+    `${path}.revoked_at`
+  )
+
+  assertNullableString(
+    value.revocation_note,
+    `${path}.revocation_note`
+  )
+
+  if (
+    value.status === 'revoked'
+      ? value.revoked_at === null
+      : value.revoked_at !== null ||
+        value.revocation_note !== null
+  ) {
+    fail(
+      `${path}.revoked_at`,
+      'must be set exactly when the document is revoked'
+    )
+  }
+
+  return {
+    code: value.code,
+    title: value.title,
+    issued_at: value.issued_at,
+    sha256: value.sha256,
+    status: value.status,
+    registered_at: value.registered_at,
+    revoked_at: value.revoked_at,
+    revocation_note: value.revocation_note,
+  }
+}
+
+export function parsePublicSignedDocumentResponse(
+  payload: unknown
+): PublicSignedDocument | null {
+  const rows =
+    parseArray(
+      payload,
+      'get_public_signed_document response',
+      (value, path) =>
+        parsePublicSignedDocument(
+          value,
+          path
+        )
+    )
+
+  if (rows.length > 1) {
+    fail(
+      'get_public_signed_document response',
+      'expected zero or one row'
+    )
+  }
+
+  return rows[0] ?? null
+}
+
+function parsePublicLegacyDocument(
+  value: unknown,
+  path: string
+): PublicLegacyDocument {
+  assertRecord(value, path)
+  assertExactKeys(
+    value,
+    RPC_FIELDS.get_public_legacy_document,
+    path
+  )
+
+  assertPattern(
+    value.slug,
+    legacyDocumentSlugPattern,
+    `${path}.slug`,
+    'expected a YYYY-MM-DD-document slug'
+  )
+
+  assertString(
+    value.title,
+    `${path}.title`
+  )
+
+  assertPattern(
+    value.issued_at,
+    legacyIssuedAtPattern,
+    `${path}.issued_at`,
+    'expected an ISO date or timestamp'
+  )
+
+  assertPattern(
+    value.fingerprint,
+    signedDocumentCodePattern,
+    `${path}.fingerprint`,
+    'expected 32 lowercase hexadecimal characters'
+  )
+
+  assertControlledValue<LegacyFingerprintAlgorithm>(
+    value.fingerprint_algorithm,
+    CONTROLLED_VOCABULARIES[
+      'legacy-fingerprint-algorithm'
+    ],
+    `${path}.fingerprint_algorithm`
+  )
+
+  assertHttpUrl(
+    value.original_url,
+    `${path}.original_url`
+  )
+
+  return {
+    slug: value.slug,
+    title: value.title,
+    issued_at: value.issued_at,
+    fingerprint: value.fingerprint,
+    fingerprint_algorithm: value.fingerprint_algorithm,
+    original_url: value.original_url,
+  }
+}
+
+export function parsePublicLegacyDocumentResponse(
+  payload: unknown
+): PublicLegacyDocument | null {
+  const rows =
+    parseArray(
+      payload,
+      'get_public_legacy_document response',
+      (value, path) =>
+        parsePublicLegacyDocument(
+          value,
+          path
+        )
+    )
+
+  if (rows.length > 1) {
+    fail(
+      'get_public_legacy_document response',
       'expected zero or one row'
     )
   }

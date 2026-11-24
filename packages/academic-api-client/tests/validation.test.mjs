@@ -6,6 +6,8 @@ import {
   parsePublicAvailabilityList,
   parsePublicCalendarSettingsResponse,
   parsePublicCollectionPublicationList,
+  parsePublicLegacyDocumentResponse,
+  parsePublicSignedDocumentResponse,
   parsePublicConferenceList,
   parsePublicPaperList,
   parsePublicPaperMilestoneList,
@@ -775,6 +777,91 @@ test('rejects malformed collection publication rows', () => {
   for (const [rows, pattern] of invalid) {
     assert.throws(
       () => parsePublicCollectionPublicationList(rows),
+      (error) =>
+        error instanceof AcademicApiValidationError &&
+        pattern.test(error.message)
+    )
+  }
+})
+
+// Synthetic document records; no real code, hash or title is used.
+const signedDocument = {
+  code: '0123456789abcdef0123456789abcdef',
+  title: 'Synthetic certificate',
+  issued_at: '2026-11-22T10:00:00.123+00:00',
+  sha256: 'a'.repeat(64),
+  status: 'registered',
+  registered_at: '2026-11-23T12:00:00+00:00',
+  revoked_at: null,
+  revocation_note: null,
+}
+
+const legacyDocument = {
+  slug: '2022-05-10-document',
+  title: 'Synthetic letter',
+  issued_at: '2022-05-10T21:36:48+01:00',
+  fingerprint: 'b'.repeat(32),
+  fingerprint_algorithm: 'unconfirmed-32-hex',
+  original_url: 'https://bgonzalezbustamante.com/validation/docs/2022-05-10-document/',
+}
+
+test('validates signed document lookups', () => {
+  assert.equal(parsePublicSignedDocumentResponse([]), null)
+  assert.deepEqual(parsePublicSignedDocumentResponse([signedDocument]), signedDocument)
+
+  const revoked = {
+    ...signedDocument,
+    status: 'revoked',
+    revoked_at: '2026-12-01T09:00:00+00:00',
+    revocation_note: 'Superseded by a corrected version.',
+  }
+
+  assert.equal(parsePublicSignedDocumentResponse([revoked]).status, 'revoked')
+})
+
+test('rejects malformed signed document rows', () => {
+  const invalid = [
+    [[{ ...signedDocument, code: 'NOT-A-CODE' }], /code/],
+    [[{ ...signedDocument, sha256: 'A'.repeat(64) }], /sha256/],
+    [[{ ...signedDocument, status: 'pending' }], /status/],
+    [[{ ...signedDocument, issued_at: '2026-11-22' }], /issued_at/],
+    [[{ ...signedDocument, revoked_at: '2026-12-01T09:00:00+00:00' }], /revoked/],
+    [[{ ...signedDocument, status: 'revoked' }], /revoked/],
+    [[{ ...signedDocument, owner_id: 'x' }], /unexpected object shape/],
+    [[signedDocument, signedDocument], /zero or one row/],
+  ]
+
+  for (const [rows, pattern] of invalid) {
+    assert.throws(
+      () => parsePublicSignedDocumentResponse(rows),
+      (error) =>
+        error instanceof AcademicApiValidationError &&
+        pattern.test(error.message)
+    )
+  }
+})
+
+test('validates historical document lookups', () => {
+  assert.equal(parsePublicLegacyDocumentResponse([]), null)
+  assert.deepEqual(parsePublicLegacyDocumentResponse([legacyDocument]), legacyDocument)
+  assert.equal(
+    parsePublicLegacyDocumentResponse([{ ...legacyDocument, issued_at: '2022-05-10' }]).issued_at,
+    '2022-05-10'
+  )
+})
+
+test('rejects malformed historical document rows', () => {
+  const invalid = [
+    [[{ ...legacyDocument, slug: 'some-document' }], /slug/],
+    [[{ ...legacyDocument, fingerprint: 'b'.repeat(64) }], /fingerprint/],
+    [[{ ...legacyDocument, fingerprint_algorithm: 'md5' }], /fingerprint_algorithm/],
+    [[{ ...legacyDocument, original_url: 'javascript:alert(1)' }], /original_url/],
+    [[{ ...legacyDocument, email: 'x' }], /unexpected object shape/],
+  ]
+
+  for (const [rows, pattern] of invalid) {
+    assert.throws(
+      () => parsePublicLegacyDocumentResponse(rows),
       (error) =>
         error instanceof AcademicApiValidationError &&
         pattern.test(error.message)

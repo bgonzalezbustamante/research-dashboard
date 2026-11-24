@@ -6,6 +6,7 @@
 
 - Started `v1.0.0-rc.6 "Steady Orchard"`, a maintenance release: routine dependency updates, Catholic Calendar 0.1.0-beta.2, the development-only `minimatch` advisory, safer links in paper text, security headers and documentation corrections.
 - The Owner's own Papers can join collections, so the sites that select publications by collection show them alongside other people's papers.
+- The Dashboard becomes the registry for signed documents and for the historical document records, which the verification site (verify.bgonzalezbustamante.com) reads one at a time through Public RPC v1.
 - Part one (own Papers in collections) was merged on 7 Nov 2026 so the collection picker is live; the rest of rc.6 continues on a continuation branch, and rc.6 closes in December.
 
 ### Code changes
@@ -29,6 +30,15 @@
 
 - Only the public Academic API page (`/api`) may appear in search results. The root layout now sets `robots: noindex, nofollow` and a `metadataBase`; `/api` overrides it with `index, follow` and a canonical URL. Before, `/login`, `/release-notes` and `/api` carried no robots tag, and `/robots.txt` redirected to `/login`, so crawlers saw no rules.
 - Added `app/robots.ts` (crawling allowed, so the `noindex` tags can be read; a `Disallow` would let a bare URL be listed) and `app/sitemap.ts` (only `/api`). `lib/supabase/proxy.ts` treats `/robots.txt` and `/sitemap.xml` as public paths. Private pages already redirected anonymous visitors to `/login`.
+
+`Document registry`
+
+- Added `signed_documents` and `legacy_documents` (migration `20261124103453_add_document_registry.sql`). A signed document has a 32-character code, title, issue time, the SHA-256 of its final PDF and a status (`registered` or `revoked`, with the revocation time and an optional public note). A historical record keeps the slug, title, original issue text with its UTC offset, 32-character fingerprint and original `/validation/docs/` address of the validation pages published from 2022 to 2024. Only the Owner can read either table; Viewers cannot.
+- Writes go only through four Owner RPCs: `register_signed_document`, `revoke_signed_document`, `remove_signed_document` (for test records that were never issued) and `import_legacy_documents` (up to 100 records, updated in place by slug). Each records an access audit event (`document_registered`, `document_revoked`, `document_removed`, `legacy_documents_imported`), shown on the Access page.
+- Added `get_public_signed_document(text)` and `get_public_legacy_document(text)` to Public RPC v1 (nineteen operations). Each returns one record for a known code or slug and no row otherwise; there is no listing, so codes and slugs cannot be enumerated. The `document-status` vocabulary follows the `signed_documents_status_check` constraint.
+- New Owner page, Documents (owner utility navigation): register a signed document from its signing-tool manifest (file or pasted JSON; the QR address must be `https://verify.bgonzalezbustamante.com/?id=<code>`), revoke with a public note, remove a test record after confirming it was never issued, and import the historical records from the signing tool's legacy file or the verification site's former registry file. Record contents are entered there, never committed.
+- The manifest adds the `documents` resource and the verification site as a consumer. `check:public-api` expects the two RPCs, treats both tables as private for anonymous callers and, live, checks that unknown codes and slugs return no row. The new `supabase/tests/rc6_document_policies.sql` (rolled back, no test accounts needed) covers the Owner RPCs, the audit events, unknown users, Viewers, anonymous lookups and the anonymous EXECUTE set.
+- `@bgonzalezbustamante/academic-api-client` `0.3.0-beta.1` adds `getPublicSignedDocument()`, `getPublicLegacyDocument()`, their parsers and the `PublicSignedDocument` and `PublicLegacyDocument` types. Tests: 35, up from 30.
 
 ## v1.0.0-rc.5 "Ancient Glacier"
 

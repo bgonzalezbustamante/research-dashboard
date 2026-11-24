@@ -11,6 +11,8 @@ import type {
   PublicPlanningAllocation,
   PublicProject,
   PublicSoftwareItem,
+  PublicLegacyDocument,
+  PublicSignedDocument,
   PublicTeachingItem,
   PublicTeachingSettings,
   PublicWorkAnalytics,
@@ -30,6 +32,8 @@ import {
   parsePublicProjectList,
   parsePublicSoftwareDetailResponse,
   parsePublicSoftwareList,
+  parsePublicLegacyDocumentResponse,
+  parsePublicSignedDocumentResponse,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
@@ -109,6 +113,16 @@ export type AcademicApiClient = {
     slug: string
   ): Promise<
     PublicSoftwareItem | null
+  >
+  getPublicSignedDocument(
+    code: string
+  ): Promise<
+    PublicSignedDocument | null
+  >
+  getPublicLegacyDocument(
+    slug: string
+  ): Promise<
+    PublicLegacyDocument | null
   >
   listPublicConferencePresentations(): Promise<
     PublicConferencePresentation[]
@@ -226,6 +240,40 @@ export function createAcademicApiClient(
         await callRpc(
           transport,
           'get_public_software',
+          { p_slug: slug }
+        )
+      )
+    },
+
+    async getPublicSignedDocument(
+      code
+    ) {
+      assertSlug(
+        code,
+        'Document code'
+      )
+
+      return parsePublicSignedDocumentResponse(
+        await callRpc(
+          transport,
+          'get_public_signed_document',
+          { p_code: code }
+        )
+      )
+    },
+
+    async getPublicLegacyDocument(
+      slug
+    ) {
+      assertSlug(
+        slug,
+        'Legacy document slug'
+      )
+
+      return parsePublicLegacyDocumentResponse(
+        await callRpc(
+          transport,
+          'get_public_legacy_document',
           { p_slug: slug }
         )
       )

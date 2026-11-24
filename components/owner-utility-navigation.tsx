@@ -17,6 +17,10 @@ const ownerLinks = [
     label: 'Software',
   },
   {
+    href: '/documents',
+    label: 'Documents',
+  },
+  {
     href: '/backups',
     label: 'Backup',
   },

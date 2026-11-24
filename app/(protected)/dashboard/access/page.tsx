@@ -92,6 +92,14 @@ function auditEventLabel(
       return 'External publication edited'
     case 'external_publication_deleted':
       return 'External publication deleted'
+    case 'document_registered':
+      return 'Signed document registered'
+    case 'document_revoked':
+      return 'Signed document revoked'
+    case 'document_removed':
+      return 'Test document removed'
+    case 'legacy_documents_imported':
+      return 'Historical document records imported'
     case 'invitation_created':
       return 'Invitation created'
     case 'invitation_sent':

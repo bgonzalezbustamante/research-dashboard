@@ -2,7 +2,7 @@
 
 ## Administrative system of record
 
-Research Dashboard is the canonical administrative source for the structured academic records it manages: papers, projects, conference presentations, teaching portfolio data, Software Ecosystem records, owner-level Calendar settings, work logs, planning data, permissions, and related internal workflow metadata.
+Research Dashboard is the canonical administrative source for the structured academic records it manages: papers, projects, conference presentations, teaching portfolio data, Software Ecosystem records, the document registry, owner-level Calendar settings, work logs, planning data, permissions, and related internal workflow metadata.
 
 Authenticated Dashboard modules may read and write the underlying Supabase tables according to the application permission model.
 
@@ -95,6 +95,8 @@ The current publicly callable function surface is (with explicit Paper-title dis
 - `list_public_project_publications()`
 - `list_public_external_publications()`
 - `list_public_collection_publications()`
+- `get_public_signed_document(text)`
+- `get_public_legacy_document(text)`
 
 The milestones endpoint deliberately publishes milestone titles and the full titles of associated Papers, including otherwise private Papers, while concealing private Paper slugs, IDs and notes. The planning-allocation endpoint lists stored manual/legacy allocations and fortnight dates rather than all source-backed Planning commitments. Consumers must avoid counting legacy allocations marked as superseded alongside milestone commitments.
 
@@ -208,6 +210,12 @@ Software Ecosystem is the canonical administrative registry for software, applic
 
 `list_public_software()` and `get_public_software(slug)` return only profiles explicitly marked Public. Repository visibility is deliberately independent from profile exposure: a software profile may be Public while its repository remains Private. In that case the public contract reports `repository_visibility = private` but forces `repository_url = null`. Internal software/owner IDs, public-exposure metadata, timestamps, and private repository URLs remain unavailable anonymously.
 
+### Document registry
+
+The document registry backs the verification site at verify.bgonzalezbustamante.com. `signed_documents` holds documents issued and signed with the signing tool (code, title, issue time, SHA-256 of the final PDF, registered or revoked); `legacy_documents` holds the historical records first published at `bgonzalezbustamante.com/validation/docs/`. Both tables are readable by the Owner only, Viewers included out, and are written only through Owner RPCs that record access audit events. Record contents are entered on the Documents page and never appear in migrations or other committed files.
+
+`get_public_signed_document(code)` and `get_public_legacy_document(slug)` return one record for a caller that already has the code or slug, and no row otherwise. There is deliberately no listing operation, so the registry cannot be browsed or enumerated anonymously. A revoked document keeps its record, with the revocation time and the Owner's public note; only test records that were never issued are removed. Internal IDs, owner metadata and timestamps other than the registration and revocation times remain private.
+
 ### Work analytics
 
 The public analytics RPC returns yearly aggregate measures plus daily net working minutes and daily coffee counts. Raw sessions, session start/end times, activity labels, locations, paper relationships, owner metadata, and internal identifiers remain private.
@@ -237,6 +245,8 @@ Public RPC v1 currently constrains:
 - Repository visibility
 - Public availability type
 - Publication authorship (`own`, `external`)
+- Signed document status (`registered`, `revoked`)
+- Historical fingerprint algorithm (`unconfirmed-32-hex`)
 
 The exact values are maintained in the database constraints and mirrored in `lib/academic-api-contract.json`; `npm run check:public-api` fails if they drift.
 
@@ -250,6 +260,7 @@ Active consumers:
 - Academic CV Studio (private): client-side fetch, run locally.
 - [Weekly Penguin Timeline](https://github.com/bgonzalezbustamante/weekly-penguin-timeline): runtime supabase-js.
 - Academic Signature Studio (private): runtime supabase-js.
+- [Document verification site](https://verify.bgonzalezbustamante.com): server-side reference client with uncached lookups, so a revocation shows at once.
 
 Planned consumers of the publication feeds, from rc.5: the OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites, and the organisation site template that several of them are built from. They select their publications by collection through `list_public_collection_publications()`, which since rc.6 includes the Owner's own Papers, and SUDAKAS and OBPEX also by Project.
 

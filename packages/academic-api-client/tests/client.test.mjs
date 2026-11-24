@@ -382,3 +382,51 @@ test('reference client fetches and validates collection publications', async () 
     { name: 'list_public_collection_publications', args: undefined },
   ])
 })
+
+test('reference client looks up documents by code and slug', async () => {
+  const calls = []
+  const transport = {
+    async rpc(name, args) {
+      calls.push({ name, args })
+
+      return {
+        data: [],
+        error: null,
+      }
+    },
+  }
+  const api =
+    createAcademicApiClient(
+      transport
+    )
+
+  assert.equal(
+    await api.getPublicSignedDocument(
+      '0123456789abcdef0123456789abcdef'
+    ),
+    null
+  )
+  assert.equal(
+    await api.getPublicLegacyDocument(
+      '2022-05-10-document'
+    ),
+    null
+  )
+  assert.deepEqual(
+    calls,
+    [
+      {
+        name: 'get_public_signed_document',
+        args: { p_code: '0123456789abcdef0123456789abcdef' },
+      },
+      {
+        name: 'get_public_legacy_document',
+        args: { p_slug: '2022-05-10-document' },
+      },
+    ]
+  )
+  await assert.rejects(
+    () => api.getPublicSignedDocument(''),
+    /Document code/
+  )
+})
