@@ -64,5 +64,8 @@ jobs:
       - name: Check backup integration
         run: npm run check:backups
 
+      - name: Check document registration links
+        run: npm run test:documents
+
       - name: Build
         run: npm run build
