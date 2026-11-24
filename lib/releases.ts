@@ -21,13 +21,20 @@ export const releases: ReleaseNote[] = [
     releasedOn: 'Release date TBC',
     comparison: 'Changes since rc.5',
     summary:
-      'Steady Orchard lets your own papers join collections, keeps the Dashboard up to date and adds a few safeguards.',
+      'Steady Orchard lets your own papers join collections, adds the document registry behind the verification site, keeps the Dashboard up to date and adds a few safeguards.',
     sections: [
       {
         title: 'Sharing publications with other sites',
         items: [
           'Your own papers can join collections, so partner sites show them alongside other people’s papers. Choose a paper’s collections in its Website settings.',
           'Each collection on the Other papers tab lists your papers in it and how many of them are public.',
+        ],
+      },
+      {
+        title: 'Document registry',
+        items: [
+          'A new Documents page registers documents you sign, so their QR codes resolve on the verification site straight away.',
+          'You can revoke a document with a short public note, and the 12 historical validation records live here too.',
         ],
       },
       {
