@@ -96,6 +96,7 @@ The current publicly callable function surface is (with explicit Paper-title dis
 - `list_public_external_publications()`
 - `list_public_collection_publications()`
 - `get_public_signed_document(text)`
+- `get_public_signed_document_by_sha256(text)`
 - `get_public_legacy_document(text)`
 
 The milestones endpoint deliberately publishes milestone titles and the full titles of associated Papers, including otherwise private Papers, while concealing private Paper slugs, IDs and notes. The planning-allocation endpoint lists stored manual/legacy allocations and fortnight dates rather than all source-backed Planning commitments. Consumers must avoid counting legacy allocations marked as superseded alongside milestone commitments.
@@ -214,7 +215,7 @@ Software Ecosystem is the canonical administrative registry for software, applic
 
 The document registry backs the verification site at verify.bgonzalezbustamante.com. `signed_documents` holds documents issued and signed with the signing tool (code, title, issue time, SHA-256 of the final PDF, registered or revoked); `legacy_documents` holds the historical records first published at `bgonzalezbustamante.com/validation/docs/`. Both tables are readable by the Owner only, Viewers included out, and are written only through Owner RPCs that record access audit events. Record contents are entered on the Documents page and never appear in migrations or other committed files.
 
-`get_public_signed_document(code)` and `get_public_legacy_document(slug)` return one record for a caller that already has the code or slug, and no row otherwise. There is deliberately no listing operation, so the registry cannot be browsed or enumerated anonymously. A revoked document keeps its record, with the revocation time and the Owner's public note; only test records that were never issued are removed. Internal IDs, owner metadata and timestamps other than the registration and revocation times remain private.
+`get_public_signed_document(code)` and `get_public_legacy_document(slug)` return one record for a caller that already has the code or slug, and no row otherwise. `get_public_signed_document_by_sha256(hash)` returns the same record for a caller that holds the PDF itself: the verification site hashes the file in the visitor's browser and sends only the hash. A unique index on `signed_documents(sha256)` registers each PDF at most once, so a hash identifies at most one document. There is deliberately no listing operation, so the registry cannot be browsed or enumerated anonymously. A revoked document keeps its record, with the revocation time and the Owner's public note; only test records that were never issued are removed. Internal IDs, owner metadata and timestamps other than the registration and revocation times remain private.
 
 ### Work analytics
 

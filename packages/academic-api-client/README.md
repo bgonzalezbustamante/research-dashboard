@@ -30,7 +30,7 @@ const academicApi = createAcademicApiClient(
 const papers = await academicApi.listPublicPapers()
 ```
 
-Use the Research Dashboard project URL and its **publishable** key, never a secret or service-role key. Anonymous callers can only execute the nineteen Public RPC v1 functions.
+Use the Research Dashboard project URL and its **publishable** key, never a secret or service-role key. Anonymous callers can only execute the twenty Public RPC v1 functions.
 
 `createFetchTransport` POSTs to `<url>/rest/v1/rpc/<name>` with the publishable key, so a site does not need `@supabase/supabase-js`. A supabase-js client also works as a transport, because it exposes the same `rpc()` method:
 
@@ -106,7 +106,7 @@ if (document?.status === 'revoked') {
 }
 ```
 
-`sha256` is the SHA-256 of the final PDF bytes, so a site can compare a PDF the visitor holds without uploading it. A verification page should not cache these lookups for long, so that a revocation shows at once: pass `init: { cache: 'no-store' }` to `createFetchTransport()`.
+`sha256` is the SHA-256 of the final PDF bytes, so a site can compare a PDF the visitor holds without uploading it. `getPublicSignedDocumentBySha256(sha256)` looks a document up from the PDF alone: hash the file on the visitor's device (Web Crypto), send only the 64-character hash, and get the same record, or `null` for an unknown hash. Each PDF is registered at most once. A malformed hash throws before any request is made. A verification page should not cache these lookups for long, so that a revocation shows at once: pass `init: { cache: 'no-store' }` to `createFetchTransport()`.
 
 ## Versioning
 
@@ -118,7 +118,7 @@ The package provides:
 
 - canonical TypeScript resource types;
 - strict runtime validators with field-level diagnostics;
-- a transport-agnostic client for the nineteen Public RPC v1 operations, plus a dependency-free fetch transport;
+- a transport-agnostic client for the twenty Public RPC v1 operations, plus a dependency-free fetch transport;
 - pure helpers for filtering by collection or Project and sorting by date;
 - generated contract metadata derived from `lib/academic-api-contract.json`.
 

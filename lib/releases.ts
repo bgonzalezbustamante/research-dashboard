@@ -35,6 +35,7 @@ export const releases: ReleaseNote[] = [
         items: [
           'A new Documents page registers documents you sign, so their QR codes resolve on the verification site straight away.',
           'You can revoke a document with a short public note, and the 12 historical validation records live here too.',
+          'The verification site can find a signed document from the PDF itself, and the same PDF can no longer be registered twice.',
         ],
       },
       {
