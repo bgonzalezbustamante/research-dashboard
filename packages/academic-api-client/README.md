@@ -110,7 +110,7 @@ if (document?.status === 'revoked') {
 
 ## Versioning
 
-The package version is independent of the Dashboard's. While Public RPC v1 is the contract, releases are `0.x` on the `beta` tag. A new field or controlled value is a minor release. A breaking contract change is a new Public RPC version and a new major release. `PUBLIC_RPC_VERSION` exports the contract version the package validates against.
+The package version is independent of the Dashboard's. During beta, every release takes the next minor version with `-beta.1`: `0.1.0-beta.1`, `0.2.0-beta.1`, `0.3.0-beta.1` and so on, published on the `beta` tag. When the package moves to release candidates, it follows the same policy as Research Dashboard: the target version stays fixed and only the counter rises. `PUBLIC_RPC_VERSION` exports the contract version the package validates against.
 
 ## Responsibilities
 

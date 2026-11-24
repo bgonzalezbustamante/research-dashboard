@@ -40,6 +40,10 @@
 - The manifest adds the `documents` resource and the verification site as a consumer. `check:public-api` expects the two RPCs, treats both tables as private for anonymous callers and, live, checks that unknown codes and slugs return no row. The new `supabase/tests/rc6_document_policies.sql` (rolled back, no test accounts needed) covers the Owner RPCs, the audit events, unknown users, Viewers, anonymous lookups and the anonymous EXECUTE set.
 - `@bgonzalezbustamante/academic-api-client` `0.3.0-beta.1` adds `getPublicSignedDocument()`, `getPublicLegacyDocument()`, their parsers and the `PublicSignedDocument` and `PublicLegacyDocument` types. Tests: 35, up from 30.
 
+`Reference client versioning`
+
+- The reference client README states its beta numbering (each release takes the next minor with `-beta.1`) and that it follows the Dashboard's policy from release candidates on. No published version changes.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.
