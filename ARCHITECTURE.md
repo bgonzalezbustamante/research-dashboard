@@ -132,7 +132,7 @@ Contract metadata for RPC names, fields, parameters, and controlled vocabularies
 The architecture therefore has three complementary checks:
 
 1. **Static producer contract: `npm run check:public-api`**  
-   Verifies the manifest against migration/function definitions, controlled database vocabularies, and forbidden-field boundaries.
+   Verifies the manifest against migration/function definitions, controlled database vocabularies, and forbidden-field boundaries. It also replays EXECUTE grants per function signature: `anon` may execute exactly the manifest RPCs, and `authenticated` exactly the allow-list in `scripts/check-public-api.mjs`, so a new function needs an explicit decision for both roles.
 
 2. **Client/schema compatibility: `npm run check:academic-api-client`**  
    Verifies generated client metadata against the manifest, compiles the canonical TypeScript types/reference client, and runs strict runtime-validator regression tests.

@@ -80,6 +80,14 @@
 - Deleting a collection checks that a row was deleted and reports a collection that was not found.
 - Removed code nothing used: the manual allocation actions `createPlanningAllocation` and `updatePlanningAllocation` with their helpers, and the retired Paper Notes actions and section (`note-actions.ts`, `notes-section.tsx`). Stored notes are untouched.
 
+`Maintenance`
+
+- Updated `next` and `eslint-config-next` to 16.4.6 (bug fixes; no advisory affected 16.4.5), `react` and `react-dom` to 19.3.1, `@supabase/supabase-js` to 2.119.2, `@supabase/ssr` to 0.12.7, Tailwind CSS to 4.3.5, `@types/react` and `@types/react-dom` to 19.3.0 and `@types/node` to 22, matching the CI Node versions. This replaces Dependabot pull requests #64 and #71.
+- Updated `@bgonzalezbustamante/catholic-calendar` to 0.1.0-beta.2. The Home labels were checked on sample dates (Advent, Immaculate Conception, Christmas, Ash Wednesday, Easter, Pentecost), and every icon it can return from 2026 to 2028 has its image in `public/catholic-calendar/`.
+- Cleared the development-only `minimatch` advisory (GHSA-g3hv-75wg-m249) without an override: `typescript-eslint` 8.73.0 and later depend on the fixed `minimatch` ^11.0.1, and the lockfile now resolves 8.74.0 within the range `eslint-config-next` allows. `npm audit` reports no vulnerabilities, development tools included.
+- `check:public-api` now replays EXECUTE grants per function signature, so each overload is tracked on its own, and checks `authenticated` EXECUTE against an allow-list of the 39 Dashboard RPCs in `scripts/check-public-api.mjs`. A new public function left executable by signed-in users, or an allow-listed one revoked, fails the check. `supabase/tests/rc5_access_policies.sql` is marked as superseded by the rc.6 suites.
+- The rc.5 entry below describes the downstream repositories in plain words instead of naming private repositories.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.
@@ -100,7 +108,7 @@ Released 7 Nov 2026.
 - Corrected the manifest's consumer list against each repository's code. The Academic Website also uses the Software, Teaching settings and availability RPCs, the Weekly Penguin Timeline also uses conference presentations and Teaching settings, and Academic Signature Studio is added. Consumers now carry `status` (`active` or `planned`) and an optional `url`. The OBPEX, SUDAKAS, Empiria Lab and Carla Cisternas websites and the organisation site template are listed as planned consumers of the publication feeds. `check:public-api` validates both fields, and `/api` marks planned consumers and names private repositories without a link, which also fixes a link to the private Academic CV Studio repository that visitors could not open.
 - Each collection on the Other papers tab now shows its Public and Private item counts and the client call a site uses to show it.
 - ARCHITECTURE.md now documents the consumer list, the planned publication consumers and the recommended integration: the published client, `createFetchTransport()` and ISR, with no downstream build triggers.
-- Wrote ready-to-apply handoff briefs, outside this repository, for organisation-site-template (an optional feed keyed by `publicationsCollection`), empiria-website, sudakas-web, obpex-website-clone and Carla Cisternas' future site, plus a shared adapter whose code was typechecked against the packed package. Sibling repositories are changed in their own sessions.
+- Wrote ready-to-apply handoff briefs, outside this repository, for the organisation site template (an optional feed keyed by `publicationsCollection`), the Empiria Lab, SUDAKAS and OBPEX websites and Carla Cisternas' future site, plus a shared adapter whose code was typechecked against the packed package. Sibling repositories are changed in their own sessions.
 
 `Safeguards from the rc.4 review`
 
