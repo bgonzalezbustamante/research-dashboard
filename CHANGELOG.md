@@ -70,6 +70,16 @@
 - Links in paper text become anchors only for URLs that parse as `http:` or `https:` (CodeQL alert 1).
 - `supabase/config.toml` sets `enable_signup = false`, matching production.
 
+`Correctness fixes`
+
+- Date-only values (stored as `YYYY-MM-DD` and built with `Date.UTC`) are formatted with `timeZone: 'UTC'` in 25 formatters across 18 files. Before, client components such as the Planning workspace, the Planning year calendar and the citation snapshot history followed the browser's time zone, so a browser west of UTC could show the previous day or month.
+- The blocked-event fallback period uses the Europe/Amsterdam date, like the rest of Planning, instead of the server's UTC date.
+- The Hours year view, the Home page and its cross-module analytics, and Planning select work sessions by the daily-log date range through a `daily_logs!inner` join instead of sending every daily-log ID in the request URL (about 370 IDs for a year). The Home page query also pages past the Data API's 1000-row limit with `selectAllRows()`.
+- The onboarding page reports failed membership, Website Editor and profile lookups instead of treating them as "no access yet".
+- Partial saves say what happened: a new Paper whose language could not be saved, and a Paper edit whose other changes were saved without the language, both return to the edit form with a message; an account name saved in the Dashboard but not in the sign-in account says so.
+- Deleting a collection checks that a row was deleted and reports a collection that was not found.
+- Removed code nothing used: the manual allocation actions `createPlanningAllocation` and `updatePlanningAllocation` with their helpers, and the retired Paper Notes actions and section (`note-actions.ts`, `notes-section.tsx`). Stored notes are untouched.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.
