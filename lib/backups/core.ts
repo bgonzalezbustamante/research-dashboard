@@ -40,6 +40,25 @@ export type BackupStatus = {
 const STALE_AFTER_MS =
   8 * 24 * 60 * 60 * 1000
 
+// Every GitHub Actions run status before 'completed'. A run in any of them is
+// still pending or running, so another dispatch would start a duplicate.
+const ACTIVE_RUN_STATUSES =
+  new Set([
+    'requested',
+    'waiting',
+    'pending',
+    'queued',
+    'in_progress',
+  ])
+
+export function isActiveRunStatus(
+  status: string
+) {
+  return ACTIVE_RUN_STATUSES.has(
+    status
+  )
+}
+
 const ATTENTION_CONCLUSIONS =
   new Set([
     'failure',
@@ -61,11 +80,8 @@ export function deriveBackupState({
 }): BackupState {
   if (
     latestAttempt &&
-    (
-      latestAttempt.status ===
-        'queued' ||
-      latestAttempt.status ===
-        'in_progress'
+    isActiveRunStatus(
+      latestAttempt.status
     )
   ) {
     return 'running'

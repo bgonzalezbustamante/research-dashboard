@@ -2,6 +2,7 @@ import 'server-only'
 
 import {
   deriveBackupState,
+  isActiveRunStatus,
   parseBackupTagTimestamp,
   type BackupAppKey,
   type BackupLatestAttempt,
@@ -318,9 +319,8 @@ function toLatestAttempt(
 function isActiveRun(
   run: GitHubWorkflowRun
 ) {
-  return (
-    run.status === 'queued' ||
-    run.status === 'in_progress'
+  return isActiveRunStatus(
+    run.status
   )
 }
 
