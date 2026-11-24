@@ -79,6 +79,22 @@ export default async function OnboardingPage({
         .limit(1),
     ])
 
+    // A failed lookup must not fall through to the onboarding form as if the
+    // account had no access yet.
+    if (
+      dashboardMembershipResult.error ||
+      websiteEditorResult.error
+    ) {
+      throw new Error(
+        `Could not load account access: ${
+          (
+            dashboardMembershipResult.error ??
+            websiteEditorResult.error
+          )?.message
+        }`
+      )
+    }
+
     if (
       dashboardMembershipResult.data
     ) {
@@ -100,11 +116,18 @@ export default async function OnboardingPage({
 
   const {
     data: profile,
+    error: profileError,
   } = await supabase
     .from('profiles')
     .select('full_name, email')
     .eq('id', userId)
     .maybeSingle()
+
+  if (profileError) {
+    throw new Error(
+      `Could not load profile: ${profileError.message}`
+    )
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-oxford-off-white text-oxford-charcoal">

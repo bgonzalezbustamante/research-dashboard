@@ -642,7 +642,10 @@ export async function deleteExternalPublicationCollection(
   const supabase =
     await createClient()
 
-  const { error } =
+  const {
+    data: deletedRows,
+    error,
+  } =
     await supabase
       .from(
         'external_publication_collections'
@@ -650,6 +653,7 @@ export async function deleteExternalPublicationCollection(
       .delete()
       .eq('id', id)
       .eq('owner_id', access.ownerId)
+      .select('id')
 
   if (error) {
     console.error(
@@ -660,6 +664,18 @@ export async function deleteExternalPublicationCollection(
     otherPapersRedirect(
       'error',
       'The collection could not be deleted.'
+    )
+  }
+
+  // RLS or a stale form can match no row without an error; report it rather
+  // than claiming the collection was deleted.
+  if (
+    (deletedRows ?? [])
+      .length === 0
+  ) {
+    otherPapersRedirect(
+      'error',
+      'The collection was not found, so nothing was deleted.'
     )
   }
 
