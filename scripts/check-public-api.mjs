@@ -473,113 +473,342 @@ function assertMigrations(contract, operations, corpus) {
   console.log('✓ Controlled vocabularies match migrations')
 }
 
-function hasRole(roleList, role) {
-  return roleList
-    .split(',')
-    .map((value) => value.trim().toLowerCase())
-    .includes(role)
+// Functions in public that signed-in users may execute: the Dashboard's own
+// mutation and lookup RPCs. Supabase grants EXECUTE on every new public
+// function to authenticated by default, so a new one fails this check until
+// it is either added here on purpose or revoked from authenticated.
+const AUTHENTICATED_RPCS = [
+  'accept_access_invitation()',
+  'cancel_access_invitation(uuid)',
+  'consolidate_activity_labels(uuid, uuid, text)',
+  'consolidate_location_labels(uuid, uuid, text)',
+  'create_access_invitation(text, boolean, uuid[])',
+  'create_external_publication(text, text[], integer, date, text, text, text, text, text, text, uuid[], uuid[])',
+  'create_my_external_publication(text, text[], integer, date, text, text, text, text)',
+  'create_paper_with_details(text, text, text, text, smallint, text, text, date, date, jsonb, jsonb)',
+  'create_project_with_details(text, text, text, text, text, text, text, integer, integer, text, text, text, boolean, text, text, uuid[], uuid[], uuid[])',
+  'create_software_with_details(text, text, text, text, text, text, text, text, text, text, text, integer, integer, boolean, text)',
+  'create_teaching_with_details(text, text, text, text, integer, integer, boolean, text[], integer, integer, integer[], integer, text, text, text, uuid[])',
+  'delete_external_publication(uuid)',
+  'delete_my_external_publication(uuid)',
+  'finalize_managed_account_deletion(uuid)',
+  'get_managed_account_deletion_plan(uuid)',
+  'get_my_pending_access_invitation()',
+  'get_project_hours()',
+  'get_teaching_hours()',
+  'get_website_editor_paper(uuid)',
+  'import_legacy_documents(jsonb)',
+  'list_my_external_publications()',
+  'list_my_website_editor_papers()',
+  'list_paper_conference_presentations(uuid)',
+  'mark_access_invitation_failed(uuid, text)',
+  'mark_access_invitation_sent(uuid, uuid)',
+  'register_signed_document(text, text, timestamptz, text)',
+  'remove_signed_document(text)',
+  'rename_managed_profile(uuid, text)',
+  'revoke_signed_document(text, text)',
+  'set_default_location_label(uuid)',
+  'set_paper_collections(uuid, uuid[])',
+  'set_website_editor_paper_assignments(uuid, uuid[])',
+  'update_external_publication(uuid, text, text[], integer, date, text, text, text, text, text, text, uuid[], uuid[])',
+  'update_my_external_publication(uuid, text, text[], integer, date, text, text, text, text)',
+  'update_paper_website_content(uuid, text, text)',
+  'update_paper_with_details(uuid, text, text, text, text, smallint, text, text, date, date, jsonb, jsonb)',
+  'update_project_with_details(uuid, text, text, text, text, text, text, text, integer, integer, text, text, text, boolean, text, text, uuid[], uuid[], uuid[])',
+  'update_software_with_details(uuid, text, text, text, text, text, text, text, text, text, text, text, integer, integer, boolean, text)',
+  'update_teaching_with_details(uuid, text, text, text, text, integer, integer, boolean, text[], integer, integer, integer[], integer, text, text, text, uuid[])',
+]
+
+const TYPE_ALIASES = new Map([
+  ['int', 'integer'],
+  ['int4', 'integer'],
+  ['int8', 'bigint'],
+  ['bool', 'boolean'],
+  ['timestamp with time zone', 'timestamptz'],
+  ['character varying', 'varchar'],
+])
+
+const PARAMETER_MODES = new Set([
+  'in',
+  'out',
+  'inout',
+  'variadic',
+])
+
+function normaliseType(raw) {
+  let type = raw
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/^public\./, '')
+  let arraySuffix = ''
+
+  while (type.endsWith('[]')) {
+    arraySuffix += '[]'
+    type = type.slice(0, -2).trim()
+  }
+
+  type = type.replace(/\(.*\)$/, '').trim()
+
+  return (TYPE_ALIASES.get(type) ?? type) + arraySuffix
 }
 
-// Replays function DDL and EXECUTE grants in migration order. Standard
-// Supabase default privileges grant EXECUTE on new public functions to anon,
-// so a function counts as anon-executable until a revoke names anon.
-function anonExecutableFunctions(corpus) {
+function splitTopLevel(text) {
+  const parts = []
+  let depth = 0
+  let quoted = false
+  let start = 0
+
+  for (let index = 0; index < text.length; index++) {
+    const character = text[index]
+
+    if (character === "'") {
+      quoted = !quoted
+    }
+
+    if (quoted) {
+      continue
+    }
+
+    if (character === '(') {
+      depth++
+    } else if (character === ')') {
+      depth--
+    } else if (character === ',' && depth === 0) {
+      parts.push(text.slice(start, index))
+      start = index + 1
+    }
+  }
+
+  const last = text.slice(start)
+
+  if (last.trim()) {
+    parts.push(last)
+  }
+
+  return parts
+}
+
+function matchingParen(text, open) {
+  let depth = 0
+  let quoted = false
+
+  for (let index = open; index < text.length; index++) {
+    const character = text[index]
+
+    if (character === "'") {
+      quoted = !quoted
+    }
+
+    if (quoted) {
+      continue
+    }
+
+    if (character === '(') {
+      depth++
+    } else if (character === ')' && --depth === 0) {
+      return index
+    }
+  }
+
+  return -1
+}
+
+// Input types only, as Postgres identifies a function: names, defaults and
+// OUT parameters are dropped. Grants list bare types; definitions name them.
+function signatureTypes(list, namedParameters) {
+  return splitTopLevel(list).flatMap((parameter) => {
+    const words = parameter
+      .replace(/\s+(default\b|=).*$/is, '')
+      .trim()
+      .split(/\s+/)
+    let mode = 'in'
+
+    if (PARAMETER_MODES.has(words[0].toLowerCase())) {
+      mode = words.shift().toLowerCase()
+    }
+
+    if (mode === 'out') {
+      return []
+    }
+
+    if (namedParameters && words.length > 1) {
+      words.shift()
+    }
+
+    return [normaliseType(words.join(' '))]
+  })
+}
+
+// Replays function DDL and EXECUTE grants in migration order, per signature,
+// so each overload is tracked on its own. Standard Supabase default
+// privileges grant EXECUTE on new public functions to anon and authenticated,
+// so a function counts as executable by a role until a revoke names that role;
+// a revoke from PUBLIC alone leaves both. A grant or revoke without an
+// argument list applies to every overload of that name.
+function executableFunctions(corpus) {
   const sql = corpus.replace(/--[^\n]*/g, '')
-  const events = new RegExp(
-    [
-      'create(?:\\s+or\\s+replace)?\\s+function\\s+public\\.(\\w+)\\s*\\(',
-      'drop\\s+function\\s+(?:if\\s+exists\\s+)?public\\.(\\w+)',
-      'alter\\s+function\\s+public\\.(\\w+)\\s*\\([^)]*\\)\\s+set\\s+schema',
-      '(grant|revoke)\\s+(?:all|execute)(?:\\s+privileges)?\\s+on\\s+function\\s+public\\.(\\w+)(?:\\s*\\([^)]*\\))?\\s+(?:to|from)\\s+([^;]+);',
-      'revoke\\s+(?:all|execute)(?:\\s+privileges)?\\s+on\\s+all\\s+functions\\s+in\\s+schema\\s+public\\s+from\\s+([^;]+);',
-    ].join('|'),
-    'gi'
-  )
+  const events =
+    /\b(create(?:\s+or\s+replace)?\s+function|drop\s+function(?:\s+if\s+exists)?|(grant|revoke)\s+(?:all|execute)(?:\s+privileges)?\s+on\s+function|revoke\s+(?:all|execute)(?:\s+privileges)?\s+on\s+all\s+functions\s+in\s+schema)\s+public\.?(\w*)/gi
   const functions = new Map()
   let match
 
   while ((match = events.exec(sql))) {
-    const [
-      ,
-      created,
-      dropped,
-      moved,
-      action,
-      granted,
-      grantRoles,
-      bulkRoles,
-    ] = match
+    const keyword = match[1].toLowerCase()
+    const name = match[3].toLowerCase()
+    const after = match.index + match[0].length
 
-    if (created) {
-      const name = created.toLowerCase()
-      const header = sql.slice(
-        match.index,
-        sql.indexOf('$', match.index)
-      )
-      const existing = functions.get(name)
+    if (keyword.includes('all functions in schema')) {
+      const roles = sql
+        .slice(after, sql.indexOf(';', after))
+        .toLowerCase()
 
-      functions.set(name, {
+      for (const state of functions.values()) {
+        if (/\banon\b/.test(roles)) {
+          state.anon = false
+        }
+
+        if (/\bauthenticated\b/.test(roles)) {
+          state.authenticated = false
+        }
+      }
+
+      continue
+    }
+
+    const rest = sql.slice(after)
+    let signature = null
+    let end = after
+
+    if (/^\s*\(/.test(rest)) {
+      const open = after + rest.indexOf('(')
+      const close = matchingParen(sql, open)
+
+      signature =
+        name +
+        '(' +
+        signatureTypes(
+          sql.slice(open + 1, close),
+          keyword.startsWith('create')
+        ).join(', ') +
+        ')'
+      end = close + 1
+    }
+
+    const matches = (key, state) =>
+      signature ? key === signature : state.name === name
+
+    if (keyword.startsWith('create')) {
+      const header = sql.slice(end, sql.indexOf('$', end))
+      const existing = functions.get(signature)
+
+      functions.set(signature, {
+        name,
         anon: existing ? existing.anon : true,
+        authenticated: existing ? existing.authenticated : true,
         trigger: /returns\s+trigger/i.test(header),
       })
-    } else if (dropped || moved) {
-      functions.delete((dropped ?? moved).toLowerCase())
-    } else if (granted) {
-      const state = functions.get(granted.toLowerCase())
-
-      if (!state) {
-        continue
-      }
-
-      if (action.toLowerCase() === 'grant') {
-        if (
-          hasRole(grantRoles, 'anon') ||
-          hasRole(grantRoles, 'public')
-        ) {
-          state.anon = true
+    } else if (keyword.startsWith('drop')) {
+      for (const [key, state] of [...functions]) {
+        if (matches(key, state)) {
+          functions.delete(key)
         }
-      } else if (hasRole(grantRoles, 'anon')) {
-        state.anon = false
       }
-    } else if (bulkRoles && hasRole(bulkRoles, 'anon')) {
-      for (const state of functions.values()) {
-        state.anon = false
+    } else {
+      const roles = sql
+        .slice(end, sql.indexOf(';', end))
+        .replace(/^\s*(to|from)\s+/i, '')
+        .toLowerCase()
+      const isGrant = match[2].toLowerCase() === 'grant'
+
+      for (const [key, state] of functions) {
+        if (!matches(key, state)) {
+          continue
+        }
+
+        if (isGrant) {
+          if (/\b(anon|public)\b/.test(roles)) {
+            state.anon = true
+          }
+
+          if (/\b(authenticated|public)\b/.test(roles)) {
+            state.authenticated = true
+          }
+        } else {
+          if (/\banon\b/.test(roles)) {
+            state.anon = false
+          }
+
+          if (/\bauthenticated\b/.test(roles)) {
+            state.authenticated = false
+          }
+        }
       }
     }
   }
 
   return [...functions]
-    .filter(([, state]) => state.anon && !state.trigger)
-    .map(([name]) => name)
-    .sort()
+    .filter(([, state]) => !state.trigger)
+    .map(([signature, state]) => ({
+      signature,
+      anon: state.anon,
+      authenticated: state.authenticated,
+    }))
 }
 
-function assertAnonSurface(operations, corpus) {
-  const expected = operations
-    .map(({ operation }) => operation.name)
-    .sort()
-  const actual = anonExecutableFunctions(corpus)
+function compareSets(actual, expected, unexpectedMessage, missingMessage) {
   const unexpected = actual.filter(
-    (name) => !expected.includes(name)
+    (signature) => !expected.includes(signature)
   )
   const missing = expected.filter(
-    (name) => !actual.includes(name)
+    (signature) => !actual.includes(signature)
   )
 
   if (unexpected.length > 0) {
-    fail(
-      'Migrations leave anon EXECUTE on functions outside the Academic API manifest: ' +
-        unexpected.join(', ') +
-        '. Revoke them from anon explicitly.'
-    )
+    fail(unexpectedMessage + unexpected.join(', '))
   }
 
   if (missing.length > 0) {
-    fail(
-      'Academic API RPCs are not executable by anon in migrations: ' +
-        missing.join(', ')
-    )
+    fail(missingMessage + missing.join(', '))
   }
+}
+
+function assertExecuteSurface(operations, corpus) {
+  const executable = executableFunctions(corpus)
+  const expectedAnon = operations
+    .map(
+      ({ operation }) =>
+        operation.name +
+        '(' +
+        operation.parameters
+          .map((parameter) => normaliseType(parameter.type))
+          .join(', ') +
+        ')'
+    )
+    .sort()
+  const actualAnon = executable
+    .filter((entry) => entry.anon)
+    .map((entry) => entry.signature)
+    .sort()
+
+  compareSets(
+    actualAnon,
+    expectedAnon,
+    'Migrations leave anon EXECUTE on functions outside the Academic API manifest: ',
+    'Academic API RPCs are not executable by anon in migrations: '
+  )
+
+  const actualAuthenticated = executable
+    .filter((entry) => entry.authenticated)
+    .map((entry) => entry.signature)
+    .sort()
+
+  compareSets(
+    actualAuthenticated,
+    [...AUTHENTICATED_RPCS].sort(),
+    'Migrations leave authenticated EXECUTE on functions outside the allow-list in scripts/check-public-api.mjs (add them there on purpose, or revoke them from authenticated): ',
+    'Allow-listed authenticated RPCs are not executable by authenticated in migrations: '
+  )
 
   const tableGrant = corpus
     .replace(/--[^\n]*/g, '')
@@ -596,8 +825,13 @@ function assertAnonSurface(operations, corpus) {
 
   console.log(
     '✓ Anon EXECUTE in migrations is limited to the ' +
-      expected.length +
-      ' manifest RPCs'
+      expectedAnon.length +
+      ' manifest RPCs, by signature'
+  )
+  console.log(
+    '✓ Authenticated EXECUTE in migrations matches the ' +
+      AUTHENTICATED_RPCS.length +
+      '-function allow-list, by signature'
   )
   console.log('✓ Migrations grant no table privileges to anon')
 }
@@ -1212,7 +1446,7 @@ async function main() {
   const operations = assertManifest(contract)
 
   assertMigrations(contract, operations, corpus)
-  assertAnonSurface(operations, corpus)
+  assertExecuteSurface(operations, corpus)
   await liveCheck()
 
   console.log('✓ Academic API contract validation passed.')
