@@ -237,6 +237,7 @@ function assertManifest(contract) {
     'list_public_external_publications',
     'list_public_collection_publications',
     'get_public_signed_document',
+    'get_public_signed_document_by_sha256',
     'get_public_legacy_document',
   ]
 
@@ -1030,6 +1031,19 @@ async function liveCheck() {
   ) {
     fail(
       'get_public_signed_document(text) must return no row for an unknown code.'
+    )
+  }
+
+  const missingSignedDocumentByHash =
+    await api.getPublicSignedDocumentBySha256(
+      '0'.repeat(64)
+    )
+
+  if (
+    missingSignedDocumentByHash !== null
+  ) {
+    fail(
+      'get_public_signed_document_by_sha256(text) must return no row for an unknown hash.'
     )
   }
 

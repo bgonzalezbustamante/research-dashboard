@@ -233,6 +233,16 @@ export const RPC_FIELDS = {
     "revoked_at",
     "revocation_note"
   ],
+  "get_public_signed_document_by_sha256": [
+    "code",
+    "title",
+    "issued_at",
+    "sha256",
+    "status",
+    "registered_at",
+    "revoked_at",
+    "revocation_note"
+  ],
   "get_public_legacy_document": [
     "slug",
     "title",
@@ -273,6 +283,9 @@ export const RPC_PARAMETERS = {
   "list_public_planning_allocations": [],
   "get_public_signed_document": [
     "p_code"
+  ],
+  "get_public_signed_document_by_sha256": [
+    "p_sha256"
   ],
   "get_public_legacy_document": [
     "p_slug"

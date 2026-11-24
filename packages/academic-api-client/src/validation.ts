@@ -1667,13 +1667,14 @@ function parsePublicSignedDocument(
   }
 }
 
-export function parsePublicSignedDocumentResponse(
-  payload: unknown
+function parseSignedDocumentLookup(
+  payload: unknown,
+  label: string
 ): PublicSignedDocument | null {
   const rows =
     parseArray(
       payload,
-      'get_public_signed_document response',
+      label,
       (value, path) =>
         parsePublicSignedDocument(
           value,
@@ -1683,12 +1684,30 @@ export function parsePublicSignedDocumentResponse(
 
   if (rows.length > 1) {
     fail(
-      'get_public_signed_document response',
+      label,
       'expected zero or one row'
     )
   }
 
   return rows[0] ?? null
+}
+
+export function parsePublicSignedDocumentResponse(
+  payload: unknown
+): PublicSignedDocument | null {
+  return parseSignedDocumentLookup(
+    payload,
+    'get_public_signed_document response'
+  )
+}
+
+export function parsePublicSignedDocumentBySha256Response(
+  payload: unknown
+): PublicSignedDocument | null {
+  return parseSignedDocumentLookup(
+    payload,
+    'get_public_signed_document_by_sha256 response'
+  )
 }
 
 function parsePublicLegacyDocument(

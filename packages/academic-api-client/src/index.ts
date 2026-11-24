@@ -51,6 +51,7 @@ export {
   parsePublicSoftwareList,
   parsePublicLegacyDocumentResponse,
   parsePublicSignedDocumentResponse,
+  parsePublicSignedDocumentBySha256Response,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,

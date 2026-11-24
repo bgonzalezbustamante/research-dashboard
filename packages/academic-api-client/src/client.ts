@@ -34,6 +34,7 @@ import {
   parsePublicSoftwareList,
   parsePublicLegacyDocumentResponse,
   parsePublicSignedDocumentResponse,
+  parsePublicSignedDocumentBySha256Response,
   parsePublicTeachingList,
   parsePublicTeachingSettingsResponse,
   parsePublicWorkAnalytics,
@@ -89,6 +90,29 @@ function assertSlug(
   }
 }
 
+function normaliseSha256(
+  sha256: string
+) {
+  const value =
+    typeof sha256 === 'string'
+      ? sha256
+          .trim()
+          .toLowerCase()
+      : ''
+
+  if (
+    !/^[0-9a-f]{64}$/.test(
+      value
+    )
+  ) {
+    throw new Error(
+      'PDF SHA-256 must be 64 hexadecimal characters.'
+    )
+  }
+
+  return value
+}
+
 export type AcademicApiClient = {
   listPublicPapers(): Promise<
     PublicPaper[]
@@ -116,6 +140,11 @@ export type AcademicApiClient = {
   >
   getPublicSignedDocument(
     code: string
+  ): Promise<
+    PublicSignedDocument | null
+  >
+  getPublicSignedDocumentBySha256(
+    sha256: string
   ): Promise<
     PublicSignedDocument | null
   >
@@ -260,6 +289,36 @@ export function createAcademicApiClient(
           { p_code: code }
         )
       )
+    },
+
+    async getPublicSignedDocumentBySha256(
+      sha256
+    ) {
+      const normalisedSha256 =
+        normaliseSha256(
+          sha256
+        )
+
+      const document =
+        parsePublicSignedDocumentBySha256Response(
+          await callRpc(
+            transport,
+            'get_public_signed_document_by_sha256',
+            { p_sha256: normalisedSha256 }
+          )
+        )
+
+      if (
+        document &&
+        document.sha256 !==
+          normalisedSha256
+      ) {
+        throw new Error(
+          'get_public_signed_document_by_sha256 returned a document for a different hash.'
+        )
+      }
+
+      return document
     },
 
     async getPublicLegacyDocument(

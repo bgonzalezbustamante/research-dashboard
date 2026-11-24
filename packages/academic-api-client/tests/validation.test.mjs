@@ -8,6 +8,7 @@ import {
   parsePublicCollectionPublicationList,
   parsePublicLegacyDocumentResponse,
   parsePublicSignedDocumentResponse,
+  parsePublicSignedDocumentBySha256Response,
   parsePublicConferenceList,
   parsePublicPaperList,
   parsePublicPaperMilestoneList,
@@ -817,6 +818,24 @@ test('validates signed document lookups', () => {
   }
 
   assert.equal(parsePublicSignedDocumentResponse([revoked]).status, 'revoked')
+})
+
+test('validates signed document lookups by PDF hash with the same rules', () => {
+  assert.equal(parsePublicSignedDocumentBySha256Response([]), null)
+  assert.deepEqual(parsePublicSignedDocumentBySha256Response([signedDocument]), signedDocument)
+
+  for (const [rows, pattern] of [
+    [[{ ...signedDocument, sha256: 'A'.repeat(64) }], /sha256/],
+    [[{ ...signedDocument, owner_id: 'x' }], /unexpected object shape/],
+    [[signedDocument, signedDocument], /get_public_signed_document_by_sha256 response.*zero or one row/],
+  ]) {
+    assert.throws(
+      () => parsePublicSignedDocumentBySha256Response(rows),
+      (error) =>
+        error instanceof AcademicApiValidationError &&
+        pattern.test(error.message)
+    )
+  }
 })
 
 test('rejects malformed signed document rows', () => {

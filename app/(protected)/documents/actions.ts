@@ -126,7 +126,11 @@ export async function registerSignedDocument(
 
     documentsRedirect(
       'error',
-      error.code === '23505'
+      error.code === '23505' &&
+        error.details ===
+          'signed_documents_sha256_key'
+        ? 'This PDF is already registered.'
+        : error.code === '23505'
         ? 'A document with this code is already registered.'
         : error.code === '23514'
           ? 'The manifest contains a value the registry does not accept.'

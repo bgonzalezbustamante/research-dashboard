@@ -430,3 +430,72 @@ test('reference client looks up documents by code and slug', async () => {
     /Document code/
   )
 })
+
+test('reference client looks up a signed document by PDF hash', async () => {
+  const sha256 =
+    'abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789'
+  const row = {
+    code: '0123456789abcdef0123456789abcdef',
+    title: 'Synthetic certificate',
+    issued_at: '2026-11-20T10:00:00+00:00',
+    sha256,
+    status: 'registered',
+    registered_at: '2026-11-21T09:00:00+00:00',
+    revoked_at: null,
+    revocation_note: null,
+  }
+  const calls = []
+  let data = [row]
+  const transport = {
+    async rpc(name, args) {
+      calls.push({ name, args })
+
+      return {
+        data,
+        error: null,
+      }
+    },
+  }
+  const api =
+    createAcademicApiClient(
+      transport
+    )
+
+  assert.deepEqual(
+    await api.getPublicSignedDocumentBySha256(
+      `  ${sha256.toUpperCase()} `
+    ),
+    row
+  )
+  assert.deepEqual(
+    calls,
+    [
+      {
+        name: 'get_public_signed_document_by_sha256',
+        args: { p_sha256: sha256 },
+      },
+    ]
+  )
+
+  data = []
+  assert.equal(
+    await api.getPublicSignedDocumentBySha256(
+      sha256
+    ),
+    null
+  )
+
+  data = [{ ...row, sha256: 'f'.repeat(64) }]
+  await assert.rejects(
+    () => api.getPublicSignedDocumentBySha256(sha256),
+    /different hash/
+  )
+
+  for (const invalid of ['', 'abc', 'g'.repeat(64), `${sha256}0`]) {
+    await assert.rejects(
+      () => api.getPublicSignedDocumentBySha256(invalid),
+      /64 hexadecimal characters/
+    )
+  }
+  assert.equal(calls.length, 3)
+})
