@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   deriveBackupState,
+  isActiveRunStatus,
   parseBackupTagTimestamp,
 } from '../../node_modules/.cache/backups-core/core.js'
 
@@ -118,6 +119,40 @@ test('missing successful backup requires attention', () => {
       now: NOW,
     }),
     'attention'
+  )
+})
+
+test('every GitHub status before completion counts as an active run', () => {
+  for (const status of [
+    'requested',
+    'waiting',
+    'pending',
+    'queued',
+    'in_progress',
+  ]) {
+    assert.equal(
+      isActiveRunStatus(status),
+      true,
+      status
+    )
+
+    assert.equal(
+      deriveBackupState({
+        latestSuccess: success('2026-10-04T18:05:00Z'),
+        latestAttempt: attempt({
+          status,
+          conclusion: null,
+        }),
+        now: NOW,
+      }),
+      'running',
+      status
+    )
+  }
+
+  assert.equal(
+    isActiveRunStatus('completed'),
+    false
   )
 })
 

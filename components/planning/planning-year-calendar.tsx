@@ -31,6 +31,7 @@ function monthName(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       month: 'long',
     }
   ).format(

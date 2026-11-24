@@ -105,16 +105,21 @@ export async function updateOwnName(
       },
     })
 
+  revalidatePath('/', 'layout')
+  revalidatePath('/account')
+  revalidatePath('/dashboard/access')
+
   if (metadataError) {
     console.error(
       'Own Auth metadata name update failed:',
       metadataError
     )
-  }
 
-  revalidatePath('/', 'layout')
-  revalidatePath('/account')
-  revalidatePath('/dashboard/access')
+    redirectAccount(
+      'error',
+      'Your name was updated in the Dashboard, but your sign-in account still has the old name. Save it again to retry.'
+    )
+  }
 
   redirectAccount(
     'notice',

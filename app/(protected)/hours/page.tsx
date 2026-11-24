@@ -146,6 +146,7 @@ function formatDate(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -518,11 +519,20 @@ export default async function HoursPage({
           papers (
             short_title,
             archived_at
+          ),
+          daily_logs!inner (
+            log_date
           )
         `)
-        .in(
-          'daily_log_id',
-          dailyLogIds
+        // Same range as the daily logs above, filtered through the join rather
+        // than by listing every daily-log ID in the request URL.
+        .gte(
+          'daily_logs.log_date',
+          analyticsStart
+        )
+        .lte(
+          'daily_logs.log_date',
+          analyticsEnd
         )
         .order(
           'daily_log_id',

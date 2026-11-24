@@ -1,4 +1,16 @@
-import { withSupabase } from 'npm:@supabase/server'
+import { withSupabase } from 'npm:@supabase/server@1.9.2'
+
+// ilike is case-insensitive, like the database's lower(btrim(email))
+// comparisons, but treats % and _ as wildcards: escape them for an exact match.
+function escapeLikePattern(
+  value: string
+) {
+  return value.replace(
+    /[\\%_]/g,
+    (character) =>
+      `\\${character}`
+  )
+}
 
 type InviteRequest = {
   invitation_id?: string
@@ -187,7 +199,9 @@ const handler = {
         .select('id')
         .ilike(
           'email',
-          invitation.email
+          escapeLikePattern(
+            invitation.email.trim()
+          )
         )
         .maybeSingle()
 
@@ -302,18 +316,33 @@ const handler = {
           }
         )
 
+        // The detail stays in the Owner's invitation record and the function
+        // log; the response carries generic text only.
+        console.error(
+          'Invitation email failed:',
+          message
+        )
+
         if (markFailedError) {
+          console.error(
+            'Invitation failure could not be recorded:',
+            markFailedError.message
+          )
+
           return jsonResponse(
             {
               error:
-                `${message} The invitation record could not be updated.`,
+                'The invitation email could not be sent, and the invitation record could not be updated.',
             },
             500
           )
         }
 
         return jsonResponse(
-          { error: message },
+          {
+            error:
+              'The invitation email could not be sent.',
+          },
           400
         )
       }

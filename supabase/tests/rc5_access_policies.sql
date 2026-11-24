@@ -1,3 +1,11 @@
+-- Superseded in Steady Orchard rc.6: kept as the record of the rc.4 and rc.5
+-- access checks. Its anonymous EXECUTE list stops at the sixteen rc.5 RPCs, so
+-- it now fails on that check by design. For the current database run
+-- supabase/tests/rc6_hardening_policies.sql and
+-- supabase/tests/rc6_document_policies.sql (no test accounts needed), and
+-- npm run check:public-api, which tracks anon and authenticated EXECUTE by
+-- signature.
+--
 -- Access policy suite, extended for Ancient Glacier rc.5 (first written for
 -- Velvet Torch rc.4).
 --

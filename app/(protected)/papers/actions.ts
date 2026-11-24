@@ -419,6 +419,14 @@ export async function createPaper(
       'Paper language update failed:',
       languageError
     )
+
+    revalidatePath('/papers')
+
+    redirect(
+      `/papers/${paperId}/edit?error=${encodeURIComponent(
+        'The paper was created, but its language could not be saved. Choose it again here.'
+      )}`
+    )
   }
 
   revalidatePath('/papers')
@@ -583,8 +591,15 @@ export async function updatePaper(
       languageError
     )
 
+    revalidatePath('/papers')
+    revalidatePath(
+      `/papers/${paperId}`
+    )
+
     redirect(
-      `/papers/${paperId}/edit?error=The paper language could not be updated.`
+      `/papers/${paperId}/edit?error=${encodeURIComponent(
+        'Your other changes were saved, but the paper language could not be updated. Choose it again here.'
+      )}`
     )
   }
 

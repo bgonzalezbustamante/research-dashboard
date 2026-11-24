@@ -1,4 +1,4 @@
-import { withSupabase } from 'npm:@supabase/server'
+import { withSupabase } from 'npm:@supabase/server@1.9.2'
 
 type DeleteRequest = {
   user_id?: string
@@ -76,11 +76,16 @@ const handler = {
         }
       )
 
+      // Details go to the function log; responses carry generic text only.
       if (planError || !plan) {
+        console.error(
+          'Account deletion plan refused:',
+          planError?.message ?? 'no plan'
+        )
+
         return jsonResponse(
           {
             error:
-              planError?.message ??
               'The account cannot be deleted.',
           },
           403
@@ -96,10 +101,14 @@ const handler = {
         authDeleteError &&
         authDeleteError.status !== 404
       ) {
+        console.error(
+          'Authentication account deletion failed:',
+          authDeleteError.message
+        )
+
         return jsonResponse(
           {
             error:
-              authDeleteError.message ??
               'The authentication account could not be deleted.',
           },
           500
@@ -117,6 +126,11 @@ const handler = {
       )
 
       if (finalizeError || !result) {
+        console.error(
+          'Dashboard cleanup after deletion failed:',
+          finalizeError?.message ?? 'no result'
+        )
+
         return jsonResponse(
           {
             error:

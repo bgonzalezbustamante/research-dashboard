@@ -255,6 +255,7 @@ function formatPeriodLabel(
     new Intl.DateTimeFormat(
       'en-GB',
       {
+        timeZone: 'UTC',
         month: 'long',
         year: 'numeric',
       }
@@ -895,11 +896,20 @@ export default async function PlanningPage({
         .select(`
           paper_id,
           start_time,
-          end_time
+          end_time,
+          daily_logs!inner (
+            log_date
+          )
         `)
-        .in(
-          'daily_log_id',
-          dailyLogIds
+        // Same half-month as the daily logs above, filtered through the join
+        // rather than by listing daily-log IDs.
+        .gte(
+          'daily_logs.log_date',
+          selectedPeriodStart
+        )
+        .lte(
+          'daily_logs.log_date',
+          selectedPeriodEnd
         )
 
     if (error) {

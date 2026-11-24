@@ -92,6 +92,36 @@ function isValidPeriodStart(
   )
 }
 
+function getAmsterdamDate() {
+  const parts =
+    new Intl.DateTimeFormat(
+      'en-GB',
+      {
+        timeZone:
+          'Europe/Amsterdam',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }
+    ).formatToParts(
+      new Date()
+    )
+
+  const values =
+    Object.fromEntries(
+      parts.map(
+        (part) => [
+          part.type,
+          part.value,
+        ]
+      )
+    )
+
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+// Falls back to the current half-month in Amsterdam, as the rest of Planning
+// does, rather than the server's UTC date.
 function returnPeriod(
   formData: FormData
 ) {
@@ -101,17 +131,25 @@ function returnPeriod(
       'period_start'
     )
 
-  return isValidPeriodStart(
-    value
+  if (
+    isValidPeriodStart(
+      value
+    )
+  ) {
+    return value
+  }
+
+  const today =
+    getAmsterdamDate()
+
+  return (
+    today.slice(0, 8) +
+    (Number(
+      today.slice(8, 10)
+    ) <= 15
+      ? '01'
+      : '16')
   )
-    ? value
-    : new Date()
-        .toISOString()
-        .slice(0, 8) +
-        (new Date().getUTCDate() <=
-        15
-          ? '01'
-          : '16')
 }
 
 function fail(

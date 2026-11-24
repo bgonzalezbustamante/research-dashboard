@@ -36,6 +36,7 @@ function formatDate(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       weekday: 'long',
       day: 'numeric',
       month: 'long',

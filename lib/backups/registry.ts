@@ -74,8 +74,9 @@ export const BACKUP_APPLICATION_KEYS =
 export function isBackupAppKey(
   value: string
 ): value is BackupAppKey {
-  return (
-    value in
-    BACKUP_APPLICATIONS
+  // Own keys only: `in` would also accept inherited names such as `constructor`.
+  return Object.hasOwn(
+    BACKUP_APPLICATIONS,
+    value
   )
 }

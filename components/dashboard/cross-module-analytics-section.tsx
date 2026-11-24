@@ -279,6 +279,7 @@ function formatMonth(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       month: 'short',
     }
   ).format(
@@ -518,11 +519,20 @@ export default async function CrossModuleAnalyticsSection({
             name,
             is_break,
             major_activity
+          ),
+          daily_logs!inner (
+            log_date
           )
         `)
-        .in(
-          'daily_log_id',
-          dailyLogIds
+        // Same year as the daily logs above, filtered through the join rather
+        // than by listing every daily-log ID in the request URL.
+        .gte(
+          'daily_logs.log_date',
+          yearStart
+        )
+        .lte(
+          'daily_logs.log_date',
+          yearEnd
         )
         .order(
           'daily_log_id',

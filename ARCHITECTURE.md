@@ -10,7 +10,7 @@ Authenticated Dashboard modules may read and write the underlying Supabase table
 
 Row Level Security policies and `SECURITY DEFINER` RPC checks in `supabase/migrations` enforce three roles; the application's page and action guards (`lib/auth/dashboard-access.ts`, `lib/supabase/proxy.ts`) mirror them for convenience only.
 
-Without a session, only `/login`, `/auth/*`, `/release-notes`, `/api`, `/robots.txt` and `/sitemap.xml` load; every other path redirects to `/login`. Search engines may list only `/api`: the root layout sets `noindex, nofollow`, the `/api` page overrides it with `index, follow` and a canonical URL, `app/robots.ts` allows crawling so those tags can be read, and `app/sitemap.ts` lists `/api` alone.
+Without a session, only `/login`, `/auth/*`, `/release-notes`, `/api`, `/robots.txt` and `/sitemap.xml` load; every other path redirects to `/login`. Search engines may list only `/api`: the root layout sets `noindex, nofollow`, the `/api` page overrides it with `index, follow` and a canonical URL, `app/robots.ts` allows crawling so those tags can be read, and `app/sitemap.ts` lists `/api` alone. `next.config.ts` sends the security headers (CSP `frame-ancestors 'none'` with `base-uri` and `object-src`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) on every response, and state-changing route handlers (sign-out, backup dispatch) accept only same-origin requests.
 
 - **Owner** (`dashboard_members.role = 'owner'`) has full read and write access.
 - **Viewer** (`dashboard_members.role = 'viewer'`) has Dashboard-wide read-only access.
@@ -132,7 +132,7 @@ Contract metadata for RPC names, fields, parameters, and controlled vocabularies
 The architecture therefore has three complementary checks:
 
 1. **Static producer contract: `npm run check:public-api`**  
-   Verifies the manifest against migration/function definitions, controlled database vocabularies, and forbidden-field boundaries.
+   Verifies the manifest against migration/function definitions, controlled database vocabularies, and forbidden-field boundaries. It also replays EXECUTE grants per function signature: `anon` may execute exactly the manifest RPCs, and `authenticated` exactly the allow-list in `scripts/check-public-api.mjs`, so a new function needs an explicit decision for both roles.
 
 2. **Client/schema compatibility: `npm run check:academic-api-client`**  
    Verifies generated client metadata against the manifest, compiles the canonical TypeScript types/reference client, and runs strict runtime-validator regression tests.

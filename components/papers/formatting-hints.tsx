@@ -6,7 +6,6 @@ import { useEffect } from 'react'
 const formattingFieldSelector = [
   'textarea[name="abstract"]',
   '#milestones textarea[name="notes"]',
-  '#notes textarea[name="body"]',
   '#conferences textarea[name="notes"]',
 ].join(', ')
 

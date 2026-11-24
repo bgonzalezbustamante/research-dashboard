@@ -6,7 +6,6 @@ import { useEffect } from 'react'
 const richTextSelector = [
   '#overview p.whitespace-pre-line',
   '#milestones p.whitespace-pre-line',
-  '#notes p.whitespace-pre-line',
   '#conferences p.whitespace-pre-line',
 ].join(', ')
 
@@ -74,6 +73,25 @@ function appendText(
   parent.appendChild(
     document.createTextNode(value)
   )
+}
+
+// Links in paper text become anchors only for http(s) URLs that parse; the
+// regex already requires that prefix, and this re-check keeps any other scheme
+// (javascript:, data:) out of href.
+function safeHttpUrl(
+  value: string
+) {
+  try {
+    const url =
+      new URL(value)
+
+    return url.protocol === 'http:' ||
+      url.protocol === 'https:'
+      ? url.href
+      : null
+  } catch {
+    return null
+  }
 }
 
 function appendInline(
@@ -183,10 +201,20 @@ function appendInline(
           /^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/
         )
 
-      if (linkMatch) {
+      const linkUrl =
+        linkMatch
+          ? safeHttpUrl(
+              linkMatch[2]
+            )
+          : null
+
+      if (
+        linkMatch &&
+        linkUrl
+      ) {
         const link =
           document.createElement('a')
-        link.href = linkMatch[2]
+        link.href = linkUrl
         link.target = '_blank'
         link.rel =
           'noopener noreferrer'

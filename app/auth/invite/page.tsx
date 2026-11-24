@@ -46,6 +46,18 @@ export default function InviteCallbackPage() {
         hash.get('refresh_token')
 
       if (accessToken && refreshToken) {
+        // Invitation emails carry type=invite. Tokens from another kind of
+        // link (recovery, magic link) must not start onboarding here.
+        if (hash.get('type') !== 'invite') {
+          if (!cancelled) {
+            setFailed(true)
+            setMessage(
+              'This link is not an invitation. Use the link from your invitation email.'
+            )
+          }
+          return
+        }
+
         const { error } =
           await supabase.auth.setSession({
             access_token: accessToken,

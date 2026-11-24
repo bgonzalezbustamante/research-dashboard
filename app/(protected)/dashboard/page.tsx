@@ -19,6 +19,7 @@ import {
   type PlanningSourceState,
   type TeachingPlanningSource,
 } from '@/lib/planning/source-backed-planning'
+import { selectAllRows } from '@/lib/supabase/select-all-rows'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -227,6 +228,7 @@ function formatDate(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -242,6 +244,7 @@ function formatCatholicCalendarDate(
   return new Intl.DateTimeFormat(
     'en-GB',
     {
+      timeZone: 'UTC',
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -283,6 +286,7 @@ function formatPlanningPeriod(
     new Intl.DateTimeFormat(
       'en-GB',
       {
+        timeZone: 'UTC',
         month: 'long',
         year: 'numeric',
       }
@@ -797,26 +801,45 @@ export default async function DashboardPage({
   if (
     dailyLogIds.length > 0
   ) {
+    // Same range as the daily logs above, filtered through the join rather
+    // than by listing every daily-log ID in the request URL, and paged past
+    // the Data API's 1000-row limit.
     const {
       data,
       error,
-    } = await supabase
-      .from(
-        'work_sessions'
-      )
-      .select(`
-        daily_log_id,
-        paper_id,
-        start_time,
-        end_time,
-        activity_labels (
-          is_break
-        )
-      `)
-      .in(
-        'daily_log_id',
-        dailyLogIds
-      )
+    } = await selectAllRows(
+      (from, to) =>
+        supabase
+          .from(
+            'work_sessions'
+          )
+          .select(`
+            id,
+            daily_log_id,
+            paper_id,
+            start_time,
+            end_time,
+            activity_labels (
+              is_break
+            ),
+            daily_logs!inner (
+              log_date
+            )
+          `)
+          .gte(
+            'daily_logs.log_date',
+            dataStart
+          )
+          .lte(
+            'daily_logs.log_date',
+            dataEnd
+          )
+          .order('id')
+          .range(
+            from,
+            to
+          )
+    )
 
     if (error) {
       throw new Error(
