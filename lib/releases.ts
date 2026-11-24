@@ -45,6 +45,8 @@ export const releases: ReleaseNote[] = [
           'Editing a paper keeps all its links, including ones the form does not show.',
           'Editing a citation snapshot can no longer save your changes onto a different snapshot.',
           'Search engines can now list only the Academic API page; the sign-in page, release notes and everything behind sign-in stay out of search results.',
+          'Tighter database permissions and account checks, a safer sign-out and invitation page, and browser security headers on every page.',
+          'Starting a backup can no longer run it twice while GitHub is still preparing the first run.',
         ],
       },
     ],

@@ -51,6 +51,25 @@
 
 - The reference client README states its beta numbering (each release takes the next minor with `-beta.1`) and that it follows the Dashboard's policy from release candidates on. No published version changes.
 
+`Database hardening`
+
+- Migration `20261124122508_harden_privileges_and_access_checks.sql`, prechecked, rehearsed in a rolled-back transaction and applied with `db push`; the new `supabase/tests/rc6_hardening_policies.sql` (rolled back, no test accounts needed) and `check:public-api:live` then passed against production. No public RPC changes its signature or fields.
+- `anon` keeps no table privileges on `dashboard_members` and `location_labels` (the precheck showed none on any public table in production; the revoke records it in the schema history). `authenticated` loses `TRUNCATE`, `REFERENCES` and `TRIGGER` on `planning_blocked_events`, `planning_source_period_states`, `teaching_settings`, `software_items`, `software_public_metadata` and `calendar_settings`.
+- Six `private` functions lose their PUBLIC `EXECUTE` grant; the four that RLS policies call keep it for `authenticated`. `get_public_work_analytics` is anon-only again, and the trigger functions `normalise_location_label_default` and `handle_updated_at` lose `anon` and `authenticated` `EXECUTE`, which triggers do not need.
+- Dropped the superseded 14-argument `create_teaching_with_details` and 15-argument `update_teaching_with_details` overloads.
+- `can_view_author` and `shares_paper_with_profile` require active profiles and no longer list the retired coauthor role. `rename_managed_profile` only renames an active account that no other Owner or dashboard uses, and `finalize_managed_account_deletion` repeats the deletion plan's "used by another dashboard" check.
+- The year checks in `get_public_work_analytics` and `list_public_availability` use the Europe/Amsterdam date instead of the server's UTC date.
+
+`Security fixes`
+
+- Sign-out (`app/auth/signout/route.ts`) requires a same-origin `Origin` header, as the backups route already did; a form on another site gets 403.
+- The invite page only accepts session tokens from a link with `type=invite`; recovery or magic-link tokens no longer start onboarding there.
+- Backups: the allow-list lookup uses `Object.hasOwn`, so names such as `constructor` are rejected, and every GitHub status before completion (`requested`, `waiting`, `pending`, `queued`, `in_progress`) counts as a running backup, so Run cannot dispatch a duplicate. Backup tests: 6, up from 5.
+- Security headers on every response: CSP `base-uri 'self'; frame-ancestors 'none'; object-src 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` and `Permissions-Policy`; `X-Powered-By` is no longer sent.
+- Edge Functions: `npm:@supabase/server` is pinned to 1.9.2; the existing-account check escapes `%`, `_` and `\` so its case-insensitive email match is exact; error responses carry generic text and details go to the function log.
+- Links in paper text become anchors only for URLs that parse as `http:` or `https:` (CodeQL alert 1).
+- `supabase/config.toml` sets `enable_signup = false`, matching production.
+
 ## v1.0.0-rc.5 "Ancient Glacier"
 
 Released 7 Nov 2026.
